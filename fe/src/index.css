@@ -1,0 +1,14 @@
+/* Estilos base de Bovitrack */
+/* Aquí irá Tailwind CSS cuando lo configures */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+}

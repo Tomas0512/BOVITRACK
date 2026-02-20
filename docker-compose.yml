@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: bovitrack_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bovitrack_user
+      POSTGRES_PASSWORD: bovitrack_pass
+      POSTGRES_DB: bovitrack_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - bovitrack_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bovitrack_user -d bovitrack_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  bovitrack_data:
