@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════
+   Header — Barra superior de navegación
+   ═══════════════════════════════════════ */
+
+.header {
+  background-color: var(--color-white);
+  border-bottom: 2px solid var(--color-primary-light);
+  padding: 0 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.header__logo:hover {
+  opacity: 0.85;
+}
+
+.header__logo-img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+}
+
+.header__action-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.header__action-btn:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-white);
+}

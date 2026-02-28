@@ -1,0 +1,21 @@
+# Dependencias
+node_modules/
+
+# Build output
+dist/
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Tests
+src/__tests__/
+*.test.tsx
+*.test.ts

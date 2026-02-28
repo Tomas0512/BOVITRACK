@@ -1,5 +1,20 @@
-/* Estilos base de Bovitrack */
-/* Aquí irá Tailwind CSS cuando lo configures */
+/* ═══════════════════════════════════════════════════════════════
+   Estilos base de BoviTrack
+   Paleta: verde oscuro → verde claro → dorado → crema → blanco
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --color-primary: #59930a;
+  --color-primary-light: #a0b53a;
+  --color-accent: #e4da7e;
+  --color-cream: #f8efbc;
+  --color-bg: #f8efeb;
+  --color-white: #ffffff;
+  --color-text: #1f2937;
+  --color-text-light: #6b7280;
+  --color-error: #dc2626;
+  --color-border: #d1d5db;
+}
 
 *,
 *::before,
@@ -10,5 +25,24 @@
 }
 
 body {
-  font-family: system-ui, sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
+
+input,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
 }

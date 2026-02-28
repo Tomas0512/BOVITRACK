@@ -1,0 +1,27 @@
+# Entorno virtual
+.venv/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Tests y cobertura
+.pytest_cache/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+
+# Variables de entorno locales
+.env
+
+# Alembic cache
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# Git
+.git/
+.gitignore

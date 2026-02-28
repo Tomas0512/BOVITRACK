@@ -1,6 +1,8 @@
 services:
+
+  # ── Base de datos (PostgreSQL) ──────────────────────
   db:
-    image: postgres:17
+    build: ./db
     container_name: bovitrack_db
     restart: unless-stopped
     environment:
@@ -16,6 +18,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # ── Backend (FastAPI) ───────────────────────────────
+  be:
+    build: ./be
+    container_name: bovitrack_be
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://bovitrack_user:bovitrack_pass@db:5432/bovitrack_db
+      SECRET_KEY: cambia-esta-clave-secreta-en-produccion
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 15
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Frontend (React + Vite) ─────────────────────────
+  fe:
+    build: ./fe
+    container_name: bovitrack_fe
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - be
 
 volumes:
   bovitrack_data:

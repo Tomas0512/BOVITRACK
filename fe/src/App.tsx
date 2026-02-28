@@ -5,16 +5,30 @@
  * ¿Impacto? Sin este componente, React no sabe qué renderizar.
  */
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { RegisterPage } from "./pages/RegisterPage";
+import { LoginPage } from "./pages/LoginPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* TODO: agregar rutas a medida que crees las páginas */}
-        {/* <Route path="/" element={<DashboardPage />} /> */}
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-        <Route path="/" element={<h1>🐄 Bovitrack — En construcción</h1>} />
+        {/* Registro */}
+        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Login */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Recuperar contraseña */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* Restablecer contraseña (con token) */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* Redirige la raíz al registro por ahora */}
+        <Route path="/" element={<Navigate to="/register" replace />} />
       </Routes>
     </BrowserRouter>
   );
