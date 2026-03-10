@@ -1,23 +1,36 @@
-services:
+# ¿Qué?    Orquesta los tres servicios del stack: db, be, fe.
+# ¿Para?   Un único `docker compose up` levanta todo el entorno.
+# ¿Impacto? Si la configuración de red, healthchecks o variables falla,
+#           los servicios pueden arrancar en orden incorrecto o con secretos expuestos.
 
+services:
   # ── Base de datos (PostgreSQL) ──────────────────────
   db:
     build: ./db
     container_name: bovitrack_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: bovitrack_user
-      POSTGRES_PASSWORD: bovitrack_pass
-      POSTGRES_DB: bovitrack_db
-    ports:
-      - "5432:5432"
+      # ¿Qué?    Variables leídas desde el archivo .env de la raíz.
+      # ¿Para?   Evitar hardcodear credenciales en este archivo (que sí se commitea).
+      # ¿Impacto? Sin esto, cualquier acceso al repo expone usuario/contraseña de la BD.
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # ¿Qué?    Puerto 5432 NO expuesto al host.
+    # ¿Para?   La DB solo es accesible dentro de backend_net (entre contenedores).
+    # ¿Impacto? Sin esto, cualquier proceso del host (o red externa) puede conectarse
+    #           directamente a PostgreSQL, saltándose toda la capa de aplicación.
     volumes:
       - bovitrack_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bovitrack_user -d bovitrack_db"]
+      # $$VAR: docker-compose pasa literal $VAR al shell del contenedor,
+      # donde se expande usando las env vars del propio contenedor.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - backend_net
 
   # ── Backend (FastAPI) ───────────────────────────────
   be:
@@ -25,27 +38,53 @@ services:
     container_name: bovitrack_be
     restart: unless-stopped
     ports:
+      # Puerto 8000 expuesto al host para acceso a Swagger (/docs) en desarrollo.
+      # En producción se puede eliminar y acceder solo a través del proxy de nginx.
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://bovitrack_user:bovitrack_pass@db:5432/bovitrack_db
-      SECRET_KEY: cambia-esta-clave-secreta-en-produccion
-      ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 15
-      REFRESH_TOKEN_EXPIRE_DAYS: 7
-      FRONTEND_URL: http://localhost:5173
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
+      FRONTEND_URL: ${FRONTEND_URL}
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      # backend_net: para comunicarse con db.
+      # frontend_net: para que nginx (fe) pueda proxiar a este servicio.
+      - backend_net
+      - frontend_net
 
-  # ── Frontend (React + Vite) ─────────────────────────
+  # ── Frontend (React + nginx) ────────────────────────
   fe:
-    build: ./fe
+    build:
+      context: ./fe
+      args:
+        # ¿Qué?    VITE_API_URL se inyecta como build-arg en la imagen.
+        # ¿Para?   Vite embebe la URL de la API en el bundle en tiempo de compilación.
+        # ¿Impacto? Si no se pasa, el frontend no sabe a qué URL llamar.
+        #           Con nginx, el valor /api/v1 es suficiente (nginx proxia internamente).
+        VITE_API_URL: ${VITE_API_URL}
     container_name: bovitrack_fe
     restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "80:80"
     depends_on:
       - be
+    networks:
+      - frontend_net
+
+# ¿Qué?    Redes internas con segmentación por responsabilidad.
+# ¿Para?   Limitar qué servicios pueden comunicarse entre sí.
+# ¿Impacto? Sin redes explícitas, Docker crea una red por defecto donde todos
+#           los contenedores pueden verse entre sí (fe podría acceder a db directamente).
+networks:
+  backend_net:
+    driver: bridge
+  frontend_net:
+    driver: bridge
 
 volumes:
   bovitrack_data:

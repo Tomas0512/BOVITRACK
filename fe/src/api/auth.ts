@@ -8,9 +8,13 @@
 
 import axios from "axios";
 
-/** Instancia de axios apuntando al backend */
+/**
+ * ¿Qué?    Instancia de axios apuntando al backend.
+ * ¿Para?   Usa VITE_API_URL del .env para ser portable entre dev y producción.
+ * ¿Impacto? Si la variable no está definida, cae al fallback localhost:8000.
+ */
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 

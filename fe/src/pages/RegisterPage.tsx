@@ -117,6 +117,14 @@ export function RegisterPage() {
       newErrors.password = "La contraseña es obligatoria";
     } else if (formData.password.length < 8) {
       newErrors.password = "Mínimo 8 caracteres";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = "Debe contener al menos una mayúscula";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = "Debe contener al menos una minúscula";
+    } else if (!/\d/.test(formData.password)) {
+      newErrors.password = "Debe contener al menos un número";
+    } else if (!/[^A-Za-z0-9]/.test(formData.password)) {
+      newErrors.password = "Debe contener al menos un carácter especial";
     }
 
     if (!formData.confirmPassword) {
@@ -285,6 +293,15 @@ export function RegisterPage() {
                   onChange={handleChange}
                 />
                 {errors.password && <span className="register__error">{errors.password}</span>}
+                {formData.password && (
+                  <ul className="register__pw-rules">
+                    <li className={formData.password.length >= 8 ? "register__pw-ok" : "register__pw-fail"}>Mínimo 8 caracteres</li>
+                    <li className={/[A-Z]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Una letra mayúscula</li>
+                    <li className={/[a-z]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Una letra minúscula</li>
+                    <li className={/\d/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Un número</li>
+                    <li className={/[^A-Za-z0-9]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Un carácter especial</li>
+                  </ul>
+                )}
               </div>
 
               <div className="register__field">
