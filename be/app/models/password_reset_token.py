@@ -68,7 +68,7 @@ class PasswordResetToken(Base):
     )
 
     # Relación ORM con User
-    user = relationship("User", lazy="selectin")
+    user: Mapped["User"] = relationship(back_populates="password_reset_tokens", lazy="selectin")
 
     def __repr__(self) -> str:
         token_preview = self.token[:8] if self.token else "N/A"

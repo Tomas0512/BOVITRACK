@@ -1,0 +1,35 @@
+# VCS
+.git
+.gitignore
+
+# OS / editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# Local backups / dumps
+*.sql.bak
+*.bak
+*.dump
+*.tar
+*.tar.gz
+
+# Python caches (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files (not needed for db image build)
+.env
+.env.*
+
+# Documentation and notes
+README.md
+docs/
