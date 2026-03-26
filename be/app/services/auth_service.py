@@ -16,7 +16,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.password_reset_token import PasswordResetToken
+from app.models.email_verification_token import EmailVerificationToken
 from app.models.user import User
+from app.services.audit_service import add_audit_log
 from app.schemas.user import (
     ResetPasswordRequest,
     TokenResponse,
@@ -25,6 +27,7 @@ from app.schemas.user import (
     UserResponse,
 )
 from app.utils.email import send_password_reset_email
+from app.utils.email import send_email_verification
 from app.utils.security import (
     create_access_token,
     create_refresh_token,
@@ -69,11 +72,36 @@ def register_user(db: Session, user_data: UserCreate) -> User:
         document_number=user_data.document_number.strip(),
         phone=user_data.phone.strip(),
         hashed_password=hash_password(user_data.password),
+        accepted_terms=user_data.accept_terms,
+        accepted_data_policy=user_data.accept_data_policy,
+        accepted_terms_at=datetime.now(timezone.utc) if user_data.accept_terms else None,
+        accepted_data_policy_at=datetime.now(timezone.utc) if user_data.accept_data_policy else None,
     )
 
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    verification_token = str(uuid.uuid4())
+    db.add(
+        EmailVerificationToken(
+            user_id=new_user.id,
+            token=verification_token,
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+        )
+    )
+    db.commit()
+
+    add_audit_log(
+        db,
+        user_id=str(new_user.id),
+        action="register",
+        entity="user",
+        entity_id=str(new_user.id),
+        details={"email": new_user.email},
+    )
+    db.commit()
+
     return new_user
 
 
@@ -98,8 +126,9 @@ def login_user(db: Session, login_data: UserLogin) -> TokenResponse:
             detail="Cuenta desactivada. Contacte al administrador.",
         )
 
-    access_token = create_access_token(data={"sub": str(user.id)})
-    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+    token_payload = {"sub": str(user.id), "ver": user.token_version}
+    access_token = create_access_token(data=token_payload)
+    refresh_token = create_refresh_token(data=token_payload)
 
     return TokenResponse(
         access_token=access_token,
@@ -134,8 +163,9 @@ def refresh_access_token(db: Session, refresh_token: str) -> TokenResponse:
             detail="Usuario no encontrado o cuenta desactivada",
         )
 
-    new_access = create_access_token(data={"sub": str(user.id)})
-    new_refresh = create_refresh_token(data={"sub": str(user.id)})
+    token_payload = {"sub": str(user.id), "ver": user.token_version}
+    new_access = create_access_token(data=token_payload)
+    new_refresh = create_refresh_token(data=token_payload)
 
     return TokenResponse(
         access_token=new_access,
@@ -205,4 +235,66 @@ def reset_password(db: Session, reset_data: ResetPasswordRequest) -> None:
 
     user.hashed_password = hash_password(reset_data.new_password)
     token_record.used = True
+    add_audit_log(
+        db,
+        user_id=str(user.id),
+        action="password_reset",
+        entity="user",
+        entity_id=str(user.id),
+    )
+    db.commit()
+
+
+async def send_registration_verification_email(db: Session, user_id: uuid.UUID) -> None:
+    stmt = select(User).where(User.id == user_id)
+    user = db.execute(stmt).scalar_one_or_none()
+    if not user:
+        return
+
+    token = str(uuid.uuid4())
+    db.add(
+        EmailVerificationToken(
+            user_id=user.id,
+            token=token,
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+        )
+    )
+    db.commit()
+    await send_email_verification(user.email, token)
+
+
+def verify_email_token(db: Session, token: str) -> None:
+    stmt = select(EmailVerificationToken).where(EmailVerificationToken.token == token)
+    token_row = db.execute(stmt).scalar_one_or_none()
+
+    if not token_row or token_row.used:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token de verificación inválido")
+    if token_row.expires_at < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token de verificación expirado")
+
+    user = db.execute(select(User).where(User.id == token_row.user_id)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuario no encontrado")
+
+    user.email_verified = True
+    token_row.used = True
+    add_audit_log(
+        db,
+        user_id=str(user.id),
+        action="email_verified",
+        entity="user",
+        entity_id=str(user.id),
+    )
+    db.commit()
+
+
+def logout_all_sessions(db: Session, user: User) -> None:
+    user.token_version += 1
+    add_audit_log(
+        db,
+        user_id=str(user.id),
+        action="logout_all_sessions",
+        entity="user",
+        entity_id=str(user.id),
+    )
     db.commit()

@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     # 🌐 URL del frontend (para CORS y enlaces en emails)
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # 🌍 Entorno (development / production)
+    ENVIRONMENT: str = "development"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -8,10 +8,11 @@ Descripción: Endpoints de autenticación — registro, login, refresh,
 ¿Impacto? Estos son los puntos de entrada de la API de autenticación.
 """
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
+from app.dependencies import get_current_user, get_db
+from app.models.user import User
 from app.schemas.user import (
     ForgotPasswordRequest,
     MessageResponse,
@@ -23,6 +24,7 @@ from app.schemas.user import (
     UserResponse,
 )
 from app.services import auth_service
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Autenticación"])
 
@@ -33,12 +35,15 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Autenticación"])
     status_code=status.HTTP_201_CREATED,
     summary="Registrar nuevo usuario",
 )
-def register(
+@limiter.limit("5/minute")
+async def register(
+    request: Request,
     user_data: UserCreate,
     db: Session = Depends(get_db),
 ) -> UserResponse:
     """Crea una nueva cuenta de usuario en BoviTrack."""
     user = auth_service.register_user(db, user_data)
+    await auth_service.send_registration_verification_email(db, user.id)
     return UserResponse.model_validate(user)
 
 
@@ -47,7 +52,9 @@ def register(
     response_model=TokenResponse,
     summary="Iniciar sesión",
 )
+@limiter.limit("10/minute")
 def login(
+    request: Request,
     credentials: UserLogin,
     db: Session = Depends(get_db),
 ) -> TokenResponse:
@@ -73,7 +80,9 @@ def refresh(
     response_model=MessageResponse,
     summary="Solicitar recuperación de contraseña",
 )
+@limiter.limit("3/minute")
 async def forgot_password(
+    request: Request,
     data: ForgotPasswordRequest,
     db: Session = Depends(get_db),
 ) -> MessageResponse:
@@ -96,3 +105,29 @@ def reset_password_endpoint(
     """Restablece la contraseña usando el token de recuperación."""
     auth_service.reset_password(db, data)
     return MessageResponse(message="Contraseña restablecida exitosamente")
+
+
+@router.post(
+    "/verify-email",
+    response_model=MessageResponse,
+    summary="Verificar correo electrónico",
+)
+def verify_email(
+    token: str,
+    db: Session = Depends(get_db),
+) -> MessageResponse:
+    auth_service.verify_email_token(db, token)
+    return MessageResponse(message="Correo verificado exitosamente")
+
+
+@router.post(
+    "/logout-all",
+    response_model=MessageResponse,
+    summary="Cerrar sesión en todos los dispositivos",
+)
+def logout_all(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> MessageResponse:
+    auth_service.logout_all_sessions(db, current_user)
+    return MessageResponse(message="Sesiones cerradas en todos los dispositivos")

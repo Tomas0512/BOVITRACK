@@ -49,6 +49,8 @@ class UserCreate(BaseModel):
     document_number: str
     phone: str
     password: str
+    accept_terms: bool
+    accept_data_policy: bool
 
     @field_validator("first_name")
     @classmethod
@@ -110,6 +112,20 @@ class UserCreate(BaseModel):
             raise ValueError("La contraseña debe contener al menos un carácter especial")
         return v
 
+    @field_validator("accept_terms")
+    @classmethod
+    def validate_accept_terms(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Debe aceptar términos y condiciones")
+        return v
+
+    @field_validator("accept_data_policy")
+    @classmethod
+    def validate_accept_data_policy(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError("Debe autorizar tratamiento de datos")
+        return v
+
 
 class UserLogin(BaseModel):
     """Schema para el login — email y contraseña."""
@@ -152,6 +168,12 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
+class DeleteAccountRequest(BaseModel):
+    """Confirmación explícita para eliminar cuenta."""
+
+    confirmation_text: str
+
+
 # ════════════════════════════════════════
 # 📤 Schemas de RESPONSE
 # ════════════════════════════════════════
@@ -167,6 +189,8 @@ class UserResponse(BaseModel):
     document_type: str
     document_number: str
     phone: str
+    role_name: str | None = None
+    email_verified: bool = False
     is_active: bool
     created_at: datetime
     updated_at: datetime

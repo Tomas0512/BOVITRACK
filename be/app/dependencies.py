@@ -69,10 +69,17 @@ def get_current_user(
     if not user_id:
         raise credentials_exception
 
+    token_version = payload.get("ver")
+    if token_version is None:
+        raise credentials_exception
+
     stmt = select(User).where(User.id == uuid.UUID(user_id))
     user = db.execute(stmt).scalar_one_or_none()
 
     if not user:
+        raise credentials_exception
+
+    if int(token_version) != int(user.token_version):
         raise credentials_exception
 
     if not user.is_active:

@@ -6,7 +6,6 @@
 
 import { Header } from "./Header";
 import { Footer } from "./Footer";
-import "./AuthLayout.css";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -18,9 +17,9 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, headerActionLabel, headerActionTo }: AuthLayoutProps) {
   return (
-    <div className="auth-layout">
+    <div className="flex min-h-screen flex-col">
       <Header actionLabel={headerActionLabel} actionTo={headerActionTo} />
-      <main className="auth-layout__main">{children}</main>
+      <main className="flex flex-1 items-center justify-center p-3">{children}</main>
       <Footer />
     </div>
   );

@@ -9,8 +9,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthLayout } from "../components/layout/AuthLayout";
-import { registerUser } from "../api/auth";
-import "./RegisterPage.css";
+import { useAuth } from "../hooks/useAuth";
 
 /** Tipos de documento disponibles */
 const DOCUMENT_TYPES = [
@@ -40,6 +39,7 @@ export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   /** Regex: solo letras, espacios y tildes */
   const TEXT_ONLY = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
@@ -149,7 +149,7 @@ export function RegisterPage() {
     setServerError("");
 
     try {
-      await registerUser({
+      await register({
         email: formData.email,
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -157,18 +157,15 @@ export function RegisterPage() {
         document_number: formData.documentNumber,
         phone: formData.phone,
         password: formData.password,
+        accept_terms: formData.acceptTerms,
+        accept_data_policy: formData.acceptDataPolicy,
       });
-      // Registro exitoso — redirigir al login
-      navigate("/login", { state: { registered: true } });
+      // Registro + auto-login exitoso — ir al dashboard
+      navigate("/dashboard");
     } catch (err: unknown) {
-      if (err && typeof err === "object" && "response" in err) {
-        const axiosErr = err as { response?: { data?: { detail?: string } } };
-        setServerError(
-          axiosErr.response?.data?.detail || "Error al registrarse. Intente de nuevo."
-        );
-      } else {
-        setServerError("Error de conexión. Verifique que el servidor esté activo.");
-      }
+      setServerError(
+        err instanceof Error ? err.message : "Error al registrarse. Intente de nuevo."
+      );
     } finally {
       setLoading(false);
     }
@@ -176,23 +173,23 @@ export function RegisterPage() {
 
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
-      <div className="register">
+      <div className="flex w-full max-w-[620px] flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
         {/* ── Tarjeta del formulario ── */}
-        <div className="register__card">
-          <h2 className="register__title">Crear cuenta</h2>
-          <p className="register__subtitle">
+        <div className="px-7 py-5">
+          <h2 className="mb-0.5 text-xl font-bold text-primary">Crear cuenta</h2>
+          <p className="mb-3 text-sm text-gray-500">
             Completa los datos para registrarte en BoviTrack
           </p>
 
           {serverError && (
-            <div className="register__server-error">{serverError}</div>
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
           )}
 
           <form onSubmit={handleSubmit} noValidate>
             {/* Nombres y Apellidos */}
-            <div className="register__row">
-              <div className="register__field">
-                <label htmlFor="firstName">Nombres <span className="register__required">*</span></label>
+            <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label htmlFor="firstName" className="mb-0.5 text-xs font-semibold text-gray-800">Nombres <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="firstName"
                   name="firstName"
@@ -200,12 +197,13 @@ export function RegisterPage() {
                   placeholder="Ingrese sus nombres"
                   value={formData.firstName}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.firstName && <span className="register__error">{errors.firstName}</span>}
+                {errors.firstName && <span className="mt-0.5 text-xs text-red-600">{errors.firstName}</span>}
               </div>
 
-              <div className="register__field">
-                <label htmlFor="lastName">Apellidos <span className="register__required">*</span></label>
+              <div className="flex flex-col">
+                <label htmlFor="lastName" className="mb-0.5 text-xs font-semibold text-gray-800">Apellidos <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="lastName"
                   name="lastName"
@@ -213,20 +211,22 @@ export function RegisterPage() {
                   placeholder="Ingrese sus apellidos"
                   value={formData.lastName}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.lastName && <span className="register__error">{errors.lastName}</span>}
+                {errors.lastName && <span className="mt-0.5 text-xs text-red-600">{errors.lastName}</span>}
               </div>
             </div>
 
             {/* Tipo y Número de Documento */}
-            <div className="register__row">
-              <div className="register__field">
-                <label htmlFor="documentType">Tipo de documento <span className="register__required">*</span></label>
+            <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label htmlFor="documentType" className="mb-0.5 text-xs font-semibold text-gray-800">Tipo de documento <span className="font-bold text-red-600">*</span></label>
                 <select
                   id="documentType"
                   name="documentType"
                   value={formData.documentType}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10"
                 >
                   {DOCUMENT_TYPES.map((dt) => (
                     <option key={dt.value} value={dt.value}>
@@ -234,11 +234,11 @@ export function RegisterPage() {
                     </option>
                   ))}
                 </select>
-                {errors.documentType && <span className="register__error">{errors.documentType}</span>}
+                {errors.documentType && <span className="mt-0.5 text-xs text-red-600">{errors.documentType}</span>}
               </div>
 
-              <div className="register__field">
-                <label htmlFor="documentNumber">Número de documento <span className="register__required">*</span></label>
+              <div className="flex flex-col">
+                <label htmlFor="documentNumber" className="mb-0.5 text-xs font-semibold text-gray-800">Número de documento <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="documentNumber"
                   name="documentNumber"
@@ -246,15 +246,16 @@ export function RegisterPage() {
                   placeholder="Ingrese su número"
                   value={formData.documentNumber}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.documentNumber && <span className="register__error">{errors.documentNumber}</span>}
+                {errors.documentNumber && <span className="mt-0.5 text-xs text-red-600">{errors.documentNumber}</span>}
               </div>
             </div>
 
             {/* Email y Teléfono */}
-            <div className="register__row">
-              <div className="register__field">
-                <label htmlFor="email">Correo electrónico <span className="register__required">*</span></label>
+            <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label htmlFor="email" className="mb-0.5 text-xs font-semibold text-gray-800">Correo electrónico <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="email"
                   name="email"
@@ -262,12 +263,13 @@ export function RegisterPage() {
                   placeholder="correo@ejemplo.com"
                   value={formData.email}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.email && <span className="register__error">{errors.email}</span>}
+                {errors.email && <span className="mt-0.5 text-xs text-red-600">{errors.email}</span>}
               </div>
 
-              <div className="register__field">
-                <label htmlFor="phone">Teléfono <span className="register__required">*</span></label>
+              <div className="flex flex-col">
+                <label htmlFor="phone" className="mb-0.5 text-xs font-semibold text-gray-800">Teléfono <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="phone"
                   name="phone"
@@ -275,15 +277,16 @@ export function RegisterPage() {
                   placeholder="+57 300 123 4567"
                   value={formData.phone}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.phone && <span className="register__error">{errors.phone}</span>}
+                {errors.phone && <span className="mt-0.5 text-xs text-red-600">{errors.phone}</span>}
               </div>
             </div>
 
             {/* Contraseña y Verificar */}
-            <div className="register__row">
-              <div className="register__field">
-                <label htmlFor="password">Contraseña <span className="register__required">*</span></label>
+            <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <div className="flex flex-col">
+                <label htmlFor="password" className="mb-0.5 text-xs font-semibold text-gray-800">Contraseña <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="password"
                   name="password"
@@ -291,21 +294,22 @@ export function RegisterPage() {
                   placeholder="Mínimo 8 caracteres"
                   value={formData.password}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.password && <span className="register__error">{errors.password}</span>}
+                {errors.password && <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>}
                 {formData.password && (
-                  <ul className="register__pw-rules">
-                    <li className={formData.password.length >= 8 ? "register__pw-ok" : "register__pw-fail"}>Mínimo 8 caracteres</li>
-                    <li className={/[A-Z]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Una letra mayúscula</li>
-                    <li className={/[a-z]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Una letra minúscula</li>
-                    <li className={/\d/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Un número</li>
-                    <li className={/[^A-Za-z0-9]/.test(formData.password) ? "register__pw-ok" : "register__pw-fail"}>Un carácter especial</li>
+                  <ul className="mt-1.5 list-none space-y-0.5 p-0 text-xs">
+                    <li className={formData.password.length >= 8 ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Mínimo 8 caracteres</li>
+                    <li className={/[A-Z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Una letra mayúscula</li>
+                    <li className={/[a-z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Una letra minúscula</li>
+                    <li className={/\d/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Un número</li>
+                    <li className={/[^A-Za-z0-9]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Un carácter especial</li>
                   </ul>
                 )}
               </div>
 
-              <div className="register__field">
-                <label htmlFor="confirmPassword">Verificar contraseña <span className="register__required">*</span></label>
+              <div className="flex flex-col">
+                <label htmlFor="confirmPassword" className="mb-0.5 text-xs font-semibold text-gray-800">Verificar contraseña <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -313,50 +317,57 @@ export function RegisterPage() {
                   placeholder="Repita la contraseña"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                {errors.confirmPassword && <span className="register__error">{errors.confirmPassword}</span>}
+                {errors.confirmPassword && <span className="mt-0.5 text-xs text-red-600">{errors.confirmPassword}</span>}
               </div>
             </div>
 
             {/* Checkboxes */}
-            <div className="register__checks">
-              <label className="register__checkbox">
+            <div className="mb-2.5">
+              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-gray-800">
                 <input
                   type="checkbox"
                   name="acceptTerms"
                   checked={formData.acceptTerms}
                   onChange={handleCheck}
+                  className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-primary"
                 />
                 <span>
                   Acepto los{" "}
-                  <a href="#terminos" className="register__link">
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline hover:text-primary-light">
                     términos y condiciones
                   </a>
                 </span>
               </label>
-              {errors.acceptTerms && <span className="register__error">{errors.acceptTerms}</span>}
+              {errors.acceptTerms && <span className="text-xs text-red-600">{errors.acceptTerms}</span>}
 
-              <label className="register__checkbox">
+              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-gray-800">
                 <input
                   type="checkbox"
                   name="acceptDataPolicy"
                   checked={formData.acceptDataPolicy}
                   onChange={handleCheck}
+                  className="mt-0.5 h-3.5 w-3.5 cursor-pointer accent-primary"
                 />
                 <span>
                   Autorizo el{" "}
-                  <a href="#datos" className="register__link">
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline hover:text-primary-light">
                     tratamiento de mis datos personales
                   </a>
                 </span>
               </label>
-              {errors.acceptDataPolicy && <span className="register__error">{errors.acceptDataPolicy}</span>}
+              {errors.acceptDataPolicy && <span className="text-xs text-red-600">{errors.acceptDataPolicy}</span>}
             </div>
 
             {/* Botón de registro */}
             <button
               type="submit"
-              className={`register__btn${!isFormComplete || loading ? " register__btn--disabled" : ""}`}
+              className={`w-full rounded-lg py-2 text-sm font-bold text-white transition-all active:scale-[0.98] ${
+                !isFormComplete || loading
+                  ? "cursor-not-allowed bg-gray-400 opacity-70"
+                  : "bg-primary hover:bg-primary-light"
+              }`}
               disabled={!isFormComplete || loading}
             >
               {loading ? "Registrando..." : "Registrarse"}
@@ -364,9 +375,9 @@ export function RegisterPage() {
           </form>
 
           {/* Enlace a login */}
-          <p className="register__login-link">
+          <p className="mt-2.5 text-center text-sm text-gray-500">
             ¿Ya estás registrado?{" "}
-            <Link to="/login">Inicia sesión</Link>
+            <Link to="/login" className="font-semibold text-primary hover:text-primary-light">Inicia sesión</Link>
           </p>
         </div>
       </div>

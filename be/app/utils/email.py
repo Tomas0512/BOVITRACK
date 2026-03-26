@@ -42,6 +42,16 @@ async def send_password_reset_email(email: str, token: str) -> None:
     #     "plain",
     #     "utf-8",
     # )
+
+
+async def send_email_verification(email: str, token: str) -> None:
+    """Envía enlace de verificación de correo electrónico."""
+    verify_link = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+    logger.info("=" * 60)
+    logger.info("📧 CORREO DE VERIFICACIÓN (modo desarrollo)")
+    logger.info(f"   Para: {email}")
+    logger.info(f"   Enlace: {verify_link}")
+    logger.info("=" * 60)
     # message["From"] = settings.MAIL_FROM
     # message["To"] = email
     # message["Subject"] = "BoviTrack - Restablecer contraseña"

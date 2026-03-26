@@ -1,95 +1,55 @@
 /**
  * Archivo: api/auth.ts
  * Descripción: Cliente HTTP para los endpoints de autenticación del backend.
- * ¿Para qué? Centralizar todas las llamadas al backend en un solo lugar.
- *             Las páginas importan estas funciones en vez de usar axios directamente.
- * ¿Impacto? Si la URL del backend cambia, solo se modifica aquí.
  */
 
-import axios from "axios";
+import api from "./axios";
+import type {
+  UserResponse,
+  TokenResponse,
+  MessageResponse,
+  RegisterRequest,
+  LoginRequest,
+} from "../types/auth";
 
-/**
- * ¿Qué?    Instancia de axios apuntando al backend.
- * ¿Para?   Usa VITE_API_URL del .env para ser portable entre dev y producción.
- * ¿Impacto? Si la variable no está definida, cae al fallback localhost:8000.
- */
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
-  headers: { "Content-Type": "application/json" },
-});
-
-// ── Tipos de respuesta ──────────────────────────
-
-export interface UserResponse {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  document_type: string;
-  document_number: string;
-  phone: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-}
-
-export interface MessageResponse {
-  message: string;
-}
-
-// ── Tipos de request ────────────────────────────
-
-export interface RegisterData {
-  email: string;
-  first_name: string;
-  last_name: string;
-  document_type: string;
-  document_number: string;
-  phone: string;
-  password: string;
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-// ── Funciones de la API ─────────────────────────
+const AUTH = "/auth";
+const USERS = "/users";
 
 /** Registrar un nuevo usuario */
-export async function registerUser(data: RegisterData): Promise<UserResponse> {
-  const response = await api.post<UserResponse>("/auth/register", data);
+export async function registerUser(data: RegisterRequest): Promise<UserResponse> {
+  const response = await api.post<UserResponse>(`${AUTH}/register`, data);
   return response.data;
 }
 
 /** Iniciar sesión */
-export async function loginUser(data: LoginData): Promise<TokenResponse> {
-  const response = await api.post<TokenResponse>("/auth/login", data);
+export async function loginUser(data: LoginRequest): Promise<TokenResponse> {
+  const response = await api.post<TokenResponse>(`${AUTH}/login`, data);
+  return response.data;
+}
+
+/** Renovar tokens */
+export async function refreshToken(refresh_token: string): Promise<TokenResponse> {
+  const response = await api.post<TokenResponse>(`${AUTH}/refresh`, { refresh_token });
   return response.data;
 }
 
 /** Solicitar recuperación de contraseña */
 export async function forgotPassword(email: string): Promise<MessageResponse> {
-  const response = await api.post<MessageResponse>("/auth/forgot-password", {
-    email,
-  });
+  const response = await api.post<MessageResponse>(`${AUTH}/forgot-password`, { email });
   return response.data;
 }
 
 /** Restablecer contraseña con token */
-export async function resetPassword(
-  token: string,
-  newPassword: string
-): Promise<MessageResponse> {
-  const response = await api.post<MessageResponse>("/auth/reset-password", {
+export async function resetPassword(token: string, newPassword: string): Promise<MessageResponse> {
+  const response = await api.post<MessageResponse>(`${AUTH}/reset-password`, {
     token,
     new_password: newPassword,
   });
+  return response.data;
+}
+
+/** Obtener perfil del usuario actual */
+export async function getMe(): Promise<UserResponse> {
+  const response = await api.get<UserResponse>(`${USERS}/me`);
   return response.data;
 }

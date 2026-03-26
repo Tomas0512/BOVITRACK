@@ -70,7 +70,7 @@ services:
     container_name: bovitrack_fe
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "5173:80"
     depends_on:
       - be
     networks:

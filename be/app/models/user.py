@@ -11,7 +11,7 @@ Descripción: Modelo ORM que representa la tabla `users` en PostgreSQL.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -87,6 +87,16 @@ class User(Base):
         nullable=False,
     )
 
+    # Confirmación de email y control de sesión global
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    token_version: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    # Consentimientos legales
+    accepted_terms: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    accepted_data_policy: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    accepted_terms_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    accepted_data_policy_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     # Fecha de creación (generada por PostgreSQL)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -105,6 +115,10 @@ class User(Base):
     password_reset_tokens: Mapped[list["PasswordResetToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan",
     )
+    email_verification_tokens: Mapped[list["EmailVerificationToken"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan",
+    )
+    audit_logs: Mapped[list["AuditLog"]] = relationship(back_populates="user")
 
     def __repr__(self) -> str:
         return f"User(id={self.id}, email={self.email}, is_active={self.is_active})"

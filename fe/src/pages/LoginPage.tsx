@@ -9,8 +9,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthLayout } from "../components/layout/AuthLayout";
-import { loginUser } from "../api/auth";
-import "./LoginPage.css";
+import { useAuth } from "../hooks/useAuth";
 
 export function LoginPage() {
   const [formData, setFormData] = useState({
@@ -23,6 +22,7 @@ export function LoginPage() {
   const [serverError, setServerError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const justRegistered = (location.state as { registered?: boolean })?.registered;
 
   /** ¿Están todos los campos llenos? */
@@ -70,24 +70,12 @@ export function LoginPage() {
     setServerError("");
 
     try {
-      const tokens = await loginUser({
-        email: formData.email,
-        password: formData.password,
-      });
-      // Guardar tokens en localStorage
-      localStorage.setItem("access_token", tokens.access_token);
-      localStorage.setItem("refresh_token", tokens.refresh_token);
-      // Redirigir al dashboard (por ahora a /)
-      navigate("/");
+      await login(formData.email, formData.password);
+      navigate("/dashboard");
     } catch (err: unknown) {
-      if (err && typeof err === "object" && "response" in err) {
-        const axiosErr = err as { response?: { data?: { detail?: string } } };
-        setServerError(
-          axiosErr.response?.data?.detail || "Error al iniciar sesión."
-        );
-      } else {
-        setServerError("Error de conexión. Verifique que el servidor esté activo.");
-      }
+      setServerError(
+        err instanceof Error ? err.message : "Error al iniciar sesión."
+      );
     } finally {
       setLoading(false);
     }
@@ -95,23 +83,23 @@ export function LoginPage() {
 
   return (
     <AuthLayout headerActionLabel="Registrarse" headerActionTo="/register">
-      <div className="login">
-        <div className="login__card">
-          <h2 className="login__title">Iniciar sesión</h2>
-          <p className="login__subtitle">
+      <div className="flex w-full items-center justify-center">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+          <h2 className="mb-0.5 text-xl font-bold text-primary">Iniciar sesión</h2>
+          <p className="mb-6 text-sm text-gray-500">
             Ingresa tus credenciales para acceder a BoviTrack
           </p>
 
           {justRegistered && (
-            <div className="login__success">Cuenta creada exitosamente. Inicia sesión.</div>
+            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-center text-sm text-green-600">Cuenta creada exitosamente. Inicia sesión.</div>
           )}
           {serverError && (
-            <div className="login__server-error">{serverError}</div>
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
           )}
 
           <form onSubmit={handleSubmit} noValidate>
-            <div className="login__field">
-              <label htmlFor="email">Correo electrónico <span className="login__required">*</span></label>
+            <div className="mb-4 flex flex-col">
+              <label htmlFor="email" className="mb-1 text-sm font-semibold text-gray-800">Correo electrónico <span className="font-bold text-red-600">*</span></label>
               <input
                 id="email"
                 name="email"
@@ -119,12 +107,13 @@ export function LoginPage() {
                 placeholder="correo@ejemplo.com"
                 value={formData.email}
                 onChange={handleChange}
+                className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
-              {errors.email && <span className="login__error">{errors.email}</span>}
+              {errors.email && <span className="mt-0.5 text-xs text-red-600">{errors.email}</span>}
             </div>
 
-            <div className="login__field">
-              <label htmlFor="password">Contraseña <span className="login__required">*</span></label>
+            <div className="mb-4 flex flex-col">
+              <label htmlFor="password" className="mb-1 text-sm font-semibold text-gray-800">Contraseña <span className="font-bold text-red-600">*</span></label>
               <input
                 id="password"
                 name="password"
@@ -132,13 +121,18 @@ export function LoginPage() {
                 placeholder="Ingrese su contraseña"
                 value={formData.password}
                 onChange={handleChange}
+                className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
-              {errors.password && <span className="login__error">{errors.password}</span>}
+              {errors.password && <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>}
             </div>
 
             <button
               type="submit"
-              className={`login__btn${!isFormComplete || loading ? " login__btn--disabled" : ""}`}
+              className={`mt-2 w-full rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${
+                !isFormComplete || loading
+                  ? "cursor-not-allowed bg-gray-400 opacity-70"
+                  : "bg-primary hover:bg-primary-light"
+              }`}
               disabled={!isFormComplete || loading}
             >
               {loading ? "Ingresando..." : "Iniciar sesión"}
@@ -146,9 +140,9 @@ export function LoginPage() {
           </form>
 
           {/* Enlaces bajo el botón */}
-          <div className="login__links">
-            <Link to="/forgot-password">¿Olvidaste tu contraseña?</Link>
-            <Link to="/register">¿No estás registrado?</Link>
+          <div className="mt-5 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+            <Link to="/forgot-password" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">¿Olvidaste tu contraseña?</Link>
+            <Link to="/register" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">¿No estás registrado?</Link>
           </div>
         </div>
       </div>

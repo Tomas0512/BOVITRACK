@@ -11,7 +11,6 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { resetPassword as resetPasswordApi } from "../api/auth";
-import "./ResetPasswordPage.css";
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -123,16 +122,16 @@ export function ResetPasswordPage() {
   if (!token) {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
-        <div className="reset">
-          <div className="reset__card">
-            <div className="reset__icon" aria-hidden="true">⚠️</div>
-            <h2 className="reset__title">Enlace inválido</h2>
-            <p className="reset__subtitle">
+        <div className="flex w-full items-center justify-center">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+            <div className="mb-2 text-center text-4xl" aria-hidden="true">⚠️</div>
+            <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Enlace inválido</h2>
+            <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
               El enlace de recuperación no es válido o ha expirado.
               Solicita uno nuevo desde la página de recuperación.
             </p>
-            <div className="reset__links">
-              <Link to="/forgot-password">Solicitar nuevo enlace</Link>
+            <div className="mt-5 flex justify-center">
+              <Link to="/forgot-password" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">Solicitar nuevo enlace</Link>
             </div>
           </div>
         </div>
@@ -142,29 +141,29 @@ export function ResetPasswordPage() {
 
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
-      <div className="reset">
-        <div className="reset__card">
+      <div className="flex w-full items-center justify-center">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
           {!submitted ? (
             <>
-              <div className="reset__icon" aria-hidden="true">🔒</div>
+              <div className="mb-2 text-center text-4xl" aria-hidden="true">🔒</div>
 
-              <h2 className="reset__title">Restablecer contraseña</h2>
-              <p className="reset__subtitle">
+              <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Restablecer contraseña</h2>
+              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Ingresa tu nueva contraseña. Asegúrate de que sea segura y fácil
                 de recordar.
               </p>
 
               <form onSubmit={handleSubmit} noValidate>
                 {serverError && (
-                  <div className="reset__server-error">{serverError}</div>
+                  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
                 )}
 
                 {/* Nueva contraseña */}
-                <div className="reset__field">
-                  <label htmlFor="password">
-                    Nueva contraseña <span className="reset__required">*</span>
+                <div className="mb-4 flex flex-col">
+                  <label htmlFor="password" className="mb-1 text-sm font-semibold text-gray-800">
+                    Nueva contraseña <span className="font-bold text-red-600">*</span>
                   </label>
-                  <div className="reset__input-wrapper">
+                  <div className="relative flex items-center">
                     <input
                       id="password"
                       name="password"
@@ -173,10 +172,11 @@ export function ResetPasswordPage() {
                       value={formData.password}
                       onChange={handleChange}
                       autoFocus
+                      className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface py-2 pl-3 pr-10 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                     <button
                       type="button"
-                      className="reset__toggle"
+                      className="absolute right-2 bg-transparent border-none cursor-pointer text-lg opacity-60 hover:opacity-100 transition-opacity"
                       onClick={() => setShowPassword((v) => !v)}
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
@@ -184,17 +184,17 @@ export function ResetPasswordPage() {
                     </button>
                   </div>
                   {errors.password && (
-                    <span className="reset__error">{errors.password}</span>
+                    <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>
                   )}
 
                   {/* Barra de fortaleza */}
                   {formData.password && (
-                    <div className="reset__strength">
-                      <div className="reset__strength-bar">
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <div className="flex flex-1 gap-0.5">
                         {[1, 2, 3, 4, 5].map((i) => (
                           <div
                             key={i}
-                            className="reset__strength-segment"
+                            className="h-1 flex-1 rounded-sm transition-colors"
                             style={{
                               backgroundColor:
                                 i <= strength.level ? strength.color : "#e5e7eb",
@@ -203,7 +203,7 @@ export function ResetPasswordPage() {
                         ))}
                       </div>
                       <span
-                        className="reset__strength-label"
+                        className="min-w-14 text-right text-xs font-semibold"
                         style={{ color: strength.color }}
                       >
                         {strength.label}
@@ -213,11 +213,11 @@ export function ResetPasswordPage() {
                 </div>
 
                 {/* Confirmar contraseña */}
-                <div className="reset__field">
-                  <label htmlFor="confirmPassword">
-                    Confirmar contraseña <span className="reset__required">*</span>
+                <div className="mb-4 flex flex-col">
+                  <label htmlFor="confirmPassword" className="mb-1 text-sm font-semibold text-gray-800">
+                    Confirmar contraseña <span className="font-bold text-red-600">*</span>
                   </label>
-                  <div className="reset__input-wrapper">
+                  <div className="relative flex items-center">
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
@@ -225,10 +225,11 @@ export function ResetPasswordPage() {
                       placeholder="Repita su nueva contraseña"
                       value={formData.confirmPassword}
                       onChange={handleChange}
+                      className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface py-2 pl-3 pr-10 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                     <button
                       type="button"
-                      className="reset__toggle"
+                      className="absolute right-2 bg-transparent border-none cursor-pointer text-lg opacity-60 hover:opacity-100 transition-opacity"
                       onClick={() => setShowConfirm((v) => !v)}
                       aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
@@ -236,43 +237,49 @@ export function ResetPasswordPage() {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <span className="reset__error">{errors.confirmPassword}</span>
+                    <span className="mt-0.5 text-xs text-red-600">{errors.confirmPassword}</span>
                   )}
                 </div>
 
                 {/* Requisitos */}
-                <ul className="reset__requirements">
-                  <li className={formData.password.length >= 8 ? "met" : ""}>Mínimo 8 caracteres</li>
-                  <li className={/[A-Z]/.test(formData.password) ? "met" : ""}>Una letra mayúscula</li>
-                  <li className={/[a-z]/.test(formData.password) ? "met" : ""}>Una letra minúscula</li>
-                  <li className={/[0-9]/.test(formData.password) ? "met" : ""}>Un número</li>
-                  <li className={/[^A-Za-z0-9]/.test(formData.password) ? "met" : ""}>Un carácter especial</li>
+                <ul className="mb-5 grid list-none grid-cols-1 gap-1 p-0 sm:grid-cols-2 sm:gap-x-3">
+                  <li className={`relative pl-5 text-xs leading-relaxed ${formData.password.length >= 8 ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Mínimo 8 caracteres</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[A-Z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra mayúscula</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[a-z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra minúscula</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un número</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[^A-Za-z0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un carácter especial</li>
                 </ul>
 
                 <button
                   type="submit"
-                  className={`reset__btn${!isFormComplete || loading ? " reset__btn--disabled" : ""}`}
+                  className={`mt-2 w-full rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${
+                    !isFormComplete || loading
+                      ? "cursor-not-allowed bg-gray-400 opacity-70"
+                      : "bg-primary hover:bg-primary-light"
+                  }`}
                   disabled={!isFormComplete || loading}
                 >
                   {loading ? "Restableciendo..." : "Restablecer contraseña"}
                 </button>
               </form>
 
-              <div className="reset__links">
-                <Link to="/login">← Volver al inicio de sesión</Link>
+              <div className="mt-5 flex justify-center">
+                <Link to="/login" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">← Volver al inicio de sesión</Link>
               </div>
             </>
           ) : (
-            /* ── Estado de éxito ── */
-            <div className="reset__success">
-              <div className="reset__success-icon" aria-hidden="true">✅</div>
-              <h2 className="reset__title">¡Contraseña restablecida!</h2>
-              <p className="reset__subtitle">
+            <div className="text-center">
+              <div className="mb-3 text-5xl" aria-hidden="true">✅</div>
+              <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Contraseña restablecida!</h2>
+              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Tu contraseña se ha cambiado correctamente. Ya puedes iniciar
                 sesión con tu nueva contraseña.
               </p>
 
-              <Link to="/login" className="reset__btn reset__btn--link">
+              <Link
+                to="/login"
+                className="block w-full rounded-lg bg-primary py-2.5 text-center text-base font-bold text-white no-underline transition-colors hover:bg-primary-light hover:text-white"
+              >
                 Ir a iniciar sesión
               </Link>
             </div>

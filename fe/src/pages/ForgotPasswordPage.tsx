@@ -11,7 +11,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { forgotPassword } from "../api/auth";
-import "./ForgotPasswordPage.css";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -61,26 +60,23 @@ export function ForgotPasswordPage() {
 
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
-      <div className="forgot">
-        <div className="forgot__card">
+      <div className="flex w-full items-center justify-center">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
           {!submitted ? (
             <>
-              {/* ── Icono decorativo ── */}
-              <div className="forgot__icon" aria-hidden="true">
-                🔑
-              </div>
+              <div className="mb-2 text-center text-4xl" aria-hidden="true">🔑</div>
 
-              <h2 className="forgot__title">Recuperar contraseña</h2>
-              <p className="forgot__subtitle">
+              <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Recuperar contraseña</h2>
+              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Ingresa tu correo electrónico y te enviaremos un enlace para
                 restablecer tu contraseña.
               </p>
 
               <form onSubmit={handleSubmit} noValidate>
-                <div className="forgot__field">
-                  <label htmlFor="email">
+                <div className="mb-4 flex flex-col">
+                  <label htmlFor="email" className="mb-1 text-sm font-semibold text-gray-800">
                     Correo electrónico{" "}
-                    <span className="forgot__required">*</span>
+                    <span className="font-bold text-red-600">*</span>
                   </label>
                   <input
                     id="email"
@@ -90,43 +86,45 @@ export function ForgotPasswordPage() {
                     value={email}
                     onChange={handleChange}
                     autoFocus
+                    className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
-                  {error && <span className="forgot__error">{error}</span>}
+                  {error && <span className="mt-0.5 text-xs text-red-600">{error}</span>}
                 </div>
 
                 <button
                   type="submit"
-                  className={`forgot__btn${!isFormComplete || loading ? " forgot__btn--disabled" : ""}`}
+                  className={`mt-2 w-full rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${
+                    !isFormComplete || loading
+                      ? "cursor-not-allowed bg-gray-400 opacity-70"
+                      : "bg-primary hover:bg-primary-light"
+                  }`}
                   disabled={!isFormComplete || loading}
                 >
                   {loading ? "Enviando..." : "Enviar enlace de recuperación"}
                 </button>
               </form>
 
-              <div className="forgot__links">
-                <Link to="/login">← Volver al inicio de sesión</Link>
+              <div className="mt-5 flex justify-center">
+                <Link to="/login" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">← Volver al inicio de sesión</Link>
               </div>
             </>
           ) : (
-            /* ── Estado de éxito ── */
-            <div className="forgot__success">
-              <div className="forgot__success-icon" aria-hidden="true">
-                ✉️
-              </div>
-              <h2 className="forgot__title">¡Correo enviado!</h2>
-              <p className="forgot__subtitle">
+            <div className="text-center">
+              <div className="mb-3 text-5xl" aria-hidden="true">✉️</div>
+              <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Correo enviado!</h2>
+              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Hemos enviado un enlace de recuperación a{" "}
                 <strong>{email}</strong>. Revisa tu bandeja de entrada y sigue
                 las instrucciones.
               </p>
-              <p className="forgot__hint">
+              <p className="mb-5 text-xs leading-relaxed text-gray-500">
                 Si no recibes el correo en unos minutos, revisa tu carpeta de
                 spam o correo no deseado.
               </p>
 
               <button
                 type="button"
-                className="forgot__btn"
+                className="w-full rounded-lg bg-primary py-2.5 text-base font-bold text-white transition-colors hover:bg-primary-light active:scale-[0.98]"
                 onClick={() => {
                   setSubmitted(false);
                   setEmail("");
@@ -135,8 +133,8 @@ export function ForgotPasswordPage() {
                 Reenviar correo
               </button>
 
-              <div className="forgot__links">
-                <Link to="/login">← Volver al inicio de sesión</Link>
+              <div className="mt-5 flex justify-center">
+                <Link to="/login" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">← Volver al inicio de sesión</Link>
               </div>
             </div>
           )}

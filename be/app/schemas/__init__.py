@@ -1,6 +1,7 @@
 # Schemas Pydantic de Bovitrack (validación de datos de entrada y salida)
 
 from app.schemas.user import (
+    DeleteAccountRequest,
     DocumentType,
     ForgotPasswordRequest,
     MessageResponse,
@@ -14,6 +15,7 @@ from app.schemas.user import (
 
 __all__ = [
     "DocumentType",
+    "DeleteAccountRequest",
     "UserCreate",
     "UserLogin",
     "ForgotPasswordRequest",
