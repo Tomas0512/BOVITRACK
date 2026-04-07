@@ -9,7 +9,7 @@ Módulo: routers/paddocks.py
 
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.permissions import require_permission
@@ -41,15 +41,13 @@ def create(
 @router.get("", response_model=list[PaddockResponse], summary="Listar potreros", dependencies=[Depends(require_permission("potreros", "can_read"))])
 def list_all(
     farm_id: uuid.UUID,
+    paddock_status: str | None = Query(None, alias="status", description="Filtrar por estado: libre, ocupado, en_descanso"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[PaddockResponse]:
-    """¿Qué? Lista los potreros activos de la finca.
-    ¿Para qué? Mostrar el mapa de potreros disponibles para rotación.
-    ¿Impacto? Solo retorna activos, ordenados por nombre.
-    """
+    """Lista los potreros activos de la finca con filtro opcional por estado."""
     _ = current_user
-    paddocks = paddock_service.list_paddocks(db, farm_id)
+    paddocks = paddock_service.list_paddocks(db, farm_id, status_filter=paddock_status)
     return [PaddockResponse.model_validate(p) for p in paddocks]
 
 

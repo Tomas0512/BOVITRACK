@@ -24,6 +24,7 @@ class PaddockCreate(BaseModel):
     area_hectares: Decimal
     max_capacity: int
     coverage_status: str = "bueno"
+    pasture_type: str | None = None
     status: str = "libre"
     rest_start_date: date | None = None
     rest_end_date: date | None = None
@@ -73,6 +74,7 @@ class PaddockUpdate(BaseModel):
     area_hectares: Decimal | None = None
     max_capacity: int | None = None
     coverage_status: str | None = None
+    pasture_type: str | None = None
     status: str | None = None
     rest_start_date: date | None = None
     rest_end_date: date | None = None
@@ -92,6 +94,7 @@ class PaddockResponse(BaseModel):
     area_hectares: Decimal
     max_capacity: int
     coverage_status: str
+    pasture_type: str | None
     status: str
     rest_start_date: date | None
     rest_end_date: date | None

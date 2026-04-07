@@ -23,7 +23,11 @@ from app.schemas.user import (
     UserLogin,
     UserResponse,
 )
+from app.schemas.invitation import InvitationInfo, InvitedRegister
+from app.schemas.reactivation import ReactivationRequestCreate, ReactivationRequestResponse
 from app.services import auth_service
+from app.services import invitation_service
+from app.services import reactivation_service
 from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Autenticación"])
@@ -120,6 +124,34 @@ def verify_email(
     return MessageResponse(message="Correo verificado exitosamente")
 
 
+@router.get(
+    "/invitation/{token}",
+    response_model=InvitationInfo,
+    summary="Obtener info de invitación",
+)
+def get_invitation(
+    token: str,
+    db: Session = Depends(get_db),
+) -> InvitationInfo:
+    """Retorna la info pública de una invitación para mostrar en el formulario de registro."""
+    return invitation_service.get_invitation_info(db, token)
+
+
+@router.post(
+    "/register-invited",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Registrar usuario por invitación",
+)
+def register_invited(
+    data: InvitedRegister,
+    db: Session = Depends(get_db),
+) -> UserResponse:
+    """Registra un nuevo usuario a partir de una invitación y lo asigna a la finca."""
+    user = invitation_service.register_invited_user(db, data)
+    return UserResponse.model_validate(user)
+
+
 @router.post(
     "/logout-all",
     response_model=MessageResponse,
@@ -131,3 +163,20 @@ def logout_all(
 ) -> MessageResponse:
     auth_service.logout_all_sessions(db, current_user)
     return MessageResponse(message="Sesiones cerradas en todos los dispositivos")
+
+
+@router.post(
+    "/request-reactivation",
+    response_model=ReactivationRequestResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Solicitar reactivación de cuenta",
+)
+@limiter.limit("3/minute")
+def request_reactivation(
+    request: Request,
+    data: ReactivationRequestCreate,
+    db: Session = Depends(get_db),
+) -> ReactivationRequestResponse:
+    """Endpoint público para que un usuario con cuenta desactivada solicite reactivación."""
+    req = reactivation_service.request_reactivation(db, data.email, data.reason)
+    return ReactivationRequestResponse.model_validate(req)

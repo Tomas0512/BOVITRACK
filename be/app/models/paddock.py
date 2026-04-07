@@ -22,6 +22,7 @@ class Paddock(Base):
     area_hectares: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     max_capacity: Mapped[int] = mapped_column(Integer, nullable=False)
     coverage_status: Mapped[str] = mapped_column(String(30), default="bueno", nullable=False)
+    pasture_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="libre", nullable=False)
     rest_start_date = mapped_column(Date, nullable=True)
     rest_end_date = mapped_column(Date, nullable=True)

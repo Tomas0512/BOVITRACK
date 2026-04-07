@@ -88,6 +88,7 @@ class LandPlot(Base):
     area_unit: Mapped[str] = mapped_column(String(20), default="hectareas", nullable=False)
     usage_type: Mapped[str] = mapped_column(String(50), nullable=False)
     max_capacity: Mapped[int] = mapped_column(Integer, nullable=False)
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

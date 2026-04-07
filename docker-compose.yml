@@ -16,10 +16,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    # ¿Qué?    Puerto 5432 NO expuesto al host.
-    # ¿Para?   La DB solo es accesible dentro de backend_net (entre contenedores).
-    # ¿Impacto? Sin esto, cualquier proceso del host (o red externa) puede conectarse
-    #           directamente a PostgreSQL, saltándose toda la capa de aplicación.
+    # Puerto expuesto SOLO en localhost (127.0.0.1) para herramientas como DBeaver.
+    # No es accesible desde la red externa.
+    ports:
+      - "127.0.0.1:5432:5432"
     volumes:
       - bovitrack_data:/var/lib/postgresql/data
     healthcheck:

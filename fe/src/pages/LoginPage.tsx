@@ -144,6 +144,16 @@ export function LoginPage() {
             <Link to="/forgot-password" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">¿Olvidaste tu contraseña?</Link>
             <Link to="/register" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">¿No estás registrado?</Link>
           </div>
+
+          {/* Reactivación */}
+          {serverError && serverError.includes("desactivada") && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-center">
+              <p className="text-sm text-amber-700">Tu cuenta está desactivada.</p>
+              <Link to="/request-reactivation" className="text-sm font-semibold text-primary no-underline hover:text-primary-light">
+                Solicitar reactivación
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </AuthLayout>

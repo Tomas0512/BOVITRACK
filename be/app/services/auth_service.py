@@ -130,6 +130,16 @@ def login_user(db: Session, login_data: UserLogin) -> TokenResponse:
     access_token = create_access_token(data=token_payload)
     refresh_token = create_refresh_token(data=token_payload)
 
+    add_audit_log(
+        db,
+        user_id=str(user.id),
+        action="login",
+        entity="user",
+        entity_id=str(user.id),
+        details={"email": user.email},
+    )
+    db.commit()
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,

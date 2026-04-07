@@ -14,6 +14,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.farm import LandPlot
 from app.models.paddock import Paddock
 from app.schemas.paddock import PaddockCreate, PaddockUpdate
 
@@ -23,6 +24,19 @@ def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate) -> Padd
     ¿Para qué? Registrar un área de pastoreo con capacidad y estado.
     ¿Impacto? El potrero estará disponible para asignar bovinos.
     """
+    # Require at least one active land plot before allowing paddock creation
+    has_plot = db.execute(
+        select(LandPlot.id)
+        .where(LandPlot.farm_id == farm_id, LandPlot.is_active.is_(True))
+        .limit(1)
+    ).scalar_one_or_none()
+
+    if has_plot is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Debe registrar al menos un lote antes de crear un potrero.",
+        )
+
     paddock = Paddock(farm_id=farm_id, **data.model_dump())
     db.add(paddock)
     db.commit()
@@ -30,16 +44,15 @@ def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate) -> Padd
     return paddock
 
 
-def list_paddocks(db: Session, farm_id: uuid.UUID) -> Sequence[Paddock]:
-    """¿Qué? Lista los potreros activos de una finca.
-    ¿Para qué? Mostrar el mapa de potreros disponibles para rotación.
-    ¿Impacto? Solo retorna potreros con is_active=True, ordenados por nombre.
-    """
+def list_paddocks(db: Session, farm_id: uuid.UUID, status_filter: str | None = None) -> Sequence[Paddock]:
+    """Lista los potreros activos de una finca con filtro opcional por estado."""
     stmt = (
         select(Paddock)
         .where(Paddock.farm_id == farm_id, Paddock.is_active.is_(True))
         .order_by(Paddock.name.asc())
     )
+    if status_filter:
+        stmt = stmt.where(Paddock.status == status_filter)
     return db.execute(stmt).scalars().all()
 
 

@@ -67,3 +67,12 @@ export async function getFarm(farmId: string): Promise<FarmResponse> {
   const response = await api.get<FarmResponse>(`${FARMS}/${farmId}`);
   return response.data;
 }
+
+export async function updateFarm(farmId: string, data: FarmRequest): Promise<FarmResponse> {
+  const response = await api.put<FarmResponse>(`${FARMS}/${farmId}`, data);
+  return response.data;
+}
+
+export async function deleteFarm(farmId: string): Promise<void> {
+  await api.delete(`${FARMS}/${farmId}`);
+}

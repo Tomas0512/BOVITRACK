@@ -16,7 +16,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
 from app.routers.auth import router as auth_router
-from app.routers.users import router as users_router
+from app.routers.users import router as users_router, audit_router as audit_logs_router
 from app.routers.farms import router as farms_router
 from app.routers.bovines import router as bovines_router
 from app.routers.treatments import router as treatments_router
@@ -25,6 +25,9 @@ from app.routers.food import router as food_router
 from app.routers.tasks import router as tasks_router
 from app.routers.paddocks import router as paddocks_router
 from app.routers.reports import router as reports_router
+from app.routers.employees import router as employees_router
+from app.routers.land_plots import router as land_plots_router
+from app.routers.admin import router as admin_router
 from app.utils.limiter import limiter
 
 
@@ -105,6 +108,10 @@ app.include_router(food_router)
 app.include_router(tasks_router)
 app.include_router(paddocks_router)
 app.include_router(reports_router)
+app.include_router(employees_router)
+app.include_router(land_plots_router)
+app.include_router(audit_logs_router)
+app.include_router(admin_router)
 
 
 # ── Health check ──────────────────────────────────

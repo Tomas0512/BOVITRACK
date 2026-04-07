@@ -52,15 +52,14 @@ async def send_email_verification(email: str, token: str) -> None:
     logger.info(f"   Para: {email}")
     logger.info(f"   Enlace: {verify_link}")
     logger.info("=" * 60)
-    # message["From"] = settings.MAIL_FROM
-    # message["To"] = email
-    # message["Subject"] = "BoviTrack - Restablecer contraseña"
-    #
-    # await aiosmtplib.send(
-    #     message,
-    #     hostname=settings.MAIL_SERVER,
-    #     port=settings.MAIL_PORT,
-    #     username=settings.MAIL_USERNAME,
-    #     password=settings.MAIL_PASSWORD,
-    #     use_tls=settings.MAIL_USE_TLS,
-    # )
+
+
+async def send_farm_invitation_email(email: str, token: str, farm_name: str) -> None:
+    """Envía enlace de invitación para registrarse en una finca."""
+    invitation_link = f"{settings.FRONTEND_URL}/register/invitation?token={token}"
+    logger.info("=" * 60)
+    logger.info("📧 INVITACIÓN A FINCA (modo desarrollo)")
+    logger.info(f"   Para: {email}")
+    logger.info(f"   Finca: {farm_name}")
+    logger.info(f"   Enlace: {invitation_link}")
+    logger.info("=" * 60)

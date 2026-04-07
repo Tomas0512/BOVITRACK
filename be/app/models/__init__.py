@@ -16,6 +16,8 @@ from app.models.food import Food, Consumption
 from app.models.treatment import Treatment
 from app.models.milk_production import MilkProduction
 from app.models.task import Task
+from app.models.farm_invitation import FarmInvitation
+from app.models.reactivation_request import ReactivationRequest
 
 __all__ = [
     "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
@@ -29,4 +31,6 @@ __all__ = [
     "Treatment",
     "MilkProduction",
     "Task",
+    "FarmInvitation",
+    "ReactivationRequest",
 ]
