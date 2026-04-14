@@ -1,4 +1,4 @@
-# SCRUM — Sprint 2
+# SCRUM — Sprint 4
 ## BoviTrack · Control Productivo, Sanitario, Reproductivo y Comercial
 
 ---
@@ -8,10 +8,10 @@
 | Campo | Valor |
 |---|---|
 | **Proyecto** | BoviTrack |
-| **Sprint** | Sprint 2 |
+| **Sprint** | Sprint 4 |
 | **Duración** | 4 semanas |
-| **Fecha inicio** | 6 de abril de 2026 |
-| **Fecha fin** | 1 de mayo de 2026 |
+| **Fecha inicio** | 20 de abril de 2026 |
+| **Fecha fin** | 17 de mayo de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Cañon |
 | **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Cañon (Developer / Product Owner) |
 
@@ -145,10 +145,10 @@ Semana 4: Gráficos, integración en BovineDetailPage, pruebas y ajustes
 
 | ID | Historia | Sprint sugerido |
 |---|---|---|
-| HU010 | Información económica e indicadores de rentabilidad | Sprint 3 |
-| HU011 | Inventarios y compras de insumos | Sprint 3 |
-| HU012 | Subir y gestionar documentos | Sprint 3 |
-| HU013 | Reportes e indicadores de desempeño | Sprint 4 |
-| HU014 | Alertas y notificaciones automáticas | Sprint 4 |
-| HU015 | Revisión de auditorías del sistema | Sprint 4 |
-| HU016 | Registro de datos sin conexión (offline) | Sprint 5 |
+| HU010 | Información económica e indicadores de rentabilidad | Sprint 5 |
+| HU011 | Inventarios y compras de insumos | Sprint 5 |
+| HU012 | Subir y gestionar documentos | Sprint 5 |
+| HU013 | Reportes e indicadores de desempeño | Sprint 6 |
+| HU014 | Alertas y notificaciones automáticas | Sprint 6 |
+| HU015 | Revisión de auditorías del sistema | Sprint 6 |
+| HU016 | Registro de datos sin conexión (offline) | Sprint 7 |
