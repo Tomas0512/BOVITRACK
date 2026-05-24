@@ -1,0 +1,5 @@
+# Configuración de pnpm (v10+)
+# onlyBuiltDependencies: paquetes que tienen permiso de correr scripts de compilación.
+# esbuild necesita compilar binarios nativos al instalar.
+onlyBuiltDependencies:
+  - esbuild
