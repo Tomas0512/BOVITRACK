@@ -20,7 +20,6 @@ htmlcov/
 node_modules/
 fe/dist/
 fe/.vite/
-pnpm-lock.yaml
 
 # ─── IDEs ─────────────────────────────────────────
 .vscode/
