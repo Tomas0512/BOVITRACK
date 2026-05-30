@@ -18,6 +18,7 @@ from app.models.farm import UserFarm
 from app.models.role import Role
 from app.models.user import User
 from app.schemas.employee import EmployeeAssign, EmployeeResponse, EmployeeUpdate
+from app.services.audit_service import add_audit_log
 
 
 def list_roles(db: Session) -> Sequence[Role]:
@@ -135,6 +136,7 @@ def update_employee(
     farm_id: uuid.UUID,
     user_id: uuid.UUID,
     data: EmployeeUpdate,
+    updated_by: uuid.UUID | None = None,
 ) -> EmployeeResponse:
     """¿Qué? Actualiza el rol o el estado activo de un empleado en la finca.
     ¿Para qué? Cambiar de rol (ej: Empleado → Capataz) o activar/desactivar.
@@ -156,14 +158,17 @@ def update_employee(
         .options(joinedload(UserFarm.user), joinedload(UserFarm.role))
         .where(UserFarm.id == uf.id)
     ).scalar_one()
+    add_audit_log(db, user_id=str(updated_by) if updated_by else None, farm_id=str(farm_id), action="update", entity="employee", entity_id=str(user_id), details={"is_active": uf.is_active})
+    db.commit()
     return _build_response(uf)
 
 
-def remove_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> None:
+def remove_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID, removed_by: uuid.UUID | None = None) -> None:
     """¿Qué? Elimina la asignación de un empleado en la finca.
     ¿Para qué? Desvincular permanentemente a un usuario de la finca.
     ¿Impacto? La operación es irreversible. Para desactivar temporalmente usar update_employee.
     """
     uf = get_employee(db, farm_id, user_id)
+    add_audit_log(db, user_id=str(removed_by) if removed_by else None, farm_id=str(farm_id), action="remove", entity="employee", entity_id=str(user_id))
     db.delete(uf)
     db.commit()

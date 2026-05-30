@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
+from app.services.audit_service import add_audit_log
 
 
 def create_task(db: Session, farm_id: uuid.UUID, data: TaskCreate, assigned_by: uuid.UUID) -> Task:
@@ -31,6 +32,8 @@ def create_task(db: Session, farm_id: uuid.UUID, data: TaskCreate, assigned_by: 
     db.add(task)
     db.commit()
     db.refresh(task)
+    add_audit_log(db, user_id=str(assigned_by), farm_id=str(farm_id), action="create", entity="task", entity_id=str(task.id), details={"title": task.title})
+    db.commit()
     return task
 
 
@@ -70,7 +73,7 @@ def get_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID) -> Task:
     return task
 
 
-def update_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID, data: TaskUpdate) -> Task:
+def update_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID, data: TaskUpdate, user_id: uuid.UUID | None = None) -> Task:
     """¿Qué? Actualiza los campos enviados de una tarea.
     ¿Para qué? Cambiar estado, prioridad, agregar observaciones o marcar como completada.
     ¿Impacto? Al cambiar status a 'completada', el frontend debería enviar completed_at.
@@ -80,15 +83,18 @@ def update_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID, data: TaskU
         setattr(task, field, value)
     db.commit()
     db.refresh(task)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="task", entity_id=str(task.id), details={"title": task.title, "status": task.status})
+    db.commit()
     return task
 
 
-def delete_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID) -> None:
+def delete_task(db: Session, farm_id: uuid.UUID, task_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Elimina una tarea de la base de datos.
     ¿Para qué? Remover tareas creadas por error o ya irrelevantes.
     ¿Impacto? Eliminación permanente. Las tareas completadas deberían
               archivarse, no eliminarse.
     """
     task = get_task(db, farm_id, task_id)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="task", entity_id=str(task.id), details={"title": task.title})
     db.delete(task)
     db.commit()

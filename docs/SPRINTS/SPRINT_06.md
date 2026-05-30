@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 6 |
-| **Duracion** | 15 dias |
+| **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 13 de junio de 2026 |
 | **Fecha fin** | 26 de junio de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
@@ -19,18 +19,32 @@
 
 ## Objetivo del Sprint
 
-> Implementar seguimiento de terneros (HU007) y completar gestion sanitaria con planes, calendario y alertas (HU008).
+> Al final del sprint, el capataz podra consultar la lista de terneros con su curva de crecimiento (HU007), y el veterinario podra registrar planes sanitarios recurrentes y ver alertas de actividades proximas en los siguientes 7 dias (HU008).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU007 | Registrar desarrollo de terneros | Media | 5 |
 | HU008 (cierre) | Planificar y registrar actividades sanitarias | Alta | 8 |
 
-**Total Story Points del Sprint: 13**
+**Total Story Points del Sprint: 13** (~39h estimadas, dentro de la capacidad del equipo)
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verifica:
+
+- [x] Criterios de aceptacion definidos y acordados con el equipo
+- [x] Filtro de terneros por `birth_date` y estado identificado sobre el modelo `Bovine` existente
+- [x] Modelo `SanitaryPlan` y logica de frecuencias documentada antes de comenzar
+- [x] Dependencia con `Treatment` existente revisada para no duplicar logica
+- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
@@ -80,12 +94,22 @@
 
 ## Sprint Review
 
-**Fecha:** 16 de junio de 2026  
+**Fecha:** 26 de junio de 2026  
 **Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
-Pendiente de ejecucion.
+| Modulo | Entregado | Observaciones |
+|---|---|---|
+| Vista y lista de terneros con indicadores | 🔲 Pendiente | |
+| Curva de crecimiento del ternero | 🔲 Pendiente | |
+| Modelo y CRUD de planes sanitarios | 🔲 Pendiente | |
+| Endpoint de alertas sanitarias proximas | 🔲 Pendiente | |
+| Banner de alertas en FarmDetailPage | 🔲 Pendiente | |
+
+### Story Points completados
+
+Pendiente de cierre.
 
 ---
 
@@ -93,8 +117,13 @@ Pendiente de ejecucion.
 
 ### Que salio bien?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
 
 ### Que se puede mejorar?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
+
+### Acciones para Sprint 7
+
+- Verificar si las reglas de frecuencia sanitaria (diaria/semanal/mensual/anual) quedaron completas o requieren iteracion.
+- Ajustar estimacion segun velocidad real registrada en Sprint 5 y 6.

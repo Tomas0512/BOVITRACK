@@ -95,7 +95,7 @@ def update(
     ¿Impacto? Retorna 404 si el usuario no está asignado a la finca.
     """
     _ = current_user
-    return employee_service.update_employee(db, farm_id, user_id, data)
+    return employee_service.update_employee(db, farm_id, user_id, data, current_user.id)
 
 
 @router.delete(
@@ -115,4 +115,4 @@ def remove(
     ¿Impacto? Irreversible. Para desactivar temporalmente usar PUT con is_active=false.
     """
     _ = current_user
-    employee_service.remove_employee(db, farm_id, user_id)
+    employee_service.remove_employee(db, farm_id, user_id, current_user.id)

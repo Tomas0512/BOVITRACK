@@ -34,6 +34,19 @@
 
 ---
 
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verificó:
+
+- [x] Criterios de aceptación definidos y acordados con el equipo
+- [x] Entidades del modelo identificadas (User, Role, Permission, Farm, LandPlot)
+- [x] Dependencias externas evaluadas (librería JWT, envio de emails)
+- [x] Sin bloqueos técnicos conocidos al inicio del sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad: ~40h por sprint (2 personas × ~20h disponibles).
+
+---
+
 ## Sprint Backlog
 
 ### HU001 — Usuarios, Roles y Accesos

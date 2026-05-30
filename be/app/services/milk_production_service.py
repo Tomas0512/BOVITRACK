@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.models.milk_production import MilkProduction
 from app.schemas.milk_production import MilkProductionCreate
+from app.services.audit_service import add_audit_log
 
 
 def create_record(db: Session, farm_id: uuid.UUID, data: MilkProductionCreate, user_id: uuid.UUID) -> MilkProduction:
@@ -30,6 +31,8 @@ def create_record(db: Session, farm_id: uuid.UUID, data: MilkProductionCreate, u
     db.add(record)
     db.commit()
     db.refresh(record)
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="milk_production", entity_id=str(record.id), details={"liters": str(record.liters_produced)})
+    db.commit()
     return record
 
 
@@ -57,11 +60,12 @@ def get_record(db: Session, farm_id: uuid.UUID, record_id: uuid.UUID) -> MilkPro
     return record
 
 
-def delete_record(db: Session, farm_id: uuid.UUID, record_id: uuid.UUID) -> None:
+def delete_record(db: Session, farm_id: uuid.UUID, record_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Elimina un registro de producción.
     ¿Para qué? Corregir registros erróneos de ordeño.
     ¿Impacto? La eliminación es permanente. Afecta los reportes de producción.
     """
     record = get_record(db, farm_id, record_id)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="milk_production", entity_id=str(record.id))
     db.delete(record)
     db.commit()

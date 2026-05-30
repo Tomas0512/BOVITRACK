@@ -85,7 +85,7 @@ def update(
     ¿Impacto? Para marcar como completada, enviar status='completada' + completed_at.
     """
     _ = current_user
-    task = task_service.update_task(db, farm_id, task_id, data)
+    task = task_service.update_task(db, farm_id, task_id, data, current_user.id)
     return TaskResponse.model_validate(task)
 
 
@@ -101,4 +101,4 @@ def delete(
     ¿Impacto? Eliminación permanente. Retorna 204 No Content.
     """
     _ = current_user
-    task_service.delete_task(db, farm_id, task_id)
+    task_service.delete_task(db, farm_id, task_id, current_user.id)

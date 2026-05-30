@@ -80,4 +80,4 @@ def delete(
     ¿Impacto? Afecta los totales en reportes de producción diaria.
     """
     _ = current_user
-    milk_production_service.delete_record(db, farm_id, record_id)
+    milk_production_service.delete_record(db, farm_id, record_id, current_user.id)

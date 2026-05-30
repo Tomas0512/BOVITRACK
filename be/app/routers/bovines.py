@@ -85,7 +85,7 @@ def update(
     ¿Impacto? Retorna 404 si el bovino no existe.
     """
     _ = current_user
-    bovine = bovine_service.update_bovine(db, farm_id, bovine_id, data)
+    bovine = bovine_service.update_bovine(db, farm_id, bovine_id, data, current_user.id)
     return BovineResponse.model_validate(bovine)
 
 
@@ -101,4 +101,4 @@ def delete(
     ¿Impacto? Retorna 204 No Content. El bovino ya no aparece en listados.
     """
     _ = current_user
-    bovine_service.delete_bovine(db, farm_id, bovine_id)
+    bovine_service.delete_bovine(db, farm_id, bovine_id, current_user.id)

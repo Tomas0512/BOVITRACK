@@ -34,6 +34,19 @@
 
 ---
 
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verificó:
+
+- [x] Criterios de aceptación definidos y acordados con el equipo
+- [x] Endpoints de fincas y lotes del Sprint 1 ya disponibles y testeados
+- [x] Modelo `Paddock` y sus dependencias con `LandPlot` identificadas
+- [x] Sin bloqueos técnicos conocidos al inicio del sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad: ~40h por sprint (2 personas × ~20h disponibles).
+
+---
+
 ## Sprint Backlog
 
 ### HU002 (parcial) — Fincas y Lotes: Frontend y CRUD de Lotes

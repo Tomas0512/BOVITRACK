@@ -14,11 +14,13 @@ def add_audit_log(
     action: str,
     entity: str,
     entity_id: str | None = None,
+    farm_id: str | None = None,
     details: dict | None = None,
 ) -> None:
     payload = json.dumps(details, ensure_ascii=False) if details else None
     row = AuditLog(
         user_id=user_id,
+        farm_id=farm_id,
         action=action,
         entity=entity,
         entity_id=entity_id,

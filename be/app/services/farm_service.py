@@ -55,6 +55,7 @@ def create_farm(db: Session, farm_data: FarmCreate, owner_id: uuid.UUID) -> Farm
     add_audit_log(
         db,
         user_id=str(owner_id),
+        farm_id=str(farm.id),
         action="create",
         entity="farm",
         entity_id=str(farm.id),
@@ -112,6 +113,7 @@ def update_farm(db: Session, farm_id: uuid.UUID, owner_id: uuid.UUID, data: Farm
     add_audit_log(
         db,
         user_id=str(owner_id),
+        farm_id=str(farm.id),
         action="update",
         entity="farm",
         entity_id=str(farm.id),
@@ -127,6 +129,7 @@ def delete_farm(db: Session, farm_id: uuid.UUID, owner_id: uuid.UUID) -> None:
     add_audit_log(
         db,
         user_id=str(owner_id),
+        farm_id=str(farm.id),
         action="delete",
         entity="farm",
         entity_id=str(farm.id),

@@ -18,9 +18,9 @@ RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 COPY package.json pnpm-lock.yaml ./
 
-# 🔑 SOLUCIÓN DEFINITIVA PARA EL BLOQUEO DE ESBUILD:
-# Forzamos a pnpm a apagar su filtro de seguridad estricto para entornos de desarrollo/Docker
-RUN pnpm config set ignore-scripts false && pnpm install --no-frozen-lockfile
+# ignore-scripts=false permite que esbuild compile sus binarios nativos.
+# frozen-lockfile garantiza que se instalen exactamente las versiones del pnpm-lock.yaml.
+RUN pnpm config set ignore-scripts false && pnpm install --frozen-lockfile
 
 COPY . .
 

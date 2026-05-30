@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.models.treatment import Treatment
 from app.schemas.treatment import TreatmentCreate
+from app.services.audit_service import add_audit_log
 
 
 def create_treatment(db: Session, farm_id: uuid.UUID, data: TreatmentCreate, user_id: uuid.UUID) -> Treatment:
@@ -32,6 +33,8 @@ def create_treatment(db: Session, farm_id: uuid.UUID, data: TreatmentCreate, use
     db.add(treatment)
     db.commit()
     db.refresh(treatment)
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="treatment", entity_id=str(treatment.id), details={"type": treatment.treatment_type})
+    db.commit()
     return treatment
 
 
@@ -59,12 +62,13 @@ def get_treatment(db: Session, farm_id: uuid.UUID, treatment_id: uuid.UUID) -> T
     return treatment
 
 
-def delete_treatment(db: Session, farm_id: uuid.UUID, treatment_id: uuid.UUID) -> None:
+def delete_treatment(db: Session, farm_id: uuid.UUID, treatment_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Elimina físicamente un tratamiento de la base de datos.
     ¿Para qué? En caso de registro erróneo. No usa soft delete porque
               los tratamientos no tienen dependencias como los bovinos.
     ¿Impacto? La eliminación es permanente — no se puede deshacer.
     """
     treatment = get_treatment(db, farm_id, treatment_id)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="treatment", entity_id=str(treatment.id), details={"type": treatment.treatment_type})
     db.delete(treatment)
     db.commit()

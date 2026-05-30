@@ -17,9 +17,10 @@ from sqlalchemy.orm import Session
 from app.models.farm import LandPlot
 from app.models.paddock import Paddock
 from app.schemas.paddock import PaddockCreate, PaddockUpdate
+from app.services.audit_service import add_audit_log
 
 
-def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate) -> Paddock:
+def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate, user_id: uuid.UUID | None = None) -> Paddock:
     """¿Qué? Crea un nuevo potrero asociado a una finca.
     ¿Para qué? Registrar un área de pastoreo con capacidad y estado.
     ¿Impacto? El potrero estará disponible para asignar bovinos.
@@ -41,6 +42,8 @@ def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate) -> Padd
     db.add(paddock)
     db.commit()
     db.refresh(paddock)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="create", entity="paddock", entity_id=str(paddock.id), details={"name": paddock.name})
+    db.commit()
     return paddock
 
 
@@ -68,7 +71,7 @@ def get_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) -> Paddo
     return paddock
 
 
-def update_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, data: PaddockUpdate) -> Paddock:
+def update_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, data: PaddockUpdate, user_id: uuid.UUID | None = None) -> Paddock:
     """¿Qué? Actualiza los campos enviados de un potrero.
     ¿Para qué? Cambiar estado (libre → ocupado → en_descanso), cobertura, fechas.
     ¿Impacto? Clave para la gestión de rotación de potreros.
@@ -78,14 +81,17 @@ def update_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, data:
         setattr(paddock, field, value)
     db.commit()
     db.refresh(paddock)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="paddock", entity_id=str(paddock.id), details={"name": paddock.name, "status": paddock.status})
+    db.commit()
     return paddock
 
 
-def delete_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) -> None:
+def delete_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Desactiva un potrero (soft delete).
     ¿Para qué? No eliminar físicamente para conservar el historial de rotaciones.
     ¿Impacto? Los bovinos en rotaciones pasadas mantienen la referencia al potrero.
     """
     paddock = get_paddock(db, farm_id, paddock_id)
     paddock.is_active = False
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="paddock", entity_id=str(paddock.id), details={"name": paddock.name})
     db.commit()

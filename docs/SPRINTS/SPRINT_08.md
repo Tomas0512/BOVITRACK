@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 8 |
-| **Duracion** | 15 dias |
+| **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 11 de julio de 2026 |
 | **Fecha fin** | 24 de julio de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
@@ -19,18 +19,32 @@
 
 ## Objetivo del Sprint
 
-> Cerrar HU011 (inventarios/compras de insumos) e implementar HU012 para carga, vinculacion y descarga de documentos.
+> Al final del sprint, el administrador podra gestionar el inventario de insumos con control de stock y alertas de minimo (HU011), y subir, consultar y descargar documentos vinculados a fincas, bovinos o eventos (HU012).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU011 (cierre) | Gestionar inventarios y compras de insumos | Alta | 8 |
 | HU012 | Subir y gestionar documentos | Media | 5 |
 
-**Total Story Points del Sprint: 13**
+**Total Story Points del Sprint: 13** (~39h estimadas, dentro de la capacidad del equipo)
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verifica:
+
+- [x] Criterios de aceptacion definidos y acordados con el equipo
+- [x] Estrategia de almacenamiento de archivos definida (filesystem local vs S3)
+- [x] Tipos y tamanos maximos de archivos permitidos acordados
+- [x] Dependencia de inventario con consumos de `Food` revisada
+- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
@@ -78,12 +92,22 @@
 
 ## Sprint Review
 
-**Fecha:** 16 de julio de 2026  
+**Fecha:** 24 de julio de 2026  
 **Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
-Pendiente de ejecucion.
+| Modulo | Entregado | Observaciones |
+|---|---|---|
+| Stock actualizado por compras/consumos | 🔲 Pendiente | |
+| Alertas de stock minimo funcionales | 🔲 Pendiente | |
+| UI de inventario y compras | 🔲 Pendiente | |
+| Upload/download/delete de documentos | 🔲 Pendiente | |
+| Asociacion documental a finca/bovino/evento | 🔲 Pendiente | |
+
+### Story Points completados
+
+Pendiente de cierre.
 
 ---
 
@@ -91,8 +115,13 @@ Pendiente de ejecucion.
 
 ### Que salio bien?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
 
 ### Que se puede mejorar?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
+
+### Acciones para Sprint 9
+
+- Verificar que los modulos de HU011 y HU012 exponen datos consumibles por los reportes de HU013.
+- Validar seguridad en manejo de archivos antes de avanzar (OWASP: file upload).

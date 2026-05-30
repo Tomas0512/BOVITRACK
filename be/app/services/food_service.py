@@ -16,9 +16,10 @@ from sqlalchemy.orm import Session
 
 from app.models.food import Consumption, Food
 from app.schemas.food import ConsumptionCreate, FoodCreate, FoodUpdate
+from app.services.audit_service import add_audit_log
 
 
-def create_food(db: Session, farm_id: uuid.UUID, data: FoodCreate) -> Food:
+def create_food(db: Session, farm_id: uuid.UUID, data: FoodCreate, user_id: uuid.UUID | None = None) -> Food:
     """¿Qué? Registra un nuevo alimento en el inventario de la finca.
     ¿Para qué? Mantener un catálogo de insumos con stock, precio y proveedor.
     ¿Impacto? El alimento queda disponible para registrar consumos.
@@ -27,6 +28,8 @@ def create_food(db: Session, farm_id: uuid.UUID, data: FoodCreate) -> Food:
     db.add(food)
     db.commit()
     db.refresh(food)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="create", entity="food", entity_id=str(food.id), details={"name": food.name})
+    db.commit()
     return food
 
 
@@ -51,7 +54,7 @@ def get_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID) -> Food:
     return food
 
 
-def update_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID, data: FoodUpdate) -> Food:
+def update_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID, data: FoodUpdate, user_id: uuid.UUID | None = None) -> Food:
     """¿Qué? Actualiza los campos enviados de un alimento.
     ¿Para qué? Modificar precio, stock, proveedor, etc. sin reenviar todo.
     ¿Impacto? exclude_unset=True asegura actualización parcial segura.
@@ -61,10 +64,12 @@ def update_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID, data: FoodU
         setattr(food, field, value)
     db.commit()
     db.refresh(food)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="food", entity_id=str(food.id), details={"name": food.name})
+    db.commit()
     return food
 
 
-def delete_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID) -> None:
+def delete_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Desactiva un alimento del inventario (soft delete).
     ¿Para qué? No eliminar físicamente para conservar el historial de consumos.
     ¿Impacto? El alimento deja de aparecer en listados pero sus consumos
@@ -72,6 +77,7 @@ def delete_food(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID) -> None:
     """
     food = get_food(db, farm_id, food_id)
     food.is_active = False
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="food", entity_id=str(food.id), details={"name": food.name})
     db.commit()
 
 
@@ -105,6 +111,8 @@ def create_consumption(db: Session, farm_id: uuid.UUID, data: ConsumptionCreate,
     db.add(consumption)
     db.commit()
     db.refresh(consumption)
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="consumption", entity_id=str(consumption.id), details={"food_id": str(data.food_id), "quantity": str(data.quantity)})
+    db.commit()
     return consumption
 
 

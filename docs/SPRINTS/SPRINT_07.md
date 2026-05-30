@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 7 |
-| **Duracion** | 15 dias |
+| **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 27 de junio de 2026 |
 | **Fecha fin** | 10 de julio de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
@@ -19,18 +19,32 @@
 
 ## Objetivo del Sprint
 
-> Implementar HU009 para entradas y salidas de animales y HU010 para gestion economica con indicadores basicos de rentabilidad.
+> Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado del bovino (HU009), y consultar indicadores de costos e ingresos por actividad productiva (HU010).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU009 | Registrar ingresos y salidas de animales | Alta | 5 |
 | HU010 | Registrar informacion economica | Alta | 5 |
 
-**Total Story Points del Sprint: 10**
+**Total Story Points del Sprint: 10** (~30h estimadas, holgura para QA y ajustes)
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verifica:
+
+- [x] Criterios de aceptacion definidos y acordados con el equipo
+- [x] Modelo `AnimalMovement` y estados de `Bovine` documentados antes de comenzar
+- [x] Categorias fijas de ingresos/egresos definidas (no dinamicas)
+- [x] Dependencia con estado actual de `Bovine.status` revisada
+- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
@@ -78,12 +92,22 @@
 
 ## Sprint Review
 
-**Fecha:** 1 de julio de 2026  
+**Fecha:** 10 de julio de 2026  
 **Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
-Pendiente de ejecucion.
+| Modulo | Entregado | Observaciones |
+|---|---|---|
+| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | |
+| Actualizacion automatica de estado del bovino | 🔲 Pendiente | |
+| UI de movimientos por finca/bovino | 🔲 Pendiente | |
+| Registro y consulta de ingresos/egresos | 🔲 Pendiente | |
+| Dashboard economico con indicadores | 🔲 Pendiente | |
+
+### Story Points completados
+
+Pendiente de cierre.
 
 ---
 
@@ -91,8 +115,13 @@ Pendiente de ejecucion.
 
 ### Que salio bien?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
 
 ### Que se puede mejorar?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
+
+### Acciones para Sprint 8
+
+- Confirmar que el catalogo de categorias economicas es suficiente para HU013 (reportes).
+- Revisar si HU011 (inventarios) tiene dependencias con lo construido en HU010.

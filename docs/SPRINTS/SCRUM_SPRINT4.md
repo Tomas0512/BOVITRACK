@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 4 |
-| **Duración** | 2 semanas |
+| **Duración** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 16 de mayo de 2026 |
 | **Fecha fin** | 29 de mayo de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Cañon, Edwin Delgado |
@@ -19,21 +19,34 @@
 
 ## Objetivo del Sprint
 
-> Extender el sistema con los módulos productivos y sanitarios del hato: registro de alimentación, ordeños y pesajes con gráficos de evolución; control reproductivo y seguimiento de terneros; planificación de actividades sanitarias con alertas; y registro de movimientos comerciales de animales (compras, ventas, traslados). Al final del sprint el ganadero podrá gestionar el ciclo completo de producción y salud de su hato.
+> Al final del sprint, el usuario autorizado podrá registrar alimentación, ordeños y pesajes con historial por animal, y el veterinario podrá gestionar tratamientos sanitarios individuales.
+
+> ⚠️ **Nota de planificación:** Este sprint fue originalmente estimado en 34 story points (5 HUs), lo que resultó inviable en 2 semanas. El alcance fue redistribuido: HU005 y HU008 quedan en Sprint 4, mientras que HU006, HU007 y HU009 se continuaron en Sprints 5, 6 y 7 respectivamente. Esta redistribución es la práctica correcta de refinamiento de backlog.
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
 
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
+
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU005 | Como usuario autorizado quiero registrar alimentación, ordeños y pesajes para llevar control productivo del ganado | Alta | 8 |
-| HU006 | Como Veterinario quiero registrar control reproductivo para dar seguimiento a servicios, diagnósticos y partos | Alta | 8 |
-| HU007 | Como Capataz quiero registrar el desarrollo de los terneros para monitorear su crecimiento y salud | Media | 5 |
 | HU008 | Como Veterinario quiero planificar y registrar actividades sanitarias para asegurar salud preventiva y correctiva | Alta | 8 |
-| HU009 | Como Administrador quiero registrar ingresos y salidas de animales para llevar control comercial y físico del hato | Alta | 5 |
 
-**Total Story Points del Sprint: 34**
+**Total Story Points del Sprint: 16** *(HU006 → Sprint 5, HU007 → Sprint 6, HU009 → Sprint 7)*
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verificó:
+
+- [x] Criterios de aceptación definidos y validados con el equipo
+- [x] Entidades y campos del modelo identificados
+- [x] Dependencias con módulos existentes revisadas (Food, MilkProduction, Treatment)
+- [x] Endpoints de referencia definidos en colección Postman
+- [x] Sin bloqueos técnicos conocidos al inicio del sprint
 
 ---
 
@@ -54,29 +67,7 @@
 | 5.9 | Gráfico de evolución de peso con línea de tiempo (Chart.js o Recharts) | Camilo | 🔲 Por hacer | 5h |
 | 5.10 | Integrar los tres componentes en `BovineDetailPage` con pestañas | Tomas | 🔲 Por hacer | 3h |
 
-### HU006 — Control Reproductivo
-
-| # | Tarea | Responsable | Estado | Estimación |
-|---|---|---|---|---|
-| 6.1 | Modelo ORM `ReproductiveEvent` (servicio, diagnóstico, parto, tipo, fecha, resultado) | Edwin | 🔲 Por hacer | 3h |
-| 6.2 | Migración Alembic para tabla `reproductive_event` | Camilo | 🔲 Por hacer | 1h |
-| 6.3 | Schema Pydantic + service para eventos reproductivos | Edwin | 🔲 Por hacer | 3h |
-| 6.4 | CRUD de eventos reproductivos (`/farms/{id}/bovines/{id}/reproductive-events`) | Camilo | 🔲 Por hacer | 3h |
-| 6.5 | Cálculo de fecha estimada de parto (+ 283 días desde servicio positivo) | Camilo | 🔲 Por hacer | 2h |
-| 6.6 | Al registrar parto: crear automáticamente ficha de ternero (`Bovine` con padres) | Camilo | 🔲 Por hacer | 4h |
-| 6.7 | Componente `ReproductiveTimeline` con historial cronológico | Edwin | 🔲 Por hacer | 4h |
-| 6.8 | Integrar en `BovineDetailPage` en pestaña "Reproducción" | Tomas | 🔲 Por hacer | 2h |
-
-### HU007 — Desarrollo de Terneros
-
-| # | Tarea | Responsable | Estado | Estimación |
-|---|---|---|---|---|
-| 7.1 | Vista filtrada de bovinos con `birth_date` reciente (≤ 6 meses) como sección "Terneros" | Edwin | 🔲 Por hacer | 2h |
-| 7.2 | Componente `CalfList` mostrando peso actual, alimentación y estado de terneros | Tomas | 🔲 Por hacer | 3h |
-| 7.3 | Gráfico de curva de crecimiento del ternero (peso vs fecha) | Edwin | 🔲 Por hacer | 3h |
-| 7.4 | La ficha de ternero reutiliza `BovineDetailPage` con sección de registros de desarrollo | Tomas | 🔲 Por hacer | 2h |
-
-### HU008 — Actividades Sanitarias
+### HU008 — Actividades Sanitarias *(movido desde posición 4)*
 
 | # | Tarea | Responsable | Estado | Estimación |
 |---|---|---|---|---|
@@ -89,18 +80,6 @@
 | 8.7 | Componente `SanitaryPlanList` con tabla y badge de próxima fecha | Tomas | 🔲 Por hacer | 3h |
 | 8.8 | Componente `AlertBanner` en `FarmDetailPage` mostrando alertas activas | Edwin | 🔲 Por hacer | 2h |
 | 8.9 | Integrar tratamientos existentes (`TreatmentList`) en pestaña "Sanidad" de `BovineDetailPage` | Tomas | 🔲 Por hacer | 2h |
-
-### HU009 — Ingresos y Salidas de Animales
-
-| # | Tarea | Responsable | Estado | Estimación |
-|---|---|---|---|---|
-| 9.1 | Modelo ORM `AnimalMovement` (tipo: compra/venta/traslado/pérdida, fecha, precio, entidad) | Edwin | 🔲 Por hacer | 3h |
-| 9.2 | Migración Alembic para tabla `animal_movement` | Camilo | 🔲 Por hacer | 1h |
-| 9.3 | Schema + service + CRUD para movimientos (`/farms/{id}/animal-movements`) | Edwin | 🔲 Por hacer | 4h |
-| 9.4 | Al registrar salida: actualizar `Bovine.status` a "vendido" / "trasladado" / "muerto" | Camilo | 🔲 Por hacer | 2h |
-| 9.5 | Al registrar compra: crear `Bovine` con `entry_type = "compra"` y datos del proveedor | Camilo | 🔲 Por hacer | 3h |
-| 9.6 | Componente `AnimalMovementList` con historial de movimientos por finca | Tomas | 🔲 Por hacer | 3h |
-| 9.7 | Formulario de registro de venta/traslado accesible desde `BovineDetailPage` | Edwin | 🔲 Por hacer | 3h |
 
 ---
 
@@ -133,10 +112,8 @@ Un ítem se considera **Hecho** cuando cumple todos los criterios:
 ## Orden de implementación sugerido
 
 ```
-Semana 1: HU005 (alimentación, ordeños) + HU009 (movimientos backend)
-Semana 2: HU006 (reproductivo backend + frontend básico)
-Semana 3: HU008 (sanitario + alertas) + HU007 (terneros)
-Semana 4: Gráficos, integración en BovineDetailPage, pruebas y ajustes
+Semana 1: HU005 — backend (pesajes, filtros food/milk) + vertical slice: endpoint + componente WeightHistory
+Semana 2: HU008 — Treatment review + SanitaryPlan + AlertBanner integrado en FarmDetailPage
 ```
 
 ---
@@ -145,10 +122,13 @@ Semana 4: Gráficos, integración en BovineDetailPage, pruebas y ajustes
 
 | ID | Historia | Sprint sugerido |
 |---|---|---|
-| HU010 | Información económica e indicadores de rentabilidad | Sprint 5 |
-| HU011 | Inventarios y compras de insumos | Sprint 5 |
-| HU012 | Subir y gestionar documentos | Sprint 5 |
-| HU013 | Reportes e indicadores de desempeño | Sprint 6 |
-| HU014 | Alertas y notificaciones automáticas | Sprint 6 |
-| HU015 | Revisión de auditorías del sistema | Sprint 6 |
-| HU016 | Registro de datos sin conexión (offline) | Sprint 7 |
+| HU006 | Control reproductivo (servicios, partos, fecha estimada) | Sprint 5 |
+| HU007 | Desarrollo y seguimiento de terneros | Sprint 6 |
+| HU009 | Ingresos y salidas de animales | Sprint 7 |
+| HU010 | Información económica e indicadores de rentabilidad | Sprint 7 |
+| HU011 | Inventarios y compras de insumos | Sprint 8 |
+| HU012 | Subir y gestionar documentos | Sprint 8 |
+| HU013 | Reportes e indicadores de desempeño | Sprint 9 |
+| HU014 | Alertas y notificaciones automáticas | Sprint 9 |
+| HU015 | Revisión de auditorías del sistema | Sprint 10 |
+| HU016 | Registro de datos sin conexión (offline) | Sprint 10 |

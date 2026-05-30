@@ -33,7 +33,7 @@ def create(
     current_user: User = Depends(get_current_user),
 ) -> LandPlotResponse:
     _ = current_user
-    lp = land_plot_service.create_land_plot(db, farm_id, data)
+    lp = land_plot_service.create_land_plot(db, farm_id, data, current_user.id)
     return LandPlotResponse.model_validate(lp)
 
 
@@ -85,7 +85,7 @@ def update(
     current_user: User = Depends(get_current_user),
 ) -> LandPlotResponse:
     _ = current_user
-    lp = land_plot_service.update_land_plot(db, farm_id, land_plot_id, data)
+    lp = land_plot_service.update_land_plot(db, farm_id, land_plot_id, data, current_user.id)
     return LandPlotResponse.model_validate(lp)
 
 
@@ -102,4 +102,4 @@ def delete(
     current_user: User = Depends(get_current_user),
 ) -> None:
     _ = current_user
-    land_plot_service.delete_land_plot(db, farm_id, land_plot_id)
+    land_plot_service.delete_land_plot(db, farm_id, land_plot_id, current_user.id)

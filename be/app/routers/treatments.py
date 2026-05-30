@@ -81,4 +81,4 @@ def delete(
     ¿Impacto? Retorna 204 No Content. La eliminación es irreversible.
     """
     _ = current_user
-    treatment_service.delete_treatment(db, farm_id, treatment_id)
+    treatment_service.delete_treatment(db, farm_id, treatment_id, current_user.id)

@@ -106,20 +106,17 @@ def list_audit_logs(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[AuditLogResponse]:
-    """Retorna los registros de auditoría de los usuarios vinculados a la finca."""
-    # Obtener IDs de todos los usuarios alguna vez vinculados a la finca
-    member_ids = db.execute(
-        select(UserFarm.user_id).where(UserFarm.farm_id == farm_id)
-    ).scalars().all()
-
-    if not member_ids:
-        return []
-
+    """Retorna los registros de auditoría de cambios de datos de la finca."""
+    _ = current_user
+    _AUTH_ACTIONS = {"login", "logout", "logout_all_sessions", "register", "email_verified", "password_reset"}
     logs = db.execute(
         select(AuditLog)
-        .where(AuditLog.user_id.in_(member_ids))
+        .where(
+            AuditLog.farm_id == farm_id,
+            AuditLog.action.notin_(_AUTH_ACTIONS),
+        )
         .order_by(AuditLog.created_at.desc())
-        .limit(200)
+        .limit(500)
     ).scalars().all()
 
     result: list[AuditLogResponse] = []

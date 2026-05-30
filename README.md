@@ -76,7 +76,7 @@ cp .env.example .env
 
 # 3. Levantar todos los servicios
 # Las migraciones de Alembic se ejecutan automáticamente al iniciar el backend.
-docker compose up --build
+docker compose up -d --build
 ```
 
 | Servicio | URL |

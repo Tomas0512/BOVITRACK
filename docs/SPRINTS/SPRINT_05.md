@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 5 |
-| **Duracion** | 15 dias |
+| **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 30 de mayo de 2026 |
 | **Fecha fin** | 12 de junio de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
@@ -19,18 +19,32 @@
 
 ## Objetivo del Sprint
 
-> Cerrar HU005 con pesajes y visualizacion productiva por bovino, e implementar HU006 para seguimiento reproductivo completo (servicios, diagnosticos, partos y fechas estimadas).
+> Al final del sprint, el veterinario podrá consultar el historial de pesajes y gráfica de evolución de cada bovino (HU005), y registrar eventos reproductivos completos con cálculo automático de fecha de parto (HU006).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU005 (cierre) | Registrar alimentacion, ordenos y pesajes para control productivo | Alta | 8 |
 | HU006 | Registrar control reproductivo para seguimiento veterinario | Alta | 8 |
 
-**Total Story Points del Sprint: 16**
+**Total Story Points del Sprint: 16** (~48h estimadas, dentro de la capacidad del equipo)
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verificó:
+
+- [x] Criterios de aceptacion definidos y acordados con el equipo
+- [x] Modelos y tablas identificados (tabla `weights` pendiente de migracion)
+- [x] Endpoints de referencia definidos en Postman
+- [x] Dependencia con `Bovine` y `MilkProduction` existentes revisada
+- [x] Libreria de graficas (Recharts) evaluada y disponible en el proyecto
 
 ---
 
@@ -85,12 +99,18 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 
 ## Sprint Review
 
-**Fecha:** 1 de junio de 2026  
+**Fecha:** 12 de junio de 2026  
 **Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
-Pendiente de ejecucion.
+| Modulo | Entregado | Observaciones |
+|---|---|---|
+| Historial de pesajes por bovino | 🔲 Pendiente | |
+| Grafica de evolucion de peso | 🔲 Pendiente | |
+| CRUD eventos reproductivos | 🔲 Pendiente | |
+| Calculo fecha estimada de parto | 🔲 Pendiente | |
+| Generacion automatica de ternero al registrar parto | 🔲 Pendiente | |
 
 ### Story Points completados
 
@@ -102,8 +122,13 @@ Pendiente de cierre.
 
 ### Que salio bien?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
 
 ### Que se puede mejorar?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
+
+### Acciones para Sprint 6
+
+- Definir si la generacion automatica de ternero se entrega completa o como iteracion posterior.
+- Revisar velocidad real del equipo vs 16 puntos planificados para ajustar Sprint 6.

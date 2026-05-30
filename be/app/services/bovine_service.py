@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.models.bovine import Bovine
 from app.schemas.bovine import BovineCreate, BovineUpdate
+from app.services.audit_service import add_audit_log
 
 
 def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: uuid.UUID) -> Bovine:
@@ -31,6 +32,8 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
     db.add(bovine)
     db.commit()
     db.refresh(bovine)
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    db.commit()
     return bovine
 
 
@@ -70,7 +73,7 @@ def get_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID) -> Bovine:
     return bovine
 
 
-def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: BovineUpdate) -> Bovine:
+def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: BovineUpdate, user_id: uuid.UUID | None = None) -> Bovine:
     """¿Qué? Actualiza los campos enviados de un bovino (actualización parcial).
     ¿Para qué? Modificar peso, estado, potrero u observaciones sin reenviar todo.
     ¿Impacto? exclude_unset=True asegura que solo se modifiquen los campos presentes
@@ -81,10 +84,12 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
         setattr(bovine, field, value)
     db.commit()
     db.refresh(bovine)
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    db.commit()
     return bovine
 
 
-def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID) -> None:
+def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     """¿Qué? Desactiva un bovino (soft delete) y lo marca como 'retirado'.
     ¿Para qué? No eliminar físicamente para mantener el historial y auditoría.
     ¿Impacto? El bovino deja de aparecer en listados pero sus registros de
@@ -93,4 +98,5 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID) -> None
     bovine = get_bovine(db, farm_id, bovine_id)
     bovine.is_active = False
     bovine.status = "retirado"
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
     db.commit()

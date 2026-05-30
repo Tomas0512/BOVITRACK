@@ -34,7 +34,7 @@ def create(
     ¿Impacto? Retorna 201 Created. El potrero queda disponible para rotación.
     """
     _ = current_user
-    paddock = paddock_service.create_paddock(db, farm_id, data)
+    paddock = paddock_service.create_paddock(db, farm_id, data, current_user.id)
     return PaddockResponse.model_validate(paddock)
 
 
@@ -80,7 +80,7 @@ def update(
     ¿Impacto? Clave para la gestión de rotación de potreros.
     """
     _ = current_user
-    paddock = paddock_service.update_paddock(db, farm_id, paddock_id, data)
+    paddock = paddock_service.update_paddock(db, farm_id, paddock_id, data, current_user.id)
     return PaddockResponse.model_validate(paddock)
 
 
@@ -96,4 +96,4 @@ def delete(
     ¿Impacto? Retorna 204 No Content. El potrero ya no aparece en listados activos.
     """
     _ = current_user
-    paddock_service.delete_paddock(db, farm_id, paddock_id)
+    paddock_service.delete_paddock(db, farm_id, paddock_id, current_user.id)

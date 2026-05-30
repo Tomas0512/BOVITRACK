@@ -9,7 +9,7 @@
 |---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 9 |
-| **Duracion** | 15 dias |
+| **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 25 de julio de 2026 |
 | **Fecha fin** | 7 de agosto de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
@@ -19,18 +19,32 @@
 
 ## Objetivo del Sprint
 
-> Cerrar HU013 con reportes exportables y completar HU014 con alertas y notificaciones configurables por usuario.
+> Al final del sprint, el administrador podra generar y exportar reportes productivos, sanitarios y economicos con filtros por fecha (HU013), y el usuario podra configurar alertas automaticas y consultar su historial de notificaciones (HU014).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
+
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
 | HU013 (cierre) | Generar reportes e indicadores | Alta | 8 |
 | HU014 | Recibir alertas y notificaciones | Media | 5 |
 
-**Total Story Points del Sprint: 13**
+**Total Story Points del Sprint: 13** (~39h estimadas, dentro de la capacidad del equipo)
+
+---
+
+## Definition of Ready (DoR)
+
+Antes de iniciar una HU en este sprint se verifica:
+
+- [x] Criterios de aceptacion definidos y acordados con el equipo
+- [x] Formatos de exportacion acordados (PDF y/o Excel)
+- [x] Fuentes de datos de reportes identificadas (modulos HU005-HU012)
+- [x] Canales de notificacion definidos (in-app y/o email)
+- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
@@ -78,12 +92,22 @@
 
 ## Sprint Review
 
-**Fecha:** 31 de julio de 2026  
+**Fecha:** 7 de agosto de 2026  
 **Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
-Pendiente de ejecucion.
+| Modulo | Entregado | Observaciones |
+|---|---|---|
+| Reportes con filtros por fecha/categoria | 🔲 Pendiente | |
+| Exportacion PDF/Excel funcional | 🔲 Pendiente | |
+| Indicadores productivos/sanitarios/economicos | 🔲 Pendiente | |
+| Motor de notificaciones por eventos proximos | 🔲 Pendiente | |
+| Configuracion de alertas + historial | 🔲 Pendiente | |
+
+### Story Points completados
+
+Pendiente de cierre.
 
 ---
 
@@ -91,8 +115,13 @@ Pendiente de ejecucion.
 
 ### Que salio bien?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
 
 ### Que se puede mejorar?
 
-Pendiente.
+Pendiente de completar al cierre del sprint.
+
+### Acciones para Sprint 10
+
+- Confirmar que la auditoria (HU015) puede reutilizar los filtros de reportes ya construidos.
+- Definir la estrategia offline (HU016) antes de comenzar el sprint: PWA, Service Worker o app nativa.

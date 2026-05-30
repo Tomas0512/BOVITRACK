@@ -45,7 +45,7 @@ def create_food(
     ¿Impacto? Retorna 201 Created. El alimento queda disponible para consumos.
     """
     _ = current_user
-    food = food_service.create_food(db, farm_id, data)
+    food = food_service.create_food(db, farm_id, data, current_user.id)
     return FoodResponse.model_validate(food)
 
 
@@ -93,7 +93,7 @@ def update_food(
     ¿Impacto? Retorna 404 si no existe.
     """
     _ = current_user
-    food = food_service.update_food(db, farm_id, food_id, data)
+    food = food_service.update_food(db, farm_id, food_id, data, current_user.id)
     return FoodResponse.model_validate(food)
 
 
@@ -109,7 +109,7 @@ def delete_food(
     ¿Impacto? El alimento deja de aparecer en listados pero no se pierde.
     """
     _ = current_user
-    food_service.delete_food(db, farm_id, food_id)
+    food_service.delete_food(db, farm_id, food_id, current_user.id)
 
 
 # ═══════════════════════════════════════════════════════
