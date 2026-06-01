@@ -116,13 +116,20 @@ def create_consumption(db: Session, farm_id: uuid.UUID, data: ConsumptionCreate,
     return consumption
 
 
-def list_consumptions(db: Session, farm_id: uuid.UUID, food_id: uuid.UUID | None = None) -> Sequence[Consumption]:
+def list_consumptions(
+    db: Session,
+    farm_id: uuid.UUID,
+    food_id: uuid.UUID | None = None,
+    bovine_id: uuid.UUID | None = None,
+) -> Sequence[Consumption]:
     """¿Qué? Lista los consumos registrados de una finca.
-    ¿Para qué? Consultar el historial de alimentación, filtrable por alimento.
+    ¿Para qué? Consultar el historial de alimentación, filtrable por alimento o bovino.
     ¿Impacto? Ordenados por fecha descendente para ver los más recientes primero.
     """
     stmt = select(Consumption).where(Consumption.farm_id == farm_id)
     if food_id:
         stmt = stmt.where(Consumption.food_id == food_id)
+    if bovine_id:
+        stmt = stmt.where(Consumption.bovine_id == bovine_id)
     stmt = stmt.order_by(Consumption.feeding_date.desc())
     return db.execute(stmt).scalars().all()
