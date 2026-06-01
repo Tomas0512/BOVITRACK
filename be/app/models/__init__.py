@@ -14,6 +14,7 @@ from app.models.paddock import Paddock, PaddockHerd
 from app.models.bovine import Bovine, BovineIdentification, BovineAudit
 from app.models.food import Food, Consumption
 from app.models.treatment import Treatment
+from app.models.sanitary_plan import SanitaryPlan
 from app.models.milk_production import MilkProduction
 from app.models.task import Task
 from app.models.farm_invitation import FarmInvitation
@@ -29,6 +30,7 @@ __all__ = [
     "Bovine", "BovineIdentification", "BovineAudit",
     "Food", "Consumption",
     "Treatment",
+    "SanitaryPlan",
     "MilkProduction",
     "Task",
     "FarmInvitation",
