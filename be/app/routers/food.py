@@ -136,13 +136,14 @@ def create_consumption(
 def list_consumptions(
     farm_id: uuid.UUID,
     food_id: uuid.UUID | None = Query(None),
+    bovine_id: uuid.UUID | None = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[ConsumptionResponse]:
-    """¿Qué? Lista los consumos registrados con filtro opcional por alimento.
-    ¿Para qué? Consultar historial de alimentación de la finca.
+    """¿Qué? Lista los consumos registrados con filtro opcional por alimento o bovino.
+    ¿Para qué? Consultar historial de alimentación de la finca o de un animal específico.
     ¿Impacto? Ordenados por fecha descendente (más recientes primero).
     """
     _ = current_user
-    consumptions = food_service.list_consumptions(db, farm_id, food_id)
+    consumptions = food_service.list_consumptions(db, farm_id, food_id, bovine_id)
     return [ConsumptionResponse.model_validate(c) for c in consumptions]

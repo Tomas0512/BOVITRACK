@@ -49,6 +49,7 @@ class Bovine(Base):
     registrant: Mapped["User"] = relationship(foreign_keys=[registered_by])
     identifications: Mapped[list["BovineIdentification"]] = relationship(back_populates="bovine", cascade="all, delete-orphan")
     audits: Mapped[list["BovineAudit"]] = relationship(back_populates="bovine")
+    weights: Mapped[list["Weight"]] = relationship(back_populates="bovine", cascade="all, delete-orphan", order_by="Weight.measured_at")
 
     def __repr__(self) -> str:
         return f"Bovine(id={self.id}, ident={self.identification_number})"
