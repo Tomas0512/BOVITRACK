@@ -20,6 +20,7 @@ from app.models.task import Task
 from app.models.farm_invitation import FarmInvitation
 from app.models.reactivation_request import ReactivationRequest
 from app.models.reproductive_event import ReproductiveEvent
+from app.models.weight import Weight
 
 __all__ = [
     "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
@@ -37,4 +38,5 @@ __all__ = [
     "FarmInvitation",
     "ReactivationRequest",
     "ReproductiveEvent",
+    "Weight",
 ]

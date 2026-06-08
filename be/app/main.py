@@ -29,6 +29,7 @@ from app.routers.employees import router as employees_router
 from app.routers.land_plots import router as land_plots_router
 from app.routers.reproductive_events import router as reproductive_events_router
 from app.routers.admin import router as admin_router
+from app.routers.weights import router as weights_router
 from app.utils.limiter import limiter
 
 
@@ -114,6 +115,7 @@ app.include_router(land_plots_router)
 app.include_router(reproductive_events_router)
 app.include_router(audit_logs_router)
 app.include_router(admin_router)
+app.include_router(weights_router)
 
 
 # ── Health check ──────────────────────────────────

@@ -34,6 +34,8 @@ import api from "./axios";
  * - expiration_date: Fecha de vencimiento (opcional)
  * - supplier: Proveedor del alimento (opcional)
  */
+import api from "./axios";
+
 export interface FoodCreate {
   name: string;
   category: string;
@@ -62,6 +64,8 @@ export interface FoodUpdate extends Partial<FoodCreate> {}
  * - created_at: Cuándo se creó
  * - updated_at: Cuándo se actualizó por última vez
  */
+export interface FoodUpdate extends Partial<FoodCreate> {}
+
 export interface FoodResponse extends FoodCreate {
   id: string;
   farm_id: string;
@@ -127,6 +131,9 @@ export async function createFood(
   farmId: string,
   data: FoodCreate
 ): Promise<FoodResponse> {
+const base = (farmId: string) => `/farms/${farmId}/food`;
+
+export async function createFood(farmId: string, data: FoodCreate): Promise<FoodResponse> {
   const response = await api.post<FoodResponse>(base(farmId), data);
   return response.data;
 }
@@ -156,6 +163,7 @@ export async function getFood(
   farmId: string,
   foodId: string
 ): Promise<FoodResponse> {
+export async function getFood(farmId: string, foodId: string): Promise<FoodResponse> {
   const response = await api.get<FoodResponse>(`${base(farmId)}/${foodId}`);
   return response.data;
 }
@@ -193,6 +201,11 @@ export async function updateFood(
  * No borra la fila de la BD. Solo marca is_active=false
  * Así los historiales siguen existiendo en la BD (auditoría)
  */
+export async function updateFood(farmId: string, foodId: string, data: FoodUpdate): Promise<FoodResponse> {
+  const response = await api.put<FoodResponse>(`${base(farmId)}/${foodId}`, data);
+  return response.data;
+}
+
 export async function deleteFood(farmId: string, foodId: string): Promise<void> {
   await api.delete(`${base(farmId)}/${foodId}`);
 }
@@ -256,9 +269,19 @@ export async function listConsumptions(
   foodId?: string
 ): Promise<ConsumptionResponse[]> {
   const params = foodId ? { food_id: foodId } : undefined;
+export async function createConsumption(farmId: string, data: ConsumptionCreate): Promise<ConsumptionResponse> {
+  const response = await api.post<ConsumptionResponse>(`${base(farmId)}/consumptions`, data);
+  return response.data;
+}
+
+export async function listConsumptions(
+  farmId: string,
+  params?: { food_id?: string; bovine_id?: string }
+): Promise<ConsumptionResponse[]> {
   const response = await api.get<ConsumptionResponse[]>(
     `${base(farmId)}/consumptions`,
     { params }
   );
   return response.data;
+}
 }
