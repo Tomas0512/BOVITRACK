@@ -8,7 +8,8 @@ import {
 
 interface Props {
   farmId: string;
-  existing?: FoodResponse;
+  isOpen: boolean;
+  editing?: FoodResponse;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -25,25 +26,28 @@ const UNITS = ["kg", "litros", "bolsas", "metros", "unidades"];
 
 export default function FoodFormModal({
   farmId,
-  existing,
+  isOpen,
+  editing,
   onSuccess,
   onClose,
 }: Props) {
   const [form, setForm] = useState<FoodCreate>({
-    name: existing?.name ?? "",
-    category: existing?.category ?? "concentrado",
-    unit_of_measure: existing?.unit_of_measure ?? "kg",
-    current_stock: existing?.current_stock ?? 0,
-    min_stock_alert: existing?.min_stock_alert ?? null,
-    cost_per_unit: existing?.cost_per_unit ?? null,
-    expiration_date: existing?.expiration_date ?? null,
-    supplier: existing?.supplier ?? null,
+    name: editing?.name ?? "",
+    category: editing?.category ?? "concentrado",
+    unit_of_measure: editing?.unit_of_measure ?? "kg",
+    current_stock: editing?.current_stock ?? 0,
+    min_stock_alert: editing?.min_stock_alert ?? null,
+    cost_per_unit: editing?.cost_per_unit ?? null,
+    expiration_date: editing?.expiration_date ?? null,
+    supplier: editing?.supplier ?? null,
   });
+
+  if (!isOpen) return null;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) =>
+  const set = <K extends keyof FoodCreate,>(key: K, value: FoodCreate[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,8 +56,8 @@ export default function FoodFormModal({
     setError("");
 
     try {
-      if (existing) {
-        await updateFood(farmId, existing.id, form);
+      if (editing) {
+        await updateFood(farmId, editing.id, form);
       } else {
         await createFood(farmId, form);
       }
@@ -75,7 +79,7 @@ export default function FoodFormModal({
       <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">
-            {existing ? "Editar alimento" : "Registrar alimento"}
+            {editing ? "Editar alimento" : "Registrar alimento"}
           </h2>
           <button
             onClick={onClose}
@@ -248,7 +252,7 @@ export default function FoodFormModal({
               )}
               {loading
                 ? "Guardando..."
-                : existing
+                : editing
                   ? "Actualizar"
                   : "Crear alimento"}
             </button>

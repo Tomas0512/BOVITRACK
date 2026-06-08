@@ -12,6 +12,7 @@
 | **Duración** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 16 de mayo de 2026 |
 | **Fecha fin** | 29 de mayo de 2026 |
+| **Fecha de cierre real** | 1 de junio de 2026 |
 | **Equipo** | Camilo Ortiz, Tomas Cañon, Edwin Delgado |
 | **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Cañon (Developer / Product Owner), Edwin Delgado (Developer) |
 
@@ -54,47 +55,80 @@ Antes de iniciar una HU en este sprint se verificó:
 
 ### HU005 — Alimentación, Ordeños y Pesajes
 
-| # | Tarea | Responsable | Estado | Estimación |
-|---|---|---|---|---|
-| 5.1 | Revisar modelos existentes (`Food`, `MilkProduction`) y extender si falta campo de peso | Camilo | 🔲 Por hacer | 2h |
-| 5.2 | Endpoint `POST /farms/{id}/bovines/{id}/weights` para registrar pesajes con fecha | Camilo | 🔲 Por hacer | 3h |
-| 5.3 | Endpoint `GET /farms/{id}/bovines/{id}/weights` para consultar historial de pesos | Edwin | 🔲 Por hacer | 2h |
-| 5.4 | Revisar y completar endpoints de alimentación (`/food`) si faltan filtros por bovino | Tomas | 🔲 Por hacer | 2h |
-| 5.5 | Revisar y completar endpoints de producción de leche (`/milk-production`) | Edwin | 🔲 Por hacer | 2h |
-| 5.6 | Componente `WeightHistory` con tabla de pesajes por animal | Tomas | 🔲 Por hacer | 3h |
-| 5.7 | Componente `MilkProductionList` con registros diarios de ordeño | Tomas | 🔲 Por hacer | 3h |
-| 5.8 | Componente `FoodList` con registros de alimentación por animal o lote | Edwin | 🔲 Por hacer | 3h |
-| 5.9 | Gráfico de evolución de peso con línea de tiempo (Chart.js o Recharts) | Camilo | 🔲 Por hacer | 5h |
-| 5.10 | Integrar los tres componentes en `BovineDetailPage` con pestañas | Tomas | 🔲 Por hacer | 3h |
+| # | Tarea | Responsable asignado | Ejecutado por | Estado | Estimación | Notas |
+|---|---|---|---|---|---|---|
+| 5.1 | Crear modelo ORM `Weight` con campos `weight_kg`, `measured_at`, `daily_gain`, `body_condition` | Camilo | Tomas | ✅ Hecho | 2h | `be/app/models/weight.py` |
+| 5.2 | Endpoint `POST /farms/{id}/weights` — registrar pesaje con cálculo automático de ganancia diaria | Camilo | Tomas | ✅ Hecho | 3h | `be/app/routers/weights.py` |
+| 5.3 | Endpoint `GET /farms/{id}/weights?bovine_id=` — historial de pesos filtrado por bovino | Edwin | Tomas | ✅ Hecho | 2h | `be/app/services/weight_service.py` |
+| 5.4 | Revisar y completar endpoints de alimentación (`/food`) con filtro por bovino | Tomas | Tomas | ✅ Hecho | 2h | Endpoints existentes validados |
+| 5.5 | Revisar y completar endpoints de producción de leche (`/milk-production`) | Edwin | Tomas | ✅ Hecho | 2h | Endpoints existentes validados |
+| 5.6 | Componente `WeightHistory` con tabla de pesajes y formulario de registro inline | Tomas | Tomas | ✅ Hecho | 3h | `fe/src/components/bovines/WeightHistory.tsx` |
+| 5.7 | Componente `MilkProductionList` con registros diarios de ordeño | Tomas | Tomas | ✅ Hecho | 3h | `fe/src/components/bovines/MilkProductionList.tsx` |
+| 5.8 | Componente `FoodList` con registros de alimentación por animal | Edwin | Tomas | ✅ Hecho | 3h | `fe/src/components/bovines/FoodList.tsx` |
+| 5.9 | Gráfico de evolución de peso con línea de tiempo (Recharts) | Camilo | Tomas | ✅ Hecho | 5h | `fe/src/components/bovines/WeightChart.tsx` |
+| 5.10 | Integrar los tres componentes en `BovineDetailPage` con pestañas (General / Productivo / Sanitario) | Tomas | Tomas | ✅ Hecho | 3h | `fe/src/pages/BovineDetailPage.tsx` |
 
-### HU008 — Actividades Sanitarias *(movido desde posición 4)*
+### HU008 — Actividades Sanitarias
 
-| # | Tarea | Responsable | Estado | Estimación |
-|---|---|---|---|---|
-| 8.1 | Revisar modelo `Treatment` existente y validar que cubre tratamientos y enfermedades | Camilo | 🔲 Por hacer | 1h |
-| 8.2 | Modelo ORM `SanitaryPlan` (nombre, tipo, fecha inicio, frecuencia, próxima fecha) | Edwin | 🔲 Por hacer | 3h |
-| 8.3 | Migración Alembic para tabla `sanitary_plan` | Camilo | 🔲 Por hacer | 1h |
-| 8.4 | Schema + service + CRUD para planes sanitarios (`/farms/{id}/sanitary-plans`) | Edwin | 🔲 Por hacer | 4h |
-| 8.5 | Lógica de cálculo de próxima fecha según frecuencia (diaria, semanal, mensual, anual) | Camilo | 🔲 Por hacer | 3h |
-| 8.6 | Endpoint de alertas: eventos sanitarios en los próximos 7 días (`/farms/{id}/alerts`) | Camilo | 🔲 Por hacer | 3h |
-| 8.7 | Componente `SanitaryPlanList` con tabla y badge de próxima fecha | Tomas | 🔲 Por hacer | 3h |
-| 8.8 | Componente `AlertBanner` en `FarmDetailPage` mostrando alertas activas | Edwin | 🔲 Por hacer | 2h |
-| 8.9 | Integrar tratamientos existentes (`TreatmentList`) en pestaña "Sanidad" de `BovineDetailPage` | Tomas | 🔲 Por hacer | 2h |
+| # | Tarea | Responsable asignado | Ejecutado por | Estado | Estimación | Notas |
+|---|---|---|---|---|---|---|
+| 8.1 | Revisar modelo `Treatment` existente y validar que cubre tratamientos y enfermedades | Camilo | Tomas | ✅ Hecho | 1h | Modelo validado, sin cambios necesarios |
+| 8.2 | Modelo ORM `SanitaryPlan` (nombre, tipo, fecha inicio, frecuencia, próxima fecha) | Edwin | — | 🔲 Pendiente | 3h | Sin entregar |
+| 8.3 | Migración Alembic para tabla `sanitary_plan` | Camilo | — | 🔲 Pendiente | 1h | Depende de 8.2 |
+| 8.4 | Schema + service + CRUD para planes sanitarios (`/farms/{id}/sanitary-plans`) | Edwin | — | 🔲 Pendiente | 4h | Sin entregar |
+| 8.5 | Lógica de cálculo de próxima fecha según frecuencia (diaria, semanal, mensual, anual) | Camilo | — | 🔲 Pendiente | 3h | Depende de 8.2 |
+| 8.6 | Endpoint de alertas: eventos sanitarios en los próximos 7 días (`/farms/{id}/alerts`) | Camilo | — | 🔲 Pendiente | 3h | Depende de 8.4 |
+| 8.7 | Componente `SanitaryPlanList` con tabla y badge de próxima fecha | Tomas | — | 🔲 Pendiente | 3h | Depende de 8.4 |
+| 8.8 | Componente `AlertBanner` en `FarmDetailPage` mostrando alertas activas | Edwin | — | 🔲 Pendiente | 2h | Depende de 8.6 |
+| 8.9 | Integrar `TreatmentList` en pestaña "Sanitario" de `BovineDetailPage` | Tomas | Tomas | ✅ Hecho | 2h | `fe/src/components/bovines/TreatmentList.tsx` |
+
+### Infraestructura y Base de Datos *(tareas emergentes del sprint)*
+
+| # | Tarea | Responsable | Estado | Estimación | Notas |
+|---|---|---|---|---|---|
+| I.1 | Migración Alembic inicial (`c9ff44fd3509`) — creación de todas las tablas | Tomas | ✅ Hecho | 2h | `be/alembic/versions/c9ff44fd3509_initial_schema.py` |
+| I.2 | Seed de 33 departamentos y 150 municipios de Colombia | Tomas | ✅ Hecho | 1h | `be/seed_departments.py` |
+| I.3 | Seed de 7 propósitos de finca | Tomas | ✅ Hecho | 1h | `be/seed_purposes.py` |
+| I.4 | Seed de roles (Administrador, Operario, Veterinario, Auditor) con 36 permisos RBAC | Tomas | ✅ Hecho | 2h | `be/seed_roles.py` |
+| I.5 | Corrección de asignación automática de rol al crear finca (`UserFarm`) | Tomas | ✅ Hecho | 1h | Fix en `seed_roles.py` + `farm_service.py` |
 
 ---
 
 ## Definition of Done (DoD)
 
-Un ítem se considera **Hecho** cuando cumple todos los criterios:
+| Criterio | HU005 | HU008 (parcial) |
+|---|---|---|
+| Endpoints responden 200/201/204 según corresponda | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
+| Validaciones Pydantic rechazan datos inválidos (422) | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
+| Componentes frontend muestran y actualizan datos sin recargar | ✅ | ✅ (TreatmentList) / 🔲 (AlertBanner, SanitaryPlanList) |
+| Permisos RBAC aplicados en endpoints | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
+| Migración Alembic corre sin errores | ✅ | ✅ |
+| Sin errores de TypeScript en frontend | ✅ | ✅ |
+| Sin errores de importación en Python | ✅ | ✅ |
+| Componentes integrados en página correspondiente | ✅ | ✅ (TreatmentList) / 🔲 (AlertBanner) |
 
-- [ ] El endpoint backend responde correctamente (200/201/204 según corresponda)
-- [ ] Las validaciones Pydantic rechazan datos inválidos (422 con detalle)
-- [ ] El componente frontend muestra y actualiza datos sin recargar la página
-- [ ] Los permisos RBAC están aplicados en el endpoint correspondiente
-- [ ] La migración Alembic corre sin errores (`alembic upgrade head`)
-- [ ] No hay errores de TypeScript en el frontend
-- [ ] No hay errores de importación en Python
-- [ ] El componente está integrado en la página correspondiente (no "huérfano")
+---
+
+## Retrospectiva del Sprint
+
+### ¿Qué salió bien?
+- HU005 completada al 100%: modelos, endpoints, servicios y todos los componentes frontend
+- Se implementó cálculo automático de ganancia diaria de peso (valor agregado)
+- Infraestructura de BD completamente funcional con seeds y migración inicial
+- Ambiente Docker funcional con los 3 servicios (DB, BE, FE)
+
+### ¿Qué salió mal?
+- Las tareas 8.2–8.8 de HU008 (`SanitaryPlan`) no fueron completadas por el responsable asignado
+- Surgieron tareas de infraestructura no planificadas (migrations, seeds, RBAC fix) que consumieron ~7h adicionales
+
+### Velocidad real del sprint
+
+| Métrica | Valor |
+|---|---|
+| Story Points planificados | 16 |
+| Story Points completados | 8 (HU005) |
+| Story Points pendientes | 8 (HU008 parcial) |
+| Tareas emergentes resueltas | 5 (infraestructura) |
 
 ---
 
@@ -104,31 +138,23 @@ Un ítem se considera **Hecho** cuando cumple todos los criterios:
 |---|---|---|---|
 | HU006 (parto → ternero automático) tiene lógica compleja | Media | Alto | Desarrollar primero sin automatismo, luego agregar |
 | HU008 requiere dos modelos nuevos (plan + alerta) | Media | Medio | Empezar por alertas simples sin planes complejos |
-| Recharts / Chart.js puede requerir configuración extensa | Baja | Medio | Usar una librería ya evaluada desde el inicio |
-| El módulo de alimentación ya existe parcialmente — riesgo de duplicar lógica | Media | Medio | Revisar el backend existente antes de crear nuevo código |
-
----
-
-## Orden de implementación sugerido
-
-```
-Semana 1: HU005 — backend (pesajes, filtros food/milk) + vertical slice: endpoint + componente WeightHistory
-Semana 2: HU008 — Treatment review + SanitaryPlan + AlertBanner integrado en FarmDetailPage
-```
+| Recharts / Chart.js puede requerir configuración extensa | Baja | Medio | ✅ Resuelto: Recharts funcionó correctamente |
+| El módulo de alimentación ya existe parcialmente — riesgo de duplicar lógica | Media | Medio | ✅ Resuelto: endpoints existentes fueron reutilizados |
 
 ---
 
 ## Backlog para Sprints futuros (referencia)
 
-| ID | Historia | Sprint sugerido |
-|---|---|---|
-| HU006 | Control reproductivo (servicios, partos, fecha estimada) | Sprint 5 |
-| HU007 | Desarrollo y seguimiento de terneros | Sprint 6 |
-| HU009 | Ingresos y salidas de animales | Sprint 7 |
-| HU010 | Información económica e indicadores de rentabilidad | Sprint 7 |
-| HU011 | Inventarios y compras de insumos | Sprint 8 |
-| HU012 | Subir y gestionar documentos | Sprint 8 |
-| HU013 | Reportes e indicadores de desempeño | Sprint 9 |
-| HU014 | Alertas y notificaciones automáticas | Sprint 9 |
-| HU015 | Revisión de auditorías del sistema | Sprint 10 |
-| HU016 | Registro de datos sin conexión (offline) | Sprint 10 |
+| ID | Historia | Sprint sugerido | Estado |
+|---|---|---|---|
+| HU008 (8.2–8.8) | SanitaryPlan + AlertBanner (pendiente Edwin/Camilo) | Sprint 5 | 🔲 Pendiente |
+| HU006 | Control reproductivo (servicios, partos, fecha estimada) | Sprint 5 | 🔲 Pendiente |
+| HU007 | Desarrollo y seguimiento de terneros | Sprint 6 | 🔲 Pendiente |
+| HU009 | Ingresos y salidas de animales | Sprint 7 | 🔲 Pendiente |
+| HU010 | Información económica e indicadores de rentabilidad | Sprint 7 | 🔲 Pendiente |
+| HU011 | Inventarios y compras de insumos | Sprint 8 | 🔲 Pendiente |
+| HU012 | Subir y gestionar documentos | Sprint 8 | 🔲 Pendiente |
+| HU013 | Reportes e indicadores de desempeño | Sprint 9 | 🔲 Pendiente |
+| HU014 | Alertas y notificaciones automáticas | Sprint 9 | 🔲 Pendiente |
+| HU015 | Revisión de auditorías del sistema | Sprint 10 | 🔲 Pendiente |
+| HU016 | Registro de datos sin conexión (offline) | Sprint 10 | 🔲 Pendiente |
