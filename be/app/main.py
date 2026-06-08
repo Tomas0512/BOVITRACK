@@ -67,14 +67,13 @@ if settings.ENVIRONMENT != "production":
             "http://localhost:5174",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:5174",
+            # Expo Web (Metro bundler)
+            "http://localhost:8081",
+            "http://127.0.0.1:8081",
+            "http://localhost:19006",
+            "http://127.0.0.1:19006",
         }
     )
-
-parsed_frontend = urlparse(settings.FRONTEND_URL)
-if parsed_frontend.hostname == "localhost" and parsed_frontend.port:
-    _origins.add(f"{parsed_frontend.scheme}://127.0.0.1:{parsed_frontend.port}")
-elif parsed_frontend.hostname == "127.0.0.1" and parsed_frontend.port:
-    _origins.add(f"{parsed_frontend.scheme}://localhost:{parsed_frontend.port}")
 
 app.add_middleware(
     CORSMiddleware,

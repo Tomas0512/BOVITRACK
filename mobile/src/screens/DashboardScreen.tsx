@@ -2,15 +2,19 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { listFarms } from '../services/farms';
 import { FarmResponse } from '../types/farms';
 import { colors } from '../theme/colors';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../navigation/AppNavigator';
 
 export default function DashboardScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
   const { data: farms, isLoading, isError, refetch } = useQuery({
     queryKey: ['farms'],
@@ -62,12 +66,16 @@ export default function DashboardScreen() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={false} onRefresh={() => refetch()} />}
           renderItem={({ item }: { item: FarmResponse }) => (
-            <View style={styles.card}>
-              <Text style={styles.farmName}>{item.name}</Text>
-              <Text style={styles.farmDetail}>📍 {item.city}, {item.department}</Text>
-              <Text style={styles.farmDetail}>📐 {item.hectares} hectáreas</Text>
-            </View>
-          )}
+  <TouchableOpacity
+    style={styles.card}
+    onPress={() => navigation.navigate('FarmDetail', { farmId: item.id })}
+  >
+    <Text style={styles.farmName}>{item.name}</Text>
+    <Text style={styles.farmDetail}>📍 {item.city}, {item.department}</Text>
+    <Text style={styles.farmDetail}>📐 {item.hectares} hectáreas</Text>
+    <Text style={styles.farmArrow}>Ver detalle →</Text>
+  </TouchableOpacity>
+)}
         />
       )}
     </View>
@@ -104,4 +112,5 @@ const styles = StyleSheet.create({
   },
   farmName: { fontSize: 17, fontWeight: '700', color: colors.textPrimary, marginBottom: 6 },
   farmDetail: { fontSize: 13, color: colors.textSecondary, marginBottom: 2 },
+  farmArrow: { fontSize: 12, color: colors.primary, fontWeight: '600', marginTop: 8, textAlign: 'right' },
 });
