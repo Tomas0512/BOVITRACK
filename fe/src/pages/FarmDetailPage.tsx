@@ -5,8 +5,10 @@ import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
 import PaddockList from "../components/paddocks/PaddockList";
 import BovineList from "../components/bovines/BovineList";
+import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
 import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
+import AlertBanner from "../components/layout/AlertBanner";
 
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
@@ -199,9 +201,11 @@ export default function FarmDetailPage() {
         </div>
       </div>
 
+      <AlertBanner farmId={farm.id} />
       <LandPlotList farmId={farm.id} />
       <PaddockList farmId={farm.id} />
       <BovineList farmId={farm.id} />
+      <SanitaryPlanList farmId={farm.id} />
       <FoodList farmId={farm.id} />
       <EmployeeList farmId={farm.id} />
       <AuditLogList farmId={farm.id} />
