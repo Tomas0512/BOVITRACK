@@ -20,6 +20,8 @@ ALL_MODULES = [
     "alimentacion",
     "tratamientos",
     "reproduccion",
+    "reproductivo",
+    "planes_sanitarios",
     "reportes",
 ]
 
@@ -42,6 +44,8 @@ ROLES = [
             "alimentacion":     (True,  True,  False, False),
             "tratamientos":     (True,  True,  False, False),
             "reproduccion":     (True,  True,  False, False),
+            "reproductivo":     (True,  True,  False, False),
+            "planes_sanitarios": (True,  True,  False, False),
             "usuarios":         (False, False, False, False),
             "reportes":         (False, True,  False, False),
         },
@@ -57,6 +61,8 @@ ROLES = [
             "alimentacion":     (False, True,  False, False),
             "tratamientos":     (True,  True,  True,  True),
             "reproduccion":     (True,  True,  True,  True),
+            "reproductivo":     (True,  True,  True,  True),
+            "planes_sanitarios": (True,  True,  True,  True),
             "usuarios":         (False, False, False, False),
             "reportes":         (False, True,  False, False),
         },
