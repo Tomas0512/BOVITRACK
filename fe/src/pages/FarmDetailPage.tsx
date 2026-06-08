@@ -5,6 +5,7 @@ import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
 import PaddockList from "../components/paddocks/PaddockList";
 import BovineList from "../components/bovines/BovineList";
+import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
 
 export default function FarmDetailPage() {
@@ -201,6 +202,7 @@ export default function FarmDetailPage() {
       <LandPlotList farmId={farm.id} />
       <PaddockList farmId={farm.id} />
       <BovineList farmId={farm.id} />
+      <FoodList farmId={farm.id} />
       <EmployeeList farmId={farm.id} />
       <AuditLogList farmId={farm.id} />
     </div>
