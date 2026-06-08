@@ -73,13 +73,13 @@ Antes de iniciar una HU en este sprint se verificó:
 | # | Tarea | Responsable asignado | Ejecutado por | Estado | Estimación | Notas |
 |---|---|---|---|---|---|---|
 | 8.1 | Revisar modelo `Treatment` existente y validar que cubre tratamientos y enfermedades | Camilo | Tomas | ✅ Hecho | 1h | Modelo validado, sin cambios necesarios |
-| 8.2 | Modelo ORM `SanitaryPlan` (nombre, tipo, fecha inicio, frecuencia, próxima fecha) | Edwin | — | 🔲 Pendiente | 3h | Sin entregar |
-| 8.3 | Migración Alembic para tabla `sanitary_plan` | Camilo | — | 🔲 Pendiente | 1h | Depende de 8.2 |
-| 8.4 | Schema + service + CRUD para planes sanitarios (`/farms/{id}/sanitary-plans`) | Edwin | — | 🔲 Pendiente | 4h | Sin entregar |
-| 8.5 | Lógica de cálculo de próxima fecha según frecuencia (diaria, semanal, mensual, anual) | Camilo | — | 🔲 Pendiente | 3h | Depende de 8.2 |
-| 8.6 | Endpoint de alertas: eventos sanitarios en los próximos 7 días (`/farms/{id}/alerts`) | Camilo | — | 🔲 Pendiente | 3h | Depende de 8.4 |
-| 8.7 | Componente `SanitaryPlanList` con tabla y badge de próxima fecha | Tomas | — | 🔲 Pendiente | 3h | Depende de 8.4 |
-| 8.8 | Componente `AlertBanner` en `FarmDetailPage` mostrando alertas activas | Edwin | — | 🔲 Pendiente | 2h | Depende de 8.6 |
+| 8.2 | Modelo ORM `SanitaryPlan` (nombre, tipo, fecha inicio, frecuencia, próxima fecha) | Edwin | Edwin | ✅ Hecho | 3h | `be/app/models/sanitary_plan.py` |
+| 8.3 | Migración Alembic para tabla `sanitary_plan` | Camilo | Camilo | ✅ Hecho | 1h | `be/alembic/versions/i1j2k3l4m5n6_create_sanitary_plan_table.py` |
+| 8.4 | Schema + service + CRUD para planes sanitarios (`/farms/{id}/sanitary-plans`) | Edwin | Edwin | ✅ Hecho | 4h | `be/app/routers/sanitary_plan.py` |
+| 8.5 | Lógica de cálculo de próxima fecha según frecuencia (diaria, semanal, mensual, anual) | Camilo | Camilo | ✅ Hecho | 3h | `be/app/services/sanitary_plan_service.py` — `mark_as_applied()` |
+| 8.6 | Endpoint de alertas: eventos sanitarios en los próximos 7 días (`/farms/{id}/alerts`) | Camilo | Camilo | ✅ Hecho | 3h | `be/app/routers/alerts.py` |
+| 8.7 | Componente `SanitaryPlanList` con tabla y badge de próxima fecha | Tomas | Tomas | ✅ Hecho | 3h | `fe/src/components/bovines/SanitaryPlanList.tsx` |
+| 8.8 | Componente `AlertBanner` en `FarmDetailPage` mostrando alertas activas | Edwin | Edwin | ✅ Hecho | 2h | `fe/src/components/layout/AlertBanner.tsx` |
 | 8.9 | Integrar `TreatmentList` en pestaña "Sanitario" de `BovineDetailPage` | Tomas | Tomas | ✅ Hecho | 2h | `fe/src/components/bovines/TreatmentList.tsx` |
 
 ### Infraestructura y Base de Datos *(tareas emergentes del sprint)*
@@ -96,16 +96,16 @@ Antes de iniciar una HU en este sprint se verificó:
 
 ## Definition of Done (DoD)
 
-| Criterio | HU005 | HU008 (parcial) |
+| Criterio | HU005 | HU008 |
 |---|---|---|
-| Endpoints responden 200/201/204 según corresponda | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
-| Validaciones Pydantic rechazan datos inválidos (422) | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
-| Componentes frontend muestran y actualizan datos sin recargar | ✅ | ✅ (TreatmentList) / 🔲 (AlertBanner, SanitaryPlanList) |
-| Permisos RBAC aplicados en endpoints | ✅ | ✅ (Treatment) / 🔲 (SanitaryPlan) |
+| Endpoints responden 200/201/204 según corresponda | ✅ | ✅ |
+| Validaciones Pydantic rechazan datos inválidos (422) | ✅ | ✅ |
+| Componentes frontend muestran y actualizan datos sin recargar | ✅ | ✅ |
+| Permisos RBAC aplicados en endpoints | ✅ | ✅ |
 | Migración Alembic corre sin errores | ✅ | ✅ |
 | Sin errores de TypeScript en frontend | ✅ | ✅ |
 | Sin errores de importación en Python | ✅ | ✅ |
-| Componentes integrados en página correspondiente | ✅ | ✅ (TreatmentList) / 🔲 (AlertBanner) |
+| Componentes integrados en página correspondiente | ✅ | ✅ |
 
 ---
 
@@ -118,7 +118,7 @@ Antes de iniciar una HU en este sprint se verificó:
 - Ambiente Docker funcional con los 3 servicios (DB, BE, FE)
 
 ### ¿Qué salió mal?
-- Las tareas 8.2–8.8 de HU008 (`SanitaryPlan`) no fueron completadas por el responsable asignado
+- Las tareas 8.2–8.8 de HU008 (`SanitaryPlan`) fueron completadas en la extensión del sprint
 - Surgieron tareas de infraestructura no planificadas (migrations, seeds, RBAC fix) que consumieron ~7h adicionales
 
 ### Velocidad real del sprint
@@ -126,8 +126,8 @@ Antes de iniciar una HU en este sprint se verificó:
 | Métrica | Valor |
 |---|---|
 | Story Points planificados | 16 |
-| Story Points completados | 8 (HU005) |
-| Story Points pendientes | 8 (HU008 parcial) |
+| Story Points completados | 16 (HU005 + HU008) |
+| Story Points pendientes | 0 |
 | Tareas emergentes resueltas | 5 (infraestructura) |
 
 ---
