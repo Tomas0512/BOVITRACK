@@ -366,16 +366,17 @@ export default function FoodList({ farmId }: Props) {
       )}
 
       {/* ─── MODAL (Crear/Editar) ─── */}
-      <FoodFormModal
-        farmId={farmId}
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditing(undefined);
-        }}
-        onSuccess={handleSuccess}
-        editing={editing}
-      />
+      {showModal && (
+        <FoodFormModal
+          farmId={farmId}
+          onClose={() => {
+            setShowModal(false);
+            setEditing(undefined);
+          }}
+          onSuccess={handleSuccess}
+          existing={editing}
+        />
+      )}
     </div>
   );
 }
