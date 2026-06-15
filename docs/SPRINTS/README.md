@@ -10,6 +10,19 @@ Equipo: 3 personas (Camilo Ortiz, Tomas Canon, Edwin Delgado).
 2. **Edwin Delgado** — Full-stack (Developer)
 3. **Camilo Ortiz** — Full-stack (Developer / Scrum Master) + QA
 
+## Flujo de trabajo por ramas
+
+Cada sprint se trabaja con **ramas individuales por persona**. Nadie toca la rama de otro.
+
+| Quién | Rama |
+|-------|------|
+| Tomas | `feature/sprint{N}-tomas` |
+| Edwin | `feature/sprint{N}-edwin` |
+| Camilo | `feature/sprint{N}-camilo` |
+
+- **Documentacion (`docs/SPRINTS/`)** se actualiza directo en `main`
+- **Codigo** se trabaja en cada rama y se hace merge a `main` al final del sprint
+
 ## Estado real por HU (15-06-2026)
 
 | HU | Estado | Observaciones |

@@ -17,6 +17,16 @@
 
 ---
 
+## Flujo de trabajo por ramas
+
+| Persona | Rama |
+|---------|------|
+| Tomas | `feature/sprint9-tomas` |
+| Edwin | `feature/sprint9-edwin` |
+| Camilo | `feature/sprint9-camilo` |
+
+---
+
 ## Objetivo del Sprint
 
 > Al final del sprint, el proyecto BoviTrack estara completamente funcional, libre de bugs criticos, con todos los modulos integrados y probados, listo para la demo final y despliegue. Este sprint no incluye nuevas HU, solo estabilizacion y aseguramiento de calidad.

@@ -17,6 +17,16 @@
 
 ---
 
+## Flujo de trabajo por ramas
+
+| Persona | Rama |
+|---------|------|
+| Tomas | `feature/sprint7-tomas` |
+| Edwin | `feature/sprint7-edwin` |
+| Camilo | `feature/sprint7-camilo` |
+
+---
+
 ## Objetivo del Sprint
 
 > Al final del sprint, el administrador podra generar y exportar reportes productivos, sanitarios y economicos con filtros por fecha (HU013 cierre), gestionar el inventario de insumos con control de stock y alertas de minimo (HU011 cierre), y subir, consultar y descargar documentos vinculados a fincas, bovinos o eventos (HU012).

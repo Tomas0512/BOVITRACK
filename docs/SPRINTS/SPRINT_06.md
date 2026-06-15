@@ -17,6 +17,16 @@
 
 ---
 
+## Flujo de trabajo por ramas
+
+| Persona | Rama |
+|---------|------|
+| Tomas | `feature/sprint6-tomas` |
+| Edwin | `feature/sprint6-edwin` |
+| Camilo | `feature/sprint6-camilo` |
+
+---
+
 ## Objetivo del Sprint
 
 > Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado (HU009), consultar indicadores economicos por actividad (HU010), y el veterinario podra completar el modulo reproductivo con generacion automatica de ternero y linea de tiempo (HU006 cierre) y consultar desarrollo de terneros (HU007).

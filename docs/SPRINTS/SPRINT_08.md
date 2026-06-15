@@ -17,6 +17,16 @@
 
 ---
 
+## Flujo de trabajo por ramas
+
+| Persona | Rama |
+|---------|------|
+| Tomas | `feature/sprint8-tomas` |
+| Edwin | `feature/sprint8-edwin` |
+| Camilo | `feature/sprint8-camilo` |
+
+---
+
 ## Objetivo del Sprint
 
 > Al final del sprint, el usuario podra configurar alertas automaticas y consultar su historial de notificaciones (HU014), el administrador podra filtrar y exportar el historial de auditoria por usuario, accion y fecha (HU015 cierre), y el usuario podra capturar datos sin conexion y sincronizarlos al recuperar conectividad (HU016).

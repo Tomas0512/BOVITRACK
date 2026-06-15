@@ -17,6 +17,16 @@
 
 ---
 
+## Flujo de trabajo por ramas
+
+| Persona | Rama |
+|---------|------|
+| Tomas | `feature/sprint10-tomas` |
+| Edwin | `feature/sprint10-edwin` |
+| Camilo | `feature/sprint10-camilo` |
+
+---
+
 ## Objetivo del Sprint
 
 > Cerrar formalmente el proyecto BoviTrack (HU001-HU016), realizar la demo final con el cliente, ejecutar el despliegue en produccion, y documentar las lecciones aprendidas para futuros proyectos.
