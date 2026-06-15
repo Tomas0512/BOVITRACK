@@ -16,7 +16,7 @@ export default function AppLayout() {
     pathname === path || pathname.startsWith(path + "/");
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Navbar */}
       <header className="sticky top-0 z-50 border-b-2 border-primary-light bg-white px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">

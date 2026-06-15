@@ -55,7 +55,7 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-cream/60 to-accent/30 px-4 py-20 sm:py-28">
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary-light/30 px-4 py-20 sm:py-28">
           <div className="mx-auto flex max-w-6xl flex-col items-center text-center">
             <span className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
               Plataforma de gestión ganadera
@@ -111,7 +111,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Cómo funciona ── */}
-        <section className="bg-cream/40 px-4 py-16 sm:py-20">
+        <section className="bg-surface-alt px-4 py-16 sm:py-20">
           <div className="mx-auto max-w-4xl">
             <h2 className="mb-3 text-center text-3xl font-extrabold text-gray-900">
               Empieza en 3 pasos
@@ -155,13 +155,13 @@ export default function HomePage() {
           <h2 className="mb-3 text-3xl font-extrabold text-white">
             ¿Listo para gestionar tu ganado?
           </h2>
-          <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-cream/90">
+          <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-white/90">
             Únete a BoviTrack y lleva el control total de tus fincas, animales y
             producción desde hoy.
           </p>
           <Link
             to="/register"
-            className="inline-block rounded-xl bg-white px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:bg-cream hover:shadow-xl active:scale-[0.98]"
+            className="inline-block rounded-xl bg-white px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:bg-surface-alt hover:shadow-xl active:scale-[0.98]"
           >
             Crear cuenta gratis
           </Link>

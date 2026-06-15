@@ -10,19 +10,19 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-primary px-8 py-4 text-cream">
+    <footer className="bg-primary px-8 py-4 text-white">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
-        <p className="text-xs leading-snug text-cream/80">
+        <p className="text-xs leading-snug text-white/70">
           &copy; {currentYear} BoviTrack. Todos los derechos reservados.
         </p>
-        <p className="text-xs leading-snug text-cream/80">
-          <a href="/contacto" className="text-cream/80 no-underline hover:text-white">Contáctanos</a>
+        <p className="text-xs leading-snug text-white/70">
+          <a href="/contacto" className="text-white/70 no-underline hover:text-white">Contáctanos</a>
           &nbsp;|&nbsp; +573158874910
         </p>
-        <p className="text-xs leading-snug text-cream/80">
-          <Link to="/terms" className="text-cream/80 no-underline hover:text-white">Términos y condiciones</Link>
+        <p className="text-xs leading-snug text-white/70">
+          <Link to="/terms" className="text-white/70 no-underline hover:text-white">Términos y condiciones</Link>
           &nbsp;·&nbsp;
-          <Link to="/privacy" className="text-cream/80 no-underline hover:text-white">Política de privacidad</Link>
+          <Link to="/privacy" className="text-white/70 no-underline hover:text-white">Política de privacidad</Link>
         </p>
       </div>
     </footer>
