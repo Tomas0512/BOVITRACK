@@ -64,3 +64,22 @@ Files modified (8):
 
 - `fe/package.json` — added lucide-react
 - `fe/pnpm-lock.yaml` — updated lockfile
+
+## [2026-06-15] Backend: Seed permissions — added economica, reproductivo, sanitario
+
+**Reason:** New modules (HU007 calves, HU010 economics) and existing modules
+(reproductivo, sanitario) were missing from the permissions seed migration,
+causing 403 errors on their endpoints.
+
+- Added `economica`, `reproductivo`, `sanitario` to `MODULES` list
+- Added corresponding CRUD permissions for all 4 roles (Administrador,
+  Capataz, Veterinario, Empleado)
+
+## [2026-06-15] Frontend: EconomicDashboard page
+
+**Reason:** HU010.4 — Dashboard económico con filtros y gráficos.
+
+- `fe/src/pages/EconomicDashboard.tsx` — Nueva página con Recharts
+- `fe/src/App.tsx` — Ruta `/farms/:farmId/economics`
+- `fe/src/pages/FarmDetailPage.tsx` — Botón de navegación "Económico"
+- `fe/src/api/economics.ts` — Cliente API (creado previamente)
