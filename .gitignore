@@ -20,6 +20,7 @@ htmlcov/
 node_modules/
 fe/dist/
 fe/.vite/
+*.tsbuildinfo
 
 # ─── IDEs ─────────────────────────────────────────
 .vscode/
