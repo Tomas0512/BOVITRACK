@@ -14,6 +14,12 @@ from app.services.audit_service import add_audit_log
 
 GESTATION_DAYS = 283
 
+_CALF_SEX_MAP: dict[str, list[str]] = {
+    "macho": ["macho"],
+    "hembra": ["hembra"],
+    "gemelos": ["macho", "hembra"],
+}
+
 
 def create_event(db: Session, farm_id: uuid.UUID, data: ReproductiveEventCreate, user_id: uuid.UUID) -> ReproductiveEvent:
     event = ReproductiveEvent(
@@ -23,12 +29,47 @@ def create_event(db: Session, farm_id: uuid.UUID, data: ReproductiveEventCreate,
     )
     if event.event_type == "servicio" and event.due_date is None:
         event.due_date = event.event_date + timedelta(days=GESTATION_DAYS)
+
+    if event.event_type == "parto":
+        calves = _create_calves_from_birth(db, farm_id, event, user_id)
+        if calves:
+            event.calf_id = calves[0].id
+
     db.add(event)
     db.commit()
     db.refresh(event)
     add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="reproductive_event", entity_id=str(event.id), details={"type": event.event_type})
     db.commit()
     return event
+
+
+def _create_calves_from_birth(db: Session, farm_id: uuid.UUID, event: ReproductiveEvent, user_id: uuid.UUID) -> list[Bovine]:
+    sexes = _CALF_SEX_MAP.get(event.result)
+    if not sexes:
+        return []
+
+    prefix = str(event.bovine_id)[:6]
+    date_str = event.event_date.strftime("%Y%m%d")
+    calves: list[Bovine] = []
+
+    for i, sex in enumerate(sexes):
+        ident = f"CRIA-{prefix}-{date_str}-{i+1}"
+        calf = Bovine(
+            farm_id=farm_id,
+            registered_by=user_id,
+            identification_number=ident,
+            sex=sex,
+            birth_date=event.event_date,
+            entry_type="nacimiento",
+            entry_date=event.event_date,
+            mother_id=event.bovine_id,
+        )
+        db.add(calf)
+        db.flush()
+        add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(calf.id), details={"calf_from": "parto", "mother_id": str(event.bovine_id)})
+        calves.append(calf)
+
+    return calves
 
 
 def list_events(
