@@ -64,3 +64,28 @@ Files modified (8):
 
 - `fe/package.json` — added lucide-react
 - `fe/pnpm-lock.yaml` — updated lockfile
+
+## [2026-06-15] Backend: Implement email sending (SMTP + Resend + Mailpit)
+
+**Reason:** Password reset, email verification, and farm invitation emails were
+stubbed out (console-only). Users never received emails.
+
+- `be/app/config.py` — replaced `MAIL_SERVER`/`MAIL_PORT`/`MAIL_USERNAME`/`MAIL_PASSWORD`/`MAIL_FROM`/`MAIL_FROM_NAME` with `SMTP_HOST`/`SMTP_PORT`/`SMTP_USERNAME`/`SMTP_PASSWORD` + `RESEND_API_KEY`/`RESEND_FROM_EMAIL`/`RESEND_FROM_NAME`
+- `be/app/utils/email.py` — rewrote 3 functions (password reset, email verification, farm invitation) with:
+  - Priority 1: SMTP via stdlib `smtplib` (Mailpit in Docker dev)
+  - Priority 2: Resend API via `resend` SDK
+  - Priority 3: Fallback to console logging
+  - HTML email templates with CTA button + direct link
+- `be/pyproject.toml` — replaced `aiosmtplib` with `resend==2.25.0`
+- `docker-compose.yml` — added `mailpit` service (ports 8025 Web UI + 1025 SMTP); added `SMTP_HOST=mailpit` and `SMTP_PORT=1025` to backend environment
+- `be/.env.example` — added `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_FROM_NAME`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`
+
+## [2026-06-15] Frontend: Unify color palette with mobile app
+
+**Reason:** Web and mobile had completely divergent color palettes. Matched web theme
+to the mobile app's forest green (`#2D6A4F`) palette for brand consistency.
+
+- `fe/src/index.css` — replaced `@theme` block with 18 colors matching mobile palette (primary, primary-dark, primary-light, secondary, secondary-light, background, surface, surface-alt, text-primary, text-secondary, text-muted, error, error-light, success, success-light, warning, warning-light, border, border-focus); removed cream/accent colors; changed body bg from `bg-surface` to `bg-background`
+- `fe/src/components/layout/AppLayout.tsx` — `bg-cream` → `bg-background`
+- `fe/src/components/layout/Footer.tsx` — `text-cream` → `text-white` / `text-white/70`
+- `fe/src/pages/HomePage.tsx` — `via-cream/60 to-accent/30` → `via-background to-secondary-light/30`; `bg-cream/40` → `bg-surface-alt`; `text-cream/90` → `text-white/90`; `hover:bg-cream` → `hover:bg-surface-alt`

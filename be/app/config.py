@@ -23,13 +23,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # 📧 Email (recuperación de contraseña)
-    MAIL_SERVER: str = "smtp.example.com"
-    MAIL_PORT: int = 587
-    MAIL_USERNAME: str = ""
-    MAIL_PASSWORD: str = ""
-    MAIL_FROM: str = "noreply@bovitrack.com"
-    MAIL_FROM_NAME: str = "BoviTrack"
+    # 📧 Email — Resend (producción)
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "onboarding@resend.dev"
+    RESEND_FROM_NAME: str = "BoviTrack"
+
+    # 📧 Email — SMTP (Mailpit en desarrollo, SMTP real en producción)
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 1025
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
 
     # 🌐 URL del frontend (para CORS y enlaces en emails)
     FRONTEND_URL: str = "http://localhost:5173"

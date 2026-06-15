@@ -4,6 +4,17 @@
 #           los servicios pueden arrancar en orden incorrecto o con secretos expuestos.
 
 services:
+  # ── Mailpit — SMTP server local para desarrollo y pruebas ───
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: bovitrack_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - backend_net
+
   # ── Base de datos (PostgreSQL) ──────────────────────
   db:
     build: ./db
@@ -48,6 +59,8 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
       FRONTEND_URL: ${FRONTEND_URL}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
     depends_on:
       db:
         condition: service_healthy
