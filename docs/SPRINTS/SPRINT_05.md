@@ -69,9 +69,9 @@ Antes de iniciar una HU en este sprint se verificó:
 | 6.1 | Modelo `ReproductiveEvent` + migracion Alembic | Edwin | ✅ Hecho | 4h |
 | 6.2 | CRUD `reproductive-events` por bovino | Camilo | ✅ Hecho (Edwin) | 4h |
 | 6.3 | Regla de fecha estimada de parto (+283 dias) | Camilo | ✅ Hecho (Edwin) | 2h |
-| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | 🔲 Pendiente → Sprint 6 | 4h |
-| 6.5 | Componente `ReproductiveTimeline` | Tomas | 🔲 Pendiente → Sprint 6 | 4h |
-| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | 🔲 Pendiente → Sprint 6 | 3h |
+| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | ✅ Hecho | 4h |
+| 6.5 | Componente `ReproductiveTimeline` | Tomas | ✅ Hecho | 4h |
+| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | ✅ Hecho | 3h |
 
 ---
 
@@ -110,16 +110,16 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 | Grafica de evolucion de peso | ✅ Hecho | Componente WeightChart con Recharts |
 | CRUD eventos reproductivos | ✅ Hecho | Backend completo por Edwin |
 | Calculo fecha estimada de parto | ✅ Hecho | Regla +283 dias incluida en servicio |
-| Generacion automatica de ternero al registrar parto | 🔲 Pendiente | Pasa a Sprint 6 |
-| Componente ReproductiveTimeline | 🔲 Pendiente | Pasa a Sprint 6 |
+| Generacion automatica de ternero al registrar parto | ✅ Hecho | Implementado por Edwin |
+| Componente ReproductiveTimeline | ✅ Hecho | Implementado por Tomas |
 
 ### Story Points completados
 
 | Metrica | Valor |
 |---|---|
 | Story Points planificados | 16 |
-| Story Points completados | 13 (HU005 completa 8 + HU006 backend 5) |
-| Story Points pendientes (→ Sprint 6) | 3 (HU006: auto-ternero, timeline, QA) |
+| Story Points completados | 16 (HU005 completa 8 + HU006 completa 8) |
+| Story Points pendientes (→ Sprint 6) | 0 — Sprint cerrado |
 
 ---
 

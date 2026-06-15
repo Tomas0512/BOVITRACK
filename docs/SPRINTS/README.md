@@ -32,7 +32,7 @@ Cada sprint se trabaja con **ramas individuales por persona**. Nadie toca la ram
 | HU003 | ✅ Completa | Potreros (backend + frontend) |
 | HU004 | ✅ Completa | Registro y gestion de bovinos |
 | HU005 | ✅ Completa | Alimentacion, ordenos, pesajes, graficas (Recharts) |
-| HU006 | ✅ Backend completo | Pendiente: auto-ternero, ReproductiveTimeline frontend, QA (→ Sprint 6) |
+| HU006 | ✅ Completa | Peso, control reproductivo, auto-ternero y ReproductiveTimeline funcionales |
 | HU007 | 🔲 Pendiente | Para completar en Sprint 6 por Camilo |
 | HU008 | ✅ Completa | Planes sanitarios, alertas, calendario (cerrado en Sprint 4) |
 | HU009 | 🔲 Pendiente | Para completar en Sprint 6 por Tomas |
@@ -48,7 +48,7 @@ Cada sprint se trabaja con **ramas individuales por persona**. Nadie toca la ram
 
 | Sprint | Fechas | Tomas | Edwin | Camilo |
 |--------|--------|-------|-------|--------|
-| **Sprint 5** | May 30 - Jun 12 | ✅ HU005 cierre (frontend) | ✅ HU006 backend | QA + filtros |
+| **Sprint 5** | May 30 - Jun 12 | ✅ HU005 cierre + HU006.5 timeline | ✅ HU006 backend + HU006.4 auto-ternero | QA + filtros |
 | **Sprint 6** | Jun 13 - 26 | **HU009** — Movimientos animales | **HU010** — Informacion economica | HU006 cierre + HU007 terneros + QA |
 | **Sprint 7** | Jun 27 - Jul 10 | **HU013** — Reportes (cierre) | **HU011** — Inventarios (cierre) | HU012 — Gestion documental + QA |
 | **Sprint 8** | Jul 11 - 24 | **HU014** — Alertas/notificaciones | **HU016** — Offline (backend) | HU015 auditoria + HU016 frontend + QA |

@@ -41,10 +41,9 @@
 |---|---|---|---|
 | HU009 | Registrar ingresos y salidas de animales | Alta | 5 |
 | HU010 | Registrar informacion economica | Alta | 5 |
-| HU006 (cierre) | Completar control reproductivo (auto-ternero + timeline) | Alta | 3 |
 | HU007 | Registrar desarrollo de terneros | Media | 5 |
 
-**Total Story Points del Sprint: 18** (~54h estimadas, dentro de la capacidad del equipo)
+**Total Story Points del Sprint: 15** (~45h estimadas, dentro de la capacidad del equipo — HU006 cierre completado en Sprint 5)
 
 ---
 
@@ -53,7 +52,7 @@
 Antes de iniciar las HU en este sprint se verifica:
 
 - [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] HU006 backend completado en Sprint 5 (modelo, CRUD, regla parto). Pendientes: auto-ternero y frontend
+- [x] HU006 completada en Sprint 5 (modelo, CRUD, regla parto, auto-ternero, ReproductiveTimeline)
 - [x] HU007: filtro de terneros por `birth_date` identificado sobre modelo `Bovine` existente
 - [x] HU009: modelo `AnimalMovement` y estados de `Bovine` documentados antes de comenzar
 - [x] HU010: categorias fijas de ingresos/egresos definidas
@@ -81,23 +80,15 @@ Antes de iniciar las HU en este sprint se verifica:
 | 10.3 | Indicadores: costos, ingresos, balance y promedios | Edwin | 🔲 Por hacer | 3h |
 | 10.4 | Dashboard economico con filtros | Edwin | 🔲 Por hacer | 4h |
 
-### HU006 - Cierre Control Reproductivo — **Camilo**
+### HU007 - Desarrollo de Terneros — **Pendiente de reasignar**
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 6.4 | Generacion automatica de ternero al registrar parto | Camilo | 🔲 Por hacer | 4h |
-| 6.5 | Componente `ReproductiveTimeline` | Camilo | 🔲 Por hacer | 4h |
-| 6.6 | QA funcional HU006 | Camilo | 🔲 Por hacer | 2h |
-
-### HU007 - Desarrollo de Terneros — **Camilo**
-
-| # | Tarea | Responsable | Estado | Estimacion |
-|---|---|---|---|---|
-| 7.1 | Endpoint/vista de terneros por edad/estado | Camilo | 🔲 Por hacer | 3h |
-| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | Camilo | 🔲 Por hacer | 3h |
-| 7.3 | Componente `CalfList` con indicadores de crecimiento | Camilo | 🔲 Por hacer | 4h |
-| 7.4 | Curva de crecimiento del ternero | Camilo | 🔲 Por hacer | 4h |
-| 7.5 | Integracion con ficha general del bovino | Camilo | 🔲 Por hacer | 2h |
+| 7.1 | Endpoint/vista de terneros por edad/estado | — | 🔲 Por hacer | 3h |
+| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | — | 🔲 Por hacer | 3h |
+| 7.3 | Componente `CalfList` con indicadores de crecimiento | — | 🔲 Por hacer | 4h |
+| 7.4 | Curva de crecimiento del ternero | — | 🔲 Por hacer | 4h |
+| 7.5 | Integracion con ficha general del bovino | — | 🔲 Por hacer | 2h |
 
 ---
 
@@ -106,8 +97,6 @@ Antes de iniciar las HU en este sprint se verifica:
 - [ ] Movimientos actualizan estado del animal correctamente
 - [ ] Registros economicos vinculados a actividad productiva
 - [ ] Indicadores visibles y filtrables
-- [ ] Auto-generacion de ternero funcional al registrar parto
-- [ ] ReproductiveTimeline visible en detalle del bovino
 - [ ] Lista y curva de crecimiento de terneros funcional
 - [ ] Sin errores tecnicos en backend/frontend
 - [ ] Evidencia funcional y pruebas minimas
@@ -117,10 +106,10 @@ Antes de iniciar las HU en este sprint se verifica:
 ## Riesgos identificados
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
-|---|---|---|---|
+|---|---|---|---|---|
 | Integridad entre movimiento y estado del animal | Media | Alto | Pruebas de transaccion y validacion cruzada |
 | Clasificacion economica inconsistente | Media | Medio | Catalogo fijo de categorias y validacion |
-| Camilo tiene 2 HU simultaneas (HU006 cierre + HU007) | Media | Medio | Son tareas pequenas (~22h total) |
+| HU007 sin responsable asignado (Camilo no participa) | Alta | Medio | Reasignar a Edwin o Tomas, o pasar a Sprint 7 |
 
 ---
 
@@ -138,8 +127,6 @@ Antes de iniciar las HU en este sprint se verifica:
 | UI de movimientos por finca/bovino | 🔲 Pendiente | |
 | Registro y consulta de ingresos/egresos | 🔲 Pendiente | |
 | Dashboard economico con indicadores | 🔲 Pendiente | |
-| Auto-generacion de ternero al registrar parto | 🔲 Pendiente | |
-| ReproductiveTimeline | 🔲 Pendiente | |
 | Lista y curva de crecimiento de terneros | 🔲 Pendiente | |
 
 ### Story Points completados
