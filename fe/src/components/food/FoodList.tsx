@@ -374,7 +374,7 @@ export default function FoodList({ farmId }: Props) {
           setEditing(undefined);
         }}
         onSuccess={handleSuccess}
-        editing={editing}
+        existing={editing}
       />
     </div>
   );

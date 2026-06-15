@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   createFood,
   updateFood,
@@ -8,6 +8,7 @@ import {
 
 interface Props {
   farmId: string;
+  isOpen: boolean;
   existing?: FoodResponse;
   onSuccess: () => void;
   onClose: () => void;
@@ -22,13 +23,18 @@ const CATEGORIES = [
 ];
 const UNITS = ["kg", "litros", "bolsas", "metros", "unidades"];
 
-
 export default function FoodFormModal({
   farmId,
+  isOpen, // 👈 Ya desestructuramos la prop que causaba el error de compilación
   existing,
   onSuccess,
   onClose,
 }: Props) {
+  // ─── CONTROL DE VISIBILIDAD ───
+  // Si no está abierto, detenemos el renderizado aquí. Evita renderizar HTML innecesario.
+  if (!isOpen) return null;
+
+  // ─── ESTADO DEL FORMULARIO ───
   const [form, setForm] = useState<FoodCreate>({
     name: existing?.name ?? "",
     category: existing?.category ?? "concentrado",
@@ -42,6 +48,22 @@ export default function FoodFormModal({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 🔄 RE-INICIALIZAR FORMULARIO AL CAMBIAR DE ALIMENTO
+  // Esto asegura que si pasas de editar un alimento a crear uno nuevo, los campos se limpien
+  useEffect(() => {
+    setForm({
+      name: existing?.name ?? "",
+      category: existing?.category ?? "concentrado",
+      unit_of_measure: existing?.unit_of_measure ?? "kg",
+      current_stock: existing?.current_stock ?? 0,
+      min_stock_alert: existing?.min_stock_alert ?? null,
+      cost_per_unit: existing?.cost_per_unit ?? null,
+      expiration_date: existing?.expiration_date ?? null,
+      supplier: existing?.supplier ?? null,
+    });
+    setError("");
+  }, [existing, isOpen]);
 
   const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
