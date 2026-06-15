@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, Tractor } from "lucide-react";
+import { AlertTriangle, Tractor, BarChart3 } from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
@@ -117,6 +117,11 @@ export default function FarmDetailPage() {
             <p className="text-sm text-gray-500">ID: {farm.farm_identifier}</p>
           </div>
           <div className="ml-auto flex gap-2">
+            <Link to={`/farms/${farmId}/economics`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              <BarChart3 size={16} />
+              Económico
+            </Link>
             <button onClick={handleEdit}
               className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
               Editar

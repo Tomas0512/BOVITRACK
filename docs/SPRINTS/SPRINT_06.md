@@ -12,8 +12,8 @@
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 13 de junio de 2026 |
 | **Fecha fin** | 26 de junio de 2026 |
-| **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
-| **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
+| **Equipo** | Tomas Canon, Edwin Delgado |
+| **Roles Scrum** | Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer / Scrum Master) |
 
 ---
 
@@ -23,7 +23,8 @@
 |---------|------|
 | Tomas | `feature/sprint6-tomas` |
 | Edwin | `feature/sprint6-edwin` |
-| Camilo | `feature/sprint6-camilo` |
+
+> **Nota:** Camilo Ortiz salió del equipo al cierre del Sprint 5. Sus HU (HU007 - Desarrollo de Terneros) quedan sin asignar y se redistribuirán o aplazarán en Sprint 7.
 
 ---
 
@@ -75,29 +76,31 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 10.1 | Modelo de ingresos/egresos por actividad | Edwin | 🔲 Por hacer | 4h |
-| 10.2 | Endpoints de registro y consulta economica | Edwin | 🔲 Por hacer | 3h |
-| 10.3 | Indicadores: costos, ingresos, balance y promedios | Edwin | 🔲 Por hacer | 3h |
-| 10.4 | Dashboard economico con filtros | Edwin | 🔲 Por hacer | 4h |
+| 10.1 | Modelo de ingresos/egresos por actividad | Edwin | ✅ Hecho | 4h |
+| 10.2 | Endpoints de registro y consulta economica | Edwin | ✅ Hecho | 3h |
+| 10.3 | Indicadores: costos, ingresos, balance y promedios | Edwin | ✅ Hecho | 3h |
+| 10.4 | Dashboard economico con filtros | Edwin | ✅ Hecho | 4h |
 
-### HU007 - Desarrollo de Terneros — **Camilo** (asignacion vertical)
+### HU007 - Desarrollo de Terneros — **Sin asignar** (Camilo fuera del equipo)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 7.1 | Endpoint/vista de terneros por edad/estado | Camilo | 🔲 Por hacer | 3h |
-| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | Camilo | 🔲 Por hacer | 3h |
-| 7.3 | Componente `CalfList` con indicadores de crecimiento | Camilo | 🔲 Por hacer | 4h |
-| 7.4 | Curva de crecimiento del ternero | Camilo | 🔲 Por hacer | 4h |
-| 7.5 | Integracion con ficha general del bovino | Camilo | 🔲 Por hacer | 2h |
+| 7.1 | Endpoint/vista de terneros por edad/estado | — | ❌ Pendiente | 3h |
+| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | — | ❌ Pendiente | 3h |
+| 7.3 | Componente `CalfList` con indicadores de crecimiento | — | ❌ Pendiente | 4h |
+| 7.4 | Curva de crecimiento del ternero | — | ❌ Pendiente | 4h |
+| 7.5 | Integracion con ficha general del bovino | — | ❌ Pendiente | 2h |
+
+> **Impacto:** HU007 queda fuera del alcance de Sprint 6. Se redistribuirá en Sprint 7 o se aplazará.
 
 ---
 
 ## Definition of Done (DoD)
 
 - [ ] Movimientos actualizan estado del animal correctamente
-- [ ] Registros economicos vinculados a actividad productiva
-- [ ] Indicadores visibles y filtrables
-- [ ] Lista y curva de crecimiento de terneros funcional
+- [x] Registros economicos vinculados a actividad productiva
+- [x] Indicadores visibles y filtrables
+- [ ] Lista y curva de crecimiento de terneros funcional (HU007 — fuera de alcance)
 - [ ] Sin errores tecnicos en backend/frontend
 - [ ] Evidencia funcional y pruebas minimas
 
@@ -115,22 +118,22 @@ Antes de iniciar las HU en este sprint se verifica:
 ## Sprint Review
 
 **Fecha:** 26 de junio de 2026  
-**Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
+**Participantes:** Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | |
-| Actualizacion automatica de estado del bovino | 🔲 Pendiente | |
-| UI de movimientos por finca/bovino | 🔲 Pendiente | |
-| Registro y consulta de ingresos/egresos | 🔲 Pendiente | |
-| Dashboard economico con indicadores | 🔲 Pendiente | |
-| Lista y curva de crecimiento de terneros | 🔲 Pendiente | |
+| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | HU009 — Tomas |
+| Actualizacion automatica de estado del bovino | 🔲 Pendiente | HU009 — Tomas |
+| UI de movimientos por finca/bovino | 🔲 Pendiente | HU009 — Tomas |
+| Modelo, endpoints e indicadores economicos (10.1-10.3) | ✅ Entregado | HU010 — Edwin |
+| Dashboard economico con indicadores | ✅ Entregado | HU010.4 — Edwin |
+| Lista y curva de crecimiento de terneros | ❌ Excluido | HU007 — fuera de alcance (Camilo fuera) |
 
 ### Story Points completados
 
-Pendiente de cierre.
+Pendiente de cierre. HU010 backend completo (~10 SP), HU007 excluido (~5 SP).
 
 ---
 
