@@ -33,6 +33,7 @@ from app.routers.alerts import router as alerts_router
 from app.routers.admin import router as admin_router
 from app.routers.weights import router as weights_router
 from app.routers.calves import router as calves_router
+from app.routers.economics import router as economics_router
 from app.utils.limiter import limiter
 
 
@@ -121,6 +122,7 @@ app.include_router(audit_logs_router)
 app.include_router(admin_router)
 app.include_router(weights_router)
 app.include_router(calves_router)  # HU007: Desarrollo de terneros
+app.include_router(economics_router)  # HU010: Información económica
 
 
 # ── Health check ──────────────────────────────────
