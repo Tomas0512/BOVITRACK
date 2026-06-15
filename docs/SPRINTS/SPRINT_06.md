@@ -12,8 +12,8 @@
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 13 de junio de 2026 |
 | **Fecha fin** | 26 de junio de 2026 |
-| **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
-| **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
+| **Equipo** | Tomas Canon, Edwin Delgado |
+| **Roles Scrum** | Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
 
 ---
 
@@ -23,19 +23,18 @@
 |---------|------|
 | Tomas | `feature/sprint6-tomas` |
 | Edwin | `feature/sprint6-edwin` |
-| Camilo | `feature/sprint6-camilo` |
 
 ---
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado (HU009), consultar indicadores economicos por actividad (HU010), y el veterinario podra completar el modulo reproductivo con generacion automatica de ternero y linea de tiempo (HU006 cierre) y consultar desarrollo de terneros (HU007).
+> Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado (HU009), y consultar indicadores economicos por actividad (HU010).
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
 
-> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
+> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~40h por sprint (2 personas × ~20h disponibles).
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
