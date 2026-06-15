@@ -100,7 +100,7 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 ## Sprint Review
 
 **Fecha:** 15 de junio de 2026  
-**Participantes:** Tomas Canon, Edwin Delgado
+**Participantes:** Tomas Canon, Edwin Delgado, Camilo Ortiz
 
 ### Incremento entregado
 
@@ -136,7 +136,6 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 ### Que se puede mejorar?
 
 - Actualizar los documentos del sprint en tiempo real para reflejar el avance real
-- Camilo quedo fuera del equipo, redistribuir su carga a futuro
 
 ### Acciones para Sprint 6
 

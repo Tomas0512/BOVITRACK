@@ -43,7 +43,7 @@
 | HU011 (cierre) | Gestionar inventarios y compras de insumos | Alta | 8 |
 | HU012 | Subir y gestionar documentos | Media | 5 |
 
-**Total Story Points del Sprint: 21** (~63h estimadas, ligeramente sobre capacidad, se ajusta con horas de QA compartidas)
+**Total Story Points del Sprint: 21** (~63h estimadas, dentro de la capacidad del equipo)
 
 ---
 
@@ -114,7 +114,6 @@ Antes de iniciar las HU en este sprint se verifica:
 | Fallas en generacion de archivos grandes (PDF/Excel) | Media | Medio | Limitar rangos y paginar resultados |
 | Manejo inseguro de archivos subidos | Media | Alto | Validar tipo/tamano y sanitizar nombres |
 | Descuadre entre costo y stock | Media | Medio | Validar transacciones de compra/consumo |
-| Sprint con 21 SP (sobre capacidad) | Media | Medio | Camilo hace QA de las 3 HU, distribuir carga |
 
 ---
 

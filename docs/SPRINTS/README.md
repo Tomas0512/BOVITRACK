@@ -2,12 +2,13 @@
 
 Fecha de corte del analisis: 15-06-2026
 Regla de planificacion: 15 dias por sprint, asignacion vertical (cada persona dueña de su HU completa).
-Equipo: 2 personas activas (Tomas Canon, Edwin Delgado). Camilo Ortiz fuera del equipo.
+Equipo: 3 personas (Camilo Ortiz, Tomas Canon, Edwin Delgado).
 
 ## Roles
 
 1. **Tomas Canon** — Full-stack (Developer / Product Owner)
 2. **Edwin Delgado** — Full-stack (Developer)
+3. **Camilo Ortiz** — Full-stack (Developer / Scrum Master) + QA
 
 ## Flujo de trabajo por ramas
 
@@ -17,6 +18,7 @@ Cada sprint se trabaja con **ramas individuales por persona**. Nadie toca la ram
 |-------|------|
 | Tomas | `feature/sprint{N}-tomas` |
 | Edwin | `feature/sprint{N}-edwin` |
+| Camilo | `feature/sprint{N}-camilo` |
 
 - **Documentacion (`docs/SPRINTS/`)** se actualiza directo en `main`
 - **Codigo** se trabaja en cada rama y se hace merge a `main` al final del sprint
@@ -31,26 +33,26 @@ Cada sprint se trabaja con **ramas individuales por persona**. Nadie toca la ram
 | HU004 | ✅ Completa | Registro y gestion de bovinos |
 | HU005 | ✅ Completa | Alimentacion, ordenos, pesajes, graficas (Recharts) |
 | HU006 | ✅ Completa | Control reproductivo, auto-ternero y timeline funcionales |
-| HU007 | 🔲 Pendiente | Desarrollo de terneros — sin responsable (era de Camilo) |
+| HU007 | 🔲 Pendiente | Para completar en Sprint 6 por Camilo |
 | HU008 | ✅ Completa | Planes sanitarios, alertas, calendario (cerrado en Sprint 4) |
 | HU009 | 🔲 Pendiente | Para completar en Sprint 6 por Tomas |
 | HU010 | 🔲 Pendiente | Para completar en Sprint 6 por Edwin |
 | HU011 | 🔲 Parcial | Pendiente cierre de compras/costos (→ Sprint 7 Edwin) |
-| HU012 | 🔲 Pendiente | Gestion documental — sin responsable (era de Camilo) |
+| HU012 | 🔲 Pendiente | Para completar en Sprint 7 por Camilo |
 | HU013 | 🔲 Parcial | Endpoints existen, falta exportacion + frontend (→ Sprint 7 Tomas) |
 | HU014 | 🔲 Pendiente | Para completar en Sprint 8 por Tomas |
-| HU015 | 🔲 Parcial | Auditoria existe, falta exportacion avanzada + UI (→ Sprint 8) |
-| HU016 | 🔲 Pendiente | Para completar en Sprint 8 por Edwin |
+| HU015 | 🔲 Parcial | Auditoria existe, falta exportacion avanzada + UI (→ Sprint 8 Camilo) |
+| HU016 | 🔲 Pendiente | Para completar en Sprint 8 por Edwin + Camilo |
 
-## Plan restante (asignacion vertical — Camilo fuera del equipo)
+## Plan restante (asignacion vertical)
 
-| Sprint | Fechas | Tomas | Edwin |
-|--------|--------|-------|-------|
-| **Sprint 5** | May 30 - Jun 12 | ✅ HU005 cierre + HU006.5 timeline | ✅ HU006 backend + HU006.4 auto-ternero |
-| **Sprint 6** | Jun 13 - 26 | **HU009** — Movimientos animales | **HU010** — Informacion economica |
-| **Sprint 7** | Jun 27 - Jul 10 | **HU013** — Reportes (cierre) | **HU011** — Inventarios (cierre) |
-| **Sprint 8** | Jul 11 - 24 | **HU014** — Alertas/notificaciones | **HU016** — Offline (backend) |
-| **Sprint 9** | Jul 25 - Ago 7 | QA final, regresion, bugs, estabilizacion (todos) | |
-| **Sprint 10** | Ago 8 - 21 | Cierre proyecto, demo final, despliegue, retrospectiva (todos) | |
+| Sprint | Fechas | Tomas | Edwin | Camilo |
+|--------|--------|-------|-------|--------|
+| **Sprint 5** | May 30 - Jun 12 | ✅ HU005 cierre + HU006.5 timeline | ✅ HU006 backend + HU006.4 auto-ternero | ✅ QA |
+| **Sprint 6** | Jun 13 - 26 | **HU009** — Movimientos animales | **HU010** — Informacion economica | **HU007** — Desarrollo terneros |
+| **Sprint 7** | Jun 27 - Jul 10 | **HU013** — Reportes (cierre) | **HU011** — Inventarios (cierre) | **HU012** — Gestion documental |
+| **Sprint 8** | Jul 11 - 24 | **HU014** — Alertas/notificaciones | **HU016** — Offline (backend) | **HU015** auditoria + HU016 frontend |
+| **Sprint 9** | Jul 25 - Ago 7 | QA final, regresion, bugs, estabilizacion (todos) | | |
+| **Sprint 10** | Ago 8 - 21 | Cierre proyecto, demo final, despliegue, retrospectiva (todos) | | |
 
 Total 6 sprints. Sin dependencias entre personas dentro del mismo sprint (asignacion vertical).

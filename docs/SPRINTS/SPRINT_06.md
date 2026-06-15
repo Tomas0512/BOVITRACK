@@ -6,14 +6,14 @@
 ## Informacion General
 
 | Campo | Valor |
-|---|---|
+|---|---|---|
 | **Proyecto** | BoviTrack |
 | **Sprint** | Sprint 6 |
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 13 de junio de 2026 |
 | **Fecha fin** | 26 de junio de 2026 |
-| **Equipo** | Tomas Canon, Edwin Delgado |
-| **Roles Scrum** | Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
+| **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
+| **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
 
 ---
 
@@ -23,6 +23,7 @@
 |---------|------|
 | Tomas | `feature/sprint6-tomas` |
 | Edwin | `feature/sprint6-edwin` |
+| Camilo | `feature/sprint6-camilo` |
 
 ---
 
@@ -79,15 +80,15 @@ Antes de iniciar las HU en este sprint se verifica:
 | 10.3 | Indicadores: costos, ingresos, balance y promedios | Edwin | 🔲 Por hacer | 3h |
 | 10.4 | Dashboard economico con filtros | Edwin | 🔲 Por hacer | 4h |
 
-### HU007 - Desarrollo de Terneros — **Pendiente de reasignar**
+### HU007 - Desarrollo de Terneros — **Camilo** (asignacion vertical)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 7.1 | Endpoint/vista de terneros por edad/estado | — | 🔲 Por hacer | 3h |
-| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | — | 🔲 Por hacer | 3h |
-| 7.3 | Componente `CalfList` con indicadores de crecimiento | — | 🔲 Por hacer | 4h |
-| 7.4 | Curva de crecimiento del ternero | — | 🔲 Por hacer | 4h |
-| 7.5 | Integracion con ficha general del bovino | — | 🔲 Por hacer | 2h |
+| 7.1 | Endpoint/vista de terneros por edad/estado | Camilo | 🔲 Por hacer | 3h |
+| 7.2 | Registro de crecimiento (peso, alimentacion, estado) | Camilo | 🔲 Por hacer | 3h |
+| 7.3 | Componente `CalfList` con indicadores de crecimiento | Camilo | 🔲 Por hacer | 4h |
+| 7.4 | Curva de crecimiento del ternero | Camilo | 🔲 Por hacer | 4h |
+| 7.5 | Integracion con ficha general del bovino | Camilo | 🔲 Por hacer | 2h |
 
 ---
 
@@ -105,10 +106,9 @@ Antes de iniciar las HU en este sprint se verifica:
 ## Riesgos identificados
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
-|---|---|---|---|---|
+|---|---|---|---|
 | Integridad entre movimiento y estado del animal | Media | Alto | Pruebas de transaccion y validacion cruzada |
 | Clasificacion economica inconsistente | Media | Medio | Catalogo fijo de categorias y validacion |
-| HU007 sin responsable asignado (Camilo no participa) | Alta | Medio | Reasignar a Edwin o Tomas, o pasar a Sprint 7 |
 
 ---
 
