@@ -1,28 +1,29 @@
 import { Link } from "react-router-dom";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
+import { Building2, Tickets, Droplets, Pill } from "lucide-react";
 
 const features = [
   {
-    icon: "🏡",
+    icon: <Building2 size={40} />,
     title: "Gestión de Fincas",
     description:
       "Registra y administra tus fincas con datos de ubicación, extensión, propósito productivo y lotes de terreno.",
   },
   {
-    icon: "🐂",
+    icon: <Tickets size={40} />,
     title: "Control del Hato",
     description:
       "Lleva el registro completo de cada bovino: identificación, genealogía, peso, estado reproductivo y más.",
   },
   {
-    icon: "🥛",
+    icon: <Droplets size={40} />,
     title: "Producción Lechera",
     description:
       "Registra ordeños diarios por animal, consulta promedios y detecta cambios en la producción de tu hato.",
   },
   {
-    icon: "💊",
+    icon: <Pill size={40} />,
     title: "Sanidad y Tratamientos",
     description:
       "Controla vacunas, desparasitaciones y tratamientos veterinarios con fechas de próxima aplicación.",
@@ -100,7 +101,7 @@ export default function HomePage() {
                   key={f.title}
                   className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
-                  <div className="mb-4 text-4xl">{f.icon}</div>
+                  <div className="mb-4 text-primary">{f.icon}</div>
                   <h3 className="mb-2 text-lg font-bold text-gray-900">{f.title}</h3>
                   <p className="text-sm leading-relaxed text-gray-500">{f.description}</p>
                 </div>

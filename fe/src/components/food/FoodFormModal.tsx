@@ -49,6 +49,10 @@ export default function FoodFormModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isFormComplete =
+    form.name.trim() !== "" &&
+    form.current_stock >= 0;
+
   // 🔄 RE-INICIALIZAR FORMULARIO AL CAMBIAR DE ALIMENTO
   // Esto asegura que si pasas de editar un alimento a crear uno nuevo, los campos se limpien
   useEffect(() => {
@@ -120,13 +124,14 @@ export default function FoodFormModal({
                 Nombre *
               </label>
               <input
-                type="text"
+                type="text" maxLength={100}
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
                 placeholder="Ej: Concentrado Premium"
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
+              <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/100</span>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -241,7 +246,7 @@ export default function FoodFormModal({
                 Proveedor
               </label>
               <input
-                type="text"
+                type="text" maxLength={200}
                 value={form.supplier ?? ""}
                 onChange={(e) =>
                   set("supplier", e.target.value || null)
@@ -249,6 +254,7 @@ export default function FoodFormModal({
                 placeholder="Ej: Distribuidora XYZ"
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
+              <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.supplier ?? "").length}/200</span>
             </div>
           </div>
 
@@ -262,7 +268,7 @@ export default function FoodFormModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={!isFormComplete || loading}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {loading && (

@@ -193,12 +193,13 @@ export function RegisterPage() {
                 <input
                   id="firstName"
                   name="firstName"
-                  type="text"
+                  type="text" required maxLength={100}
                   placeholder="Ingrese sus nombres"
                   value={formData.firstName}
                   onChange={handleChange}
                   className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
+                <span className="mt-0.5 block text-right text-xs text-gray-400">{formData.firstName.length}/100</span>
                 {errors.firstName && <span className="mt-0.5 text-xs text-red-600">{errors.firstName}</span>}
               </div>
 
@@ -207,12 +208,13 @@ export function RegisterPage() {
                 <input
                   id="lastName"
                   name="lastName"
-                  type="text"
+                  type="text" required maxLength={100}
                   placeholder="Ingrese sus apellidos"
                   value={formData.lastName}
                   onChange={handleChange}
                   className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
+                <span className="mt-0.5 block text-right text-xs text-gray-400">{formData.lastName.length}/100</span>
                 {errors.lastName && <span className="mt-0.5 text-xs text-red-600">{errors.lastName}</span>}
               </div>
             </div>
@@ -242,7 +244,7 @@ export function RegisterPage() {
                 <input
                   id="documentNumber"
                   name="documentNumber"
-                  type="text"
+                  type="text" required maxLength={20}
                   placeholder="Ingrese su número"
                   value={formData.documentNumber}
                   onChange={handleChange}
@@ -259,7 +261,7 @@ export function RegisterPage() {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="email" required maxLength={255}
                   placeholder="correo@ejemplo.com"
                   value={formData.email}
                   onChange={handleChange}
@@ -273,7 +275,7 @@ export function RegisterPage() {
                 <input
                   id="phone"
                   name="phone"
-                  type="tel"
+                  type="tel" required maxLength={20}
                   placeholder="+57 300 123 4567"
                   value={formData.phone}
                   onChange={handleChange}
@@ -290,7 +292,7 @@ export function RegisterPage() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type="password" required maxLength={128}
                   placeholder="Mínimo 8 caracteres"
                   value={formData.password}
                   onChange={handleChange}
@@ -313,7 +315,7 @@ export function RegisterPage() {
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type="password" required maxLength={128}
                   placeholder="Repita la contraseña"
                   value={formData.confirmPassword}
                   onChange={handleChange}

@@ -12,6 +12,12 @@ export interface FarmRequest {
   phone?: string | null;
 }
 
+export interface CityOption {
+  id: string;
+  name: string;
+  code: string | null;
+}
+
 export interface DepartmentOption {
   id: string;
   name: string;
@@ -50,6 +56,11 @@ export async function createFarm(data: FarmRequest): Promise<FarmResponse> {
 
 export async function listDepartments(): Promise<DepartmentOption[]> {
   const response = await api.get<DepartmentOption[]>(`${FARMS}/departments`);
+  return response.data;
+}
+
+export async function listCities(departmentId: string): Promise<CityOption[]> {
+  const response = await api.get<CityOption[]>(`${FARMS}/departments/${departmentId}/cities`);
   return response.data;
 }
 

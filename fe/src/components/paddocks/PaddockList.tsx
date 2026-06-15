@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { listPaddocks, deletePaddock, type PaddockResponse } from "../../api/paddocks";
 import { listLandPlots } from "../../api/land_plots";
 import PaddockFormModal from "./PaddockFormModal";
@@ -88,7 +89,7 @@ export default function PaddockList({ farmId }: Props) {
             + Nuevo potrero
           </button>
           {!hasLandPlots && (
-            <p className="text-xs text-amber-600">⚠ Debe existir al menos un lote activo</p>
+            <p className="text-xs text-amber-600"><AlertTriangle size={12} className="inline-block mr-0.5 -mt-0.5" /> Debe existir al menos un lote activo</p>
           )}
         </div>
       </div>

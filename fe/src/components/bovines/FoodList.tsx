@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Sprout } from "lucide-react";
 import {
   listConsumptions,
   listFoods,
@@ -45,7 +46,7 @@ export default function FoodList({ farmId, bovineId }: Props) {
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900">🌾 Historial de alimentación</h3>
+      <h3 className="mb-4 font-bold text-gray-900"><Sprout size={18} className="inline-block mr-1.5 -mt-0.5" /> Historial de alimentación</h3>
 
       {loading && (
         <div className="flex justify-center py-8">

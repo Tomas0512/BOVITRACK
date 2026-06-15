@@ -121,6 +121,14 @@ class DepartmentOption(BaseModel):
     code: str | None
 
 
+class CityOption(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    name: str
+    code: str | None
+
+
 class PurposeOption(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { getInvitationInfo, registerInvited, type InvitationInfo } from "../api/auth";
 
@@ -164,7 +165,7 @@ export function InvitedRegisterPage() {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full max-w-md flex-col items-center rounded-2xl bg-white p-8 shadow-lg">
-          <div className="mb-4 text-4xl">⚠️</div>
+          <div className="mb-4" aria-hidden="true"><AlertTriangle size={36} className="mx-auto text-amber-500" /></div>
           <h2 className="mb-2 text-lg font-bold text-gray-900">Invitación no válida</h2>
           <p className="mb-4 text-center text-sm text-gray-500">
             {invitationError || "No se pudo cargar la invitación"}
@@ -181,7 +182,7 @@ export function InvitedRegisterPage() {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full max-w-md flex-col items-center rounded-2xl bg-white p-8 shadow-lg">
-          <div className="mb-4 text-4xl">✅</div>
+          <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
           <h2 className="mb-2 text-lg font-bold text-gray-900">¡Registro exitoso!</h2>
           <p className="mb-4 text-center text-sm text-gray-500">
             Tu cuenta ha sido creada y ya estás vinculado a la finca <strong>{invitation.farm_name}</strong>.

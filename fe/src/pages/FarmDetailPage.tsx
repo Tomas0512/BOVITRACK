@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { AlertTriangle, Tractor } from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
@@ -92,7 +93,7 @@ export default function FarmDetailPage() {
     return (
       <div className="flex justify-center pt-12">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-          <div className="mb-3 text-5xl">⚠️</div>
+          <div className="mb-3" aria-hidden="true"><AlertTriangle size={40} className="text-amber-500 mx-auto" /></div>
           <h2 className="mb-2 text-lg font-bold text-gray-800">Finca no encontrada</h2>
           <p className="mb-6 text-sm text-gray-500">{error || "No se pudo cargar la finca."}</p>
           <Link
@@ -110,7 +111,7 @@ export default function FarmDetailPage() {
     <div>
       <div className="rounded-2xl bg-white p-8 shadow-sm">
         <div className="mb-6 flex items-center gap-3">
-          <span className="text-4xl">🐄</span>
+          <Tractor size={36} className="text-primary shrink-0" />
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{farm.name}</h1>
             <p className="text-sm text-gray-500">ID: {farm.farm_identifier}</p>
@@ -195,7 +196,7 @@ export default function FarmDetailPage() {
           <InfoCard label="Ciudad o municipio" value={farm.city_municipality} />
           <InfoCard label="Área total" value={`${farm.total_area} ${farm.area_unit}`} />
           <InfoCard label="Teléfono" value={farm.phone ?? "No registrado"} />
-          <InfoCard label="Estado" value={farm.is_active ? "Activa ✅" : "Inactiva ❌"} />
+          <InfoCard label="Estado" value={farm.is_active ? "Activa" : "Inactiva"} />
           <InfoCard label="Fecha de creación" value={new Date(farm.created_at).toLocaleDateString("es-CO")} />
           <InfoCard label="Última actualización" value={new Date(farm.updated_at).toLocaleDateString("es-CO")} />
         </div>

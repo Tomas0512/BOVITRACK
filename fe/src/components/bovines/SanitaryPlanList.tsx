@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
   listSanitaryPlans,
   deleteSanitaryPlan,
@@ -174,7 +175,7 @@ export default function SanitaryPlanList({ farmId }: Props) {
                               plan.next_scheduled_date,
                             ).toLocaleDateString("es-CO")
                           : "Pendiente"}
-                        {overdue && " 🔴"}
+                        {overdue && <AlertTriangle size={14} className="inline-block ml-1 -mt-0.5 text-red-600" />}
                       </span>
                     </td>
                     <td className="py-3">

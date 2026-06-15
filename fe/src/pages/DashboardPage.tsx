@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Building2, Tractor } from "lucide-react";
 import { listFarms, type FarmResponse } from "../api/farms";
 import { useAuth } from "../hooks/useAuth";
 
@@ -29,7 +30,7 @@ export default function DashboardPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            ¡Hola, {user?.first_name}! 👋
+            ¡Hola, {user?.first_name}!
           </h1>
           <p className="mt-1 text-sm text-gray-500">Gestiona tus fincas ganaderas</p>
           {user?.role_name && (
@@ -63,7 +64,7 @@ export default function DashboardPage() {
       {/* Sin fincas */}
       {!loading && !error && farms.length === 0 && (
         <div className="rounded-2xl bg-white p-12 text-center shadow-sm">
-          <div className="mb-3 text-5xl">🏡</div>
+          <div className="mb-3 text-primary"><Building2 size={48} className="mx-auto" /></div>
           <h2 className="mb-2 text-lg font-bold text-gray-800">Aún no tienes fincas</h2>
           <p className="mb-6 text-sm text-gray-500">
             Crea tu primera finca para empezar a gestionar tu ganado.
@@ -87,7 +88,7 @@ export default function DashboardPage() {
               className="group rounded-xl bg-white p-5 shadow-sm transition-shadow no-underline hover:shadow-md"
             >
               <div className="mb-2 flex items-center gap-2">
-                <span className="text-2xl">🐄</span>
+                <Tractor size={24} className="text-primary shrink-0" />
                 <h3 className="text-base font-bold text-gray-900 group-hover:text-primary">
                   {farm.name}
                 </h3>

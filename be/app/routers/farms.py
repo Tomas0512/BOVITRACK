@@ -6,10 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
 from app.permissions import require_permission
-from app.models.department import Department
+from app.models.department import City, Department
 from app.models.purpose import Purpose
 from app.models.user import User
 from app.schemas.farm import (
+    CityOption,
     DepartmentOption,
     FarmBulkCreateRequest,
     FarmCreate,
@@ -35,6 +36,24 @@ def list_departments(
     _ = current_user
     departments = db.execute(select(Department).order_by(Department.name.asc())).scalars().all()
     return [DepartmentOption.model_validate(d) for d in departments]
+
+
+@router.get(
+    "/departments/{department_id}/cities",
+    response_model=list[CityOption],
+    summary="Listar ciudades de un departamento",
+)
+def list_cities(
+    department_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[CityOption]:
+    """Retorna catálogo de ciudades de un departamento para formularios."""
+    _ = current_user
+    cities = db.execute(
+        select(City).where(City.department_id == department_id).order_by(City.name.asc())
+    ).scalars().all()
+    return [CityOption.model_validate(c) for c in cities]
 
 
 @router.get(

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { FileText, BarChart3, Dna, Syringe, AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Tag, Mars, Venus } from "lucide-react";
 import { getBovine, type BovineResponse } from "../api/bovines";
 import WeightChart from "../components/bovines/WeightChart";
 import WeightHistory from "../components/bovines/WeightHistory";
@@ -10,11 +11,11 @@ import ReproductiveTimeline from "../components/bovines/ReproductiveTimeline";
 
 type Tab = "general" | "productivo" | "reproductivo" | "sanitario";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "general", label: "General", icon: "📋" },
-  { id: "productivo", label: "Productivo", icon: "📊" },
-  { id: "reproductivo", label: "Reproductivo", icon: "🧬" },
-  { id: "sanitario", label: "Sanitario", icon: "💉" },
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "general", label: "General", icon: <FileText size={16} /> },
+  { id: "productivo", label: "Productivo", icon: <BarChart3 size={16} /> },
+  { id: "reproductivo", label: "Reproductivo", icon: <Dna size={16} /> },
+  { id: "sanitario", label: "Sanitario", icon: <Syringe size={16} /> },
 ];
 
 export default function BovineDetailPage() {
@@ -44,7 +45,7 @@ export default function BovineDetailPage() {
     return (
       <div className="flex justify-center pt-12">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-          <div className="mb-3 text-5xl">⚠️</div>
+          <div className="mb-3 text-5xl"><AlertTriangle size={48} className="text-amber-500 mx-auto" /></div>
           <h2 className="mb-2 text-lg font-bold text-gray-800">Bovino no encontrado</h2>
           <p className="mb-6 text-sm text-gray-500">{error}</p>
           <Link
@@ -63,7 +64,13 @@ export default function BovineDetailPage() {
       {/* Cabecera */}
       <div className="rounded-2xl bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
-          <span className="text-4xl">{bovine.sex === "macho" ? "🐂" : "🐄"}</span>
+          <div className="flex items-center gap-2 text-4xl text-primary">
+            {bovine.sex === "macho" ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v8"/><path d="M7 16a5 5 0 1 0 10 0"/></svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v8"/><circle cx="12" cy="17" r="4"/></svg>
+            )}
+          </div> {/* <- Corrección: Aquí faltaba cerrar este contenedor */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {bovine.name ?? bovine.identification_number}
@@ -129,21 +136,21 @@ export default function BovineDetailPage() {
             <h2 className="mb-4 text-lg font-bold text-gray-900">Trazabilidad</h2>
             <div className="space-y-3">
               <TraceItem
-                icon="📥"
+                icon={<ArrowDownToLine size={20} />}
                 title={`Ingreso: ${bovine.entry_type}`}
                 date={bovine.entry_date ?? ""}
                 description={bovine.observations ?? undefined}
               />
               {bovine.exit_date && (
                 <TraceItem
-                  icon="📤"
+                  icon={<ArrowUpFromLine size={20} />}
                   title={`Salida: ${bovine.exit_reason ?? "sin motivo registrado"}`}
                   date={bovine.exit_date}
                 />
               )}
               {bovine.father_id && (
                 <TraceItem
-                  icon="🐂"
+                  icon={<Mars size={20} className="text-primary" />}
                   title="Padre registrado"
                   date=""
                   description={`ID padre: ${bovine.father_id}`}
@@ -151,14 +158,14 @@ export default function BovineDetailPage() {
               )}
               {bovine.mother_id && (
                 <TraceItem
-                  icon="🐄"
+                  icon={<Venus size={20} className="text-primary" />}
                   title="Madre registrada"
                   date=""
                   description={`ID madre: ${bovine.mother_id}`}
                 />
               )}
               {bovine.markings && (
-                <TraceItem icon="🏷️" title="Marcas" date="" description={bovine.markings} />
+                <TraceItem icon={<Tag size={20} />} title="Marcas" date="" description={bovine.markings} />
               )}
             </div>
           </div>
@@ -175,9 +182,7 @@ export default function BovineDetailPage() {
         </>
       )}
 
-      {/* ¿Qué? Pestaña de eventos reproductivos del bovino.
-          ¿Para qué? Mostrar el timeline de servicios, partos, abortos y secados.
-          ¿Impacto? Sin esta pestaña, el usuario no puede gestionar la reproducción. */}
+      {/* Pestaña Reproductivo */}
       {activeTab === "reproductivo" && farmId && bovineId && (
         <ReproductiveTimeline farmId={farmId} bovineId={bovineId} />
       )}
@@ -186,37 +191,30 @@ export default function BovineDetailPage() {
       {activeTab === "sanitario" && farmId && bovineId && (
         <TreatmentList farmId={farmId} bovineId={bovineId} />
       )}
+    </div>
+  );
+}
 
-      {/* Botón volver */}
-      <div>
-        <Link
-          to={`/farms/${farmId}`}
-          className="inline-block rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50"
-        >
-          ← Volver a la finca
-        </Link>
+{/* Componentes Auxiliares Locales */}
+function InfoCard({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="rounded-xl bg-gray-50 p-4">
+      <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-gray-800 capitalize">{value}</p>
+    </div>
+  );
+}
+
+function TraceItem({ icon, title, date, description }: { icon: React.ReactNode; title: string; date: string; description?: string }) {
+  return (
+    <div className="flex gap-4 items-start rounded-xl p-3 hover:bg-gray-50 transition-colors">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light/10 text-primary">
+        {icon}
       </div>
-    </div>
-  );
-}
-
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-gray-100 bg-surface p-3">
-      <p className="mb-0.5 text-xs font-semibold uppercase tracking-wide text-gray-400">{label}</p>
-      <p className="text-sm font-medium text-gray-800">{value}</p>
-    </div>
-  );
-}
-
-function TraceItem({ icon, title, date, description }: { icon: string; title: string; date: string; description?: string }) {
-  return (
-    <div className="flex items-start gap-3 rounded-lg border border-gray-100 p-3">
-      <span className="text-xl">{icon}</span>
-      <div>
-        <p className="font-medium text-gray-800">{title}</p>
+      <div className="space-y-0.5">
+        <h4 className="text-sm font-semibold text-gray-800">{title}</h4>
         {date && <p className="text-xs text-gray-400">{date}</p>}
-        {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+        {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
       </div>
     </div>
   );

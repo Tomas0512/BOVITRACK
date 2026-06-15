@@ -15,6 +15,8 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const isFormComplete = email.trim() !== "" && roleId !== "";
+
   useEffect(() => {
     listRoles(farmId)
       .then(setRoles)
@@ -77,12 +79,11 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
               Correo del empleado
             </label>
             <input
-              type="email"
+              type="email" required maxLength={255}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="correo@ejemplo.com"
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              required
             />
             <p className="mt-1 text-xs text-gray-400">
               Se enviará un enlace de registro al correo ingresado
@@ -116,8 +117,8 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
             </button>
             <button
               type="submit"
-              disabled={loading || !!successMsg}
-              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60"
+              disabled={!isFormComplete || loading || !!successMsg}
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Enviando..." : "Enviar invitación"}
             </button>

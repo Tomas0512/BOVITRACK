@@ -104,6 +104,7 @@ export function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
+                required maxLength={255}
                 placeholder="correo@ejemplo.com"
                 value={formData.email}
                 onChange={handleChange}
@@ -118,6 +119,7 @@ export function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
+                required maxLength={128}
                 placeholder="Ingrese su contraseña"
                 value={formData.password}
                 onChange={handleChange}

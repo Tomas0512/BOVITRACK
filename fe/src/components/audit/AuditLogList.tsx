@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FileText } from "lucide-react";
 import { listAuditLogs, type AuditLogEntry } from "../../api/audit_logs";
 
 interface Props {
@@ -48,7 +49,7 @@ export default function AuditLogList({ farmId }: Props) {
         className="flex w-full items-center justify-between rounded-2xl bg-white px-6 py-4 shadow-sm hover:bg-gray-50"
       >
         <span className="flex items-center gap-2 font-bold text-gray-900">
-          🗂️ Historial de auditoría
+          <FileText size={18} /> Historial de auditoría
         </span>
         <span className="text-gray-400">{open ? "▲" : "▼"}</span>
       </button>
