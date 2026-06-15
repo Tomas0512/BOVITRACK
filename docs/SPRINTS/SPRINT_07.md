@@ -1,5 +1,5 @@
 ﻿# SCRUM - Sprint 7
-## BoviTrack · Movimientos del Hato y Gestion Economica
+## BoviTrack · Reportes, Inventarios y Gestion Documental
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado del bovino (HU009), y consultar indicadores de costos e ingresos por actividad productiva (HU010).
+> Al final del sprint, el administrador podra generar y exportar reportes productivos, sanitarios y economicos con filtros por fecha (HU013 cierre), gestionar el inventario de insumos con control de stock y alertas de minimo (HU011 cierre), y subir, consultar y descargar documentos vinculados a fincas, bovinos o eventos (HU012).
 
 ---
 
@@ -29,53 +29,69 @@
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
-| HU009 | Registrar ingresos y salidas de animales | Alta | 5 |
-| HU010 | Registrar informacion economica | Alta | 5 |
+| HU013 (cierre) | Generar reportes e indicadores | Alta | 8 |
+| HU011 (cierre) | Gestionar inventarios y compras de insumos | Alta | 8 |
+| HU012 | Subir y gestionar documentos | Media | 5 |
 
-**Total Story Points del Sprint: 10** (~30h estimadas, holgura para QA y ajustes)
+**Total Story Points del Sprint: 21** (~63h estimadas, ligeramente sobre capacidad, se ajusta con horas de QA compartidas)
 
 ---
 
 ## Definition of Ready (DoR)
 
-Antes de iniciar una HU en este sprint se verifica:
+Antes de iniciar las HU en este sprint se verifica:
 
 - [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] Modelo `AnimalMovement` y estados de `Bovine` documentados antes de comenzar
-- [x] Categorias fijas de ingresos/egresos definidas (no dinamicas)
-- [x] Dependencia con estado actual de `Bovine.status` revisada
+- [x] Formatos de exportacion acordados (PDF y/o Excel)
+- [x] Fuentes de datos de reportes identificadas (modulos HU005-HU012)
+- [x] Estrategia de almacenamiento de archivos definida (filesystem local vs S3)
+- [x] Tipos y tamanos maximos de archivos permitidos acordados
+- [x] Dependencia de inventario con consumos de `Food` revisada
 - [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
 ## Sprint Backlog
 
-### HU009 - Ingresos y Salidas de Animales
+### HU013 - Reportes e Indicadores (cierre) — **Tomas** (asignacion vertical)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 9.1 | Modelo `AnimalMovement` + migracion | Camilo | 🔲 Por hacer | 4h |
-| 9.2 | CRUD de movimientos comerciales por finca | Edwin | 🔲 Por hacer | 4h |
-| 9.3 | Regla de actualizacion automatica de estado del bovino | Camilo | 🔲 Por hacer | 2h |
-| 9.4 | UI de movimientos por bovino/finca | Tomas | 🔲 Por hacer | 4h |
+| 13.1 | Completar filtros de reportes por fecha/categoria | Tomas | 🔲 Por hacer | 3h |
+| 13.2 | Exportacion PDF/Excel | Tomas | 🔲 Por hacer | 4h |
+| 13.3 | Pantalla de reportes con descarga | Tomas | 🔲 Por hacer | 4h |
+| 13.4 | Ajustes de indicadores productivos/sanitarios/economicos | Tomas | 🔲 Por hacer | 3h |
 
-### HU010 - Informacion Economica
+### HU011 - Inventarios y Compras de Insumos (cierre) — **Edwin** (asignacion vertical)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 10.1 | Modelo de ingresos/egresos por actividad | Edwin | 🔲 Por hacer | 4h |
-| 10.2 | Endpoints de registro y consulta economica | Camilo | 🔲 Por hacer | 3h |
-| 10.3 | Indicadores: costos, ingresos, balance y promedios | Camilo | 🔲 Por hacer | 3h |
-| 10.4 | Dashboard economico con filtros | Tomas | 🔲 Por hacer | 4h |
-| 10.5 | QA funcional HU009/HU010 | Edwin | 🔲 Por hacer | 3h |
+| 11.1 | Completar flujo de compras con impacto en stock y costo | Edwin | 🔲 Por hacer | 4h |
+| 11.2 | Trazabilidad de entradas/salidas por modulo origen | Edwin | 🔲 Por hacer | 3h |
+| 11.3 | Ajustes de alertas de stock minimo | Edwin | 🔲 Por hacer | 2h |
+| 11.4 | Pantalla de inventario y compras | Edwin | 🔲 Por hacer | 4h |
+
+### HU012 - Gestion de Documentos — **Camilo** (asignacion vertical)
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 12.1 | Modelo `Document` + almacenamiento y metadata | Camilo | 🔲 Por hacer | 4h |
+| 12.2 | Endpoints upload/list/download/delete | Camilo | 🔲 Por hacer | 4h |
+| 12.3 | Asociacion a finca, bovino o evento | Camilo | 🔲 Por hacer | 3h |
+| 12.4 | UI de carga y repositorio documental | Camilo | 🔲 Por hacer | 5h |
+| 12.5 | QA funcional HU011/HU012/HU013 | Camilo | 🔲 Por hacer | 3h |
 
 ---
 
 ## Definition of Done (DoD)
 
-- [ ] Movimientos actualizan estado del animal correctamente
-- [ ] Registros economicos vinculados a actividad productiva
-- [ ] Indicadores visibles y filtrables
+- [ ] Reportes exportables en formatos solicitados
+- [ ] Indicadores visibles y con filtros funcionales
+- [ ] Stock se actualiza automaticamente por compras/consumos
+- [ ] Alertas de stock minimo funcionales
+- [ ] Documentos suben, se listan y se descargan correctamente
+- [ ] Asociaciones a entidades del sistema funcionales
+- [ ] Sin errores de seguridad evidentes en archivos
 - [ ] Sin errores tecnicos en backend/frontend
 - [ ] Evidencia funcional y pruebas minimas
 
@@ -85,8 +101,10 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |---|---|---|---|
-| Integridad entre movimiento y estado del animal | Media | Alto | Pruebas de transaccion y validacion cruzada |
-| Clasificacion economica inconsistente | Media | Medio | Catalogo fijo de categorias y validacion |
+| Fallas en generacion de archivos grandes (PDF/Excel) | Media | Medio | Limitar rangos y paginar resultados |
+| Manejo inseguro de archivos subidos | Media | Alto | Validar tipo/tamano y sanitizar nombres |
+| Descuadre entre costo y stock | Media | Medio | Validar transacciones de compra/consumo |
+| Sprint con 21 SP (sobre capacidad) | Media | Medio | Camilo hace QA de las 3 HU, distribuir carga |
 
 ---
 
@@ -99,11 +117,14 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | |
-| Actualizacion automatica de estado del bovino | 🔲 Pendiente | |
-| UI de movimientos por finca/bovino | 🔲 Pendiente | |
-| Registro y consulta de ingresos/egresos | 🔲 Pendiente | |
-| Dashboard economico con indicadores | 🔲 Pendiente | |
+| Reportes con filtros por fecha/categoria | 🔲 Pendiente | |
+| Exportacion PDF/Excel funcional | 🔲 Pendiente | |
+| Indicadores productivos/sanitarios/economicos | 🔲 Pendiente | |
+| Stock actualizado por compras/consumos | 🔲 Pendiente | |
+| Alertas de stock minimo funcionales | 🔲 Pendiente | |
+| UI de inventario y compras | 🔲 Pendiente | |
+| Upload/download/delete de documentos | 🔲 Pendiente | |
+| Asociacion documental a finca/bovino/evento | 🔲 Pendiente | |
 
 ### Story Points completados
 
@@ -123,5 +144,6 @@ Pendiente de completar al cierre del sprint.
 
 ### Acciones para Sprint 8
 
-- Confirmar que el catalogo de categorias economicas es suficiente para HU013 (reportes).
-- Revisar si HU011 (inventarios) tiene dependencias con lo construido en HU010.
+- Verificar que los modulos de reportes exponen datos consumibles por HU015 (auditoria)
+- Validar seguridad en manejo de archivos antes de avanzar (OWASP: file upload)
+- Revisar velocidad real del equipo vs 21 puntos planificados

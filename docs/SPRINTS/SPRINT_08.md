@@ -1,5 +1,5 @@
 ﻿# SCRUM - Sprint 8
-## BoviTrack · Inventario Completo y Gestion Documental
+## BoviTrack · Notificaciones, Auditoria y Modo Offline
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el administrador podra gestionar el inventario de insumos con control de stock y alertas de minimo (HU011), y subir, consultar y descargar documentos vinculados a fincas, bovinos o eventos (HU012).
+> Al final del sprint, el usuario podra configurar alertas automaticas y consultar su historial de notificaciones (HU014), el administrador podra filtrar y exportar el historial de auditoria por usuario, accion y fecha (HU015 cierre), y el usuario podra capturar datos sin conexion y sincronizarlos al recuperar conectividad (HU016).
 
 ---
 
@@ -29,54 +29,65 @@
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
-| HU011 (cierre) | Gestionar inventarios y compras de insumos | Alta | 8 |
-| HU012 | Subir y gestionar documentos | Media | 5 |
+| HU014 | Recibir alertas y notificaciones | Media | 5 |
+| HU015 (cierre) | Revisar auditorias del sistema | Alta | 5 |
+| HU016 | Registrar datos sin conexion | Alta | 8 |
 
-**Total Story Points del Sprint: 13** (~39h estimadas, dentro de la capacidad del equipo)
+**Total Story Points del Sprint: 18** (~54h estimadas, dentro de la capacidad del equipo)
 
 ---
 
 ## Definition of Ready (DoR)
 
-Antes de iniciar una HU en este sprint se verifica:
+Antes de iniciar las HU en este sprint se verifica:
 
 - [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] Estrategia de almacenamiento de archivos definida (filesystem local vs S3)
-- [x] Tipos y tamanos maximos de archivos permitidos acordados
-- [x] Dependencia de inventario con consumos de `Food` revisada
+- [x] Canales de notificacion definidos (in-app y/o email)
+- [x] Auditoria existente revisada: filtros adicionales identificados vs lo ya construido
+- [x] Estrategia de sincronizacion offline acordada (cola local + endpoint de sync)
+- [x] Politica de resolucion de conflictos definida (last-write-wins o manual)
 - [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
 ## Sprint Backlog
 
-### HU011 - Inventarios y Compras de Insumos (cierre)
+### HU014 - Alertas y Notificaciones — **Tomas** (asignacion vertical)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 11.1 | Completar flujo de compras con impacto en stock y costo | Camilo | 🔲 Por hacer | 4h |
-| 11.2 | Trazabilidad de entradas/salidas por modulo origen | Edwin | 🔲 Por hacer | 3h |
-| 11.3 | Ajustes de alertas de stock minimo | Camilo | 🔲 Por hacer | 2h |
-| 11.4 | Pantalla de inventario y compras | Tomas | 🔲 Por hacer | 4h |
+| 14.1 | Motor de notificaciones por eventos proximos | Tomas | 🔲 Por hacer | 4h |
+| 14.2 | Preferencias por canal y frecuencia | Tomas | 🔲 Por hacer | 3h |
+| 14.3 | Historial de notificaciones enviadas | Tomas | 🔲 Por hacer | 3h |
+| 14.4 | UI de configuracion de alertas + historial | Tomas | 🔲 Por hacer | 5h |
 
-### HU012 - Gestion de Documentos
+### HU016 - Registro sin Conexion — **Edwin** (backend) + **Camilo** (frontend)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 12.1 | Modelo `Document` + almacenamiento y metadata | Edwin | 🔲 Por hacer | 4h |
-| 12.2 | Endpoints upload/list/download/delete | Camilo | 🔲 Por hacer | 4h |
-| 12.3 | Asociacion a finca, bovino o evento | Edwin | 🔲 Por hacer | 3h |
-| 12.4 | UI de carga y repositorio documental | Tomas | 🔲 Por hacer | 5h |
-| 12.5 | QA funcional HU011/HU012 | Edwin | 🔲 Por hacer | 3h |
+| 16.1 | Cola local de operaciones offline | Edwin | 🔲 Por hacer | 4h |
+| 16.2 | Endpoints de sincronizacion y versionado | Edwin | 🔲 Por hacer | 4h |
+| 16.3 | Deteccion y manejo de conflictos de sincronizacion | Edwin | 🔲 Por hacer | 4h |
+| 16.4 | UI de conflictos y resolucion | Camilo | 🔲 Por hacer | 3h |
+
+### HU015 - Auditorias del Sistema (cierre) — **Camilo**
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 15.1 | Filtros avanzados (usuario, accion, fecha) en backend | Camilo | 🔲 Por hacer | 3h |
+| 15.2 | Exportacion de auditoria filtrada | Camilo | 🔲 Por hacer | 3h |
+| 15.3 | UI de auditoria con filtros y descarga | Camilo | 🔲 Por hacer | 4h |
+| 15.4 | QA funcional HU014/HU015/HU016 | Camilo | 🔲 Por hacer | 4h |
 
 ---
 
 ## Definition of Done (DoD)
 
-- [ ] Stock se actualiza automaticamente por compras/consumos
-- [ ] Documentos suben, se listan y se descargan correctamente
-- [ ] Asociaciones a entidades del sistema funcionales
-- [ ] Sin errores de seguridad evidentes en archivos
+- [ ] Notificaciones configurables y registradas en historial
+- [ ] Auditoria exportable y filtrable
+- [ ] Captura offline funcional con sincronizacion posterior
+- [ ] Conflictos detectados y resolubles por usuario
+- [ ] Sin errores tecnicos en backend/frontend
 - [ ] Evidencia funcional y pruebas minimas
 
 ---
@@ -85,8 +96,9 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |---|---|---|---|
-| Manejo inseguro de archivos subidos | Media | Alto | Validar tipo/tamano y sanitizar nombres |
-| Descuadre entre costo y stock | Media | Medio | Validar transacciones de compra/consumo |
+| Complejidad de sincronizacion offline | Alta | Alto | Definir estrategia simple de versionado por registro |
+| Conflictos frecuentes por edicion simultanea | Media | Alto | Politica clara de resolucion + trazabilidad |
+| Notificaciones duplicadas o perdidas | Media | Alto | Idempotencia y trazabilidad de envios |
 
 ---
 
@@ -99,11 +111,12 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| Stock actualizado por compras/consumos | 🔲 Pendiente | |
-| Alertas de stock minimo funcionales | 🔲 Pendiente | |
-| UI de inventario y compras | 🔲 Pendiente | |
-| Upload/download/delete de documentos | 🔲 Pendiente | |
-| Asociacion documental a finca/bovino/evento | 🔲 Pendiente | |
+| Motor de notificaciones por eventos proximos | 🔲 Pendiente | |
+| Configuracion de alertas + historial | 🔲 Pendiente | |
+| Auditoria filtrable y exportable | 🔲 Pendiente | |
+| Captura offline funcional | 🔲 Pendiente | |
+| Sincronizacion al reconectar | 🔲 Pendiente | |
+| Resolucion de conflictos por usuario | 🔲 Pendiente | |
 
 ### Story Points completados
 
@@ -123,5 +136,5 @@ Pendiente de completar al cierre del sprint.
 
 ### Acciones para Sprint 9
 
-- Verificar que los modulos de HU011 y HU012 exponen datos consumibles por los reportes de HU013.
-- Validar seguridad en manejo de archivos antes de avanzar (OWASP: file upload).
+- Evaluar si falta algo para el cierre final del proyecto
+- Preparar demo final con todos los modulos integrados

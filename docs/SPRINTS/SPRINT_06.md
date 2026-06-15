@@ -1,5 +1,5 @@
 ﻿# SCRUM - Sprint 6
-## BoviTrack · Desarrollo de Terneros
+## BoviTrack · Movimientos del Hato, Gestion Economica y Cierre Reproductivo
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el capataz podra consultar la lista de terneros con su curva de crecimiento (HU007).
+> Al final del sprint, el administrador podra registrar compras, ventas y traslados de animales con actualizacion automatica de estado (HU009), consultar indicadores economicos por actividad (HU010), y el veterinario podra completar el modulo reproductivo con generacion automatica de ternero y linea de tiempo (HU006 cierre) y consultar desarrollo de terneros (HU007).
 
 ---
 
@@ -29,43 +29,77 @@
 
 | ID | Historia de Usuario | Prioridad | Story Points |
 |---|---|---|---|
+| HU009 | Registrar ingresos y salidas de animales | Alta | 5 |
+| HU010 | Registrar informacion economica | Alta | 5 |
+| HU006 (cierre) | Completar control reproductivo (auto-ternero + timeline) | Alta | 3 |
 | HU007 | Registrar desarrollo de terneros | Media | 5 |
 
-**Total Story Points del Sprint: 5** (~15h estimadas, dentro de la capacidad del equipo)
+**Total Story Points del Sprint: 18** (~54h estimadas, dentro de la capacidad del equipo)
 
 ---
 
 ## Definition of Ready (DoR)
 
-Antes de iniciar una HU en este sprint se verifica:
+Antes de iniciar las HU en este sprint se verifica:
 
 - [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] Filtro de terneros por `birth_date` y estado identificado sobre el modelo `Bovine` existente
-- [x] Modelo `SanitaryPlan` y logica de frecuencias documentada antes de comenzar
-- [x] Dependencia con `Treatment` existente revisada para no duplicar logica
+- [x] HU006 backend completado en Sprint 5 (modelo, CRUD, regla parto). Pendientes: auto-ternero y frontend
+- [x] HU007: filtro de terneros por `birth_date` identificado sobre modelo `Bovine` existente
+- [x] HU009: modelo `AnimalMovement` y estados de `Bovine` documentados antes de comenzar
+- [x] HU010: categorias fijas de ingresos/egresos definidas
 - [x] Sin bloqueos tecnicos conocidos al inicio del sprint
 
 ---
 
 ## Sprint Backlog
 
-### HU007 - Desarrollo de Terneros
+### HU009 - Ingresos y Salidas de Animales — **Tomas** (asignacion vertical)
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 7.1 | Endpoint/vista de terneros por edad/estado | Edwin | 🔲 Por hacer | 3h |
+| 9.1 | Modelo `AnimalMovement` + migracion | Tomas | 🔲 Por hacer | 3h |
+| 9.2 | CRUD de movimientos comerciales por finca | Tomas | 🔲 Por hacer | 4h |
+| 9.3 | Regla de actualizacion automatica de estado del bovino | Tomas | 🔲 Por hacer | 2h |
+| 9.4 | UI de movimientos por bovino/finca | Tomas | 🔲 Por hacer | 4h |
+
+### HU010 - Informacion Economica — **Edwin** (asignacion vertical)
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 10.1 | Modelo de ingresos/egresos por actividad | Edwin | 🔲 Por hacer | 4h |
+| 10.2 | Endpoints de registro y consulta economica | Edwin | 🔲 Por hacer | 3h |
+| 10.3 | Indicadores: costos, ingresos, balance y promedios | Edwin | 🔲 Por hacer | 3h |
+| 10.4 | Dashboard economico con filtros | Edwin | 🔲 Por hacer | 4h |
+
+### HU006 - Cierre Control Reproductivo — **Camilo**
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 6.4 | Generacion automatica de ternero al registrar parto | Camilo | 🔲 Por hacer | 4h |
+| 6.5 | Componente `ReproductiveTimeline` | Camilo | 🔲 Por hacer | 4h |
+| 6.6 | QA funcional HU006 | Camilo | 🔲 Por hacer | 2h |
+
+### HU007 - Desarrollo de Terneros — **Camilo**
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 7.1 | Endpoint/vista de terneros por edad/estado | Camilo | 🔲 Por hacer | 3h |
 | 7.2 | Registro de crecimiento (peso, alimentacion, estado) | Camilo | 🔲 Por hacer | 3h |
-| 7.3 | Componente `CalfList` con indicadores de crecimiento | Tomas | 🔲 Por hacer | 4h |
-| 7.4 | Curva de crecimiento del ternero | Tomas | 🔲 Por hacer | 4h |
-| 7.5 | Integracion con ficha general del bovino | Edwin | 🔲 Por hacer | 2h |
+| 7.3 | Componente `CalfList` con indicadores de crecimiento | Camilo | 🔲 Por hacer | 4h |
+| 7.4 | Curva de crecimiento del ternero | Camilo | 🔲 Por hacer | 4h |
+| 7.5 | Integracion con ficha general del bovino | Camilo | 🔲 Por hacer | 2h |
 
 ---
 
 ## Definition of Done (DoD)
 
-- [ ] Endpoints y vistas funcionando segun criterios HU
-- [ ] Integracion completa en interfaz existente
-- [ ] Sin errores de compilacion/lint
+- [ ] Movimientos actualizan estado del animal correctamente
+- [ ] Registros economicos vinculados a actividad productiva
+- [ ] Indicadores visibles y filtrables
+- [ ] Auto-generacion de ternero funcional al registrar parto
+- [ ] ReproductiveTimeline visible en detalle del bovino
+- [ ] Lista y curva de crecimiento de terneros funcional
+- [ ] Sin errores tecnicos en backend/frontend
 - [ ] Evidencia funcional y pruebas minimas
 
 ---
@@ -74,7 +108,9 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |---|---|---|---|
-| Inconsistencias de datos historicos de terneros | Media | Medio | Definir validaciones y valores por defecto |
+| Integridad entre movimiento y estado del animal | Media | Alto | Pruebas de transaccion y validacion cruzada |
+| Clasificacion economica inconsistente | Media | Medio | Catalogo fijo de categorias y validacion |
+| Camilo tiene 2 HU simultaneas (HU006 cierre + HU007) | Media | Medio | Son tareas pequenas (~22h total) |
 
 ---
 
@@ -87,8 +123,14 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| Vista y lista de terneros con indicadores | 🔲 Pendiente | |
-| Curva de crecimiento del ternero | 🔲 Pendiente | |
+| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | |
+| Actualizacion automatica de estado del bovino | 🔲 Pendiente | |
+| UI de movimientos por finca/bovino | 🔲 Pendiente | |
+| Registro y consulta de ingresos/egresos | 🔲 Pendiente | |
+| Dashboard economico con indicadores | 🔲 Pendiente | |
+| Auto-generacion de ternero al registrar parto | 🔲 Pendiente | |
+| ReproductiveTimeline | 🔲 Pendiente | |
+| Lista y curva de crecimiento de terneros | 🔲 Pendiente | |
 
 ### Story Points completados
 
@@ -108,4 +150,5 @@ Pendiente de completar al cierre del sprint.
 
 ### Acciones para Sprint 7
 
-- Ajustar estimacion segun velocidad real registrada en Sprint 5 y 6.
+- Confirmar que los modulos economicos exponen datos consumibles por HU013 (reportes)
+- Revisar velocidad real del equipo vs 18 puntos planificados

@@ -19,7 +19,7 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el veterinario podrá consultar el historial de pesajes y gráfica de evolución de cada bovino (HU005), y registrar eventos reproductivos completos con cálculo automático de fecha de parto (HU006).
+> Al final del sprint, el veterinario podra consultar el historial de pesajes y gráfica de evolución de cada bovino (HU005), y registrar eventos reproductivos completos con cálculo automático de fecha de parto (HU006).
 
 ---
 
@@ -50,28 +50,28 @@ Antes de iniciar una HU en este sprint se verificó:
 
 ## Sprint Backlog
 
-### HU005 - Alimentacion, Ordenos y Pesajes (cierre)
+### HU005 - Alimentacion, Ordenos y Pesajes (cierre) — ✅ COMPLETO
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 5.1 | Modelo/tabla de pesajes historicos por bovino | Camilo | 🔲 Por hacer | 3h |
-| 5.2 | Endpoint `POST /farms/{id}/bovines/{id}/weights` | Edwin | 🔲 Por hacer | 3h |
-| 5.3 | Endpoint `GET /farms/{id}/bovines/{id}/weights` | Edwin | 🔲 Por hacer | 2h |
-| 5.4 | Ajustes de filtros en `/food` por bovino/lote | Camilo | 🔲 Por hacer | 2h |
-| 5.5 | Ajustes de filtros en `/milk-production` por bovino | Camilo | 🔲 Por hacer | 2h |
-| 5.6 | Componente `WeightHistory` + integracion en `BovineDetailPage` | Tomas | 🔲 Por hacer | 4h |
-| 5.7 | Grafica de evolucion (peso y ordeno) en detalle de bovino | Tomas | 🔲 Por hacer | 5h |
+| 5.1 | Modelo/tabla de pesajes historicos por bovino | Camilo | ✅ Hecho | 3h |
+| 5.2 | Endpoint `POST /farms/{id}/bovines/{id}/weights` | Edwin | ✅ Hecho | 3h |
+| 5.3 | Endpoint `GET /farms/{id}/bovines/{id}/weights` | Edwin | ✅ Hecho | 2h |
+| 5.4 | Ajustes de filtros en `/food` por bovino/lote | Camilo | ✅ Hecho | 2h |
+| 5.5 | Ajustes de filtros en `/milk-production` por bovino | Camilo | ✅ Hecho | 2h |
+| 5.6 | Componente `WeightHistory` + integracion en `BovineDetailPage` | Tomas | ✅ Hecho | 4h |
+| 5.7 | Grafica de evolucion (peso y ordeno) en detalle de bovino | Tomas | ✅ Hecho | 5h |
 
 ### HU006 - Control Reproductivo
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 6.1 | Modelo `ReproductiveEvent` + migracion Alembic | Edwin | 🔲 Por hacer | 4h |
-| 6.2 | CRUD `reproductive-events` por bovino | Camilo | 🔲 Por hacer | 4h |
-| 6.3 | Regla de fecha estimada de parto (+283 dias) | Camilo | 🔲 Por hacer | 2h |
-| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | 🔲 Por hacer | 4h |
-| 6.5 | Componente `ReproductiveTimeline` | Tomas | 🔲 Por hacer | 4h |
-| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | 🔲 Por hacer | 3h |
+| 6.1 | Modelo `ReproductiveEvent` + migracion Alembic | Edwin | ✅ Hecho | 4h |
+| 6.2 | CRUD `reproductive-events` por bovino | Camilo | ✅ Hecho (Edwin) | 4h |
+| 6.3 | Regla de fecha estimada de parto (+283 dias) | Camilo | ✅ Hecho (Edwin) | 2h |
+| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | 🔲 Pendiente → Sprint 6 | 4h |
+| 6.5 | Componente `ReproductiveTimeline` | Tomas | 🔲 Pendiente → Sprint 6 | 4h |
+| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | 🔲 Pendiente → Sprint 6 | 3h |
 
 ---
 
@@ -79,12 +79,12 @@ Antes de iniciar una HU en este sprint se verificó:
 
 Un item se considera **Hecho** cuando cumple todos los criterios:
 
-- [ ] Endpoints funcionando (200/201/204 segun corresponda)
-- [ ] Validaciones de negocio y de datos implementadas
-- [ ] Integracion frontend-backend completa
-- [ ] No hay errores de TypeScript ni de imports Python
-- [ ] Pruebas minimas ejecutadas para casos criticos
-- [ ] Evidencia de demo registrada
+- [x] Endpoints funcionando (200/201/204 segun corresponda)
+- [x] Validaciones de negocio y de datos implementadas
+- [x] Integracion frontend-backend completa
+- [x] No hay errores de TypeScript ni de imports Python
+- [x] Pruebas minimas ejecutadas para casos criticos
+- [x] Evidencia de demo registrada
 
 ---
 
@@ -92,8 +92,8 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |---|---|---|---|
-| Logica de parto automatico con creacion de ternero | Media | Alto | Entregar primero CRUD reproductivo y luego automatismo |
-| Falta de datos historicos para graficas | Media | Medio | Sembrar datos de prueba para demo |
+| Logica de parto automatico con creacion de ternero | Media | Alto | Pasa a Sprint 6 para dar tiempo a completar |
+| Falta de datos historicos para graficas | Media | Medio | Datos de prueba sembrados para demo |
 
 ---
 
@@ -106,15 +106,20 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| Historial de pesajes por bovino | 🔲 Pendiente | |
-| Grafica de evolucion de peso | 🔲 Pendiente | |
-| CRUD eventos reproductivos | 🔲 Pendiente | |
-| Calculo fecha estimada de parto | 🔲 Pendiente | |
-| Generacion automatica de ternero al registrar parto | 🔲 Pendiente | |
+| Historial de pesajes por bovino | ✅ Hecho | Modelo, endpoints y componente WeightHistory |
+| Grafica de evolucion de peso | ✅ Hecho | Componente WeightChart con Recharts |
+| CRUD eventos reproductivos | ✅ Hecho | Backend completo por Edwin |
+| Calculo fecha estimada de parto | ✅ Hecho | Regla +283 dias incluida en servicio |
+| Generacion automatica de ternero al registrar parto | 🔲 Pendiente | Pasa a Sprint 6 |
+| Componente ReproductiveTimeline | 🔲 Pendiente | Pasa a Sprint 6 |
 
 ### Story Points completados
 
-Pendiente de cierre.
+| Metrica | Valor |
+|---|---|
+| Story Points planificados | 16 |
+| Story Points completados | 13 (HU005 completa 8 + HU006 backend 5) |
+| Story Points pendientes (→ Sprint 6) | 3 (HU006: auto-ternero, timeline, QA) |
 
 ---
 
@@ -122,13 +127,16 @@ Pendiente de cierre.
 
 ### Que salio bien?
 
-Pendiente de completar al cierre del sprint.
+- HU005 se completo completamente (backend + frontend + graficas)
+- Edwin avanzo significativamente el backend de HU006 (modelo, CRUD, regla parto)
+- Los componentes WeightHistory y WeightChart quedaron funcionales con Recharts
 
 ### Que se puede mejorar?
 
-Pendiente de completar al cierre del sprint.
+- Actualizar los documentos del sprint en tiempo real para reflejar el avance real
+- Coordinar mejor las tareas frontend que dependen de backend para evitar pases a siguiente sprint
 
 ### Acciones para Sprint 6
 
-- Definir si la generacion automatica de ternero se entrega completa o como iteracion posterior.
-- Revisar velocidad real del equipo vs 16 puntos planificados para ajustar Sprint 6.
+- Completar tareas pendientes de HU006 (6.4 auto-ternero, 6.5 ReproductiveTimeline, 6.6 QA)
+- Asignacion vertical: cada persona dueña completa de su HU (backend + frontend)

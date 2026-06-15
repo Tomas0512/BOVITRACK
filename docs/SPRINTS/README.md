@@ -1,52 +1,45 @@
 # Plan de Sprints de Cierre - BoviTrack
 
-Fecha de corte del analisis: 11-05-2026
-Regla de planificacion: 15 dias por sprint, 2 HU por sprint.
-Equipo objetivo: 3 personas (incluye nuevo integrante: Edwin Delgado).
+Fecha de corte del analisis: 15-06-2026
+Regla de planificacion: 15 dias por sprint, asignacion vertical (cada persona dueña de su HU completa).
+Equipo: 3 personas (Camilo Ortiz, Tomas Canon, Edwin Delgado).
 
-## Roles propuestos (3)
+## Roles
 
-1. Rol A - Backend y Base de Datos
-- APIs FastAPI, modelos, migraciones Alembic, reglas de negocio.
+1. **Tomas Canon** — Full-stack (Developer / Product Owner)
+2. **Edwin Delgado** — Full-stack (Developer)
+3. **Camilo Ortiz** — Full-stack (Developer / Scrum Master) + QA
 
-2. Rol B - Frontend e Integracion
-- Vistas React, consumo de APIs, validaciones UI, experiencia de usuario.
+## Estado real por HU (15-06-2026)
 
-3. Rol C - QA, DevOps y Documentacion
-- Pruebas (backend/frontend), regresion, docker, calidad, evidencias y cierre de sprint.
+| HU | Estado | Observaciones |
+|----|--------|---------------|
+| HU001 | ✅ Completa | Autenticacion JWT, RBAC, 4 roles, 32 permisos |
+| HU002 | ✅ Completa | Fincas y lotes (backend + frontend) |
+| HU003 | ✅ Completa | Potreros (backend + frontend) |
+| HU004 | ✅ Completa | Registro y gestion de bovinos |
+| HU005 | ✅ Completa | Alimentacion, ordenos, pesajes, graficas (Recharts) |
+| HU006 | ✅ Backend completo | Pendiente: auto-ternero, ReproductiveTimeline frontend, QA (→ Sprint 6) |
+| HU007 | 🔲 Pendiente | Para completar en Sprint 6 por Camilo |
+| HU008 | ✅ Completa | Planes sanitarios, alertas, calendario (cerrado en Sprint 4) |
+| HU009 | 🔲 Pendiente | Para completar en Sprint 6 por Tomas |
+| HU010 | 🔲 Pendiente | Para completar en Sprint 6 por Edwin |
+| HU011 | 🔲 Parcial | Pendiente cierre de compras/costos (→ Sprint 7 Edwin) |
+| HU012 | 🔲 Pendiente | Para completar en Sprint 7 por Camilo |
+| HU013 | 🔲 Parcial | Endpoints existen, falta exportacion + frontend (→ Sprint 7 Tomas) |
+| HU014 | 🔲 Pendiente | Para completar en Sprint 8 por Tomas |
+| HU015 | 🔲 Parcial | Auditoria existe, falta exportacion avanzada + UI (→ Sprint 8 Camilo) |
+| HU016 | 🔲 Pendiente | Para completar en Sprint 8 por Edwin + Camilo |
 
-Nota: cuando confirmes nombres, se reemplaza Rol A/B/C por las personas.
+## Plan restante (asignacion vertical)
 
-## Estado real detectado por HU
+| Sprint | Fechas | Tomas | Edwin | Camilo |
+|--------|--------|-------|-------|--------|
+| **Sprint 5** | May 30 - Jun 12 | ✅ HU005 cierre (frontend) | ✅ HU006 backend | QA + filtros |
+| **Sprint 6** | Jun 13 - 26 | **HU009** — Movimientos animales | **HU010** — Informacion economica | HU006 cierre + HU007 terneros + QA |
+| **Sprint 7** | Jun 27 - Jul 10 | **HU013** — Reportes (cierre) | **HU011** — Inventarios (cierre) | HU012 — Gestion documental + QA |
+| **Sprint 8** | Jul 11 - 24 | **HU014** — Alertas/notificaciones | **HU016** — Offline (backend) | HU015 auditoria + HU016 frontend + QA |
+| **Sprint 9** | Jul 25 - Ago 7 | QA final, regresion, bugs, estabilizacion (todos) | | |
+| **Sprint 10** | Ago 8 - 21 | Cierre proyecto, demo final, despliegue, retrospectiva (todos) | | |
 
-- HU001: completa.
-- HU002: completa.
-- HU003: completa.
-- HU004: completa.
-- HU005: parcial (hay alimentacion y ordenos; faltan pesajes historicos y graficos).
-- HU006: pendiente.
-- HU007: pendiente/parcial bajo.
-- HU008: parcial (tratamientos listos; faltan planes, calendario y alertas sanitarias).
-- HU009: pendiente.
-- HU010: pendiente.
-- HU011: parcial (inventario y stock minimo existen; falta cierre de compras/costos completo).
-- HU012: pendiente.
-- HU013: parcial (endpoints de reportes existen; falta exportar y frontend de reportes).
-- HU014: pendiente/parcial bajo (no hay notificaciones multicanal ni preferencias/historial).
-- HU015: parcial (auditoria existe; falta exportacion avanzada).
-- HU016: pendiente.
-
-## Sprint no cerrado
-
-El Sprint 4 historico no esta cerrado de forma integral: tiene avances tecnicos pero no cumple cierre completo de las HU planeadas.
-
-## Plan restante
-
-- Sprint 5: HU005 + HU006
-- Sprint 6: HU007 + HU008
-- Sprint 7: HU009 + HU010
-- Sprint 8: HU011 + HU012
-- Sprint 9: HU013 + HU014
-- Sprint 10: HU015 + HU016
-
-Revisar detalle en archivos SPRINT_05 a SPRINT_10.
+Total 6 sprints. Sin dependencias entre personas dentro del mismo sprint (asignacion vertical).

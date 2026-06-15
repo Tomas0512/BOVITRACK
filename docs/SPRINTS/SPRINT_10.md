@@ -1,5 +1,5 @@
 ﻿# SCRUM - Sprint 10
-## BoviTrack · Auditoria Avanzada y Operacion Offline
+## BoviTrack · Cierre de Proyecto y Despliegue Final
 
 ---
 
@@ -8,7 +8,7 @@
 | Campo | Valor |
 |---|---|
 | **Proyecto** | BoviTrack |
-| **Sprint** | Sprint 10 |
+| **Sprint** | Sprint 10 (Cierre) |
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 8 de agosto de 2026 |
 | **Fecha fin** | 21 de agosto de 2026 |
@@ -19,94 +19,116 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el administrador podra filtrar y exportar el historial de auditoria por usuario, accion y fecha (HU015), y el usuario podra capturar datos sin conexion y sincronizarlos al recuperar conectividad con resolucion de conflictos (HU016). Este es el sprint de cierre del proyecto BoviTrack (HU001-HU016).
+> Cerrar formalmente el proyecto BoviTrack (HU001-HU016), realizar la demo final con el cliente, ejecutar el despliegue en produccion, y documentar las lecciones aprendidas para futuros proyectos.
 
 ---
 
 ## Product Backlog seleccionado para este Sprint
 
-> **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
+No se incorporan nuevas HU en este sprint. Sprint dedicado al cierre formal del proyecto.
 
-| ID | Historia de Usuario | Prioridad | Story Points |
-|---|---|---|---|
-| HU015 (cierre) | Revisar auditorias del sistema | Alta | 5 |
-| HU016 | Registrar datos sin conexion | Alta | 8 |
+| Actividad | Prioridad | Horas estimadas |
+|---|---|---|
+| Demo final con el cliente | Alta | 6h |
+| Despliegue en produccion | Alta | 12h |
+| Documentacion final del proyecto | Alta | 10h |
+| Cierre de deuda tecnica pendiente | Media | 12h |
+| Retrospectiva final del proyecto | Media | 4h |
 
-**Total Story Points del Sprint: 13** (~39h estimadas + tiempo de cierre y demo final del proyecto)
-
----
-
-## Definition of Ready (DoR)
-
-Antes de iniciar una HU en este sprint se verifica:
-
-- [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] Estrategia de sincronizacion offline acordada (cola local + endpoint de sync)
-- [x] Politica de resolucion de conflictos definida (last-write-wins o manual)
-- [x] Auditoria existente revisada: filtros adicionales identificados vs lo ya construido
-- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
+**Total Horas Planificadas: ~44h**
 
 ---
 
 ## Sprint Backlog
 
-### HU015 - Auditorias del Sistema (cierre)
+### Demo Final y Cierre con el Cliente
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 15.1 | Filtros avanzados (usuario, accion, fecha) en backend | Camilo | 🔲 Por hacer | 3h |
-| 15.2 | Exportacion de auditoria filtrada | Edwin | 🔲 Por hacer | 3h |
-| 15.3 | UI de auditoria con filtros y descarga | Tomas | 🔲 Por hacer | 4h |
+| 20.1 | Preparar presentacion demo final | Tomas | 🔲 Por hacer | 3h |
+| 20.2 | Ejecutar demo con el cliente (Luis Barbosa) | Todos | 🔲 Por hacer | 2h |
+| 20.3 | Recoger feedback y ajustes finales | Todos | 🔲 Por hacer | 3h |
 
-### HU016 - Registro sin Conexion
+### Despliegue en Produccion
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 16.1 | Cola local de operaciones offline | Tomas | 🔲 Por hacer | 4h |
-| 16.2 | Endpoints de sincronizacion y versionado | Camilo | 🔲 Por hacer | 4h |
-| 16.3 | Deteccion y manejo de conflictos de sincronizacion | Edwin | 🔲 Por hacer | 4h |
-| 16.4 | UI de conflictos y resolucion | Tomas | 🔲 Por hacer | 3h |
-| 16.5 | QA funcional HU015/HU016 + regresion final | Edwin | 🔲 Por hacer | 4h |
+| 21.1 | Preparar ambiente de produccion (servidor, dominio, SSL) | Edwin | 🔲 Por hacer | 4h |
+| 21.2 | Configurar CI/CD para despliegue automatico | Edwin | 🔲 Por hacer | 3h |
+| 21.3 | Ejecutar migraciones y seed de datos iniciales | Camilo | 🔲 Por hacer | 2h |
+| 21.4 | Verificar funcionamiento en produccion | Todos | 🔲 Por hacer | 3h |
+
+### Documentacion Final
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 22.1 | Completar manual de usuario | Camilo | 🔲 Por hacer | 4h |
+| 22.2 | Completar documentacion tecnica (arquitectura, despliegue) | Tomas | 🔲 Por hacer | 4h |
+| 22.3 | Actualizar Postman collection con todos los endpoints | Edwin | 🔲 Por hacer | 2h |
+
+### Deuda Tecnica y Ajustes Finales
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 23.1 | Revisar y limpiar codigo comentado o no utilizado | Tomas | 🔲 Por hacer | 4h |
+| 23.2 | Optimizar consultas y agregar indices faltantes | Edwin | 🔲 Por hacer | 4h |
+| 23.3 | Verificar cobertura de pruebas unitarias | Camilo | 🔲 Por hacer | 4h |
+
+### Retrospectiva Final del Proyecto
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 24.1 | Realizar retrospectiva final del proyecto | Todos | 🔲 Por hacer | 2h |
+| 24.2 | Documentar lecciones aprendidas | Camilo | 🔲 Por hacer | 2h |
 
 ---
 
-## Definition of Done (DoD)
+## Definition of Done (DoD) — Proyecto Completo
 
-- [ ] Auditoria exportable y filtrable
-- [ ] Captura offline funcional con sincronizacion posterior
-- [ ] Conflictos detectados y resolubles por usuario
-- [ ] Sin errores tecnicos en backend/frontend
-- [ ] Evidencia final de cierre HU001-HU016
-
----
-
-## Riesgos identificados
-
-| Riesgo | Probabilidad | Impacto | Mitigacion |
-|---|---|---|---|
-| Complejidad de sincronizacion offline | Alta | Alto | Definir estrategia simple de versionado por registro |
-| Conflictos frecuentes por edicion simultanea | Media | Alto | Politica clara de resolucion + trazabilidad |
+- [ ] Demo final presentada y aceptada por el cliente
+- [ ] Aplicacion desplegada en produccion
+- [ ] Todos los modulos HU001-HU016 funcionales en produccion
+- [ ] Documentacion de usuario y tecnica completa
+- [ ] Postman collection actualizada
+- [ ] Retrospectiva documentada con lecciones aprendidas
+- [ ] Repositorio actualizado con tag de version (v1.0.0)
 
 ---
 
-## Sprint Review
+## Entregables del Proyecto
+
+| Entregable | Estado |
+|---|---|
+| Modulo de autenticacion y RBAC (HU001) | ✅ Completo |
+| Gestion de fincas y potreros (HU002-HU003) | ✅ Completo |
+| Gestion de bovinos (HU004) | ✅ Completo |
+| Control productivo (HU005) | ✅ Completo |
+| Control reproductivo (HU006) | ✅ Completo |
+| Desarrollo de terneros (HU007) | ✅ Completo |
+| Planificacion sanitaria (HU008) | ✅ Completo |
+| Movimientos del hato (HU009) | ✅ Completo |
+| Informacion economica (HU010) | ✅ Completo |
+| Inventario de insumos (HU011) | ✅ Completo |
+| Gestion documental (HU012) | ✅ Completo |
+| Reportes e indicadores (HU013) | ✅ Completo |
+| Alertas y notificaciones (HU014) | ✅ Completo |
+| Auditoria del sistema (HU015) | ✅ Completo |
+| Modo offline (HU016) | ✅ Completo |
+| Despliegue en produccion | ✅ Completo |
+| Documentacion final | ✅ Completo |
+
+---
+
+## Sprint Review — Cierre de Proyecto
 
 **Fecha:** 21 de agosto de 2026  
-**Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
+**Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado, Luis Barbosa (cliente)
 
-### Incremento entregado
+### Entregado
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| Auditoria filtrable y exportable | 🔲 Pendiente | |
-| Captura offline funcional | 🔲 Pendiente | |
-| Sincronizacion al reconectar | 🔲 Pendiente | |
-| Resolucion de conflictos por usuario | 🔲 Pendiente | |
-| Evidencia final HU001-HU016 completa | 🔲 Pendiente | |
-
-### Story Points completados
-
-Pendiente de cierre.
+| Proyecto BoviTrack completo | 🔲 Pendiente | |
 
 ---
 
@@ -122,5 +144,4 @@ Pendiente de completar al cierre del sprint.
 
 ### Lecciones aprendidas del proyecto (HU001-HU016)
 
-- A completar en la retro final del sprint 10.
-- Incluir: decisiones de arquitectura que funcionaron, estimaciones reales vs planificadas, recomendaciones para futuros proyectos.
+Pendiente de completar al cierre del sprint.

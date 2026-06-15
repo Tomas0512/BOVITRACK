@@ -1,5 +1,5 @@
 ﻿# SCRUM - Sprint 9
-## BoviTrack · Reportes, Indicadores y Notificaciones
+## BoviTrack · Estabilizacion, QA Final y Preparacion de Cierre
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## Objetivo del Sprint
 
-> Al final del sprint, el administrador podra generar y exportar reportes productivos, sanitarios y economicos con filtros por fecha (HU013), y el usuario podra configurar alertas automaticas y consultar su historial de notificaciones (HU014).
+> Al final del sprint, el proyecto BoviTrack estara completamente funcional, libre de bugs criticos, con todos los modulos integrados y probados, listo para la demo final y despliegue. Este sprint no incluye nuevas HU, solo estabilizacion y aseguramiento de calidad.
 
 ---
 
@@ -27,57 +27,77 @@
 
 > **Equivalencia del equipo:** 1 Story Point ≈ 3 horas de trabajo efectivo. Capacidad del equipo: ~60h por sprint (3 personas × ~20h disponibles).
 
-| ID | Historia de Usuario | Prioridad | Story Points |
-|---|---|---|---|
-| HU013 (cierre) | Generar reportes e indicadores | Alta | 8 |
-| HU014 | Recibir alertas y notificaciones | Media | 5 |
+No se incorporan nuevas HU en este sprint. El enfoque es 100% en calidad.
 
-**Total Story Points del Sprint: 13** (~39h estimadas, dentro de la capacidad del equipo)
+| Actividad | Prioridad | Horas estimadas |
+|---|---|---|
+| QA y pruebas de regresion HU001-HU016 | Alta | 24h |
+| Correccion de bugs encontrados | Alta | 16h |
+| Revision de seguridad (OWASP top 10) | Media | 8h |
+| Optimizacion de rendimiento | Media | 8h |
+| Documentacion tecnica y de usuario | Media | 10h |
+
+**Total Horas Planificadas: ~66h** (dentro de la capacidad del equipo con margen)
 
 ---
 
 ## Definition of Ready (DoR)
 
-Antes de iniciar una HU en este sprint se verifica:
+Antes de iniciar el sprint de estabilizacion se verifica:
 
-- [x] Criterios de aceptacion definidos y acordados con el equipo
-- [x] Formatos de exportacion acordados (PDF y/o Excel)
-- [x] Fuentes de datos de reportes identificadas (modulos HU005-HU012)
-- [x] Canales de notificacion definidos (in-app y/o email)
-- [x] Sin bloqueos tecnicos conocidos al inicio del sprint
+- [x] Todos los modulos HU001-HU016 tienen al menos su funcionalidad base implementada
+- [x] Los sprints anteriores fueron cerrados formalmente
+- [x] Se cuenta con un listado de bugs conocidos o riesgos tecnicos
+- [x] Ambiente de pruebas disponible (local o staging)
 
 ---
 
 ## Sprint Backlog
 
-### HU013 - Reportes e Indicadores (cierre)
+### QA y Pruebas de Regresion
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 13.1 | Completar filtros de reportes por fecha/categoria | Camilo | 🔲 Por hacer | 3h |
-| 13.2 | Exportacion PDF/Excel | Edwin | 🔲 Por hacer | 4h |
-| 13.3 | Pantalla de reportes con descarga | Tomas | 🔲 Por hacer | 4h |
-| 13.4 | Ajustes de indicadores productivos/sanitarios/economicos | Camilo | 🔲 Por hacer | 3h |
+| 17.1 | Pruebas de regresion modulo auth (HU001) | Todos | 🔲 Por hacer | 4h |
+| 17.2 | Pruebas de regresion fincas/potreros (HU002-HU003) | Todos | 🔲 Por hacer | 4h |
+| 17.3 | Pruebas de regresion bovinos (HU004) | Todos | 🔲 Por hacer | 4h |
+| 17.4 | Pruebas de regresion productivo (HU005) | Todos | 🔲 Por hacer | 4h |
+| 17.5 | Pruebas de regresion reproductivo (HU006) | Todos | 🔲 Por hacer | 4h |
+| 17.6 | Pruebas de regresion terneros (HU007) | Todos | 🔲 Por hacer | 3h |
+| 17.7 | Pruebas de regresion sanitario (HU008) | Todos | 🔲 Por hacer | 3h |
+| 17.8 | Pruebas de regresion movimientos (HU009) | Todos | 🔲 Por hacer | 3h |
+| 17.9 | Pruebas de regresion economia (HU010) | Todos | 🔲 Por hacer | 3h |
+| 17.10 | Pruebas de regresion inventarios (HU011) | Todos | 🔲 Por hacer | 3h |
+| 17.11 | Pruebas de regresion documentos (HU012) | Todos | 🔲 Por hacer | 3h |
+| 17.12 | Pruebas de regresion reportes (HU013) | Todos | 🔲 Por hacer | 3h |
+| 17.13 | Pruebas de regresion notificaciones (HU014) | Todos | 🔲 Por hacer | 3h |
+| 17.14 | Pruebas de regresion auditoria (HU015) | Todos | 🔲 Por hacer | 2h |
+| 17.15 | Pruebas de regresion offline (HU016) | Todos | 🔲 Por hacer | 4h |
 
-### HU014 - Alertas y Notificaciones
+### Correccion de Bugs
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 14.1 | Motor de notificaciones por eventos proximos | Edwin | 🔲 Por hacer | 4h |
-| 14.2 | Preferencias por canal y frecuencia | Camilo | 🔲 Por hacer | 3h |
-| 14.3 | Historial de notificaciones enviadas | Edwin | 🔲 Por hacer | 3h |
-| 14.4 | UI de configuracion de alertas + historial | Tomas | 🔲 Por hacer | 5h |
-| 14.5 | QA funcional HU013/HU014 | Edwin | 🔲 Por hacer | 3h |
+| 18.1 | Correccion de bugs criticos encontrados en QA | Segun modulo | 🔲 Por hacer | 8h |
+| 18.2 | Correccion de bugs medios/bajos | Segun modulo | 🔲 Por hacer | 8h |
+
+### Seguridad, Rendimiento y Documentacion
+
+| # | Tarea | Responsable | Estado | Estimacion |
+|---|---|---|---|---|
+| 19.1 | Revision OWASP top 10 (file upload, XSS, SQLi, auth) | Edwin | 🔲 Por hacer | 4h |
+| 19.2 | Revision de rendimiento (consultas lentas, N+1) | Tomas | 🔲 Por hacer | 4h |
+| 19.3 | Actualizar documentacion tecnica (README, API docs) | Camilo | 🔲 Por hacer | 4h |
+| 19.4 | Preparar evidencias de cierre por modulo | Camilo | 🔲 Por hacer | 6h |
 
 ---
 
 ## Definition of Done (DoD)
 
-- [ ] Reportes exportables en formatos solicitados
-- [ ] Indicadores visibles y con filtros funcionales
-- [ ] Notificaciones configurables y registradas en historial
-- [ ] Sin errores tecnicos en backend/frontend
-- [ ] Evidencia funcional y pruebas minimas
+- [ ] Todos los modulos HU001-HU016 probados y funcionales
+- [ ] Sin bugs criticos ni altos conocidos
+- [ ] Documentacion tecnica actualizada
+- [ ] Evidencias de cierre preparadas
 
 ---
 
@@ -85,8 +105,8 @@ Antes de iniciar una HU en este sprint se verifica:
 
 | Riesgo | Probabilidad | Impacto | Mitigacion |
 |---|---|---|---|
-| Fallas en generacion de archivos grandes | Media | Medio | Limitar rangos y paginar resultados |
-| Notificaciones duplicadas o perdidas | Media | Alto | Idempotencia y trazabilidad de envios |
+| Bugs criticos que requieren reapertura de modulos | Media | Alto | Priorizar fixes sobre nuevas funcionalidades |
+| Documentacion desactualizada | Alta | Medio | Dedicar tiempo especifico en el backlog |
 
 ---
 
@@ -97,17 +117,12 @@ Antes de iniciar una HU en este sprint se verifica:
 
 ### Incremento entregado
 
-| Modulo | Entregado | Observaciones |
+| Actividad | Entregado | Observaciones |
 |---|---|---|
-| Reportes con filtros por fecha/categoria | 🔲 Pendiente | |
-| Exportacion PDF/Excel funcional | 🔲 Pendiente | |
-| Indicadores productivos/sanitarios/economicos | 🔲 Pendiente | |
-| Motor de notificaciones por eventos proximos | 🔲 Pendiente | |
-| Configuracion de alertas + historial | 🔲 Pendiente | |
-
-### Story Points completados
-
-Pendiente de cierre.
+| Pruebas de regresion completas | 🔲 Pendiente | |
+| Bugs correctivos aplicados | 🔲 Pendiente | |
+| Revision de seguridad | 🔲 Pendiente | |
+| Documentacion actualizada | 🔲 Pendiente | |
 
 ---
 
@@ -123,5 +138,6 @@ Pendiente de completar al cierre del sprint.
 
 ### Acciones para Sprint 10
 
-- Confirmar que la auditoria (HU015) puede reutilizar los filtros de reportes ya construidos.
-- Definir la estrategia offline (HU016) antes de comenzar el sprint: PWA, Service Worker o app nativa.
+- Preparar demo final con todos los modulos
+- Coordinar despliegue en produccion
+- Completar retrospectiva final del proyecto
