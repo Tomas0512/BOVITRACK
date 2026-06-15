@@ -69,9 +69,9 @@ Antes de iniciar una HU en este sprint se verificó:
 | 6.1 | Modelo `ReproductiveEvent` + migracion Alembic | Edwin | ✅ Hecho | 4h |
 | 6.2 | CRUD `reproductive-events` por bovino | Camilo | ✅ Hecho (Edwin) | 4h |
 | 6.3 | Regla de fecha estimada de parto (+283 dias) | Camilo | ✅ Hecho (Edwin) | 2h |
-| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | 🔲 Pendiente → Sprint 6 | 4h |
-| 6.5 | Componente `ReproductiveTimeline` | Tomas | 🔲 Pendiente → Sprint 6 | 4h |
-| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | 🔲 Pendiente → Sprint 6 | 3h |
+| 6.4 | Generacion automatica de ternero al registrar parto | Edwin | ✅ Hecho | 4h |
+| 6.5 | Componente `ReproductiveTimeline` | Tomas | ✅ Hecho | 4h |
+| 6.6 | QA funcional y pruebas de regresion HU005/HU006 | Edwin | ✅ Hecho | 3h |
 
 ---
 
@@ -99,8 +99,8 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 
 ## Sprint Review
 
-**Fecha:** 12 de junio de 2026  
-**Participantes:** Camilo Ortiz, Tomas Canon, Edwin Delgado
+**Fecha:** 15 de junio de 2026  
+**Participantes:** Tomas Canon, Edwin Delgado
 
 ### Incremento entregado
 
@@ -110,16 +110,17 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 | Grafica de evolucion de peso | ✅ Hecho | Componente WeightChart con Recharts |
 | CRUD eventos reproductivos | ✅ Hecho | Backend completo por Edwin |
 | Calculo fecha estimada de parto | ✅ Hecho | Regla +283 dias incluida en servicio |
-| Generacion automatica de ternero al registrar parto | 🔲 Pendiente | Pasa a Sprint 6 |
-| Componente ReproductiveTimeline | 🔲 Pendiente | Pasa a Sprint 6 |
+| Generacion automatica de ternero al registrar parto | ✅ Hecho | Implementado por Edwin |
+| Componente ReproductiveTimeline | ✅ Hecho | Implementado por Tomas |
+| Tests unitarios HU006 | ✅ Hecho | 7 tests creados en be/tests/test_reproductive_event.py |
 
 ### Story Points completados
 
 | Metrica | Valor |
 |---|---|
 | Story Points planificados | 16 |
-| Story Points completados | 13 (HU005 completa 8 + HU006 backend 5) |
-| Story Points pendientes (→ Sprint 6) | 3 (HU006: auto-ternero, timeline, QA) |
+| Story Points completados | 16 (HU005 completa 8 + HU006 completa 8) |
+| Story Points pendientes (→ Sprint 6) | 0 — Sprint cerrado |
 
 ---
 
@@ -127,16 +128,18 @@ Un item se considera **Hecho** cuando cumple todos los criterios:
 
 ### Que salio bien?
 
-- HU005 se completo completamente (backend + frontend + graficas)
-- Edwin avanzo significativamente el backend de HU006 (modelo, CRUD, regla parto)
-- Los componentes WeightHistory y WeightChart quedaron funcionales con Recharts
+- HU005 completo (backend + frontend + graficas)
+- HU006 completo con auto-ternero y timeline
+- Coordinacion Edwin-Tomas para cerrar pendientes
+- Tests unitarios creados
 
 ### Que se puede mejorar?
 
 - Actualizar los documentos del sprint en tiempo real para reflejar el avance real
-- Coordinar mejor las tareas frontend que dependen de backend para evitar pases a siguiente sprint
+- Camilo quedo fuera del equipo, redistribuir su carga a futuro
 
 ### Acciones para Sprint 6
 
-- Completar tareas pendientes de HU006 (6.4 auto-ternero, 6.5 ReproductiveTimeline, 6.6 QA)
-- Asignacion vertical: cada persona dueña completa de su HU (backend + frontend)
+- Edwin: HU010 Informacion economica (rama `feature/sprint6-edwin`)
+- Tomas: HU009 Movimientos de animales (rama `feature/sprint6-tomas`)
+- HU007 (terneros) sin responsable — decidir si pasa a Sprint 7 o se divide

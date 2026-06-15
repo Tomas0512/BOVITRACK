@@ -6,12 +6,14 @@ import WeightHistory from "../components/bovines/WeightHistory";
 import MilkProductionList from "../components/bovines/MilkProductionList";
 import FoodList from "../components/bovines/FoodList";
 import TreatmentList from "../components/bovines/TreatmentList";
+import ReproductiveTimeline from "../components/bovines/ReproductiveTimeline";
 
-type Tab = "general" | "productivo" | "sanitario";
+type Tab = "general" | "productivo" | "reproductivo" | "sanitario";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "general", label: "General", icon: "📋" },
   { id: "productivo", label: "Productivo", icon: "📊" },
+  { id: "reproductivo", label: "Reproductivo", icon: "🧬" },
   { id: "sanitario", label: "Sanitario", icon: "💉" },
 ];
 
@@ -171,6 +173,13 @@ export default function BovineDetailPage() {
           <MilkProductionList farmId={farmId} bovineId={bovineId} />
           <FoodList farmId={farmId} bovineId={bovineId} />
         </>
+      )}
+
+      {/* ¿Qué? Pestaña de eventos reproductivos del bovino.
+          ¿Para qué? Mostrar el timeline de servicios, partos, abortos y secados.
+          ¿Impacto? Sin esta pestaña, el usuario no puede gestionar la reproducción. */}
+      {activeTab === "reproductivo" && farmId && bovineId && (
+        <ReproductiveTimeline farmId={farmId} bovineId={bovineId} />
       )}
 
       {/* Pestaña Sanitario */}
