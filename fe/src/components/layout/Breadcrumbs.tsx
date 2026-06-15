@@ -21,7 +21,7 @@ export default function Breadcrumbs() {
     <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-sm">
       {crumbs.map((crumb, idx) => (
         <span key={idx} className="flex items-center gap-2">
-          {idx > 0 && <span className="text-gray-400">/</span>}
+          {idx > 0 && <span className="text-text-muted">/</span>}
           {crumb.to ? (
             <Link
               to={crumb.to}
@@ -30,7 +30,7 @@ export default function Breadcrumbs() {
               {crumb.label}
             </Link>
           ) : (
-            <span className="font-semibold text-gray-700">{crumb.label}</span>
+            <span className="font-semibold text-text-secondary">{crumb.label}</span>
           )}
         </span>
       ))}

@@ -121,9 +121,9 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">
+        <h3 className="font-bold text-text-primary">
           <Dna size={18} className="inline mr-1.5 align-text-bottom text-primary" />
           Eventos reproductivos
         </h3>
@@ -146,14 +146,14 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-primary">Nuevo evento reproductivo</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"
               >
                 <X size={20} />
               </button>
@@ -167,14 +167,14 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
 
             <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Tipo de evento <span className="text-red-500">*</span>
                 </label>
                 <select
                   required
                   value={form.event_type}
                   onChange={(e) => setForm((f) => ({ ...f, event_type: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 >
                   {Object.entries(EVENT_TYPE_LABELS).map(([value, label]) => (
                     <option key={value} value={value}>{label}</option>
@@ -183,23 +183,23 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Fecha del evento <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date" required
                   value={form.event_date}
                   onChange={(e) => setForm((f) => ({ ...f, event_date: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Resultado</label>
+                <label className="mb-1 block text-xs font-medium text-text-secondary">Resultado</label>
                 <select
                   value={form.result ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, result: e.target.value || undefined }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 >
                   <option value="">— Sin registrar —</option>
                   {Object.entries(RESULT_LABELS).map(([value, label]) => (
@@ -209,19 +209,19 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Fecha estimada de parto
                 </label>
                 <input
                   type="date"
                   value={form.due_date ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value || undefined }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Observaciones
                 </label>
                 <input
@@ -229,16 +229,16 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
                   value={form.observations ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
                   placeholder="Opcional"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
-                <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.observations ?? "").length}/500</span>
+                <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.observations ?? "").length}/500</span>
               </div>
 
               <div className="col-span-full flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
                 >
                   Cancelar
                 </button>
@@ -268,7 +268,7 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
         <p className="py-4 text-center text-sm text-red-500">{error}</p>
       )}
       {!loading && !error && events.length === 0 && (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-text-muted">
           Sin eventos reproductivos registrados.
         </p>
       )}
@@ -277,7 +277,7 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
           {events.map((event) => (
             <div
               key={event.id}
-              className="flex items-start gap-4 rounded-xl border border-gray-100 p-4"
+              className="flex items-start gap-4 rounded-xl border border-border p-4"
             >
               <div className="mt-1">
                 {event.event_type === "parto" ? (
@@ -296,12 +296,12 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      EVENT_TYPE_COLORS[event.event_type] ?? "bg-gray-50 text-gray-700"
+                      EVENT_TYPE_COLORS[event.event_type] ?? "bg-surface-alt text-text-secondary"
                     }`}
                   >
                     {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-text-muted">
                     {formatDate(event.event_date)}
                   </span>
                   {event.due_date && (
@@ -311,12 +311,12 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
                   )}
                 </div>
                 {event.result && (
-                  <p className="mt-1 text-sm text-gray-600">
+                  <p className="mt-1 text-sm text-text-secondary">
                     Resultado: {RESULT_LABELS[event.result] ?? event.result}
                   </p>
                 )}
                 {event.observations && (
-                  <p className="mt-0.5 text-sm text-gray-400">
+                  <p className="mt-0.5 text-sm text-text-muted">
                     {event.observations}
                   </p>
                 )}

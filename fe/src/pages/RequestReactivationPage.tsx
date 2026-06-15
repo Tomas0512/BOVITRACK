@@ -33,10 +33,10 @@ export default function RequestReactivationPage() {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full items-center justify-center">
-          <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-8 text-center shadow-lg">
             <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
-            <h2 className="mb-2 text-xl font-bold text-gray-800">Solicitud enviada</h2>
-            <p className="mb-6 text-sm text-gray-500">
+            <h2 className="mb-2 text-xl font-bold text-text-primary">Solicitud enviada</h2>
+            <p className="mb-6 text-sm text-text-secondary">
               Tu solicitud de reactivación ha sido registrada. Un administrador la revisará pronto.
             </p>
             <Link to="/login" className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white no-underline hover:bg-primary-light">
@@ -51,9 +51,9 @@ export default function RequestReactivationPage() {
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
       <div className="flex w-full items-center justify-center">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-lg">
           <h2 className="mb-0.5 text-xl font-bold text-primary">Solicitar reactivación</h2>
-          <p className="mb-6 text-sm text-gray-500">
+          <p className="mb-6 text-sm text-text-secondary">
             Ingresa tu correo para solicitar la reactivación de tu cuenta desactivada.
           </p>
 
@@ -63,24 +63,24 @@ export default function RequestReactivationPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-800">Correo electrónico</label>
+              <label className="mb-1 block text-sm font-semibold text-text-primary">Correo electrónico</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="correo@ejemplo.com"
-                className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-full rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-800">Motivo (opcional)</label>
+              <label className="mb-1 block text-sm font-semibold text-text-primary">Motivo (opcional)</label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Explica por qué deseas reactivar tu cuenta..."
                 rows={3}
-                className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="w-full rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
             </div>
             <button

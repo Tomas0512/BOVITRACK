@@ -75,10 +75,10 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl mx-4">
+      <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">{existing ? "Editar bovino" : "Registrar bovino"}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <h2 className="text-lg font-bold text-text-primary">{existing ? "Editar bovino" : "Registrar bovino"}</h2>
+          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
         </div>
 
         {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
@@ -86,104 +86,104 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">N° Identificación *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">N° Identificación *</label>
               <input type="text" value={form.identification_number} maxLength={50}
                 onChange={(e) => set("identification_number", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              <span className="mt-0.5 block text-right text-xs text-gray-400">{form.identification_number.length}/50</span>
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              <span className="mt-0.5 block text-right text-xs text-text-muted">{form.identification_number.length}/50</span>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre</label>
               <input type="text" value={form.name ?? ""} maxLength={100}
                 onChange={(e) => set("name", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
-              <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.name ?? "").length}/100</span>
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.name ?? "").length}/100</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Sexo *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Sexo *</label>
               <select value={form.sex} onChange={(e) => set("sex", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                 <option value="macho">Macho</option>
                 <option value="hembra">Hembra</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Raza</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Raza</label>
               <input type="text" value={form.breed ?? ""} maxLength={50}
                 onChange={(e) => set("breed", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Fecha nacimiento *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha nacimiento *</label>
               <input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Color</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Color</label>
               <input type="text" value={form.color ?? ""} maxLength={50}
                 onChange={(e) => set("color", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Peso nacimiento (kg)</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Peso nacimiento (kg)</label>
               <input type="number" min={0} step={0.1} value={form.birth_weight ?? ""}
                 onChange={(e) => set("birth_weight", e.target.value ? parseFloat(e.target.value) : null)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Peso actual (kg)</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Peso actual (kg)</label>
               <input type="number" min={0} step={0.1} value={form.current_weight ?? ""}
                 onChange={(e) => set("current_weight", e.target.value ? parseFloat(e.target.value) : null)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Tipo de ingreso *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo de ingreso *</label>
               <select value={form.entry_type} onChange={(e) => set("entry_type", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                 {ENTRY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Fecha ingreso *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha ingreso *</label>
               <input type="date" value={form.entry_date} onChange={(e) => set("entry_date", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Propósito</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Propósito</label>
               <select value={form.purpose ?? ""} onChange={(e) => set("purpose", e.target.value || null)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                 <option value="">Sin especificar</option>
                 {PURPOSES.map((p) => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Estado</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Estado</label>
               <select value={form.status} onChange={(e) => set("status", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                 {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Lote asignado</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Lote asignado</label>
             <select value={form.land_plot_id ?? ""} onChange={(e) => set("land_plot_id", e.target.value || null)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none">
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
               <option value="">Sin lote</option>
               {landPlots.filter((lp) => lp.is_active).map((lp) => (
                 <option key={lp.id} value={lp.id}>{lp.name} ({lp.usage_type})</option>
@@ -192,16 +192,16 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Observaciones</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Observaciones</label>
             <textarea value={form.observations ?? ""} maxLength={500}
               onChange={(e) => set("observations", e.target.value)}
-              rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.observations ?? "").length}/500</span>
+              rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.observations ?? "").length}/500</span>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
               Cancelar
             </button>
             <button type="submit" disabled={!isFormComplete || loading}

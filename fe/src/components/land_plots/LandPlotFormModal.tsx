@@ -53,12 +53,12 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-text-primary">
             {existing ? "Editar lote" : "Nuevo lote"}
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
         </div>
 
         {error && (
@@ -67,36 +67,36 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Nombre del lote</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del lote</label>
             <input
               type="text" maxLength={100}
               value={form.name}
               onChange={(e) => set("name", e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/100</span>
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Área</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Área</label>
               <input
                 type="number"
                 min={0.01}
                 step={0.01}
                 value={form.area}
                 onChange={(e) => set("area", parseFloat(e.target.value))}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Unidad</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Unidad</label>
               <select
                 value={form.area_unit}
                 onChange={(e) => set("area_unit", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               >
                 {AREA_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
@@ -104,11 +104,11 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Tipo de uso</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo de uso</label>
             <select
               value={form.usage_type}
               onChange={(e) => set("usage_type", e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             >
               <option value="">Seleccionar...</option>
@@ -117,31 +117,31 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Capacidad máxima (animales)</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Capacidad máxima (animales)</label>
             <input
               type="number"
               min={1}
               value={form.max_capacity}
               onChange={(e) => set("max_capacity", parseInt(e.target.value))}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Ubicación (opcional)</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Ubicación (opcional)</label>
             <input
               type="text"
               value={form.location ?? ""}
               onChange={(e) => set("location", e.target.value || "")}
               placeholder="Ej: Sector norte, coordenadas, referencia"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
               Cancelar
             </button>
             <button type="submit" disabled={!isFormComplete || loading}

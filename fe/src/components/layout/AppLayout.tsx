@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import Breadcrumbs from "./Breadcrumbs";
+import ThemeToggle from "./ThemeToggle";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -16,38 +17,39 @@ export default function AppLayout() {
     pathname === path || pathname.startsWith(path + "/");
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b-2 border-primary-light bg-white px-8">
+      <header className="sticky top-0 z-50 border-b-2 border-primary-light bg-surface px-8">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-2 no-underline hover:opacity-85">
             <img src="/Logo_BoviTrack.png" alt="BoviTrack" className="h-[52px] w-auto object-contain" />
           </Link>
 
           <nav className="flex items-center gap-4">
+            <ThemeToggle />
             <Link
               to="/dashboard"
               className={`text-sm font-medium no-underline transition-colors hover:text-primary ${
                 isActive("/dashboard") || isActive("/farms")
                   ? "border-b-2 border-primary pb-0.5 text-primary"
-                  : "text-gray-700"
+                  : "text-text-secondary"
               }`}
             >
               Mis Fincas
             </Link>
             <div className="text-right leading-tight">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-text-primary">
                 {user?.first_name} {user?.last_name}
               </p>
               {user?.role_name && (
-                <p className="text-xs uppercase tracking-wide text-gray-500">
+                <p className="text-xs uppercase tracking-wide text-text-muted">
                   Rol: {user.role_name}
                 </p>
               )}
             </div>
             <button
               onClick={handleLogout}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-alt"
             >
               Cerrar sesión
             </button>
@@ -62,7 +64,7 @@ export default function AppLayout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white py-3 text-center text-xs text-gray-400">
+      <footer className="border-t border-border bg-surface py-3 text-center text-xs text-text-muted">
         © {new Date().getFullYear()} BoviTrack — Gestión Ganadera Inteligente
       </footer>
     </div>

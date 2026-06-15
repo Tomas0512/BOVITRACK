@@ -88,13 +88,13 @@ export default function SanitaryPlanList({ farmId }: Props) {
   };
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-text-primary">
             Planes Sanitarios
           </h2>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-text-muted">
             {plans.length} plan{plans.length !== 1 ? "es" : ""}
           </p>
         </div>
@@ -111,8 +111,8 @@ export default function SanitaryPlanList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : plans.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">
             No hay planes sanitarios registrados
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function SanitaryPlanList({ farmId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Tratamiento</th>
                 <th className="pb-2 pr-4">Tipo</th>
                 <th className="pb-2 pr-4">Frecuencia</th>
@@ -139,23 +139,23 @@ export default function SanitaryPlanList({ farmId }: Props) {
                 return (
                   <tr
                     key={plan.id}
-                    className={`hover:bg-gray-50 ${overdue ? "bg-red-50" : ""}`}
+                    className={`hover:bg-surface-alt ${overdue ? "bg-red-50" : ""}`}
                   >
-                    <td className="py-3 pr-4 font-medium text-gray-800">
+                    <td className="py-3 pr-4 font-medium text-text-primary">
                       {plan.vaccine_or_treatment_name}
                     </td>
                     <td className="py-3 pr-4">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           TYPE_BADGE[plan.treatment_type] ??
-                          "bg-gray-100 text-gray-600"
+                          "bg-surface-alt text-text-secondary"
                         }`}
                       >
                         {plan.treatment_type}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">{freqLabel}</td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-text-secondary">{freqLabel}</td>
+                    <td className="py-3 pr-4 text-text-secondary">
                       {plan.last_applied_date
                         ? new Date(
                             plan.last_applied_date,

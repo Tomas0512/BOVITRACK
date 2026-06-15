@@ -173,11 +173,11 @@ export function RegisterPage() {
 
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
-      <div className="flex w-full max-w-[620px] flex-col overflow-hidden rounded-2xl bg-white shadow-lg">
+      <div className="flex w-full max-w-[620px] flex-col overflow-hidden rounded-2xl bg-surface shadow-lg">
         {/* ── Tarjeta del formulario ── */}
         <div className="px-7 py-5">
           <h2 className="mb-0.5 text-xl font-bold text-primary">Crear cuenta</h2>
-          <p className="mb-3 text-sm text-gray-500">
+          <p className="mb-3 text-sm text-text-secondary">
             Completa los datos para registrarte en BoviTrack
           </p>
 
@@ -189,7 +189,7 @@ export function RegisterPage() {
             {/* Nombres y Apellidos */}
             <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="flex flex-col">
-                <label htmlFor="firstName" className="mb-0.5 text-xs font-semibold text-gray-800">Nombres <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="firstName" className="mb-0.5 text-xs font-semibold text-text-primary">Nombres <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="firstName"
                   name="firstName"
@@ -197,14 +197,14 @@ export function RegisterPage() {
                   placeholder="Ingrese sus nombres"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                <span className="mt-0.5 block text-right text-xs text-gray-400">{formData.firstName.length}/100</span>
+                <span className="mt-0.5 block text-right text-xs text-text-muted">{formData.firstName.length}/100</span>
                 {errors.firstName && <span className="mt-0.5 text-xs text-red-600">{errors.firstName}</span>}
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="lastName" className="mb-0.5 text-xs font-semibold text-gray-800">Apellidos <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="lastName" className="mb-0.5 text-xs font-semibold text-text-primary">Apellidos <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="lastName"
                   name="lastName"
@@ -212,9 +212,9 @@ export function RegisterPage() {
                   placeholder="Ingrese sus apellidos"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                <span className="mt-0.5 block text-right text-xs text-gray-400">{formData.lastName.length}/100</span>
+                <span className="mt-0.5 block text-right text-xs text-text-muted">{formData.lastName.length}/100</span>
                 {errors.lastName && <span className="mt-0.5 text-xs text-red-600">{errors.lastName}</span>}
               </div>
             </div>
@@ -222,13 +222,13 @@ export function RegisterPage() {
             {/* Tipo y Número de Documento */}
             <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="flex flex-col">
-                <label htmlFor="documentType" className="mb-0.5 text-xs font-semibold text-gray-800">Tipo de documento <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="documentType" className="mb-0.5 text-xs font-semibold text-text-primary">Tipo de documento <span className="font-bold text-red-600">*</span></label>
                 <select
                   id="documentType"
                   name="documentType"
                   value={formData.documentType}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/10"
                 >
                   {DOCUMENT_TYPES.map((dt) => (
                     <option key={dt.value} value={dt.value}>
@@ -240,7 +240,7 @@ export function RegisterPage() {
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="documentNumber" className="mb-0.5 text-xs font-semibold text-gray-800">Número de documento <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="documentNumber" className="mb-0.5 text-xs font-semibold text-text-primary">Número de documento <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="documentNumber"
                   name="documentNumber"
@@ -248,7 +248,7 @@ export function RegisterPage() {
                   placeholder="Ingrese su número"
                   value={formData.documentNumber}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 {errors.documentNumber && <span className="mt-0.5 text-xs text-red-600">{errors.documentNumber}</span>}
               </div>
@@ -257,7 +257,7 @@ export function RegisterPage() {
             {/* Email y Teléfono */}
             <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="flex flex-col">
-                <label htmlFor="email" className="mb-0.5 text-xs font-semibold text-gray-800">Correo electrónico <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="email" className="mb-0.5 text-xs font-semibold text-text-primary">Correo electrónico <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="email"
                   name="email"
@@ -265,13 +265,13 @@ export function RegisterPage() {
                   placeholder="correo@ejemplo.com"
                   value={formData.email}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 {errors.email && <span className="mt-0.5 text-xs text-red-600">{errors.email}</span>}
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="phone" className="mb-0.5 text-xs font-semibold text-gray-800">Teléfono <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="phone" className="mb-0.5 text-xs font-semibold text-text-primary">Teléfono <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="phone"
                   name="phone"
@@ -279,7 +279,7 @@ export function RegisterPage() {
                   placeholder="+57 300 123 4567"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 {errors.phone && <span className="mt-0.5 text-xs text-red-600">{errors.phone}</span>}
               </div>
@@ -288,7 +288,7 @@ export function RegisterPage() {
             {/* Contraseña y Verificar */}
             <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <div className="flex flex-col">
-                <label htmlFor="password" className="mb-0.5 text-xs font-semibold text-gray-800">Contraseña <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="password" className="mb-0.5 text-xs font-semibold text-text-primary">Contraseña <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="password"
                   name="password"
@@ -296,22 +296,22 @@ export function RegisterPage() {
                   placeholder="Mínimo 8 caracteres"
                   value={formData.password}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 {errors.password && <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>}
                 {formData.password && (
                   <ul className="mt-1.5 list-none space-y-0.5 p-0 text-xs">
-                    <li className={formData.password.length >= 8 ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Mínimo 8 caracteres</li>
-                    <li className={/[A-Z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Una letra mayúscula</li>
-                    <li className={/[a-z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Una letra minúscula</li>
-                    <li className={/\d/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Un número</li>
-                    <li className={/[^A-Za-z0-9]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-gray-400 before:mr-1 before:content-['✗']"}>Un carácter especial</li>
+                    <li className={formData.password.length >= 8 ? "text-green-600 before:mr-1 before:content-['✓']" : "text-text-muted before:mr-1 before:content-['✗']"}>Mínimo 8 caracteres</li>
+                    <li className={/[A-Z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-text-muted before:mr-1 before:content-['✗']"}>Una letra mayúscula</li>
+                    <li className={/[a-z]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-text-muted before:mr-1 before:content-['✗']"}>Una letra minúscula</li>
+                    <li className={/\d/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-text-muted before:mr-1 before:content-['✗']"}>Un número</li>
+                    <li className={/[^A-Za-z0-9]/.test(formData.password) ? "text-green-600 before:mr-1 before:content-['✓']" : "text-text-muted before:mr-1 before:content-['✗']"}>Un carácter especial</li>
                   </ul>
                 )}
               </div>
 
               <div className="flex flex-col">
-                <label htmlFor="confirmPassword" className="mb-0.5 text-xs font-semibold text-gray-800">Verificar contraseña <span className="font-bold text-red-600">*</span></label>
+                <label htmlFor="confirmPassword" className="mb-0.5 text-xs font-semibold text-text-primary">Verificar contraseña <span className="font-bold text-red-600">*</span></label>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -319,7 +319,7 @@ export function RegisterPage() {
                   placeholder="Repita la contraseña"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-2.5 py-1.5 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                  className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 {errors.confirmPassword && <span className="mt-0.5 text-xs text-red-600">{errors.confirmPassword}</span>}
               </div>
@@ -327,7 +327,7 @@ export function RegisterPage() {
 
             {/* Checkboxes */}
             <div className="mb-2.5">
-              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-gray-800">
+              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-text-primary">
                 <input
                   type="checkbox"
                   name="acceptTerms"
@@ -344,7 +344,7 @@ export function RegisterPage() {
               </label>
               {errors.acceptTerms && <span className="text-xs text-red-600">{errors.acceptTerms}</span>}
 
-              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-gray-800">
+              <label className="mb-1 flex cursor-pointer items-start gap-1.5 text-xs text-text-primary">
                 <input
                   type="checkbox"
                   name="acceptDataPolicy"
@@ -377,7 +377,7 @@ export function RegisterPage() {
           </form>
 
           {/* Enlace a login */}
-          <p className="mt-2.5 text-center text-sm text-gray-500">
+          <p className="mt-2.5 text-center text-sm text-text-secondary">
             ¿Ya estás registrado?{" "}
             <Link to="/login" className="font-semibold text-primary hover:text-primary-light">Inicia sesión</Link>
           </p>

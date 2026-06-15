@@ -51,11 +51,11 @@ export default function LandPlotList({ farmId }: Props) {
   const activeCount = plots.filter((p) => p.is_active).length;
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Lotes</h2>
-          <p className="text-xs text-gray-400">{activeCount} activo{activeCount !== 1 ? "s" : ""} · {plots.length - activeCount} inactivo{plots.length - activeCount !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-bold text-text-primary">Lotes</h2>
+          <p className="text-xs text-text-muted">{activeCount} activo{activeCount !== 1 ? "s" : ""} · {plots.length - activeCount} inactivo{plots.length - activeCount !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={() => { setEditing(undefined); setShowModal(true); }}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
@@ -72,24 +72,24 @@ export default function LandPlotList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : plots.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">No hay lotes registrados en esta finca</p>
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">No hay lotes registrados en esta finca</p>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {plots.map((lp) => (
-            <div key={lp.id} className={`rounded-xl border p-4 ${lp.is_active ? "border-gray-100 bg-surface" : "border-gray-200 bg-gray-50 opacity-70"}`}>
+            <div key={lp.id} className={`rounded-xl border p-4 ${lp.is_active ? "border-border bg-surface" : "border-border bg-surface-alt opacity-70"}`}>
               <div className="mb-2 flex items-start justify-between">
-                <span className="font-semibold text-gray-800">{lp.name}</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${lp.is_active ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                <span className="font-semibold text-text-primary">{lp.name}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${lp.is_active ? "bg-green-50 text-green-700" : "bg-surface-alt text-text-secondary"}`}>
                   {lp.is_active ? "Activo" : "Inactivo"}
                 </span>
               </div>
-              <p className="text-xs text-gray-500">{lp.area} {lp.area_unit} · {lp.usage_type}</p>
-              <p className="text-xs text-gray-500">Cap. máx: {lp.max_capacity} animales</p>
+              <p className="text-xs text-text-secondary">{lp.area} {lp.area_unit} · {lp.usage_type}</p>
+              <p className="text-xs text-text-secondary">Cap. máx: {lp.max_capacity} animales</p>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { setEditing(lp); setShowModal(true); }}
-                  className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100">
+                  className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                   Editar
                 </button>
                 <button onClick={() => handleDelete(lp)} disabled={actionLoading === lp.id}

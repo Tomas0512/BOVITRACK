@@ -99,9 +99,9 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">
+        <h3 className="font-bold text-text-primary">
           <Scale size={18} className="inline mr-1.5 align-text-bottom text-primary" />
           Historial de pesajes
         </h3>
@@ -124,14 +124,14 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
+            className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-primary">Registrar pesaje</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"
               >
                 <X size={20} />
               </button>
@@ -145,19 +145,19 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
 
             <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Peso (kg) <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number" step="0.01" min="0.01" required
                   value={form.weight_kg || ""}
                   onChange={(e) => setForm((f) => ({ ...f, weight_kg: parseFloat(e.target.value) }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Fecha de medición <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -165,12 +165,12 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                   max={new Date().toISOString().slice(0, 10)}
                   value={form.measured_at}
                   onChange={(e) => setForm((f) => ({ ...f, measured_at: e.target.value }))}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Condición corporal (1–5)
                 </label>
                 <select
@@ -181,7 +181,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                       body_condition: e.target.value ? parseInt(e.target.value) : undefined,
                     }))
                   }
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 >
                   <option value="">— Sin registrar —</option>
                   {[1, 2, 3, 4, 5].map((n) => (
@@ -191,7 +191,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
                   Observaciones
                 </label>
                 <input
@@ -199,16 +199,16 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                   value={form.observations ?? ""}
                   onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
                   placeholder="Opcional"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
-                <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.observations ?? "").length}/500</span>
+                <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.observations ?? "").length}/500</span>
               </div>
 
               <div className="col-span-full mt-2 flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
                 >
                   Cancelar
                 </button>
@@ -238,7 +238,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
         <p className="py-4 text-center text-sm text-red-500">{error}</p>
       )}
       {!loading && !error && weights.length === 0 && (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-text-muted">
           Sin registros de pesaje. Registra el primero.
         </p>
       )}
@@ -246,7 +246,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Fecha</th>
                 <th className="pb-2 pr-4">Peso (kg)</th>
                 <th className="pb-2 pr-4">Ganancia diaria</th>
@@ -259,12 +259,12 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
               {[...weights].reverse().map((w) => (
                 <tr
                   key={w.id}
-                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
+                  className="border-b border-border last:border-0 hover:bg-surface-alt"
                 >
-                  <td className="py-2 pr-4 font-medium text-gray-800 whitespace-nowrap">
+                  <td className="py-2 pr-4 font-medium text-text-primary whitespace-nowrap">
                     {formatDate(w.measured_at)}
                   </td>
-                  <td className="py-2 pr-4 text-gray-700">
+                  <td className="py-2 pr-4 text-text-secondary">
                     {Number(w.weight_kg).toFixed(1)} kg
                   </td>
                   <td className="py-2 pr-4">
@@ -278,16 +278,16 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                         {Number(w.daily_gain).toFixed(2)} kg/día
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-text-muted">—</span>
                     )}
                   </td>
-                  <td className="py-2 pr-4 text-gray-600">
+                  <td className="py-2 pr-4 text-text-secondary">
                     {w.body_condition !== null
                       ? BODY_CONDITION_LABELS[w.body_condition]
-                      : <span className="text-gray-400">—</span>}
+                      : <span className="text-text-muted">—</span>}
                   </td>
-                  <td className="py-2 pr-4 text-gray-500">
-                    {w.observations ?? <span className="text-gray-300">—</span>}
+                  <td className="py-2 pr-4 text-text-secondary">
+                    {w.observations ?? <span className="text-text-muted">—</span>}
                   </td>
                   <td className="py-2 text-right">
                     <button

@@ -93,11 +93,11 @@ export default function EmployeeList({ farmId }: Props) {
   const inactiveCount = employees.filter((e) => !e.is_active).length;
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Empleados</h2>
-          <p className="text-xs text-gray-400">
+          <h2 className="text-lg font-bold text-text-primary">Empleados</h2>
+          <p className="text-xs text-text-muted">
             {activeCount} activo{activeCount !== 1 ? "s" : ""} · {inactiveCount} inactivo
             {inactiveCount !== 1 ? "s" : ""}
           </p>
@@ -119,7 +119,7 @@ export default function EmployeeList({ farmId }: Props) {
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               filter === f
                 ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-surface-alt text-text-secondary hover:bg-gray-200"
             }`}
           >
             {f === "all" ? "Todos" : f === "active" ? "Activos" : "Inactivos"}
@@ -136,14 +136,14 @@ export default function EmployeeList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : employees.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">No hay empleados en esta categoría</p>
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">No hay empleados en esta categoría</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Nombre</th>
                 <th className="pb-2 pr-4">Correo</th>
                 <th className="pb-2 pr-4">Documento</th>
@@ -154,12 +154,12 @@ export default function EmployeeList({ farmId }: Props) {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {employees.map((emp) => (
-                <tr key={emp.id} className="hover:bg-gray-50">
-                  <td className="py-3 pr-4 font-medium text-gray-800">
+                <tr key={emp.id} className="hover:bg-surface-alt">
+                  <td className="py-3 pr-4 font-medium text-text-primary">
                     {emp.first_name} {emp.last_name}
                   </td>
-                  <td className="py-3 pr-4 text-gray-600">{emp.email}</td>
-                  <td className="py-3 pr-4 text-gray-500">
+                  <td className="py-3 pr-4 text-text-secondary">{emp.email}</td>
+                  <td className="py-3 pr-4 text-text-secondary">
                     {emp.document_type} {emp.document_number}
                   </td>
                   <td className="py-3 pr-4">
@@ -169,7 +169,7 @@ export default function EmployeeList({ farmId }: Props) {
                         onChange={(e) => handleRoleChange(emp, e.target.value)}
                         onBlur={() => setChangingRole(null)}
                         autoFocus
-                        className="rounded-lg border border-gray-200 px-2 py-0.5 text-xs focus:border-primary focus:outline-none"
+                        className="rounded-lg border border-border px-2 py-0.5 text-xs focus:border-primary focus:outline-none"
                       >
                         {roles.map((r) => (
                           <option key={r.id} value={r.id}>{r.name}</option>
@@ -190,7 +190,7 @@ export default function EmployeeList({ farmId }: Props) {
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         emp.is_active
                           ? "bg-green-50 text-green-700"
-                          : "bg-gray-100 text-gray-500"
+                          : "bg-surface-alt text-text-secondary"
                       }`}
                     >
                       {emp.is_active ? "Activo" : "Inactivo"}
@@ -201,7 +201,7 @@ export default function EmployeeList({ farmId }: Props) {
                       <button
                         onClick={() => toggleActive(emp)}
                         disabled={actionLoading === emp.user_id}
-                        className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+                        className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt disabled:opacity-50"
                       >
                         {emp.is_active ? "Desactivar" : "Activar"}
                       </button>

@@ -45,9 +45,9 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
   const totalLitros = records.reduce((sum, r) => sum + Number(r.quantity_liters), 0);
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900"><Droplets size={18} className="inline mr-1.5 align-text-bottom" />Historial de ordeño</h3>
+        <h3 className="font-bold text-text-primary"><Droplets size={18} className="inline mr-1.5 align-text-bottom" />Historial de ordeño</h3>
         {records.length > 0 && (
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
             Total: {totalLitros.toFixed(1)} L ({records.length} registros)
@@ -64,7 +64,7 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
         <p className="py-4 text-center text-sm text-red-500">{error}</p>
       )}
       {!loading && !error && records.length === 0 && (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-text-muted">
           Sin registros de ordeño para este animal.
         </p>
       )}
@@ -72,7 +72,7 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Fecha</th>
                 <th className="pb-2 pr-4">Sesión</th>
                 <th className="pb-2 pr-4">Tipo</th>
@@ -84,9 +84,9 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
               {records.map((r) => (
                 <tr
                   key={r.id}
-                  className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
+                  className="border-b border-border last:border-0 hover:bg-surface-alt"
                 >
-                  <td className="py-2 pr-4 font-medium text-gray-800 whitespace-nowrap">
+                  <td className="py-2 pr-4 font-medium text-text-primary whitespace-nowrap">
                     {formatDate(r.milking_date)}
                   </td>
                   <td className="py-2 pr-4">
@@ -95,17 +95,17 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
                         {SESSION_LABELS[r.milking_session] ?? r.milking_session}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-text-muted">—</span>
                     )}
                   </td>
-                  <td className="py-2 pr-4 text-gray-600">
+                  <td className="py-2 pr-4 text-text-secondary">
                     {MILKING_TYPE_LABELS[r.milking_type] ?? r.milking_type}
                   </td>
                   <td className="py-2 pr-4 font-semibold text-blue-700">
                     {Number(r.quantity_liters).toFixed(1)} L
                   </td>
-                  <td className="py-2 text-gray-500">
-                    {r.observations ?? <span className="text-gray-300">—</span>}
+                  <td className="py-2 text-text-secondary">
+                    {r.observations ?? <span className="text-text-muted">—</span>}
                   </td>
                 </tr>
               ))}

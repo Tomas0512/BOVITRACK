@@ -193,12 +193,12 @@ export default function FoodList({ farmId }: Props) {
   // ════════════════════════════════════════════════════════════════════════════════
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       {/* ─── HEADER (Título + Botón Nuevo) ─── */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Inventario de Alimentos</h2>
-          <p className="text-xs text-gray-400">
+          <h2 className="text-lg font-bold text-text-primary">Inventario de Alimentos</h2>
+          <p className="text-xs text-text-muted">
             {foods.length} alimento{foods.length !== 1 ? "s" : ""}
             {lowStockCount > 0 && (
               <> · <span className="text-amber-600"><AlertTriangle size={12} className="inline-block mr-0.5 -mt-0.5" /> {lowStockCount} con stock bajo</span></>
@@ -224,7 +224,7 @@ export default function FoodList({ farmId }: Props) {
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             categoryFilter === ""
               ? "bg-primary text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              : "bg-surface-alt text-text-secondary hover:bg-gray-200"
           }`}
         >
           Todos
@@ -238,7 +238,7 @@ export default function FoodList({ farmId }: Props) {
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               categoryFilter === category
                 ? "bg-primary text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-surface-alt text-text-secondary hover:bg-gray-200"
             }`}
           >
             {category} ({count})
@@ -260,8 +260,8 @@ export default function FoodList({ farmId }: Props) {
         </div>
       ) : foods.length === 0 ? (
         /* ─── ESTADO VACÍO ─── */
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">
             {categoryFilter
               ? "No hay alimentos en esta categoría"
               : "No hay alimentos registrados"}
@@ -272,7 +272,7 @@ export default function FoodList({ farmId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Nombre</th>
                 <th className="pb-2 pr-4">Categoría</th>
                 <th className="pb-2 pr-4">Unidad</th>
@@ -296,36 +296,36 @@ export default function FoodList({ farmId }: Props) {
                 return (
                   <tr
                     key={food.id}
-                    className={`hover:bg-gray-50 ${isLowStock ? "bg-amber-50" : ""}`}
+                    className={`hover:bg-surface-alt ${isLowStock ? "bg-amber-50" : ""}`}
                   >
-                    <td className="py-3 pr-4 font-medium text-gray-800">
+                    <td className="py-3 pr-4 font-medium text-text-primary">
                       {food.name}
                     </td>
                     <td className="py-3 pr-4">
                       <span
                         className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                           CATEGORY_BADGE[food.category] ??
-                          "bg-gray-100 text-gray-600"
+                          "bg-surface-alt text-text-secondary"
                         }`}
                       >
                         {food.category}
                       </span>
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {food.unit_of_measure}
                     </td>
                     <td
                       className={`py-3 pr-4 font-semibold ${
-                        isLowStock ? "text-amber-700" : "text-gray-700"
+                        isLowStock ? "text-amber-700" : "text-text-secondary"
                       }`}
                     >
                       {food.current_stock}
                       {isLowStock && <AlertTriangle size={12} className="inline-block ml-0.5 -mt-0.5 text-amber-600" />}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {food.min_stock_alert ?? "—"}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {food.cost_per_unit
                         ? `$${parseFloat(
                             food.cost_per_unit.toString()
@@ -335,7 +335,7 @@ export default function FoodList({ farmId }: Props) {
                           })}`
                         : "—"}
                     </td>
-                    <td className="py-3 pr-4 text-gray-500">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {food.supplier ?? "—"}
                     </td>
                     <td className="py-3">
@@ -345,7 +345,7 @@ export default function FoodList({ farmId }: Props) {
                             setEditing(food);
                             setShowModal(true);
                           }}
-                          className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100"
+                          className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt"
                         >
                           Editar
                         </button>

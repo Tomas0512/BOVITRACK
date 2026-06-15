@@ -84,9 +84,9 @@ export function LoginPage() {
   return (
     <AuthLayout headerActionLabel="Registrarse" headerActionTo="/register">
       <div className="flex w-full items-center justify-center">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-lg">
           <h2 className="mb-0.5 text-xl font-bold text-primary">Iniciar sesión</h2>
-          <p className="mb-6 text-sm text-gray-500">
+          <p className="mb-6 text-sm text-text-secondary">
             Ingresa tus credenciales para acceder a BoviTrack
           </p>
 
@@ -99,7 +99,7 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit} noValidate>
             <div className="mb-4 flex flex-col">
-              <label htmlFor="email" className="mb-1 text-sm font-semibold text-gray-800">Correo electrónico <span className="font-bold text-red-600">*</span></label>
+              <label htmlFor="email" className="mb-1 text-sm font-semibold text-text-primary">Correo electrónico <span className="font-bold text-red-600">*</span></label>
               <input
                 id="email"
                 name="email"
@@ -108,13 +108,13 @@ export function LoginPage() {
                 placeholder="correo@ejemplo.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
               {errors.email && <span className="mt-0.5 text-xs text-red-600">{errors.email}</span>}
             </div>
 
             <div className="mb-4 flex flex-col">
-              <label htmlFor="password" className="mb-1 text-sm font-semibold text-gray-800">Contraseña <span className="font-bold text-red-600">*</span></label>
+              <label htmlFor="password" className="mb-1 text-sm font-semibold text-text-primary">Contraseña <span className="font-bold text-red-600">*</span></label>
               <input
                 id="password"
                 name="password"
@@ -123,7 +123,7 @@ export function LoginPage() {
                 placeholder="Ingrese su contraseña"
                 value={formData.password}
                 onChange={handleChange}
-                className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                className="rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
               />
               {errors.password && <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>}
             </div>

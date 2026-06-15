@@ -62,20 +62,20 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
       <div className="flex w-full items-center justify-center">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-lg">
           {!submitted ? (
             <>
               <div className="mb-2 text-center" aria-hidden="true"><Key size={36} className="mx-auto text-primary" /></div>
 
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Recuperar contraseña</h2>
-              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
+              <p className="mb-6 text-center text-sm leading-relaxed text-text-secondary">
                 Ingresa tu correo electrónico y te enviaremos un enlace para
                 restablecer tu contraseña.
               </p>
 
               <form onSubmit={handleSubmit} noValidate>
                 <div className="mb-4 flex flex-col">
-                  <label htmlFor="email" className="mb-1 text-sm font-semibold text-gray-800">
+                  <label htmlFor="email" className="mb-1 text-sm font-semibold text-text-primary">
                     Correo electrónico{" "}
                     <span className="font-bold text-red-600">*</span>
                   </label>
@@ -87,7 +87,7 @@ export function ForgotPasswordPage() {
                     value={email}
                     onChange={handleChange}
                     autoFocus
-                    className="rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                    className="rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                   />
                   {error && <span className="mt-0.5 text-xs text-red-600">{error}</span>}
                 </div>
@@ -113,12 +113,12 @@ export function ForgotPasswordPage() {
             <div className="text-center">
               <div className="mb-3 text-center" aria-hidden="true"><Mail size={40} className="mx-auto text-primary" /></div>
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Correo enviado!</h2>
-              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
+              <p className="mb-6 text-center text-sm leading-relaxed text-text-secondary">
                 Hemos enviado un enlace de recuperación a{" "}
                 <strong>{email}</strong>. Revisa tu bandeja de entrada y sigue
                 las instrucciones.
               </p>
-              <p className="mb-5 text-xs leading-relaxed text-gray-500">
+              <p className="mb-5 text-xs leading-relaxed text-text-secondary">
                 Si no recibes el correo en unos minutos, revisa tu carpeta de
                 spam o correo no deseado.
               </p>

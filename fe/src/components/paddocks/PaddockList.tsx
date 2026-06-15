@@ -72,11 +72,11 @@ export default function PaddockList({ farmId }: Props) {
   paddocks.forEach((p) => { if (p.status in counts) counts[p.status as keyof typeof counts]++; });
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Potreros</h2>
-          <p className="text-xs text-gray-400">
+          <h2 className="text-lg font-bold text-text-primary">Potreros</h2>
+          <p className="text-xs text-text-muted">
             {counts.libre} libre{counts.libre !== 1 ? "s" : ""} · {counts.ocupado} ocupado{counts.ocupado !== 1 ? "s" : ""} · {counts.en_descanso} en descanso
           </p>
         </div>
@@ -99,7 +99,7 @@ export default function PaddockList({ farmId }: Props) {
         {[{ key: "", label: "Todos" }, { key: "libre", label: "Libres" }, { key: "ocupado", label: "Ocupados" }, { key: "en_descanso", label: "En descanso" }].map((f) => (
           <button key={f.key} onClick={() => setStatusFilter(f.key)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              statusFilter === f.key ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              statusFilter === f.key ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-gray-200"
             }`}>
             {f.label}
           </button>
@@ -113,25 +113,25 @@ export default function PaddockList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : paddocks.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">No hay potreros registrados en esta finca</p>
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">No hay potreros registrados en esta finca</p>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {paddocks.map((p) => (
-            <div key={p.id} className="rounded-xl border border-gray-100 bg-surface p-4">
+            <div key={p.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="mb-2 flex items-start justify-between">
-                <span className="font-semibold text-gray-800">{p.name}</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[p.status] ?? "bg-gray-100 text-gray-600"}`}>
+                <span className="font-semibold text-text-primary">{p.name}</span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[p.status] ?? "bg-surface-alt text-text-secondary"}`}>
                   {p.status.replace("_", " ")}
                 </span>
               </div>
-              <p className="text-xs text-gray-500">{p.area_hectares} ha · Cap. {p.max_capacity}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-text-secondary">{p.area_hectares} ha · Cap. {p.max_capacity}</p>
+              <p className="text-xs text-text-secondary">
                 Cobertura: <span className={`rounded px-1 text-xs font-medium ${COVERAGE_BADGE[p.coverage_status] ?? ""}`}>{p.coverage_status}</span>
               </p>
               {p.pasture_type && (
-                <p className="text-xs text-gray-500">Pasto: {p.pasture_type.replace("_", " ")}</p>
+                <p className="text-xs text-text-secondary">Pasto: {p.pasture_type.replace("_", " ")}</p>
               )}
               {p.rest_start_date && (
                 <p className="mt-1 text-xs text-blue-600">
@@ -140,7 +140,7 @@ export default function PaddockList({ farmId }: Props) {
               )}
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { setEditing(p); setShowModal(true); }}
-                  className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100">
+                  className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                   Editar
                 </button>
                 <button onClick={() => handleDelete(p)} disabled={actionLoading === p.id}

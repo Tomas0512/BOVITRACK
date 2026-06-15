@@ -60,11 +60,11 @@ export default function HomePage() {
             <span className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-semibold text-primary">
               Plataforma de gestión ganadera
             </span>
-            <h1 className="mb-5 text-4xl font-extrabold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
+            <h1 className="mb-5 text-4xl font-extrabold leading-tight text-text-primary sm:text-5xl lg:text-6xl">
               Tu ganado bajo control con{" "}
               <span className="text-primary">BoviTrack</span>
             </h1>
-            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-gray-600">
+            <p className="mb-10 max-w-2xl text-lg leading-relaxed text-text-secondary">
               La herramienta integral para ganaderos colombianos. Registra fincas,
               controla tu hato, producción lechera, tratamientos, alimentación y
               tareas — todo desde un solo lugar.
@@ -87,23 +87,23 @@ export default function HomePage() {
         </section>
 
         {/* ── Características ── */}
-        <section className="bg-white px-4 py-16 sm:py-20">
+        <section className="bg-surface px-4 py-16 sm:py-20">
           <div className="mx-auto max-w-6xl">
-            <h2 className="mb-3 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mb-3 text-center text-3xl font-extrabold text-text-primary">
               Todo lo que necesitas
             </h2>
-            <p className="mx-auto mb-12 max-w-xl text-center text-gray-500">
+            <p className="mx-auto mb-12 max-w-xl text-center text-text-secondary">
               Módulos diseñados para cubrir cada aspecto de la operación ganadera diaria.
             </p>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((f) => (
                 <div
                   key={f.title}
-                  className="rounded-2xl border border-gray-100 bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
+                  className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
                 >
                   <div className="mb-4 text-primary">{f.icon}</div>
-                  <h3 className="mb-2 text-lg font-bold text-gray-900">{f.title}</h3>
-                  <p className="text-sm leading-relaxed text-gray-500">{f.description}</p>
+                  <h3 className="mb-2 text-lg font-bold text-text-primary">{f.title}</h3>
+                  <p className="text-sm leading-relaxed text-text-secondary">{f.description}</p>
                 </div>
               ))}
             </div>
@@ -111,12 +111,12 @@ export default function HomePage() {
         </section>
 
         {/* ── Cómo funciona ── */}
-        <section className="bg-cream/40 px-4 py-16 sm:py-20">
+        <section className="bg-background/40 px-4 py-16 sm:py-20">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-3 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mb-3 text-center text-3xl font-extrabold text-text-primary">
               Empieza en 3 pasos
             </h2>
-            <p className="mx-auto mb-12 max-w-lg text-center text-gray-500">
+            <p className="mx-auto mb-12 max-w-lg text-center text-text-secondary">
               Sin configuraciones complicadas. Registra, configura y gestiona.
             </p>
             <div className="grid gap-8 sm:grid-cols-3">
@@ -125,8 +125,8 @@ export default function HomePage() {
                   <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-xl font-extrabold text-white shadow-md">
                     {s.number}
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-gray-900">{s.title}</h3>
-                  <p className="text-sm leading-relaxed text-gray-500">{s.description}</p>
+                  <h3 className="mb-2 text-lg font-bold text-text-primary">{s.title}</h3>
+                  <p className="text-sm leading-relaxed text-text-secondary">{s.description}</p>
                 </div>
               ))}
             </div>
@@ -134,7 +134,7 @@ export default function HomePage() {
         </section>
 
         {/* ── Números / propuesta de valor ── */}
-        <section className="bg-white px-4 py-16 sm:py-20">
+        <section className="bg-surface px-4 py-16 sm:py-20">
           <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { value: "8", label: "Módulos integrados" },
@@ -144,7 +144,7 @@ export default function HomePage() {
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <p className="text-4xl font-extrabold text-primary">{stat.value}</p>
-                <p className="mt-1 text-sm font-medium text-gray-500">{stat.label}</p>
+                <p className="mt-1 text-sm font-medium text-text-secondary">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -155,13 +155,13 @@ export default function HomePage() {
           <h2 className="mb-3 text-3xl font-extrabold text-white">
             ¿Listo para gestionar tu ganado?
           </h2>
-          <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-cream/90">
+          <p className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-text-primary/90">
             Únete a BoviTrack y lleva el control total de tus fincas, animales y
             producción desde hoy.
           </p>
           <Link
             to="/register"
-            className="inline-block rounded-xl bg-white px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:bg-cream hover:shadow-xl active:scale-[0.98]"
+            className="inline-block rounded-xl bg-surface px-8 py-3.5 text-base font-bold text-primary shadow-lg transition-all hover:bg-background hover:shadow-xl active:scale-[0.98]"
           >
             Crear cuenta gratis
           </Link>

@@ -124,10 +124,10 @@ export function ResetPasswordPage() {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full items-center justify-center">
-          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-lg">
             <div className="mb-2 text-center" aria-hidden="true"><AlertTriangle size={36} className="mx-auto text-amber-500" /></div>
             <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Enlace inválido</h2>
-            <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
+            <p className="mb-6 text-center text-sm leading-relaxed text-text-secondary">
               El enlace de recuperación no es válido o ha expirado.
               Solicita uno nuevo desde la página de recuperación.
             </p>
@@ -143,13 +143,13 @@ export function ResetPasswordPage() {
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
       <div className="flex w-full items-center justify-center">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 shadow-lg">
           {!submitted ? (
             <>
               <div className="mb-2 text-center" aria-hidden="true"><Lock size={36} className="mx-auto text-primary" /></div>
 
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Restablecer contraseña</h2>
-              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
+              <p className="mb-6 text-center text-sm leading-relaxed text-text-secondary">
                 Ingresa tu nueva contraseña. Asegúrate de que sea segura y fácil
                 de recordar.
               </p>
@@ -161,7 +161,7 @@ export function ResetPasswordPage() {
 
                 {/* Nueva contraseña */}
                 <div className="mb-4 flex flex-col">
-                  <label htmlFor="password" className="mb-1 text-sm font-semibold text-gray-800">
+                  <label htmlFor="password" className="mb-1 text-sm font-semibold text-text-primary">
                     Nueva contraseña <span className="font-bold text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -173,7 +173,7 @@ export function ResetPasswordPage() {
                       value={formData.password}
                       onChange={handleChange}
                       autoFocus
-                      className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface py-2 pl-3 pr-10 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      className="w-full rounded-lg border-[1.5px] border-border bg-surface py-2 pl-3 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                     <button
                       type="button"
@@ -215,7 +215,7 @@ export function ResetPasswordPage() {
 
                 {/* Confirmar contraseña */}
                 <div className="mb-4 flex flex-col">
-                  <label htmlFor="confirmPassword" className="mb-1 text-sm font-semibold text-gray-800">
+                  <label htmlFor="confirmPassword" className="mb-1 text-sm font-semibold text-text-primary">
                     Confirmar contraseña <span className="font-bold text-red-600">*</span>
                   </label>
                   <div className="relative flex items-center">
@@ -226,7 +226,7 @@ export function ResetPasswordPage() {
                       placeholder="Repita su nueva contraseña"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="w-full rounded-lg border-[1.5px] border-gray-300 bg-surface py-2 pl-3 pr-10 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10"
+                      className="w-full rounded-lg border-[1.5px] border-border bg-surface py-2 pl-3 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10"
                     />
                     <button
                       type="button"
@@ -244,11 +244,11 @@ export function ResetPasswordPage() {
 
                 {/* Requisitos */}
                 <ul className="mb-5 grid list-none grid-cols-1 gap-1 p-0 sm:grid-cols-2 sm:gap-x-3">
-                  <li className={`relative pl-5 text-xs leading-relaxed ${formData.password.length >= 8 ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Mínimo 8 caracteres</li>
-                  <li className={`relative pl-5 text-xs leading-relaxed ${/[A-Z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra mayúscula</li>
-                  <li className={`relative pl-5 text-xs leading-relaxed ${/[a-z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra minúscula</li>
-                  <li className={`relative pl-5 text-xs leading-relaxed ${/[0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un número</li>
-                  <li className={`relative pl-5 text-xs leading-relaxed ${/[^A-Za-z0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-gray-500 before:text-gray-300 before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un carácter especial</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${formData.password.length >= 8 ? "text-primary before:text-primary before:content-['●']" : "text-text-secondary before:text-text-muted before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Mínimo 8 caracteres</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[A-Z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-text-secondary before:text-text-muted before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra mayúscula</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[a-z]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-text-secondary before:text-text-muted before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Una letra minúscula</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-text-secondary before:text-text-muted before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un número</li>
+                  <li className={`relative pl-5 text-xs leading-relaxed ${/[^A-Za-z0-9]/.test(formData.password) ? "text-primary before:text-primary before:content-['●']" : "text-text-secondary before:text-text-muted before:content-['○']"} before:absolute before:left-0 before:text-[0.7rem]`}>Un carácter especial</li>
                 </ul>
 
                 <button
@@ -272,7 +272,7 @@ export function ResetPasswordPage() {
             <div className="text-center">
               <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" aria-hidden="true" />
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Contraseña restablecida!</h2>
-              <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
+              <p className="mb-6 text-center text-sm leading-relaxed text-text-secondary">
                 Tu contraseña se ha cambiado correctamente. Ya puedes iniciar
                 sesión con tu nueva contraseña.
               </p>

@@ -48,8 +48,8 @@ function CustomTooltip({
   const peso = payload.find((p) => p.dataKey === "peso");
   const ganancia = payload.find((p) => p.dataKey === "ganancia");
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-3 shadow-md text-sm">
-      <p className="mb-1 font-semibold text-gray-700">{label}</p>
+    <div className="rounded-xl border border-border bg-surface p-3 shadow-md text-sm">
+      <p className="mb-1 font-semibold text-text-secondary">{label}</p>
       {peso && (
         <p className="text-primary font-medium">{peso.value.toFixed(1)} kg</p>
       )}
@@ -82,7 +82,7 @@ export default function WeightChart({ farmId, bovineId }: Props) {
 
   if (loading) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-sm">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-surface shadow-sm">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
@@ -90,7 +90,7 @@ export default function WeightChart({ farmId, bovineId }: Props) {
 
   if (error) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-sm">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-surface shadow-sm">
         <p className="text-sm text-red-500">{error}</p>
       </div>
     );
@@ -98,8 +98,8 @@ export default function WeightChart({ farmId, bovineId }: Props) {
 
   if (data.length < 2) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-2xl bg-white shadow-sm">
-        <p className="text-sm text-gray-400">
+      <div className="flex h-48 items-center justify-center rounded-2xl bg-surface shadow-sm">
+        <p className="text-sm text-text-muted">
           Se necesitan al menos 2 pesajes para mostrar el gráfico.
         </p>
       </div>
@@ -107,8 +107,8 @@ export default function WeightChart({ farmId, bovineId }: Props) {
   }
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900"><TrendingUp size={18} className="inline mr-1.5 align-text-bottom" />Evolución de peso</h3>
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
+      <h3 className="mb-4 font-bold text-text-primary"><TrendingUp size={18} className="inline mr-1.5 align-text-bottom" />Evolución de peso</h3>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

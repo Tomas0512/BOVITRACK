@@ -55,8 +55,8 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
   }, [farmId, bovineId]);
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900"><Syringe size={18} className="inline-block mr-1.5 -mt-0.5" /> Tratamientos sanitarios</h3>
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
+      <h3 className="mb-4 font-bold text-text-primary"><Syringe size={18} className="inline-block mr-1.5 -mt-0.5" /> Tratamientos sanitarios</h3>
 
       {loading && (
         <div className="flex justify-center py-8">
@@ -67,7 +67,7 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
         <p className="py-4 text-center text-sm text-red-500">{error}</p>
       )}
       {!loading && !error && treatments.length === 0 && (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-text-muted">
           Sin tratamientos registrados para este animal.
         </p>
       )}
@@ -86,36 +86,36 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
                     ? "border-red-200 bg-red-50"
                     : isUpcoming
                     ? "border-amber-200 bg-amber-50"
-                    : "border-gray-100 bg-gray-50"
+                    : "border-border bg-surface-alt"
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <Syringe size={20} className="mt-0.5 shrink-0 text-red-500" />
                     <div>
-                      <p className="font-semibold text-gray-800">
+                      <p className="font-semibold text-text-primary">
                         {TREATMENT_TYPE_LABELS[t.treatment_type] ?? t.treatment_type}:{" "}
                         {t.product_name}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-text-muted">
                         {formatDate(t.application_date)}
                       </p>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <p className="mt-1 text-sm text-text-secondary">
                         Dosis: <span className="font-medium">{t.dose}</span> · Vía:{" "}
                         <span className="font-medium">
                           {ROUTE_LABELS[t.administration_route] ?? t.administration_route}
                         </span>
                       </p>
                       {t.diagnosis && (
-                        <p className="mt-1 text-sm text-gray-500">
+                        <p className="mt-1 text-sm text-text-secondary">
                           Diagnóstico: {t.diagnosis}
                         </p>
                       )}
                       {t.symptoms && (
-                        <p className="text-sm text-gray-500">Síntomas: {t.symptoms}</p>
+                        <p className="text-sm text-text-secondary">Síntomas: {t.symptoms}</p>
                       )}
                       {t.observations && (
-                        <p className="mt-1 text-xs text-gray-400">{t.observations}</p>
+                        <p className="mt-1 text-xs text-text-muted">{t.observations}</p>
                       )}
                     </div>
                   </div>
@@ -123,14 +123,14 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
                   {/* Badge próxima aplicación */}
                   {t.next_application_date && (
                     <div className="shrink-0 text-right">
-                      <p className="text-xs text-gray-400">Próx. aplicación</p>
+                      <p className="text-xs text-text-muted">Próx. aplicación</p>
                       <p
                         className={`text-sm font-semibold ${
                           isOverdue
                             ? "text-red-600"
                             : isUpcoming
                             ? "text-amber-600"
-                            : "text-gray-700"
+                            : "text-text-secondary"
                         }`}
                       >
                         {formatDate(t.next_application_date)}
@@ -142,7 +142,7 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
                               ? "text-red-500"
                               : isUpcoming
                               ? "text-amber-500"
-                              : "text-gray-400"
+                              : "text-text-muted"
                           }`}
                         >
                           {isOverdue

@@ -29,12 +29,12 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             ¡Hola, {user?.first_name}!
           </h1>
-          <p className="mt-1 text-sm text-gray-500">Gestiona tus fincas ganaderas</p>
+          <p className="mt-1 text-sm text-text-secondary">Gestiona tus fincas ganaderas</p>
           {user?.role_name && (
-            <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">
+            <p className="mt-1 text-xs uppercase tracking-wide text-text-secondary">
               Rol en sesión: {user.role_name}
             </p>
           )}
@@ -63,10 +63,10 @@ export default function DashboardPage() {
 
       {/* Sin fincas */}
       {!loading && !error && farms.length === 0 && (
-        <div className="rounded-2xl bg-white p-12 text-center shadow-sm">
+        <div className="rounded-2xl bg-surface p-12 text-center shadow-sm">
           <div className="mb-3 text-primary"><Building2 size={48} className="mx-auto" /></div>
-          <h2 className="mb-2 text-lg font-bold text-gray-800">Aún no tienes fincas</h2>
-          <p className="mb-6 text-sm text-gray-500">
+          <h2 className="mb-2 text-lg font-bold text-text-primary">Aún no tienes fincas</h2>
+          <p className="mb-6 text-sm text-text-secondary">
             Crea tu primera finca para empezar a gestionar tu ganado.
           </p>
           <Link
@@ -85,16 +85,16 @@ export default function DashboardPage() {
             <Link
               key={farm.id}
               to={`/farms/${farm.id}`}
-              className="group rounded-xl bg-white p-5 shadow-sm transition-shadow no-underline hover:shadow-md"
+              className="group rounded-xl bg-surface p-5 shadow-sm transition-shadow no-underline hover:shadow-md"
             >
               <div className="mb-2 flex items-center gap-2">
                 <Tractor size={24} className="text-primary shrink-0" />
-                <h3 className="text-base font-bold text-gray-900 group-hover:text-primary">
+                <h3 className="text-base font-bold text-text-primary group-hover:text-primary">
                   {farm.name}
                 </h3>
               </div>
-              <p className="mb-1 text-sm text-gray-500">{farm.address}</p>
-              <div className="flex items-center gap-3 text-xs text-gray-400">
+              <p className="mb-1 text-sm text-text-secondary">{farm.address}</p>
+              <div className="flex items-center gap-3 text-xs text-text-muted">
                 <span>{farm.total_area} {farm.area_unit}</span>
                 <span>ID: {farm.farm_identifier}</span>
               </div>

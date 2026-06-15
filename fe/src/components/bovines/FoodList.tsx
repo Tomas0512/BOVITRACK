@@ -45,8 +45,8 @@ export default function FoodList({ farmId, bovineId }: Props) {
   }, [farmId, bovineId]);
 
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900"><Sprout size={18} className="inline-block mr-1.5 -mt-0.5" /> Historial de alimentación</h3>
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
+      <h3 className="mb-4 font-bold text-text-primary"><Sprout size={18} className="inline-block mr-1.5 -mt-0.5" /> Historial de alimentación</h3>
 
       {loading && (
         <div className="flex justify-center py-8">
@@ -57,7 +57,7 @@ export default function FoodList({ farmId, bovineId }: Props) {
         <p className="py-4 text-center text-sm text-red-500">{error}</p>
       )}
       {!loading && !error && consumptions.length === 0 && (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-text-muted">
           Sin registros de alimentación para este animal.
         </p>
       )}
@@ -65,7 +65,7 @@ export default function FoodList({ farmId, bovineId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[520px] text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">Fecha</th>
                 <th className="pb-2 pr-4">Alimento</th>
                 <th className="pb-2 pr-4">Categoría</th>
@@ -79,14 +79,14 @@ export default function FoodList({ farmId, bovineId }: Props) {
                 return (
                   <tr
                     key={c.id}
-                    className="border-b border-gray-50 last:border-0 hover:bg-gray-50"
+                    className="border-b border-border last:border-0 hover:bg-surface-alt"
                   >
-                    <td className="py-2 pr-4 text-gray-500 whitespace-nowrap">
+                    <td className="py-2 pr-4 text-text-secondary whitespace-nowrap">
                       {formatDateTime(c.feeding_date)}
                     </td>
-                    <td className="py-2 pr-4 font-medium text-gray-800">
+                    <td className="py-2 pr-4 font-medium text-text-primary">
                       {food?.name ?? (
-                        <span className="text-gray-400 text-xs">ID: {c.food_id.slice(0, 8)}…</span>
+                        <span className="text-text-muted text-xs">ID: {c.food_id.slice(0, 8)}…</span>
                       )}
                     </td>
                     <td className="py-2 pr-4">
@@ -95,18 +95,18 @@ export default function FoodList({ farmId, bovineId }: Props) {
                           {food.category}
                         </span>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-text-muted">—</span>
                       )}
                     </td>
-                    <td className="py-2 pr-4 text-gray-700">
+                    <td className="py-2 pr-4 text-text-secondary">
                       {Number(c.quantity).toFixed(2)}{" "}
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-text-muted">
                         {food?.unit_of_measure ?? ""}
                       </span>
                     </td>
-                    <td className="py-2 text-gray-500">
+                    <td className="py-2 text-text-secondary">
                       {c.observations ?? (
-                        <span className="text-gray-300">—</span>
+                        <span className="text-text-muted">—</span>
                       )}
                     </td>
                   </tr>

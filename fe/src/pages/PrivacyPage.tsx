@@ -12,19 +12,19 @@ export default function PrivacyPage() {
   return (
     // ¿Qué? Contenedor con fondo claro y ancho máximo para legibilidad.
     // ¿Para qué? Las páginas legales deben ser fáciles de leer.
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-alt">
       <div className="mx-auto max-w-3xl px-4 py-12">
         {/* ¿Qué? Título principal — un solo <h1> por página (SEO + accesibilidad). */}
         <h1 className="mb-8 text-3xl font-bold text-emerald-800">
           Política de Privacidad y Tratamiento de Datos Personales
         </h1>
-        <p className="mb-4 text-sm text-gray-500">
+        <p className="mb-4 text-sm text-text-secondary">
           Última actualización: marzo de 2026
         </p>
 
-        <div className="space-y-6 text-gray-700 leading-relaxed">
+        <div className="space-y-6 text-text-secondary leading-relaxed">
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">1. Responsable del tratamiento</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">1. Responsable del tratamiento</h2>
             <p>
               BoviTrack, proyecto educativo desarrollado en el marco del Servicio Nacional de
               Aprendizaje (SENA), es responsable del tratamiento de los datos personales
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">2. Datos que recopilamos</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">2. Datos que recopilamos</h2>
             <p>Recopilamos los siguientes datos personales:</p>
             <ul className="ml-6 mt-2 list-disc space-y-1">
               <li><strong>Datos de identificación:</strong> nombre completo, número de documento.</li>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">3. Finalidad del tratamiento</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">3. Finalidad del tratamiento</h2>
             <p>Los datos personales son utilizados para:</p>
             <ul className="ml-6 mt-2 list-disc space-y-1">
               <li>Gestionar la cuenta del usuario y autenticar su identidad.</li>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
               ¿Para qué? Informar al usuario sobre sus derechos ARCO.
               ¿Impacto? Obligatorio por ley — la SIC puede sancionar si no se informa. */}
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">4. Derechos del titular</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">4. Derechos del titular</h2>
             <p>
               De conformidad con la Ley 1581 de 2012, el titular de los datos tiene derecho a:
             </p>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">5. Medidas de seguridad</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">5. Medidas de seguridad</h2>
             <p>Implementamos las siguientes medidas para proteger los datos:</p>
             <ul className="ml-6 mt-2 list-disc space-y-1">
               <li>Cifrado de contraseñas con bcrypt.</li>
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">6. Transferencia de datos</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">6. Transferencia de datos</h2>
             <p>
               Los datos personales no serán transferidos a terceros sin el consentimiento
               previo del titular, salvo cuando exista una obligación legal o judicial que así
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">7. Conservación de datos</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">7. Conservación de datos</h2>
             <p>
               Los datos personales se conservarán mientras la cuenta del usuario esté activa
               y durante el tiempo necesario para cumplir con las finalidades descritas.
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">8. Modificaciones</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">8. Modificaciones</h2>
             <p>
               Esta política puede ser actualizada en cualquier momento. Los cambios serán
               comunicados a través de la plataforma. La fecha de última actualización se
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">9. Contacto</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">9. Contacto</h2>
             <p>
               Para ejercer sus derechos o realizar consultas sobre el tratamiento de datos,
               puede comunicarse al correo electrónico:
@@ -123,7 +123,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-xl font-semibold text-gray-800">10. Marco normativo</h2>
+            <h2 className="mb-2 text-xl font-semibold text-text-primary">10. Marco normativo</h2>
             <p>
               Esta política se rige por la normatividad colombiana vigente, en particular:
             </p>
@@ -136,7 +136,7 @@ export default function PrivacyPage() {
         </div>
 
         {/* ¿Qué? Footer de la página legal con crédito institucional. */}
-        <div className="mt-10 border-t pt-6 text-center text-sm text-gray-400">
+        <div className="mt-10 border-t pt-6 text-center text-sm text-text-muted">
           Proyecto educativo — SENA · {new Date().getFullYear()}
         </div>
       </div>

@@ -98,14 +98,14 @@ export default function FoodFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl mx-4">
+      <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">
+          <h2 className="text-lg font-bold text-text-primary">
             {existing ? "Editar alimento" : "Registrar alimento"}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-text-muted hover:text-text-secondary text-xl leading-none"
           >
             ×
           </button>
@@ -120,7 +120,7 @@ export default function FoodFormModal({
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Nombre *
               </label>
               <input
@@ -128,19 +128,19 @@ export default function FoodFormModal({
                 value={form.name}
                 onChange={(e) => set("name", e.target.value)}
                 placeholder="Ej: Concentrado Premium"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
-              <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/100</span>
+              <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Categoría *
               </label>
               <select
                 value={form.category}
                 onChange={(e) => set("category", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               >
                 {CATEGORIES.map((cat) => (
@@ -154,13 +154,13 @@ export default function FoodFormModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Unidad *
               </label>
               <select
                 value={form.unit_of_measure}
                 onChange={(e) => set("unit_of_measure", e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               >
                 {UNITS.map((unit) => (
@@ -171,7 +171,7 @@ export default function FoodFormModal({
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Stock actual *
               </label>
               <input
@@ -182,7 +182,7 @@ export default function FoodFormModal({
                   set("current_stock", parseFloat(e.target.value) || 0)
                 }
                 placeholder="0"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
             </div>
@@ -190,7 +190,7 @@ export default function FoodFormModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Stock mínimo
               </label>
               <input
@@ -204,11 +204,11 @@ export default function FoodFormModal({
                   )
                 }
                 placeholder="Ej: 20"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Precio unitario ($)
               </label>
               <input
@@ -222,14 +222,14 @@ export default function FoodFormModal({
                   )
                 }
                 placeholder="Ej: 5000"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Vencimiento
               </label>
               <input
@@ -238,11 +238,11 @@ export default function FoodFormModal({
                 onChange={(e) =>
                   set("expiration_date", e.target.value || null)
                 }
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-text-secondary">
                 Proveedor
               </label>
               <input
@@ -252,9 +252,9 @@ export default function FoodFormModal({
                   set("supplier", e.target.value || null)
                 }
                 placeholder="Ej: Distribuidora XYZ"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
-              <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.supplier ?? "").length}/200</span>
+              <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.supplier ?? "").length}/200</span>
             </div>
           </div>
 
@@ -262,7 +262,7 @@ export default function FoodFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
             >
               Cancelar
             </button>

@@ -15,7 +15,7 @@ const SEX_BADGE: Record<string, string> = {
 
 const STATUS_BADGE: Record<string, string> = {
   activo: "bg-green-50 text-green-700",
-  vendido: "bg-gray-100 text-gray-600",
+  vendido: "bg-surface-alt text-text-secondary",
   muerto: "bg-red-50 text-red-700",
   retirado: "bg-yellow-50 text-yellow-700",
 };
@@ -69,11 +69,11 @@ export default function BovineList({ farmId }: Props) {
   };
 
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Bovinos</h2>
-          <p className="text-xs text-gray-400">{bovines.length} registro{bovines.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-bold text-text-primary">Bovinos</h2>
+          <p className="text-xs text-text-muted">{bovines.length} registro{bovines.length !== 1 ? "s" : ""}</p>
         </div>
         <button onClick={() => { setEditing(undefined); setShowModal(true); }}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
@@ -85,7 +85,7 @@ export default function BovineList({ farmId }: Props) {
       <div className="mb-4 flex gap-2">
         {[{ val: "", label: "Todos" }, { val: "macho", label: "Machos" }, { val: "hembra", label: "Hembras" }].map((f) => (
           <button key={f.val} onClick={() => setFilterSex(f.val)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterSex === f.val ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterSex === f.val ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-gray-200"}`}>
             {f.label}
           </button>
         ))}
@@ -98,14 +98,14 @@ export default function BovineList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : bovines.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-200 py-10 text-center">
-          <p className="text-sm text-gray-400">No hay bovinos registrados</p>
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">No hay bovinos registrados</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 text-left text-xs font-semibold uppercase tracking-wide text-gray-400">
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">ID</th>
                 <th className="pb-2 pr-4">Nombre</th>
                 <th className="pb-2 pr-4">Sexo</th>
@@ -117,21 +117,21 @@ export default function BovineList({ farmId }: Props) {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {bovines.map((b) => (
-                <tr key={b.id} className="hover:bg-gray-50">
-                  <td className="py-3 pr-4 font-mono text-xs text-gray-600">{b.identification_number}</td>
-                  <td className="py-3 pr-4 font-medium text-gray-800">{b.name ?? "—"}</td>
+                <tr key={b.id} className="hover:bg-surface-alt">
+                  <td className="py-3 pr-4 font-mono text-xs text-text-secondary">{b.identification_number}</td>
+                  <td className="py-3 pr-4 font-medium text-text-primary">{b.name ?? "—"}</td>
                   <td className="py-3 pr-4">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${SEX_BADGE[b.sex] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${SEX_BADGE[b.sex] ?? "bg-surface-alt text-text-secondary"}`}>
                       {b.sex}
                     </span>
                   </td>
-                  <td className="py-3 pr-4 text-gray-500">{b.breed ?? "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{b.breed ?? "—"}</td>
                   <td className="py-3 pr-4">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[b.status] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[b.status] ?? "bg-surface-alt text-text-secondary"}`}>
                       {b.status}
                     </span>
                   </td>
-                  <td className="py-3 pr-4 text-gray-500">{b.current_weight ? `${b.current_weight} kg` : "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{b.current_weight ? `${b.current_weight} kg` : "—"}</td>
                   <td className="py-3">
                     <div className="flex gap-2">
                       <Link to={`/farms/${farmId}/bovines/${b.id}`}
@@ -139,7 +139,7 @@ export default function BovineList({ farmId }: Props) {
                         Ver
                       </Link>
                       <button onClick={() => { setEditing(b); setShowModal(true); }}
-                        className="rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100">
+                        className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                         Editar
                       </button>
                       <button onClick={() => handleDelete(b)} disabled={actionLoading === b.id}

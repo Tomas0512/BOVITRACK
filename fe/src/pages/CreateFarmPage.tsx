@@ -118,16 +118,16 @@ export default function CreateFarmPage() {
   };
 
   const inputClass =
-    "w-full rounded-lg border-[1.5px] border-gray-300 bg-surface px-3 py-2 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/10";
+    "w-full rounded-lg border-[1.5px] border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10";
 
   // Estado de éxito
   if (success) {
     return (
       <div className="flex justify-center pt-12">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 text-center shadow-lg">
           <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
           <h2 className="mb-1 text-xl font-bold text-primary">¡Finca creada!</h2>
-          <p className="mb-6 text-sm text-gray-500">
+          <p className="mb-6 text-sm text-text-secondary">
             La finca <strong>{success.name}</strong> ha sido registrada exitosamente.
           </p>
           <button
@@ -149,14 +149,14 @@ export default function CreateFarmPage() {
 
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-lg rounded-2xl bg-surface p-8 shadow-lg">
         <h2 className="mb-1 text-center text-xl font-bold text-primary">Registrar finca</h2>
-        <p className="mb-6 text-center text-sm text-gray-500">
+        <p className="mb-6 text-center text-sm text-text-secondary">
           Ingresa los datos de tu nueva finca ganadera.
         </p>
 
         {loadingCatalogs && (
-          <p className="mb-4 text-center text-sm text-gray-500">Cargando catálogos...</p>
+          <p className="mb-4 text-center text-sm text-text-secondary">Cargando catálogos...</p>
         )}
 
         <form onSubmit={handleSubmit} noValidate>
@@ -168,7 +168,7 @@ export default function CreateFarmPage() {
 
           {/* Nombre */}
           <div className="mb-4">
-            <label htmlFor="name" className="mb-1 block text-sm font-semibold text-gray-800">
+            <label htmlFor="name" className="mb-1 block text-sm font-semibold text-text-primary">
               Nombre de la finca <span className="text-red-600">*</span>
             </label>
             <input
@@ -176,12 +176,12 @@ export default function CreateFarmPage() {
               value={form.name} onChange={handleChange}
               placeholder="Ej: Hacienda El Porvenir" className={inputClass}
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/255</span>
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/255</span>
           </div>
 
           {/* Dirección */}
           <div className="mb-4">
-            <label htmlFor="address" className="mb-1 block text-sm font-semibold text-gray-800">
+            <label htmlFor="address" className="mb-1 block text-sm font-semibold text-text-primary">
               Dirección <span className="text-red-600">*</span>
             </label>
             <input
@@ -189,13 +189,13 @@ export default function CreateFarmPage() {
               value={form.address} onChange={handleChange}
               placeholder="Ej: Vereda La Esperanza, Km 5" className={inputClass}
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.address.length}/500</span>
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{form.address.length}/500</span>
           </div>
 
           {/* Departamento y Ciudad */}
           <div className="mb-4 grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="department_id" className="mb-1 block text-sm font-semibold text-gray-800">
+              <label htmlFor="department_id" className="mb-1 block text-sm font-semibold text-text-primary">
                 Departamento <span className="text-red-600">*</span>
               </label>
               <select
@@ -214,7 +214,7 @@ export default function CreateFarmPage() {
               </select>
             </div>
             <div>
-              <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-gray-800">
+              <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-text-primary">
                 Ciudad o municipio <span className="text-red-600">*</span>
               </label>
               <select
@@ -239,7 +239,7 @@ export default function CreateFarmPage() {
           {/* Área y unidad */}
           <div className="mb-4 grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="total_area" className="mb-1 block text-sm font-semibold text-gray-800">
+              <label htmlFor="total_area" className="mb-1 block text-sm font-semibold text-text-primary">
                 Área total <span className="text-red-600">*</span>
               </label>
               <input
@@ -250,7 +250,7 @@ export default function CreateFarmPage() {
               />
             </div>
             <div>
-              <label htmlFor="area_unit" className="mb-1 block text-sm font-semibold text-gray-800">
+              <label htmlFor="area_unit" className="mb-1 block text-sm font-semibold text-text-primary">
                 Unidad
               </label>
               <select id="area_unit" name="area_unit" value={form.area_unit} onChange={handleChange} className={inputClass}>
@@ -263,7 +263,7 @@ export default function CreateFarmPage() {
 
           {/* Propósito */}
           <div className="mb-4">
-            <label htmlFor="purpose_id" className="mb-1 block text-sm font-semibold text-gray-800">
+            <label htmlFor="purpose_id" className="mb-1 block text-sm font-semibold text-text-primary">
               Propósito <span className="text-red-600">*</span>
             </label>
             <select
@@ -284,7 +284,7 @@ export default function CreateFarmPage() {
 
           {/* Identificador */}
           <div className="mb-4">
-            <label htmlFor="farm_identifier" className="mb-1 block text-sm font-semibold text-gray-800">
+            <label htmlFor="farm_identifier" className="mb-1 block text-sm font-semibold text-text-primary">
               Identificador de la finca <span className="text-red-600">*</span>
             </label>
             <input
@@ -292,12 +292,12 @@ export default function CreateFarmPage() {
               value={form.farm_identifier} onChange={handleChange}
               placeholder="Ej: FIN-001" className={inputClass}
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.farm_identifier.length}/100</span>
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{form.farm_identifier.length}/100</span>
           </div>
 
           {/* Teléfono */}
           <div className="mb-4">
-            <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-gray-800">
+            <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-text-primary">
               Teléfono
             </label>
             <input
@@ -305,7 +305,7 @@ export default function CreateFarmPage() {
               value={form.phone ?? ""} onChange={handleChange}
               placeholder="Ej: 3001234567" className={inputClass}
             />
-            <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.phone ?? "").length}/20</span>
+            <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.phone ?? "").length}/20</span>
           </div>
 
           <button

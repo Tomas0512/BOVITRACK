@@ -44,10 +44,10 @@ export default function BovineDetailPage() {
   if (error || !bovine) {
     return (
       <div className="flex justify-center pt-12">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
+        <div className="w-full max-w-md rounded-2xl bg-surface p-8 text-center shadow-lg">
           <div className="mb-3 text-5xl"><AlertTriangle size={48} className="text-amber-500 mx-auto" /></div>
-          <h2 className="mb-2 text-lg font-bold text-gray-800">Bovino no encontrado</h2>
-          <p className="mb-6 text-sm text-gray-500">{error}</p>
+          <h2 className="mb-2 text-lg font-bold text-text-primary">Bovino no encontrado</h2>
+          <p className="mb-6 text-sm text-text-secondary">{error}</p>
           <Link
             to={`/farms/${farmId}`}
             className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white no-underline hover:bg-primary-light"
@@ -62,7 +62,7 @@ export default function BovineDetailPage() {
   return (
     <div className="space-y-6">
       {/* Cabecera */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm">
+      <div className="rounded-2xl bg-surface p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
           <div className="flex items-center gap-2 text-4xl text-primary">
             {bovine.sex === "macho" ? (
@@ -72,17 +72,17 @@ export default function BovineDetailPage() {
             )}
           </div> {/* <- Corrección: Aquí faltaba cerrar este contenedor */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-text-primary">
               {bovine.name ?? bovine.identification_number}
             </h1>
-            <p className="text-sm text-gray-400">ID: {bovine.identification_number}</p>
+            <p className="text-sm text-text-muted">ID: {bovine.identification_number}</p>
           </div>
           <div className="ml-auto">
             <span
               className={`rounded-full px-3 py-1 text-sm font-medium ${
                 bovine.status === "activo"
                   ? "bg-green-50 text-green-700"
-                  : "bg-gray-100 text-gray-600"
+                  : "bg-surface-alt text-text-secondary"
               }`}
             >
               {bovine.status}
@@ -92,15 +92,15 @@ export default function BovineDetailPage() {
       </div>
 
       {/* Pestañas */}
-      <div className="flex gap-1 rounded-xl bg-gray-100 p-1">
+      <div className="flex gap-1 rounded-xl bg-surface-alt p-1">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-surface text-text-primary shadow-sm"
+                : "text-text-secondary hover:text-text-secondary"
             }`}
           >
             <span>{tab.icon}</span>
@@ -112,8 +112,8 @@ export default function BovineDetailPage() {
       {/* Pestaña General */}
       {activeTab === "general" && (
         <>
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-gray-900">Datos generales</h2>
+          <div className="rounded-2xl bg-surface p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-text-primary">Datos generales</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <InfoCard label="Sexo" value={bovine.sex} />
               <InfoCard label="Raza" value={bovine.breed ?? "No registrada"} />
@@ -132,8 +132,8 @@ export default function BovineDetailPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-gray-900">Trazabilidad</h2>
+          <div className="rounded-2xl bg-surface p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-text-primary">Trazabilidad</h2>
             <div className="space-y-3">
               <TraceItem
                 icon={<ArrowDownToLine size={20} />}
@@ -198,23 +198,23 @@ export default function BovineDetailPage() {
 {/* Componentes Auxiliares Locales */}
 function InfoCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl bg-gray-50 p-4">
-      <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-gray-800 capitalize">{value}</p>
+    <div className="rounded-xl bg-surface-alt p-4">
+      <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-text-primary capitalize">{value}</p>
     </div>
   );
 }
 
 function TraceItem({ icon, title, date, description }: { icon: React.ReactNode; title: string; date: string; description?: string }) {
   return (
-    <div className="flex gap-4 items-start rounded-xl p-3 hover:bg-gray-50 transition-colors">
+    <div className="flex gap-4 items-start rounded-xl p-3 hover:bg-surface-alt transition-colors">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light/10 text-primary">
         {icon}
       </div>
       <div className="space-y-0.5">
-        <h4 className="text-sm font-semibold text-gray-800">{title}</h4>
-        {date && <p className="text-xs text-gray-400">{date}</p>}
-        {description && <p className="text-sm text-gray-600 mt-1">{description}</p>}
+        <h4 className="text-sm font-semibold text-text-primary">{title}</h4>
+        {date && <p className="text-xs text-text-muted">{date}</p>}
+        {description && <p className="text-sm text-text-secondary mt-1">{description}</p>}
       </div>
     </div>
   );

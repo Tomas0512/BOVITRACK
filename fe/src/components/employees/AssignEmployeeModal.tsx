@@ -49,12 +49,12 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Invitar empleado</h2>
+          <h2 className="text-lg font-bold text-text-primary">Invitar empleado</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-text-muted hover:text-text-secondary text-xl leading-none"
             aria-label="Cerrar"
           >
             ×
@@ -75,7 +75,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label className="mb-1 block text-sm font-medium text-text-secondary">
               Correo del empleado
             </label>
             <input
@@ -83,19 +83,19 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="correo@ejemplo.com"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-text-muted">
               Se enviará un enlace de registro al correo ingresado
             </p>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Rol</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Rol</label>
             <select
               value={roleId}
               onChange={(e) => setRoleId(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             >
               <option value="">Seleccionar rol...</option>
@@ -111,7 +111,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
             >
               Cancelar
             </button>
