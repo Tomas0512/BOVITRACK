@@ -26,6 +26,9 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isFormComplete =
+    form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
+
   const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
@@ -64,8 +67,10 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Nombre del potrero</label>
-            <input type="text" value={form.name} onChange={(e) => set("name", e.target.value)}
+            <input type="text" value={form.name} maxLength={100}
+              onChange={(e) => set("name", e.target.value)}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/100</span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -131,8 +136,8 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
+            <button type="submit" disabled={!isFormComplete || loading}
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? "Guardando..." : existing ? "Guardar cambios" : "Crear potrero"}
             </button>
           </div>

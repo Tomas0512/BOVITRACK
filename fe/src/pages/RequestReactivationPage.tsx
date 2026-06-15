@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { requestReactivation } from "../api/auth";
 
@@ -33,7 +34,7 @@ export default function RequestReactivationPage() {
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full items-center justify-center">
           <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-            <div className="mb-3 text-5xl">✅</div>
+            <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
             <h2 className="mb-2 text-xl font-bold text-gray-800">Solicitud enviada</h2>
             <p className="mb-6 text-sm text-gray-500">
               Tu solicitud de reactivación ha sido registrada. Un administrador la revisará pronto.

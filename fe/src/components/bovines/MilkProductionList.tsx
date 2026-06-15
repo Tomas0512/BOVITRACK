@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Droplets } from "lucide-react";
 import {
   listMilkProduction,
   type MilkProductionResponse,
@@ -46,7 +47,7 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">🥛 Historial de ordeño</h3>
+        <h3 className="font-bold text-gray-900"><Droplets size={18} className="inline mr-1.5 align-text-bottom" />Historial de ordeño</h3>
         {records.length > 0 && (
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
             Total: {totalLitros.toFixed(1)} L ({records.length} registros)

@@ -15,6 +15,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
   listFoods,
   deleteFood,
@@ -200,7 +201,7 @@ export default function FoodList({ farmId }: Props) {
           <p className="text-xs text-gray-400">
             {foods.length} alimento{foods.length !== 1 ? "s" : ""}
             {lowStockCount > 0 && (
-              <> · <span className="text-amber-600">⚠️ {lowStockCount} con stock bajo</span></>
+              <> · <span className="text-amber-600"><AlertTriangle size={12} className="inline-block mr-0.5 -mt-0.5" /> {lowStockCount} con stock bajo</span></>
             )}
           </p>
         </div>
@@ -319,7 +320,7 @@ export default function FoodList({ farmId }: Props) {
                       }`}
                     >
                       {food.current_stock}
-                      {isLowStock && " ⚠️"}
+                      {isLowStock && <AlertTriangle size={12} className="inline-block ml-0.5 -mt-0.5 text-amber-600" />}
                     </td>
                     <td className="py-3 pr-4 text-gray-500">
                       {food.min_stock_alert ?? "—"}

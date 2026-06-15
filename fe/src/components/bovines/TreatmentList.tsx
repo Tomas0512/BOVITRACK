@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Syringe } from "lucide-react";
 import { listTreatments, type TreatmentResponse } from "../../api/treatments";
 
 interface Props {
@@ -55,7 +56,7 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900">💉 Tratamientos sanitarios</h3>
+      <h3 className="mb-4 font-bold text-gray-900"><Syringe size={18} className="inline-block mr-1.5 -mt-0.5" /> Tratamientos sanitarios</h3>
 
       {loading && (
         <div className="flex justify-center py-8">
@@ -90,7 +91,7 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-3">
-                    <span className="mt-0.5 text-xl">💉</span>
+                    <Syringe size={20} className="mt-0.5 shrink-0 text-red-500" />
                     <div>
                       <p className="font-semibold text-gray-800">
                         {TREATMENT_TYPE_LABELS[t.treatment_type] ?? t.treatment_type}:{" "}

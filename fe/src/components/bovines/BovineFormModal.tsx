@@ -34,6 +34,11 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isFormComplete =
+    form.identification_number.trim() !== "" &&
+    form.birth_date !== "" &&
+    form.entry_date !== "";
+
   const set = <K extends keyof BovineRequest>(key: K, value: BovineRequest[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
@@ -82,15 +87,17 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">N° Identificación *</label>
-              <input type="text" value={form.identification_number}
+              <input type="text" value={form.identification_number} maxLength={50}
                 onChange={(e) => set("identification_number", e.target.value)}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              <span className="mt-0.5 block text-right text-xs text-gray-400">{form.identification_number.length}/50</span>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
-              <input type="text" value={form.name ?? ""}
+              <input type="text" value={form.name ?? ""} maxLength={100}
                 onChange={(e) => set("name", e.target.value)}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.name ?? "").length}/100</span>
             </div>
           </div>
 
@@ -105,7 +112,8 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Raza</label>
-              <input type="text" value={form.breed ?? ""} onChange={(e) => set("breed", e.target.value)}
+              <input type="text" value={form.breed ?? ""} maxLength={50}
+                onChange={(e) => set("breed", e.target.value)}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
           </div>
@@ -118,7 +126,8 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">Color</label>
-              <input type="text" value={form.color ?? ""} onChange={(e) => set("color", e.target.value)}
+              <input type="text" value={form.color ?? ""} maxLength={50}
+                onChange={(e) => set("color", e.target.value)}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
             </div>
           </div>
@@ -184,8 +193,10 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">Observaciones</label>
-            <textarea value={form.observations ?? ""} onChange={(e) => set("observations", e.target.value)}
+            <textarea value={form.observations ?? ""} maxLength={500}
+              onChange={(e) => set("observations", e.target.value)}
               rows={2} className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.observations ?? "").length}/500</span>
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -193,8 +204,8 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
               className="flex-1 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
               Cancelar
             </button>
-            <button type="submit" disabled={loading}
-              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
+            <button type="submit" disabled={!isFormComplete || loading}
+              className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed">
               {loading ? "Guardando..." : existing ? "Guardar cambios" : "Registrar"}
             </button>
           </div>

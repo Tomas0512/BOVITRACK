@@ -1,9 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import {
   createFarm,
   listDepartments,
+  listCities,
   listPurposes,
+  type CityOption,
   type DepartmentOption,
   type FarmRequest,
   type PurposeOption,
@@ -19,9 +22,11 @@ export default function CreateFarmPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingCatalogs, setLoadingCatalogs] = useState(true);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<{ id: string; name: string } | null>(null);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
 
   const [form, setForm] = useState<FarmRequest>({
@@ -38,12 +43,19 @@ export default function CreateFarmPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "total_area" ? Number(value) : value,
-    }));
+    setForm((prev) => {
+      const updated = {
+        ...prev,
+        [name]: name === "total_area" ? Number(value) : value,
+      };
+      if (name === "department_id") {
+        updated.city_municipality = "";
+      }
+      return updated;
+    });
   };
 
+  // Cargar catálogos iniciales
   useEffect(() => {
     const loadCatalogs = async () => {
       setLoadingCatalogs(true);
@@ -61,8 +73,38 @@ export default function CreateFarmPage() {
     loadCatalogs();
   }, []);
 
+  // Cargar ciudades cuando cambia el departamento
+  useEffect(() => {
+    if (!form.department_id) {
+      setCities([]);
+      return;
+    }
+    const load = async () => {
+      setLoadingCities(true);
+      try {
+        const cits = await listCities(form.department_id);
+        setCities(cits);
+      } catch {
+        setCities([]);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+    load();
+  }, [form.department_id]);
+
+  const isFormComplete =
+    form.name.trim() !== "" &&
+    form.address.trim() !== "" &&
+    form.department_id !== "" &&
+    form.city_municipality !== "" &&
+    form.total_area > 0 &&
+    form.purpose_id !== "" &&
+    form.farm_identifier.trim() !== "";
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!isFormComplete) return;
     setError("");
     setLoading(true);
     try {
@@ -83,7 +125,7 @@ export default function CreateFarmPage() {
     return (
       <div className="flex justify-center pt-12">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-          <div className="mb-3 text-5xl">✅</div>
+          <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
           <h2 className="mb-1 text-xl font-bold text-primary">¡Finca creada!</h2>
           <p className="mb-6 text-sm text-gray-500">
             La finca <strong>{success.name}</strong> ha sido registrada exitosamente.
@@ -129,7 +171,12 @@ export default function CreateFarmPage() {
             <label htmlFor="name" className="mb-1 block text-sm font-semibold text-gray-800">
               Nombre de la finca <span className="text-red-600">*</span>
             </label>
-            <input id="name" name="name" value={form.name} onChange={handleChange} placeholder="Ej: Hacienda El Porvenir" className={inputClass} />
+            <input
+              id="name" name="name" required maxLength={255}
+              value={form.name} onChange={handleChange}
+              placeholder="Ej: Hacienda El Porvenir" className={inputClass}
+            />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.name.length}/255</span>
           </div>
 
           {/* Dirección */}
@@ -137,7 +184,12 @@ export default function CreateFarmPage() {
             <label htmlFor="address" className="mb-1 block text-sm font-semibold text-gray-800">
               Dirección <span className="text-red-600">*</span>
             </label>
-            <input id="address" name="address" value={form.address} onChange={handleChange} placeholder="Ej: Vereda La Esperanza, Km 5" className={inputClass} />
+            <input
+              id="address" name="address" required maxLength={500}
+              value={form.address} onChange={handleChange}
+              placeholder="Ej: Vereda La Esperanza, Km 5" className={inputClass}
+            />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.address.length}/500</span>
           </div>
 
           {/* Departamento y Ciudad */}
@@ -147,8 +199,7 @@ export default function CreateFarmPage() {
                 Departamento <span className="text-red-600">*</span>
               </label>
               <select
-                id="department_id"
-                name="department_id"
+                id="department_id" name="department_id" required
                 value={form.department_id}
                 onChange={handleChange}
                 className={inputClass}
@@ -166,14 +217,22 @@ export default function CreateFarmPage() {
               <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-gray-800">
                 Ciudad o municipio <span className="text-red-600">*</span>
               </label>
-              <input
-                id="city_municipality"
-                name="city_municipality"
+              <select
+                id="city_municipality" name="city_municipality" required
                 value={form.city_municipality}
                 onChange={handleChange}
-                placeholder="Ej: Yopal"
                 className={inputClass}
-              />
+                disabled={!form.department_id || loadingCities}
+              >
+                <option value="">
+                  {loadingCities ? "Cargando..." : form.department_id ? "Seleccione una ciudad" : "Primero seleccione departamento"}
+                </option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -183,7 +242,12 @@ export default function CreateFarmPage() {
               <label htmlFor="total_area" className="mb-1 block text-sm font-semibold text-gray-800">
                 Área total <span className="text-red-600">*</span>
               </label>
-              <input id="total_area" name="total_area" type="number" min="0" step="0.01" value={form.total_area || ""} onChange={handleChange} placeholder="Ej: 150" className={inputClass} />
+              <input
+                id="total_area" name="total_area" required
+                type="number" min="0.01" step="0.01"
+                value={form.total_area || ""} onChange={handleChange}
+                placeholder="Ej: 150" className={inputClass}
+              />
             </div>
             <div>
               <label htmlFor="area_unit" className="mb-1 block text-sm font-semibold text-gray-800">
@@ -203,8 +267,7 @@ export default function CreateFarmPage() {
               Propósito <span className="text-red-600">*</span>
             </label>
             <select
-              id="purpose_id"
-              name="purpose_id"
+              id="purpose_id" name="purpose_id" required
               value={form.purpose_id}
               onChange={handleChange}
               className={inputClass}
@@ -224,7 +287,12 @@ export default function CreateFarmPage() {
             <label htmlFor="farm_identifier" className="mb-1 block text-sm font-semibold text-gray-800">
               Identificador de la finca <span className="text-red-600">*</span>
             </label>
-            <input id="farm_identifier" name="farm_identifier" value={form.farm_identifier} onChange={handleChange} placeholder="Ej: FIN-001" className={inputClass} />
+            <input
+              id="farm_identifier" name="farm_identifier" required maxLength={100}
+              value={form.farm_identifier} onChange={handleChange}
+              placeholder="Ej: FIN-001" className={inputClass}
+            />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{form.farm_identifier.length}/100</span>
           </div>
 
           {/* Teléfono */}
@@ -232,14 +300,21 @@ export default function CreateFarmPage() {
             <label htmlFor="phone" className="mb-1 block text-sm font-semibold text-gray-800">
               Teléfono
             </label>
-            <input id="phone" name="phone" value={form.phone ?? ""} onChange={handleChange} placeholder="Ej: 3001234567" className={inputClass} />
+            <input
+              id="phone" name="phone" maxLength={20}
+              value={form.phone ?? ""} onChange={handleChange}
+              placeholder="Ej: 3001234567" className={inputClass}
+            />
+            <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.phone ?? "").length}/20</span>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={!isFormComplete || loading}
             className={`mt-2 w-full rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${
-              loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"
+              !isFormComplete || loading
+                ? "cursor-not-allowed bg-gray-400 opacity-70"
+                : "bg-primary hover:bg-primary-light"
             }`}
           >
             {loading ? "Registrando..." : "Registrar finca"}

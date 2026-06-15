@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AlertTriangle, Circle } from "lucide-react";
 import { listAlerts, type AlertsResponse } from "../../api/alerts";
 
 interface Props {
@@ -35,7 +36,7 @@ export default function AlertBanner({ farmId }: Props) {
       {overdueCount > 0 && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 text-lg">🔴</span>
+            <Circle size={20} fill="#dc2626" stroke="none" className="mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-red-800">
                 {overdueCount} plan{overdueCount !== 1 ? "es" : ""} sanitario
@@ -66,7 +67,7 @@ export default function AlertBanner({ farmId }: Props) {
       {upcomingCount > 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 text-lg">⚠️</span>
+            <AlertTriangle size={20} className="mt-0.5 shrink-0 text-amber-600" />
             <div>
               <p className="text-sm font-semibold text-amber-800">
                 {upcomingCount} plan{upcomingCount !== 1 ? "es" : ""} sanitario

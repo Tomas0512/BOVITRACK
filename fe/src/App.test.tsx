@@ -14,8 +14,8 @@ describe("App", () => {
     expect(screen.getByText(/Bovitrack — En construcción/i)).toBeDefined();
   });
 
-  it("renderiza el emoji de vaca", () => {
+  it("renderiza el título de la plataforma", () => {
     render(<App />);
-    expect(screen.getByText(/🐄/i)).toBeDefined();
+    expect(screen.getByText(/BoviTrack/i)).toBeDefined();
   });
 });

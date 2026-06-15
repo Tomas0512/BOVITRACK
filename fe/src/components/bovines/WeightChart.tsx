@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TrendingUp } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -107,7 +108,7 @@ export default function WeightChart({ farmId, bovineId }: Props) {
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-4 font-bold text-gray-900">📈 Evolución de peso</h3>
+      <h3 className="mb-4 font-bold text-gray-900"><TrendingUp size={18} className="inline mr-1.5 align-text-bottom" />Evolución de peso</h3>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

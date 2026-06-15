@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { AlertTriangle, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { resetPassword as resetPasswordApi } from "../api/auth";
 
@@ -124,7 +125,7 @@ export function ResetPasswordPage() {
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full items-center justify-center">
           <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-            <div className="mb-2 text-center text-4xl" aria-hidden="true">⚠️</div>
+            <div className="mb-2 text-center" aria-hidden="true"><AlertTriangle size={36} className="mx-auto text-amber-500" /></div>
             <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Enlace inválido</h2>
             <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
               El enlace de recuperación no es válido o ha expirado.
@@ -145,7 +146,7 @@ export function ResetPasswordPage() {
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
           {!submitted ? (
             <>
-              <div className="mb-2 text-center text-4xl" aria-hidden="true">🔒</div>
+              <div className="mb-2 text-center" aria-hidden="true"><Lock size={36} className="mx-auto text-primary" /></div>
 
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Restablecer contraseña</h2>
               <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
@@ -180,7 +181,7 @@ export function ResetPasswordPage() {
                       onClick={() => setShowPassword((v) => !v)}
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
-                      {showPassword ? "🙈" : "👁️"}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                   {errors.password && (
@@ -229,11 +230,11 @@ export function ResetPasswordPage() {
                     />
                     <button
                       type="button"
-                      className="absolute right-2 bg-transparent border-none cursor-pointer text-lg opacity-60 hover:opacity-100 transition-opacity"
+                      className="absolute right-2 bg-transparent border-none cursor-pointer opacity-60 hover:opacity-100 transition-opacity"
                       onClick={() => setShowConfirm((v) => !v)}
                       aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
                     >
-                      {showConfirm ? "🙈" : "👁️"}
+                      {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
@@ -269,7 +270,7 @@ export function ResetPasswordPage() {
             </>
           ) : (
             <div className="text-center">
-              <div className="mb-3 text-5xl" aria-hidden="true">✅</div>
+              <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" aria-hidden="true" />
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Contraseña restablecida!</h2>
               <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Tu contraseña se ha cambiado correctamente. Ya puedes iniciar

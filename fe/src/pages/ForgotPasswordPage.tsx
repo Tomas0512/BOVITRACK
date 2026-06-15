@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Key, Mail } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { forgotPassword } from "../api/auth";
 
@@ -64,7 +65,7 @@ export function ForgotPasswordPage() {
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
           {!submitted ? (
             <>
-              <div className="mb-2 text-center text-4xl" aria-hidden="true">🔑</div>
+              <div className="mb-2 text-center" aria-hidden="true"><Key size={36} className="mx-auto text-primary" /></div>
 
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">Recuperar contraseña</h2>
               <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
@@ -110,7 +111,7 @@ export function ForgotPasswordPage() {
             </>
           ) : (
             <div className="text-center">
-              <div className="mb-3 text-5xl" aria-hidden="true">✉️</div>
+              <div className="mb-3 text-center" aria-hidden="true"><Mail size={40} className="mx-auto text-primary" /></div>
               <h2 className="mb-0.5 text-center text-xl font-bold text-primary">¡Correo enviado!</h2>
               <p className="mb-6 text-center text-sm leading-relaxed text-gray-500">
                 Hemos enviado un enlace de recuperación a{" "}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Scale, X } from "lucide-react";
 import {
   listWeights,
   createWeight,
@@ -21,7 +22,6 @@ const BODY_CONDITION_LABELS: Record<number, string> = {
 };
 
 function formatDate(iso: string) {
-  // "YYYY-MM-DD" → "DD/MM/YYYY"
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
 }
@@ -37,7 +37,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
   const [weights, setWeights] = useState<WeightResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<WeightCreate>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
@@ -55,11 +55,17 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
     load();
   }, [farmId, bovineId]);
 
+  const isFormComplete = form.weight_kg > 0 && form.measured_at !== "";
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setFormError("");
     if (!form.weight_kg || form.weight_kg <= 0) {
       setFormError("El peso debe ser mayor a 0 kg.");
+      return;
+    }
+    if (!form.measured_at) {
+      setFormError("La fecha de medición es obligatoria.");
       return;
     }
     setSaving(true);
@@ -70,7 +76,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
         observations: form.observations || null,
       });
       setForm(EMPTY_FORM);
-      setShowForm(false);
+      setShowModal(false);
       load();
     } catch {
       setFormError("No se pudo registrar el pesaje. Intente de nuevo.");
@@ -95,109 +101,134 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-bold text-gray-900">⚖️ Historial de pesajes</h3>
+        <h3 className="font-bold text-gray-900">
+          <Scale size={18} className="inline mr-1.5 align-text-bottom text-primary" />
+          Historial de pesajes
+        </h3>
         <button
-          onClick={() => setShowForm((v) => !v)}
+          onClick={() => {
+            setForm(EMPTY_FORM);
+            setFormError("");
+            setShowModal(true);
+          }}
           className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary/90"
         >
-          {showForm ? "Cancelar" : "+ Registrar pesaje"}
+          + Registrar pesaje
         </button>
       </div>
 
-      {/* Formulario de registro */}
-      {showForm && (
-        <form
-          onSubmit={handleCreate}
-          className="mb-6 grid grid-cols-1 gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 sm:grid-cols-2"
+      {/* Modal para registrar pesaje */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setShowModal(false)}
         >
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Peso (kg) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              required
-              value={form.weight_kg || ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, weight_kg: parseFloat(e.target.value) }))
-              }
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-            />
-          </div>
+          <div
+            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-primary">Registrar pesaje</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Fecha de medición <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              required
-              max={new Date().toISOString().slice(0, 10)}
-              value={form.measured_at}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, measured_at: e.target.value }))
-              }
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-            />
-          </div>
+            {formError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+                {formError}
+              </div>
+            )}
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Condición corporal (1–5)
-            </label>
-            <select
-              value={form.body_condition ?? ""}
-              onChange={(e) =>
-                setForm((f) => ({
-                  ...f,
-                  body_condition: e.target.value ? parseInt(e.target.value) : undefined,
-                }))
-              }
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-            >
-              <option value="">— Sin registrar —</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {BODY_CONDITION_LABELS[n]}
-                </option>
-              ))}
-            </select>
-          </div>
+            <form onSubmit={handleCreate} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Peso (kg) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number" step="0.01" min="0.01" required
+                  value={form.weight_kg || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, weight_kg: parseFloat(e.target.value) }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                />
+              </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-gray-600">
-              Observaciones
-            </label>
-            <input
-              type="text"
-              value={form.observations ?? ""}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, observations: e.target.value }))
-              }
-              placeholder="Opcional"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
-            />
-          </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Fecha de medición <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date" required
+                  max={new Date().toISOString().slice(0, 10)}
+                  value={form.measured_at}
+                  onChange={(e) => setForm((f) => ({ ...f, measured_at: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                />
+              </div>
 
-          {formError && (
-            <p className="col-span-full text-sm text-red-500">{formError}</p>
-          )}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Condición corporal (1–5)
+                </label>
+                <select
+                  value={form.body_condition ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      body_condition: e.target.value ? parseInt(e.target.value) : undefined,
+                    }))
+                  }
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                >
+                  <option value="">— Sin registrar —</option>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>{BODY_CONDITION_LABELS[n]}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div className="col-span-full flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
-            >
-              {saving ? "Guardando…" : "Guardar pesaje"}
-            </button>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">
+                  Observaciones
+                </label>
+                <input
+                  type="text" maxLength={500}
+                  value={form.observations ?? ""}
+                  onChange={(e) => setForm((f) => ({ ...f, observations: e.target.value }))}
+                  placeholder="Opcional"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                />
+                <span className="mt-0.5 block text-right text-xs text-gray-400">{(form.observations ?? "").length}/500</span>
+              </div>
+
+              <div className="col-span-full mt-2 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isFormComplete || saving}
+                  className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition-colors ${
+                    !isFormComplete || saving
+                      ? "cursor-not-allowed bg-gray-400 opacity-70"
+                      : "bg-primary hover:bg-primary/90"
+                  }`}
+                >
+                  {saving ? "Guardando…" : "Guardar pesaje"}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       )}
 
-      {/* Tabla de historial */}
       {loading && (
         <div className="flex justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

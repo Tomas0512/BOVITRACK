@@ -21,11 +21,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libpq-dev && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY pyproject.toml .
 # --prefix=/install: instala paquetes en directorio aislado para
 # poder copiarlos limpiamente a la etapa runtime.
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --prefix=/install -r requirements.txt
+    pip install --no-cache-dir --prefix=/install .
 
 # ── Runtime: imagen mínima sin herramientas de compilación ────
 FROM python:3.12-slim AS runtime
