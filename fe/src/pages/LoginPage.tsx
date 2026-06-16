@@ -1,7 +1,7 @@
 /**
  * Archivo: pages/LoginPage.tsx
  * Descripción: Página de inicio de sesión de BoviTrack.
- * ¿Para qué? Permitir que usuarios registrados accedan al sistema.
+ * Why? Permitir que usuarios registrados accedan al sistema.
  * Campos: correo electrónico, contraseña.
  * Enlaces: "¿Olvidaste tu contraseña?" y "¿No estás registrado?"
  */

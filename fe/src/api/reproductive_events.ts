@@ -1,16 +1,16 @@
 /*
  * Archivo: api/reproductive_events.ts
- * ¿Qué? Cliente HTTP para el módulo de eventos reproductivos.
+ * What? Cliente HTTP para el módulo de eventos reproductivos.
  *       Define tipos Create/Response y funciones list, create, delete.
- * ¿Para qué? El frontend necesita consumir el backend de eventos reproductivos
+ * Why? El frontend necesita consumir el backend de eventos reproductivos
  *            (CRUD) desde los componentes de la interfaz.
- * ¿Impacto? Sin este archivo, el componente ReproductiveTimeline no puede
+ * Impact? Sin este archivo, el componente ReproductiveTimeline no puede
  *           listar ni registrar eventos reproductivos.
  */
 import api from "./axios";
 
-// ¿Qué? Datos necesarios para crear un evento reproductivo.
-// ¿Para qué? Tipar el body de la petición POST al backend.
+// What? Datos necesarios para crear un evento reproductivo.
+// Why? Tipar el body de la petición POST al backend.
 export interface ReproductiveEventCreate {
   bovine_id: string;
   event_type: string;
@@ -22,8 +22,8 @@ export interface ReproductiveEventCreate {
   observations?: string | null;
 }
 
-// ¿Qué? Estructura de la respuesta del backend para un evento reproductivo.
-// ¿Para qué? Tipar la respuesta de todas las llamadas del API.
+// What? Estructura de la respuesta del backend para un evento reproductivo.
+// Why? Tipar la respuesta de todas las llamadas del API.
 export interface ReproductiveEventResponse {
   id: string;
   farm_id: string;
@@ -39,9 +39,9 @@ export interface ReproductiveEventResponse {
   created_at: string;
 }
 
-// ¿Qué? Obtener todos los eventos reproductivos de un bovino específico.
-// ¿Para qué? Listar en el timeline del bovino los eventos registrados.
-// ¿Impacto? Si falla, el usuario no ve el historial reproductivo del animal.
+// What? Obtener todos los eventos reproductivos de un bovino específico.
+// Why? Listar en el timeline del bovino los eventos registrados.
+// Impact? Si falla, el usuario no ve el historial reproductivo del animal.
 export async function listReproductiveEvents(
   farmId: string,
   bovineId: string
@@ -53,9 +53,9 @@ export async function listReproductiveEvents(
   return response.data;
 }
 
-// ¿Qué? Registrar un nuevo evento reproductivo en el backend.
-// ¿Para qué? El usuario necesita documentar servicios, partos, diagnósticos, etc.
-// ¿Impacto? Sin esta función, no se pueden crear eventos desde el frontend.
+// What? Registrar un nuevo evento reproductivo en el backend.
+// Why? El usuario necesita documentar servicios, partos, diagnósticos, etc.
+// Impact? Sin esta función, no se pueden crear eventos desde el frontend.
 export async function createReproductiveEvent(
   farmId: string,
   data: ReproductiveEventCreate
@@ -67,9 +67,9 @@ export async function createReproductiveEvent(
   return response.data;
 }
 
-// ¿Qué? Eliminar un evento reproductivo por su ID.
-// ¿Para qué? Permitir corregir registros erróneos.
-// ¿Impacto? El evento se borra permanentemente del sistema.
+// What? Eliminar un evento reproductivo por su ID.
+// Why? Permitir corregir registros erróneos.
+// Impact? El evento se borra permanentemente del sistema.
 export async function deleteReproductiveEvent(
   farmId: string,
   eventId: string

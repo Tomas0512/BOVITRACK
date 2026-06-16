@@ -1,7 +1,7 @@
 /**
  * Archivo: pages/ResetPasswordPage.tsx
  * Descripción: Página para restablecer la contraseña de BoviTrack.
- * ¿Para qué? Permitir que el usuario defina una nueva contraseña después de
+ * Why? Permitir que el usuario defina una nueva contraseña después de
  *             haber recibido un enlace de recuperación por correo electrónico.
  * Flujo: El usuario llega con un token en la URL (?token=xxx), ingresa
  *        su nueva contraseña, la confirma y envía el formulario.

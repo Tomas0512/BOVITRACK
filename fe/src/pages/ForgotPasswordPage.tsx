@@ -1,7 +1,7 @@
 /**
  * Archivo: pages/ForgotPasswordPage.tsx
  * Descripción: Página de recuperación de contraseña de BoviTrack.
- * ¿Para qué? Permitir que usuarios que olvidaron su contraseña soliciten
+ * Why? Permitir que usuarios que olvidaron su contraseña soliciten
  *             un enlace de recuperación enviado a su correo electrónico.
  * Campos: correo electrónico.
  * Enlaces: "Volver al inicio de sesión".

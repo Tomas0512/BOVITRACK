@@ -27,8 +27,8 @@ import { apiClient } from "./axios";
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * ¿Qué? Interfaz para un ternero en la lista.
- * ¿Para qué? Tipificar los datos que retorna listCalves()
+ * What? Interfaz para un ternero en la lista.
+ * Why? Tipificar los datos que retorna listCalves()
  */
 export interface ICalf {
   id: string;
@@ -41,8 +41,8 @@ export interface ICalf {
 }
 
 /**
- * ¿Qué? Interfaz para las métricas de crecimiento.
- * ¿Para qué? Tipificar los indicadores de un ternero.
+ * What? Interfaz para las métricas de crecimiento.
+ * Why? Tipificar los indicadores de un ternero.
  */
 export interface ICalfMetrics {
   current_weight_kg: number;
@@ -55,8 +55,8 @@ export interface ICalfMetrics {
 }
 
 /**
- * ¿Qué? Interfaz para el detalle de un ternero.
- * ¿Para qué? Tipificar la respuesta de getCalfDetails()
+ * What? Interfaz para el detalle de un ternero.
+ * Why? Tipificar la respuesta de getCalfDetails()
  */
 export interface ICalfDetail {
   bovine: {
@@ -72,8 +72,8 @@ export interface ICalfDetail {
 }
 
 /**
- * ¿Qué? Interfaz para un registro de pesaje.
- * ¿Para qué? Tipificar los datos de weight history.
+ * What? Interfaz para un registro de pesaje.
+ * Why? Tipificar los datos de weight history.
  */
 export interface IWeightRecord {
   id: string;
@@ -83,8 +83,8 @@ export interface IWeightRecord {
 }
 
 /**
- * ¿Qué? Interfaz para el resumen global de terneros.
- * ¿Para qué? Tipificar el resumen por finca.
+ * What? Interfaz para el resumen global de terneros.
+ * Why? Tipificar el resumen por finca.
  */
 export interface ICalfSummary {
   total_calves: number;
@@ -100,9 +100,9 @@ export interface ICalfSummary {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * ¿Qué? Lista todos los terneros de una finca con filtros.
+ * What? Lista todos los terneros de una finca con filtros.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.1: Mostrar lista de terneros
  *   - Componente: CalfList.tsx
  *
@@ -140,9 +140,9 @@ export const listCalves = async (
 };
 
 /**
- * ¿Qué? Obtiene un ternero específico con todas sus métricas.
+ * What? Obtiene un ternero específico con todas sus métricas.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.5: Integración con ficha general
  *   - Mostrar detalle en BovineDetailPage
  *
@@ -161,9 +161,9 @@ export const getCalfDetails = async (
 };
 
 /**
- * ¿Qué? Obtiene el historial de pesajes de un ternero.
+ * What? Obtiene el historial de pesajes de un ternero.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.4: Graficar curva de crecimiento
  *   - Componente: GrowthChart.tsx
  *
@@ -188,9 +188,9 @@ export const getCalfWeightHistory = async (
 };
 
 /**
- * ¿Qué? Obtiene resumen global de terneros.
+ * What? Obtiene resumen global de terneros.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.3: Componente CalfList con indicadores
  *   - Dashboard con estadísticas
  *
@@ -212,9 +212,9 @@ export const getCalfSummary = async (
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * ¿Qué? Registra un nuevo pesaje para un ternero.
+ * What? Registra un nuevo pesaje para un ternero.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.2: Registro de crecimiento (peso)
  *   - Formulario en BovineDetailPage
  *
@@ -264,9 +264,9 @@ export const recordCalfWeight = async (
 };
 
 /**
- * ¿Qué? Actualiza el plan de alimentación de un ternero.
+ * What? Actualiza el plan de alimentación de un ternero.
  *
- * ¿Para qué?
+ * Why?
  *   - HU007 Task 7.2: Registro de alimentación
  *   - Registrar qué alimentos recibe el ternero
  *
@@ -308,7 +308,7 @@ export const updateCalfFeedingPlan = async (
 
 /**
  * Función auxiliar para manejar errores de forma consistente.
- * ¿Para qué? Mostrar mensajes de error amigables al usuario.
+ * Why? Mostrar mensajes de error amigables al usuario.
  */
 export const handleCalfError = (error: any): string => {
   if (axios.isAxiosError(error)) {

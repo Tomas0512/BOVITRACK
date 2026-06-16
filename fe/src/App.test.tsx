@@ -1,7 +1,7 @@
 /*
  * App.test.tsx
- * ¿Qué? Tests básicos del componente raíz App.
- * ¿Para qué? Verificar que la app renderiza correctamente.
+ * What? Tests básicos del componente raíz App.
+ * Why? Verificar que la app renderiza correctamente.
  */
 
 import { describe, it, expect } from "vitest";

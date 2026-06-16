@@ -1,7 +1,7 @@
 /**
  * Archivo: pages/RegisterPage.tsx
  * Descripción: Página de registro de BoviTrack.
- * ¿Para qué? Permitir que nuevos usuarios creen una cuenta en el sistema.
+ * Why? Permitir que nuevos usuarios creen una cuenta en el sistema.
  * Campos: nombres, apellidos, tipo doc, num doc, email, teléfono,
  *         contraseña, verificar contraseña, T&C, autorización datos.
  */

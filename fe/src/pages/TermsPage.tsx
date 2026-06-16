@@ -1,9 +1,9 @@
 /*
  * Archivo: pages/TermsPage.tsx
- * ¿Qué? Página estática de términos y condiciones de uso de BoviTrack.
- * ¿Para qué? Cumplir con el requisito legal de la rúbrica y las leyes
+ * What? Página estática de términos y condiciones de uso de BoviTrack.
+ * Why? Cumplir con el requisito legal de la rúbrica y las leyes
  *            colombianas (Ley 527/1999, Ley 1480/2011, Ley 1581/2012).
- * ¿Impacto? Sin esta página, los enlaces del footer serían anclas vacías
+ * Impact? Sin esta página, los enlaces del footer serían anclas vacías
  *           y la rúbrica sancionaría la ausencia de páginas legales.
  */
 

@@ -1,7 +1,7 @@
 /**
  * Archivo: components/layout/Header.tsx
  * Descripción: Header principal de BoviTrack.
- * ¿Para qué? Mostrar el logo a la izquierda y un botón de acción a la derecha.
+ * Why? Mostrar el logo a la izquierda y un botón de acción a la derecha.
  */
 
 import { Link } from "react-router-dom";

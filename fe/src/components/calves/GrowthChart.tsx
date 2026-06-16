@@ -3,13 +3,13 @@
  * ║ COMPONENTE: src/components/calves/GrowthChart.tsx                    ║
  * ║ PROPÓSITO: Gráfica de crecimiento del ternero (HU007 Task 7.4)       ║
  * ║                                                                        ║
- * ║ ¿QUÉ?                                                                  ║
+ * ║ WHAT?                                                                  ║
  * ║   Componente React que renderiza una gráfica de línea mostrando:      ║
  * ║   - Evolución del peso del ternero en el tiempo                       ║
  * ║   - Ganancia diaria (línea secundaria)                                ║
  * ║   - Peso esperado según raza (línea de referencia)                    ║
  * ║                                                                        ║
- * ║ ¿PARA QUÉ?                                                            ║
+ * ║ WHY?                                                            ║
  * ║   - HU007 Task 7.4: Curva de crecimiento del ternero                  ║
  * ║   - Visualizar si el ternero crece adecuadamente                      ║
  * ║   - Detectar anomalías en el crecimiento                              ║
@@ -59,7 +59,7 @@ interface IGrowthChartProps {
 
 /**
  * Componente Principal: GrowthChart
- * ¿Para qué? Mostrar la gráfica de crecimiento del ternero
+ * Why? Mostrar la gráfica de crecimiento del ternero
  */
 export const GrowthChart: React.FC<IGrowthChartProps> = ({
   farmId,
@@ -88,8 +88,8 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
-   * ¿Qué? Se ejecuta al montar o cambiar daysRange.
-   * ¿Para qué? Cargar historial de pesajes del servidor.
+   * What? Se ejecuta al montar o cambiar daysRange.
+   * Why? Cargar historial de pesajes del servidor.
    */
   useEffect(() => {
     const loadWeightHistory = async () => {
@@ -120,8 +120,8 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
-   * ¿Qué? Prepara los datos para Chart.js
-   * ¿Para qué? Convertir array de pesajes en estructura que Chart.js entiende
+   * What? Prepara los datos para Chart.js
+   * Why? Convertir array de pesajes en estructura que Chart.js entiende
    */
   const chartData = {
     // Etiquetas del eje X (fechas)
@@ -183,8 +183,8 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
   };
 
   /**
-   * ¿Qué? Calcula pesos esperados según edad.
-   * ¿Para qué? Mostrar como referencia en la gráfica.
+   * What? Calcula pesos esperados según edad.
+   * Why? Mostrar como referencia en la gráfica.
    */
   function calculateExpectedWeights(): (number | null)[] {
     if (weightHistory.length === 0) return [];

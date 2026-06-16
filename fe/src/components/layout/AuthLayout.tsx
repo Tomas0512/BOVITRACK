@@ -1,7 +1,7 @@
 /**
  * Archivo: components/layout/AuthLayout.tsx
  * Descripción: Layout para páginas de autenticación (registro, login, etc.).
- * ¿Para qué? Envolver las páginas de auth con Header + Footer + diseño centrado.
+ * Why? Envolver las páginas de auth con Header + Footer + diseño centrado.
  */
 
 import { Header } from "./Header";

@@ -1,9 +1,9 @@
 # ── Imagen del Backend BoviTrack (FastAPI) ───────────────────
 #
-# ¿Qué?    Multi-stage build con dos etapas: builder y runtime.
+# What?    Multi-stage build con dos etapas: builder y runtime.
 # ¿Para?   La etapa builder compila dependencias con gcc;
 #           la etapa runtime es una imagen mínima sin herramientas de compilación.
-# ¿Impacto? Sin multi-stage, gcc y libpq-dev quedan en la imagen final:
+# Impact? Sin multi-stage, gcc y libpq-dev quedan en la imagen final:
 #           ~100 MB extra, mayor superficie de ataque, herramientas de
 #           compilación disponibles si hay un exploit en la app.
 
@@ -39,9 +39,9 @@ WORKDIR /app
 # psycopg2-binary bundlea libpq internamente → no se necesita libpq5 en runtime.
 COPY --from=builder /install /usr/local
 
-# ¿Qué?    Usuario del sistema sin privilegios para ejecutar la app.
+# What?    Usuario del sistema sin privilegios para ejecutar la app.
 # ¿Para?   Principio de mínimo privilegio.
-# ¿Impacto? Sin esto, la app corre como root dentro del contenedor.
+# Impact? Sin esto, la app corre como root dentro del contenedor.
 #           Si hay un exploit, el atacante obtiene root en el contenedor,
 #           facilitando escape al host o movimiento lateral.
 RUN addgroup --system appgroup && \
@@ -54,10 +54,10 @@ USER appuser
 
 EXPOSE 8000
 
-# ¿Qué?    Health check que verifica que FastAPI responde en el endpoint raíz.
+# What?    Health check que verifica que FastAPI responde en el endpoint raíz.
 # ¿Para?   Docker (y orquestadores como Swarm/Kubernetes) usan este estado
 #           para decidir si el contenedor está sano antes de enviarle tráfico.
-# ¿Impacto? Sin HEALTHCHECK, Docker reporta el contenedor como "running" aunque
+# Impact? Sin HEALTHCHECK, Docker reporta el contenedor como "running" aunque
 #           uvicorn haya crasheado o la app esté colgada.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/')" || exit 1

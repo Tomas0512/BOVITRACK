@@ -1,9 +1,9 @@
 """
 Módulo: alembic/env.py
 Descripción: Configuración del entorno de migraciones de Alembic.
-¿Para qué? Conectar Alembic con los modelos SQLAlchemy para generar
+Why? Conectar Alembic con los modelos SQLAlchemy para generar
            migraciones automáticas cuando cambies los modelos.
-¿Impacto? Sin este archivo, Alembic no sabe qué base de datos usar
+Impact? Sin este archivo, Alembic no sabe qué base de datos usar
           ni qué modelos rastrear para generar migraciones.
 """
 

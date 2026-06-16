@@ -3,14 +3,14 @@
  * ║ COMPONENTE: src/components/calves/CalfList.tsx                       ║
  * ║ PROPÓSITO: Lista y dashboard de terneros (HU007)                      ║
  * ║                                                                        ║
- * ║ ¿QUÉ?                                                                  ║
+ * ║ WHAT?                                                                  ║
  * ║   Componente React que:                                                ║
  * ║   - Muestra lista de terneros con filtros                             ║
  * ║   - Calcula edad de cada ternero                                      ║
  * ║   - Muestra indicadores de crecimiento                                ║
  * ║   - Permite registrar pesajes                                         ║
  * ║                                                                        ║
- * ║ ¿PARA QUÉ?                                                            ║
+ * ║ WHY?                                                            ║
  * ║   - HU007 Task 7.1: Endpoint/vista de terneros                        ║
  * ║   - HU007 Task 7.3: Componente CalfList con indicadores               ║
  * ║                                                                        ║
@@ -39,7 +39,7 @@ interface ICalfListProps {
 
 /**
  * Componente Principal: CalfList
- * ¿Para qué? Mostrar la lista de terneros con todas sus funcionalidades
+ * Why? Mostrar la lista de terneros con todas sus funcionalidades
  */
 export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   // ═══════════════════════════════════════════════════════════════════════
@@ -85,8 +85,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
-   * ¿Qué? Se ejecuta al montar el componente.
-   * ¿Para qué? Cargar lista de terneros y resumen.
+   * What? Se ejecuta al montar el componente.
+   * Why? Cargar lista de terneros y resumen.
    */
   useEffect(() => {
     const loadCalvesData = async () => {
@@ -131,8 +131,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
-   * ¿Qué? Abre el modal para registrar un pesaje.
-   * ¿Para qué? HU007 Task 7.2: Registro de crecimiento
+   * What? Abre el modal para registrar un pesaje.
+   * Why? HU007 Task 7.2: Registro de crecimiento
    */
   const handleOpenWeightModal = (calf: ICalf) => {
     setSelectedCalf(calf);
@@ -147,7 +147,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   };
 
   /**
-   * ¿Qué? Cierra el modal.
+   * What? Cierra el modal.
    */
   const handleCloseWeightModal = () => {
     setShowWeightModal(false);
@@ -155,8 +155,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   };
 
   /**
-   * ¿Qué? Registra un nuevo pesaje.
-   * ¿Para qué? Guardar el pesaje en el servidor.
+   * What? Registra un nuevo pesaje.
+   * Why? Guardar el pesaje en el servidor.
    * ¿Validaciones?
    *   - Validadas por Pydantic en el servidor
    *   - weight_kg > 0
@@ -205,8 +205,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   // ═══════════════════════════════════════════════════════════════════════
 
   /**
-   * ¿Qué? Calcula porcentaje de crecimiento esperado.
-   * ¿Para qué? Mostrar indicador visual de salud.
+   * What? Calcula porcentaje de crecimiento esperado.
+   * Why? Mostrar indicador visual de salud.
    */
   const calculateGrowthPercentage = (calf: ICalf): number => {
     // Peso esperado simplificado: 30kg + 0.2kg/día
@@ -215,8 +215,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   };
 
   /**
-   * ¿Qué? Obtiene color de indicador según crecimiento.
-   * ¿Para qué? Visualizar si el ternero crece bien (verde), normal (amarillo) o lento (rojo)
+   * What? Obtiene color de indicador según crecimiento.
+   * Why? Visualizar si el ternero crece bien (verde), normal (amarillo) o lento (rojo)
    */
   const getGrowthColor = (percentage: number): string => {
     if (percentage >= 90) return "text-green-600"; // Bueno

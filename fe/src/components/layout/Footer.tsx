@@ -1,7 +1,7 @@
 /**
  * Archivo: components/layout/Footer.tsx
  * Descripción: Footer principal de BoviTrack.
- * ¿Para qué? Mostrar información de contacto, derechos reservados y enlaces legales.
+ * Why? Mostrar información de contacto, derechos reservados y enlaces legales.
  */
 
 import { Link } from "react-router-dom";

@@ -1,6 +1,6 @@
-# ¿Qué?    Orquesta los tres servicios del stack: db, be, fe.
+# What?    Orquesta los tres servicios del stack: db, be, fe.
 # ¿Para?   Un único `docker compose up` levanta todo el entorno.
-# ¿Impacto? Si la configuración de red, healthchecks o variables falla,
+# Impact? Si la configuración de red, healthchecks o variables falla,
 #           los servicios pueden arrancar en orden incorrecto o con secretos expuestos.
 
 services:
@@ -21,9 +21,9 @@ services:
     container_name: bovitrack_db
     restart: unless-stopped
     environment:
-      # ¿Qué?    Variables leídas desde el archivo .env de la raíz.
+      # What?    Variables leídas desde el archivo .env de la raíz.
       # ¿Para?   Evitar hardcodear credenciales en este archivo (que sí se commitea).
-      # ¿Impacto? Sin esto, cualquier acceso al repo expone usuario/contraseña de la BD.
+      # Impact? Sin esto, cualquier acceso al repo expone usuario/contraseña de la BD.
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -75,9 +75,9 @@ services:
     build:
       context: ./fe
       args:
-        # ¿Qué?    VITE_API_URL se inyecta como build-arg en la imagen.
+        # What?    VITE_API_URL se inyecta como build-arg en la imagen.
         # ¿Para?   Vite embebe la URL de la API en el bundle en tiempo de compilación.
-        # ¿Impacto? Si no se pasa, el frontend no sabe a qué URL llamar.
+        # Impact? Si no se pasa, el frontend no sabe a qué URL llamar.
         #           Con nginx, el valor /api/v1 es suficiente (nginx proxia internamente).
         VITE_API_URL: ${VITE_API_URL}
     container_name: bovitrack_fe
@@ -89,9 +89,9 @@ services:
     networks:
       - frontend_net
 
-# ¿Qué?    Redes internas con segmentación por responsabilidad.
+# What?    Redes internas con segmentación por responsabilidad.
 # ¿Para?   Limitar qué servicios pueden comunicarse entre sí.
-# ¿Impacto? Sin redes explícitas, Docker crea una red por defecto donde todos
+# Impact? Sin redes explícitas, Docker crea una red por defecto donde todos
 #           los contenedores pueden verse entre sí (fe podría acceder a db directamente).
 networks:
   backend_net:
