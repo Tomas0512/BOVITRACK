@@ -31,7 +31,8 @@ def _send_email_smtp(to_email: str, subject: str, html: str) -> None:
     msg.attach(MIMEText(html, "html"))
 
     with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-        server.starttls()
+        if settings.SMTP_USE_TLS:
+            server.starttls()
         if settings.SMTP_USERNAME:
             server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
         server.send_message(msg)

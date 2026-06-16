@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     SMTP_PORT: int = 1025
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
+    SMTP_USE_TLS: bool = True
 
     # 🌐 URL del frontend (para CORS y enlaces en emails)
     FRONTEND_URL: str = "http://localhost:5173"

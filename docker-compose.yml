@@ -61,6 +61,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
+      SMTP_USE_TLS: false
     depends_on:
       db:
         condition: service_healthy
