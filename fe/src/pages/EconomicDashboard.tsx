@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, TrendingUp, TrendingDown, Wallet, DollarSign, Calendar } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Wallet, DollarSign, Calendar, type LucideIcon } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend,
 } from "recharts";
@@ -155,7 +155,7 @@ export default function EconomicDashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis type="number" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b7280" }} tickLine={false} axisLine={false} width={120} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v) => fmt(Number(v))} />
                     <Bar dataKey="value" fill="#16a34a" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -172,7 +172,7 @@ export default function EconomicDashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis type="number" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b7280" }} tickLine={false} axisLine={false} width={120} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v) => fmt(Number(v))} />
                     <Bar dataKey="value" fill="#dc2626" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -190,7 +190,7 @@ export default function EconomicDashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} width={80} />
-                  <Tooltip formatter={(v: number) => fmt(v)} />
+                  <Tooltip formatter={(v) => fmt(Number(v))} />
                   <Legend />
                   <Line type="monotone" dataKey="income" stroke="#16a34a" strokeWidth={2} name="Ingresos" dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="expense" stroke="#dc2626" strokeWidth={2} name="Egresos" dot={{ r: 3 }} />
@@ -206,7 +206,7 @@ export default function EconomicDashboard() {
   );
 }
 
-function SummaryCard({ icon: Icon, label, value, color }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string; color: string }) {
+function SummaryCard({ icon: Icon, label, value, color }: { icon: LucideIcon; label: string; value: string; color: string }) {
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-2 flex items-center gap-2">

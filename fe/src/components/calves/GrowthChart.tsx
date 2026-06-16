@@ -191,7 +191,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
 
     // Asumimos que el ternero nació hace X días
     // Usamos una fórmula simple: peso esperado = 30 + (0.2 * días_edad)
-    return weightHistory.map((w, idx) => {
+    return weightHistory.map((w, _idx) => {
       // Calcular edad aproximada en ese momento
       const lastDate = new Date(weightHistory[weightHistory.length - 1].date);
       const currentDate = new Date(w.date);
@@ -200,8 +200,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
       );
 
       // Calcular edad aproximada (hoy - daysAgo)
-      const today = new Date();
-      const calfAge = daysAgo; // Simplificado
+      const calfAge = daysAgo; // Simplified
 
       // Peso esperado: 30kg + 0.2kg/día
       return 30 + calfAge * 0.2;

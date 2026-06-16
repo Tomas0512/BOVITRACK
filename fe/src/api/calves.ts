@@ -20,7 +20,7 @@
  */
 
 import axios from "axios";
-import { apiClient } from "./axios";
+import apiClient from "./axios";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 📋 TIPOS DE DATOS (TypeScript Interfaces)
