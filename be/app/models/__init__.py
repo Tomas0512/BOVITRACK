@@ -21,6 +21,8 @@ from app.models.farm_invitation import FarmInvitation
 from app.models.reactivation_request import ReactivationRequest
 from app.models.reproductive_event import ReproductiveEvent
 from app.models.weight import Weight
+from app.models.economics import EconomicRecord
+from app.models.movement import AnimalMovement
 
 __all__ = [
     "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
@@ -39,4 +41,6 @@ __all__ = [
     "ReactivationRequest",
     "ReproductiveEvent",
     "Weight",
+    "EconomicRecord",
+    "AnimalMovement",
 ]

@@ -18,6 +18,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CreateFarmPage from "./pages/CreateFarmPage";
 import FarmDetailPage from "./pages/FarmDetailPage";
 import BovineDetailPage from "./pages/BovineDetailPage";
+import EconomicDashboard from "./pages/EconomicDashboard";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import { InvitedRegisterPage } from "./pages/InvitedRegisterPage";
@@ -46,6 +47,7 @@ function App() {
             <Route path="/farms/new" element={<CreateFarmPage />} />
             <Route path="/farms/:farmId" element={<FarmDetailPage />} />
             <Route path="/farms/:farmId/bovines/:bovineId" element={<BovineDetailPage />} />
+            <Route path="/farms/:farmId/economics" element={<EconomicDashboard />} />
           </Route>
 
           {/* Catch-all */}

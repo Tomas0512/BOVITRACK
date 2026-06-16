@@ -42,6 +42,9 @@ MODULES = [
     "tareas",
     "fincas",
     "usuarios",
+    "reproductivo",
+    "sanitario",
+    "economica",
 ]
 
 # ¿Qué? Definición de los 4 roles con sus permisos por módulo.
@@ -65,6 +68,9 @@ ROLES = [
             "tareas": {"c": True, "r": True, "u": True, "d": False},
             "fincas": {"c": False, "r": True, "u": False, "d": False},
             "usuarios": {"c": False, "r": True, "u": False, "d": False},
+            "reproductivo": {"c": True, "r": True, "u": True, "d": False},
+            "sanitario": {"c": True, "r": True, "u": True, "d": False},
+            "economica": {"c": True, "r": True, "u": True, "d": False},
         },
     },
     {
@@ -79,6 +85,9 @@ ROLES = [
             "tareas": {"c": False, "r": True, "u": True, "d": False},
             "fincas": {"c": False, "r": True, "u": False, "d": False},
             "usuarios": {"c": False, "r": True, "u": False, "d": False},
+            "reproductivo": {"c": True, "r": True, "u": True, "d": False},
+            "sanitario": {"c": True, "r": True, "u": True, "d": False},
+            "economica": {"c": False, "r": True, "u": False, "d": False},
         },
     },
     {
@@ -93,6 +102,9 @@ ROLES = [
             "tareas": {"c": False, "r": True, "u": True, "d": False},
             "fincas": {"c": False, "r": True, "u": False, "d": False},
             "usuarios": {"c": False, "r": False, "u": False, "d": False},
+            "reproductivo": {"c": False, "r": True, "u": False, "d": False},
+            "sanitario": {"c": False, "r": True, "u": False, "d": False},
+            "economica": {"c": False, "r": True, "u": False, "d": False},
         },
     },
 ]
