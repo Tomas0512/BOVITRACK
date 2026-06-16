@@ -66,10 +66,10 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 9.1 | Modelo `AnimalMovement` + migracion | Tomas | 🔲 Por hacer | 3h |
-| 9.2 | CRUD de movimientos comerciales por finca | Tomas | 🔲 Por hacer | 4h |
-| 9.3 | Regla de actualizacion automatica de estado del bovino | Tomas | 🔲 Por hacer | 2h |
-| 9.4 | UI de movimientos por bovino/finca | Tomas | 🔲 Por hacer | 4h |
+| 9.1 | Modelo `AnimalMovement` + migracion | Tomas | ✅ Hecho | 3h |
+| 9.2 | CRUD de movimientos comerciales por finca | Tomas | ✅ Hecho | 4h |
+| 9.3 | Regla de actualizacion automatica de estado del bovino | Tomas | ✅ Hecho | 2h |
+| 9.4 | UI de movimientos por bovino/finca | Tomas | ✅ Hecho | 4h |
 
 ### HU010 - Informacion Economica — **Edwin** (asignacion vertical)
 
@@ -99,7 +99,7 @@ Antes de iniciar las HU en este sprint se verifica:
 - [x] Lista y curva de crecimiento de terneros funcional
 - [x] Sin errores tecnicos en backend/frontend
 - [x] Evidencia funcional y pruebas minimas (backend + frontend)
-- [ ] HU009 — Pendiente de respuesta de Tomas (movimientos de animales)
+- [x] HU009 — Modelo AnimalMovement, CRUD, regla de estado automatica y UI completados
 
 ---
 
@@ -121,16 +121,16 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| CRUD movimientos de animales (compra/venta/traslado) | 🔲 Pendiente | HU009 — Tomas (pendiente respuesta) |
-| Actualizacion automatica de estado del bovino | 🔲 Pendiente | HU009 — Tomas (pendiente respuesta) |
-| UI de movimientos por finca/bovino | 🔲 Pendiente | HU009 — Tomas (pendiente respuesta) |
+| CRUD movimientos de animales (compra/venta/traslado) | ✅ Entregado | HU009 — Tomas |
+| Actualizacion automatica de estado del bovino | ✅ Entregado | HU009 — Tomas |
+| UI de movimientos por finca/bovino | ✅ Entregado | HU009 — Tomas |
 | Modelo, endpoints e indicadores economicos (10.1-10.3) | ✅ Entregado | HU010 — Edwin |
 | Dashboard economico con indicadores | ✅ Entregado | HU010.4 — Edwin |
 | CRUD terneros, CalfList y GrowthChart (7.1-7.5) | ✅ Entregado | HU007 — Camilo |
 
 ### Story Points completados
 
-HU010 (10 SP) + HU007 (10 SP) = **20 SP completados**. HU009 (5 SP) pendiente de respuesta de Tomas.
+HU009 (5 SP) + HU010 (10 SP) + HU007 (10 SP) = **25 SP completados**.
 
 ---
 
