@@ -1,25 +1,23 @@
 """
-╔════════════════════════════════════════════════════════════════════════════╗
-║ MODELO: app/models/document.py                                            ║
-║ PROPÓSITO: Modelo ORM para gestión de documentos en BoviTrack             ║
-║                                                                            ║
-║ ¿QUÉ?                                                                      ║
-║   Tabla para almacenar metadatos de documentos (PDF, imágenes, etc)       ║
-║   y sus asociaciones a:                                                    ║
-║   - Fincas (Farm)                                                          ║
-║   - Bovinos (Bovine)                                                       ║
-║   - Eventos reproductivos (ReproductiveEvent)                             ║
-║   - Tratamientos (Treatment)                                              ║
-║   - Planes sanitarios (SanitaryPlan)                                       ║
-║                                                                            ║
-║ ¿PARA QUÉ?                                                                ║
-║   HU012: Subir y gestionar documentos                                     ║
-║   Permitir que usuarios adjunten archivos a diferentes entidades          ║
-║                                                                            ║
-║ ¿IMPACTO?                                                                 ║
-║   Los documentos se guardan en filesystem local (storage/)                ║
-║   Los metadatos se almacenan en BD para trazabilidad y búsqueda           ║
-╚════════════════════════════════════════════════════════════════════════════╝
+Module: app/models/document.py
+Purpose: ORM model for document management in BoviTrack
+
+What?
+  Table to store document metadata (PDF, images, etc)
+  and their associations to:
+  - Farms
+  - Bovines
+  - Reproductive Events
+  - Treatments
+  - Sanitary Plans
+
+Why?
+  HU012: Upload and manage documents
+  Allow users to attach files to different entities
+
+Impact?
+  Documents are saved in local filesystem (storage/)
+  Metadata is stored in DB for traceability and search
 """
 
 import uuid
@@ -37,9 +35,9 @@ from app.database import Base
 
 class DocumentType(str, Enum):
     """
-    ¿Qué? Tipos de documentos permitidos en el sistema.
-    ¿Para qué? Validar que solo se suban archivos de tipos específicos.
-    ¿Impacto? Limita extensiones a tipos seguros (no .exe, .sh, etc).
+    What? Allowed document types in the system.
+    Why? Validate that only specific file types are uploaded.
+    Impact? Limits extensions to safe types (no .exe, .sh, etc).
     """
     PDF = "pdf"
     IMAGE = "image"  # jpg, png, etc
@@ -50,9 +48,9 @@ class DocumentType(str, Enum):
 
 class DocumentAssociation(str, Enum):
     """
-    ¿Qué? Tipos de entidades a las que se puede asociar un documento.
-    ¿Para qué? HU012 Task 12.3: Asociación a finca/bovino/evento.
-    ¿Impacto? Define dónde se puede "adjuntar" un documento.
+    What? Entity types a document can be associated with.
+    Why? HU012 Task 12.3: Association to farm/bovine/event.
+    Impact? Defines where a document can be "attached".
     """
     FARM = "farm"                          # Documentos generales de finca
     BOVINE = "bovine"                      # Ficha, fotos, genealogía
@@ -63,140 +61,130 @@ class DocumentAssociation(str, Enum):
 
 class Document(Base):
     """
-    ¿Qué? Modelo para almacenar metadatos de documentos.
-    ¿Para qué? Rastrear archivos subidos, quién los subió, cuándo, etc.
-    ¿Impacto? No almacena el contenido (va en filesystem), solo metadatos.
+    What? Model to store document metadata.
+    Why? Track uploaded files, who uploaded them, when, etc.
+    Impact? Does not store content (goes to filesystem), only metadata.
     """
     __tablename__ = "document"
 
-    # ═══════════════════════════════════════════════════════════════════
-    # 🔑 IDENTIFICACIÓN
-    # ═══════════════════════════════════════════════════════════════════
+    # ── Identification ─────────────────────────────────────
 
-    # UUID único del documento
+    # Document UUID
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid4
     )
 
-    # Referencia a la finca (requerida - multitenancy)
+    # Farm reference (required - multitenancy)
     farm_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("farm.id", ondelete="CASCADE"),
         nullable=False
     )
 
-    # ═══════════════════════════════════════════════════════════════════
-    # 📄 METADATOS DEL ARCHIVO
-    # ═══════════════════════════════════════════════════════════════════
+    # ── File Metadata ──────────────────────────────────────
 
-    # Nombre original del archivo (ej: "Diagnóstico_Vaca_001.pdf")
+    # Original filename (e.g. "Diagnostico_Vaca_001.pdf")
     original_filename: Mapped[str] = mapped_column(
         String(255),
         nullable=False
     )
 
-    # Nombre sanitizado para guardar en filesystem
-    # ¿Para qué? Prevenir ataques de path traversal
-    # Formato: {uuid}_{timestamp}.{ext}
+    # Sanitized filename for filesystem storage
+    # Why? Prevent path traversal attacks
+    # Format: {uuid}_{timestamp}.{ext}
     stored_filename: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
         unique=True
     )
 
-    # Tamaño del archivo en bytes
+    # File size in bytes
     file_size: Mapped[int] = mapped_column(
         nullable=False
     )
 
-    # Tipo MIME (ej: "application/pdf", "image/jpeg")
+    # MIME type (e.g. "application/pdf", "image/jpeg")
     mime_type: Mapped[str] = mapped_column(
         String(50),
         nullable=False
     )
 
-    # Clasificación del documento
+    # Document classification
     document_type: Mapped[str] = mapped_column(
         String(20),
         nullable=False
-        # Valores: pdf, image, word, excel, text
+        # Values: pdf, image, word, excel, text
     )
 
-    # ═══════════════════════════════════════════════════════════════════
-    # 🔗 ASOCIACIONES (HU012 Task 12.3)
-    # ═══════════════════════════════════════════════════════════════════
+    # ── Associations (HU012 Task 12.3) ─────────────────────
 
-    # Tipo de entidad a la que está asociado
-    # ej: "farm", "bovine", "reproductive_event"
+    # Entity type this document is associated with
+    # e.g. "farm", "bovine", "reproductive_event"
     association_type: Mapped[str] = mapped_column(
         String(30),
         nullable=False
     )
 
-    # ID de la entidad asociada (UUID)
-    # Ejemplo: si association_type="bovine", esto es el bovine_id
+    # Associated entity ID (UUID)
+    # Example: if association_type="bovine", this is the bovine_id
     associated_entity_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         nullable=False
     )
 
-    # ═══════════════════════════════════════════════════════════════════
-    # 📝 DESCRIPCIÓN Y AUDITORÍA
-    # ═══════════════════════════════════════════════════════════════════
+    # ── Description & Audit ─────────────────────────────────
 
-    # Descripción del documento (ej: "Diagnóstico de preñez - Ecografía")
+    # Document description (e.g. "Pregnancy diagnosis - Ultrasound")
     description: Mapped[str | None] = mapped_column(
         Text,
         nullable=True
     )
 
-    # Quién subió el documento
+    # Who uploaded the document
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False
     )
 
-    # Fecha de carga del documento
+    # Upload date
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
     )
 
-    # ¿Es activo o fue eliminado lógicamente?
+    # Is active or soft-deleted?
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False
     )
 
-    # Fecha de eliminación lógica (soft delete)
+    # Soft delete date
     deleted_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )
 
-    # Quién lo eliminó
+    # Who deleted it
     deleted_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True
     )
 
-    # ═══════════════════════════════════════════════════════════════════
-    # 🔍 RELACIONES ORM
-    # ═══════════════════════════════════════════════════════════════════
+    # ── ORM Relationships ───────────────────────────────────
 
-    # ¿Qué? Relación a la finca
+    # What? Farm relationship
     farm: Mapped["Farm"] = relationship()
 
-    # ¿Qué? Relación al usuario que lo subió
+    # What? Uploader user relationship
     uploader: Mapped["User"] = relationship(foreign_keys=[uploaded_by])
 
-    # ¿Qué? Relación al usuario que lo eliminó
+    # What? Deleter user relationship
     deleter: Mapped["User | None"] = relationship(foreign_keys=[deleted_by])
 
     def __repr__(self) -> str:

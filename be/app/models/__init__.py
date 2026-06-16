@@ -23,6 +23,7 @@ from app.models.reproductive_event import ReproductiveEvent
 from app.models.weight import Weight
 from app.models.economics import EconomicRecord
 from app.models.movement import AnimalMovement
+from app.models.document import Document
 
 __all__ = [
     "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
@@ -43,4 +44,5 @@ __all__ = [
     "Weight",
     "EconomicRecord",
     "AnimalMovement",
+    "Document",
 ]

@@ -1,19 +1,17 @@
 """
-╔════════════════════════════════════════════════════════════════════════════╗
-║ SCHEMAS: app/schemas/document.py                                          ║
-║ PROPÓSITO: Validación Pydantic para documentos (HU012)                    ║
-║                                                                            ║
-║ ¿QUÉ?                                                                      ║
-║   Modelos Pydantic para validar:                                           ║
-║   - Upload de documentos                                                   ║
-║   - Parámetros de listado/búsqueda                                        ║
-║   - Respuestas al cliente                                                  ║
-║                                                                            ║
-║ ¿PARA QUÉ?                                                                ║
-║   FastAPI retorna 422 si datos no cumplen estos esquemas                  ║
-║   Documentación automática en Swagger                                      ║
-║   Type-safety en el código                                                 ║
-╚════════════════════════════════════════════════════════════════════════════╝
+Module: app/schemas/document.py
+Purpose: Pydantic validation for documents (HU012)
+
+What?
+  Pydantic models to validate:
+  - Document upload
+  - List/search parameters
+  - Client responses
+
+Why?
+  FastAPI returns 422 if data doesn't match these schemas
+  Auto-documentation in Swagger
+  Type-safety in code
 """
 
 import uuid
@@ -23,12 +21,10 @@ from enum import Enum
 from pydantic import BaseModel, Field, field_validator
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 📋 ENUMS
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Enums ───────────────────────────────────────────────
 
 class DocumentTypeEnum(str, Enum):
-    """Tipos de documentos permitidos"""
+    """Allowed document types"""
     PDF = "pdf"
     IMAGE = "image"
     WORD = "word"
@@ -37,7 +33,7 @@ class DocumentTypeEnum(str, Enum):
 
 
 class DocumentAssociationEnum(str, Enum):
-    """Tipos de entidades a asociar"""
+    """Entity types to associate"""
     FARM = "farm"
     BOVINE = "bovine"
     REPRODUCTIVE_EVENT = "reproductive_event"
@@ -45,71 +41,69 @@ class DocumentAssociationEnum(str, Enum):
     SANITARY_PLAN = "sanitary_plan"
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 📥 SCHEMAS DE ENTRADA (REQUEST)
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Request schemas ──────────────────────────────────────
 
 class DocumentUploadRequest(BaseModel):
     """
-    ¿Qué? Datos requeridos para subir un documento.
-    ¿Para qué? Validar que el cliente envía metadatos correctos.
+    What? Required data to upload a document.
+    Why? Validate that the client sends correct metadata.
 
-    ¿Campos?
-      - document_type: Tipo del documento (pdf, image, etc)
-      - file_size: Tamaño en bytes (validar límite)
-      - mime_type: Tipo MIME (application/pdf, image/jpeg, etc)
-      - association_type: Con qué entidad se asocia
-      - associated_entity_id: UUID de la entidad
-      - description: Descripción opcional
+    Fields?
+      - document_type: Document type (pdf, image, etc)
+      - file_size: Size in bytes (validate limit)
+      - mime_type: MIME type (application/pdf, image/jpeg, etc)
+      - association_type: Which entity it associates with
+      - associated_entity_id: Entity UUID
+      - description: Optional description
     """
 
-    # Tipo de documento
+    # Document type
     document_type: DocumentTypeEnum = Field(
         ...,
-        description="Tipo de documento"
+        description="Document type"
     )
 
-    # Tamaño del archivo (bytes)
+    # File size (bytes)
     file_size: int = Field(
         ...,
-        gt=0,  # Greater than 0
-        le=52428800,  # 50MB máximo
-        description="Tamaño en bytes (máximo 50MB)"
+        gt=0,
+        le=52428800,  # 50MB max
+        description="File size in bytes (max 50MB)"
     )
 
-    # Tipo MIME
+    # MIME type
     mime_type: str = Field(
         ...,
         description="application/pdf, image/jpeg, etc"
     )
 
-    # Tipo de asociación
+    # Association type
     association_type: DocumentAssociationEnum = Field(
         ...,
         description="farm, bovine, reproductive_event, etc"
     )
 
-    # ID de la entidad asociada
+    # Associated entity ID
     associated_entity_id: uuid.UUID = Field(
         ...,
-        description="UUID de la finca/bovino/evento"
+        description="Entity UUID (farm/bovine/event)"
     )
 
-    # Descripción
+    # Description
     description: str | None = Field(
         None,
         max_length=500,
-        description="Descripción del documento"
+        description="Document description"
     )
 
     @field_validator("mime_type")
     @classmethod
     def validate_mime_type(cls, v: str) -> str:
         """
-        ¿Qué? Valida que el MIME type sea seguro.
-        ¿Para qué? Prevenir upload de ejecutables disfrazados.
+        What? Validates that the MIME type is safe.
+        Why? Prevent disguised executable upload.
         """
-        # Whitelist de tipos MIME permitidos
+        # Whitelist of allowed MIME types
         allowed_types = {
             "application/pdf",
             "image/jpeg",
@@ -124,82 +118,80 @@ class DocumentUploadRequest(BaseModel):
         }
 
         if v not in allowed_types:
-            raise ValueError(f"MIME type no permitido: {v}")
+            raise ValueError(f"Unallowed MIME type: {v}")
 
         return v
 
 
 class DocumentListRequest(BaseModel):
     """
-    ¿Qué? Parámetros para listar documentos.
-    ¿Para qué? HU012 Task 12.4: Repositorio documental con búsqueda.
+    What? Parameters to list documents.
+    Why? HU012 Task 12.4: Document repository with search.
     """
 
-    # Filtro por tipo de asociación
+    # Filter by association type
     association_type: DocumentAssociationEnum | None = Field(
         None,
-        description="Filtrar por tipo (farm, bovine, etc)"
+        description="Filter by type (farm, bovine, etc)"
     )
 
-    # Filtro por entidad específica
+    # Filter by specific entity
     associated_entity_id: uuid.UUID | None = Field(
         None,
-        description="Filtrar por entidad"
+        description="Filter by entity"
     )
 
-    # Búsqueda en nombre
+    # Search in name/description
     search: str | None = Field(
         None,
         max_length=100,
-        description="Buscar en nombre o descripción"
+        description="Search in name or description"
     )
 
-    # Ordenamiento
+    # Ordering
     order_by: str = Field(
         "uploaded_at",
         pattern="^(uploaded_at|filename)$",
-        description="uploaded_at o filename"
+        description="uploaded_at or filename"
     )
 
-    # Dirección
+    # Direction
     order_direction: str = Field(
         "desc",
         pattern="^(asc|desc)$",
-        description="asc o desc"
+        description="asc or desc"
     )
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 📤 SCHEMAS DE SALIDA (RESPONSE)
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Response schemas ─────────────────────────────────────
 
 class DocumentResponse(BaseModel):
     """
-    ¿Qué? Información de un documento para retornar al cliente.
-    ¿Para qué? Serializar documento a JSON.
+    What? Document information to return to the client.
+    Why? Serialize document to JSON.
     """
 
-    id: uuid.UUID = Field(..., description="ID único")
+    id: uuid.UUID = Field(..., description="Unique ID")
 
-    original_filename: str = Field(..., description="Nombre original del archivo")
+    original_filename: str = Field(..., description="Original filename")
 
-    file_size: int = Field(..., description="Tamaño en bytes")
+    file_size: int = Field(..., description="File size in bytes")
 
-    mime_type: str = Field(..., description="Tipo MIME")
+    mime_type: str = Field(..., description="MIME type")
 
-    document_type: str = Field(..., description="Tipo de documento")
+    document_type: str = Field(..., description="Document type")
 
-    association_type: str = Field(..., description="Tipo de asociación")
+    association_type: str = Field(..., description="Association type")
 
-    associated_entity_id: uuid.UUID = Field(..., description="ID de la entidad")
+    associated_entity_id: uuid.UUID = Field(..., description="Entity ID")
 
-    description: str | None = Field(None, description="Descripción")
+    description: str | None = Field(None, description="Description")
 
-    uploaded_by: uuid.UUID = Field(..., description="Quién lo subió")
+    uploaded_by: uuid.UUID = Field(..., description="Who uploaded it")
 
-    uploaded_at: datetime = Field(..., description="Fecha de carga")
+    uploaded_at: datetime = Field(..., description="Upload date")
 
-    is_active: bool = Field(..., description="¿Está activo?")
+    is_active: bool = Field(..., description="Is active?")
 
     class ConfigDict:
         from_attributes = True
@@ -207,27 +199,27 @@ class DocumentResponse(BaseModel):
 
 class DocumentListResponse(BaseModel):
     """
-    ¿Qué? Lista de documentos con metadatos.
-    ¿Para qué? Retornar resultados del repositorio.
+    What? Document list with metadata.
+    Why? Return repository results.
     """
 
-    documents: list[DocumentResponse] = Field(..., description="Array de documentos")
+    documents: list[DocumentResponse] = Field(..., description="Document array")
 
-    total: int = Field(..., description="Total de documentos")
+    total: int = Field(..., description="Total documents")
 
-    page: int = Field(..., description="Página actual")
+    page: int = Field(..., description="Current page")
 
-    page_size: int = Field(..., description="Documentos por página")
+    page_size: int = Field(..., description="Documents per page")
 
 
 class DocumentDeleteResponse(BaseModel):
     """
-    ¿Qué? Confirmación de eliminación.
-    ¿Para qué? Soft delete de documentos.
+    What? Deletion confirmation.
+    Why? Soft delete of documents.
     """
 
-    message: str = Field(..., description="Mensaje de confirmación")
+    message: str = Field(..., description="Confirmation message")
 
-    document_id: uuid.UUID = Field(..., description="ID del documento")
+    document_id: uuid.UUID = Field(..., description="Document ID")
 
-    deleted_at: datetime = Field(..., description="Fecha de eliminación")
+    deleted_at: datetime = Field(..., description="Deletion date")

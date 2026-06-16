@@ -1,21 +1,19 @@
 """
-╔════════════════════════════════════════════════════════════════════════════╗
-║ ROUTER: app/routers/documents.py                                          ║
-║ PROPÓSITO: Endpoints HTTP para gestión de documentos (HU012)              ║
-║                                                                            ║
-║ ¿QUÉ?                                                                      ║
-║   Rutas HTTP para:                                                         ║
-║   - POST /farms/{farm_id}/documents - Upload archivo                      ║
-║   - GET /farms/{farm_id}/documents - Listar documentos                    ║
-║   - GET /farms/{farm_id}/documents/{document_id} - Descargar              ║
-║   - DELETE /farms/{farm_id}/documents/{document_id} - Eliminar            ║
-║                                                                            ║
-║ ¿PARA QUÉ?                                                                ║
-║   HU012 Tasks 12.2-12.4: Upload, download, list, delete                  ║
-║                                                                            ║
-║ ¿IMPACTO?                                                                 ║
-║   Cada endpoint valida JWT + RBAC + pertenencia a finca                   ║
-╚════════════════════════════════════════════════════════════════════════════╝
+Module: app/routers/documents.py
+Purpose: HTTP endpoints for document management (HU012)
+
+What?
+  HTTP routes for:
+  - POST /farms/{farm_id}/documents - Upload file
+  - GET /farms/{farm_id}/documents - List documents
+  - GET /farms/{farm_id}/documents/{document_id} - Download
+  - DELETE /farms/{farm_id}/documents/{document_id} - Delete
+
+Why?
+  HU012 Tasks 12.2-12.4: Upload, download, list, delete
+
+Impact?
+  Each endpoint validates JWT + RBAC + farm ownership
 """
 
 import uuid
@@ -72,27 +70,27 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
 ) -> DocumentResponse:
     """
-    ¿QUÉ PASA AQUÍ?
+    What happens here?
 
-    1. Leer contenido del archivo subido
-    2. Validar tamaño y tipo MIME
-    3. Crear registro en BD
-    4. Retornar metadatos
+    1. Read uploaded file content
+    2. Validate size and MIME type
+    3. Create DB record
+    4. Return metadata
 
-    ¿IMPACTO CRÍTICO?
-      - Archivo se guarda en storage/documents/
-      - Metadatos se almacenan en BD
-      - Se registra en auditoría quién lo subió
+    Critical impact?
+      - File saved in storage/documents/
+      - Metadata stored in DB
+      - Audit log records who uploaded it
     """
 
-    # 1. Leer contenido del archivo
+    # 1. Read file content
     file_content = await file.read()
 
-    # 2. Validar tamaño
+    # 2. Validate size
     if len(file_content) > 52428800:  # 50MB
         raise Exception("Archivo demasiado grande")
 
-    # 3. Crear request data
+    # 3. Create request data
     request_data = DocumentUploadRequest(
         document_type=document_type,
         file_size=len(file_content),
@@ -102,7 +100,7 @@ async def upload_document(
         description=description,
     )
 
-    # 4. Crear documento (guarda archivo + BD)
+    # 4. Create document (save file + DB)
     document = document_service.create_document(
         db,
         farm_id=farm_id,
@@ -137,15 +135,15 @@ def list_documents(
     current_user: User = Depends(get_current_user),
 ) -> DocumentListResponse:
     """
-    ¿QUÉ PASA AQUÍ?
+    What happens here?
 
-    1. Listar documentos con filtros
-    2. Buscar en nombre/descripción
-    3. Paginar resultados
-    4. Retornar array con total
+    1. List documents with filters
+    2. Search in name/description
+    3. Paginate results
+    4. Return array with total
 
-    ¿IMPACTO?
-      Solo retorna documentos activos (no eliminados)
+    Impact?
+      Only returns active documents (not soft-deleted)
     """
 
     documents, total = document_service.list_documents(
@@ -183,14 +181,14 @@ def download_document(
     current_user: User = Depends(get_current_user),
 ) -> FileResponse:
     """
-    ¿QUÉ PASA AQUÍ?
+    What happens here?
 
-    1. Obtener metadatos del documento
-    2. Leer archivo del filesystem
-    3. Retornar con headers correctos
+    1. Get document metadata
+    2. Read file from filesystem
+    3. Return with correct headers
 
-    ¿IMPACTO?
-      Cliente descarga el archivo con nombre original
+    Impact?
+      Client downloads file with original filename
       Header: Content-Disposition: attachment; filename="..."
     """
 
@@ -223,16 +221,16 @@ def delete_document(
     current_user: User = Depends(get_current_user),
 ) -> None:
     """
-    ¿QUÉ PASA AQUÍ?
+    What happens here?
 
-    1. Soft delete en BD (marca como inactivo)
-    2. Elimina archivo del filesystem
-    3. Registra en auditoría
+    1. Soft delete in DB (mark as inactive)
+    2. Delete file from filesystem
+    3. Register in audit log
 
-    ¿IMPACTO?
-      - Documento desaparece de listados
-      - Archivo se elimina físicamente
-      - Historial se mantiene (auditoría)
+    Impact?
+      - Document disappears from listings
+      - File is physically deleted
+      - History is kept (audit log)
     """
 
     document_service.delete_document(

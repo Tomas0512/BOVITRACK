@@ -1,24 +1,22 @@
 """
-╔════════════════════════════════════════════════════════════════════════════╗
-║ SERVICIO: app/services/document_service.py                                ║
-║ PROPÓSITO: Lógica de negocio para gestión de documentos (HU012)           ║
-║                                                                            ║
-║ ¿QUÉ?                                                                      ║
-║   Funciones para:                                                          ║
-║   - Guardar archivos en filesystem                                         ║
-║   - Crear registros en BD                                                  ║
-║   - Listar/buscar documentos                                              ║
-║   - Descargar documentos                                                   ║
-║   - Eliminar documentos (soft delete)                                     ║
-║   - Validar tipos de archivo                                              ║
-║                                                                            ║
-║ ¿PARA QUÉ?                                                                ║
-║   HU012 Tasks 12.1-12.3: Upload, list, download, delete, asociación      ║
-║                                                                            ║
-║ ¿IMPACTO?                                                                 ║
-║   Todo sube a storage/ (filesystem local)                                 ║
-║   Metadatos se guardan en BD para trazabilidad                            ║
-╚════════════════════════════════════════════════════════════════════════════╝
+Module: app/services/document_service.py
+Purpose: Business logic for document management (HU012)
+
+What?
+  Functions for:
+  - Save files to filesystem
+  - Create DB records
+  - List/search documents
+  - Download documents
+  - Delete documents (soft delete)
+  - Validate file types
+
+Why?
+  HU012 Tasks 12.1-12.3: Upload, list, download, delete, association
+
+Impact?
+  Everything goes to storage/ (local filesystem)
+  Metadata stored in DB for traceability
 """
 
 import uuid
@@ -35,21 +33,19 @@ from app.schemas.document import DocumentUploadRequest
 from app.services.audit_service import add_audit_log
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 🔧 CONFIGURACIÓN DE ALMACENAMIENTO
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Storage configuration ─────────────────────────────────
 
-# Directorio de almacenamiento de documentos
+# Document storage directory
 STORAGE_DIR = Path("storage/documents")
 
-# Crear directorio si no existe
+# Create directory if it doesn't exist
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def get_file_extension(mime_type: str) -> str:
     """
-    ¿Qué? Obtiene la extensión desde el MIME type.
-    ¿Para qué? Guardar archivos con extensión correcta.
+    What? Gets file extension from MIME type.
+    Why? Save files with correct extension.
     """
     mime_to_ext = {
         "application/pdf": "pdf",
@@ -66,48 +62,46 @@ def get_file_extension(mime_type: str) -> str:
     return mime_to_ext.get(mime_type, "bin")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 💾 FUNCIONES DE ALMACENAMIENTO
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Storage functions ────────────────────────────────────
 
 def save_document_file(file_content: bytes, mime_type: str) -> str:
     """
-    ¿Qué? Guarda el contenido del archivo en el filesystem.
+    What? Saves file content to the filesystem.
 
-    ¿Para qué?
-      - HU012 Task 12.1: Almacenamiento de documentos
-      - Mantener archivos separados de la BD
+    Why?
+      - HU012 Task 12.1: Document storage
+      - Keep files separate from DB
 
-    ¿Parámetros?
-      file_content: Bytes del archivo
-      mime_type: Tipo MIME para determinar extensión
+    Params?
+      file_content: File bytes
+      mime_type: MIME type to determine extension
 
-    ¿Retorna?
-      stored_filename: Nombre sanitizado para recuperar después
+    Returns?
+      stored_filename: Sanitized name for later retrieval
 
-    ¿Impacto?
-      CRÍTICO: Almacena en storage/documents/{timestamp}_{uuid}.{ext}
-      Usa UUID para evitar colisiones de nombres
+    Impact?
+      CRITICAL: Saves in storage/documents/{timestamp}_{uuid}.{ext}
+      Uses UUID to avoid name collisions
     """
 
-    # Generar nombre sanitizado
-    # Formato: {uuid}_{timestamp}.{ext}
+    # Generate sanitized filename
+    # Format: {uuid}_{timestamp}.{ext}
     document_id = uuid.uuid4()
     timestamp = int(datetime.now(timezone.utc).timestamp())
     extension = get_file_extension(mime_type)
     stored_filename = f"{document_id}_{timestamp}.{extension}"
 
-    # Ruta completa del archivo
+    # Full file path
     file_path = STORAGE_DIR / stored_filename
 
-    # Guardar el archivo
+    # Save the file
     try:
         with open(file_path, "wb") as f:
             f.write(file_content)
     except IOError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al guardar archivo: {str(e)}"
+            detail=f"Error saving file: {str(e)}"
         )
 
     return stored_filename
@@ -115,68 +109,66 @@ def save_document_file(file_content: bytes, mime_type: str) -> str:
 
 def retrieve_document_file(stored_filename: str) -> bytes:
     """
-    ¿Qué? Recupera el contenido del archivo del filesystem.
+    What? Retrieves file content from the filesystem.
 
-    ¿Para qué?
-      - HU012 Task 12.2: Download de documentos
-      - Retornar archivo al cliente
+    Why?
+      - HU012 Task 12.2: Document download
+      - Return file to client
 
-    ¿Parámetros?
-      stored_filename: Nombre sanitizado (de BD)
+    Params?
+      stored_filename: Sanitized name (from DB)
 
-    ¿Retorna?
-      bytes: Contenido del archivo
+    Returns?
+      bytes: File content
 
-    ¿Impacto?
-      Lanza 404 si archivo no existe
+    Impact?
+      Raises 404 if file doesn't exist
     """
 
     file_path = STORAGE_DIR / stored_filename
 
-    # Validar que el archivo existe
+    # Validate the file exists
     if not file_path.exists():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Archivo no encontrado"
+            detail="File not found"
         )
 
-    # Leer el archivo
+    # Read the file
     try:
         with open(file_path, "rb") as f:
             return f.read()
     except IOError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al leer archivo: {str(e)}"
+            detail=f"Error reading file: {str(e)}"
         )
 
 
 def delete_document_file(stored_filename: str) -> None:
     """
-    ¿Qué? Elimina físicamente el archivo del filesystem.
+    What? Physically deletes the file from filesystem.
 
-    ¿Para qué?
-      - Limpiar archivos cuando se eliminan documentos
-      - Liberar espacio en disco
+    Why?
+      - Clean up files when documents are deleted
+      - Free up disk space
 
-    ¿Impacto?
-      Elimina archivo físicamente (no es soft delete)
-      Se hace DESPUÉS de soft delete en BD
+    Impact?
+      Deletes file physically (not soft delete)
+      Done AFTER soft delete in DB
     """
 
     file_path = STORAGE_DIR / stored_filename
 
     if file_path.exists():
         try:
-            file_path.unlink()  # Eliminar archivo
+            file_path.unlink()  # Delete file
         except OSError as e:
-            # Log pero no fallar - ya está en BD como deleted
-            print(f"Error al eliminar archivo físico: {str(e)}")
+            # Log but don't fail - already marked as deleted in DB
+            print(f"Error deleting physical file: {str(e)}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# 📝 FUNCIONES DE BASE DE DATOS
-# ═══════════════════════════════════════════════════════════════════════════
+# ── Database functions ───────────────────────────────────
 
 def create_document(
     db: Session,
@@ -187,26 +179,26 @@ def create_document(
     user_id: uuid.UUID,
 ) -> Document:
     """
-    ¿Qué? Crea un documento (guarda archivo + metadatos en BD).
+    What? Creates a document (save file + metadata in DB).
 
-    ¿Para qué?
-      - HU012 Task 12.1: Crear registro de documento
-      - HU012 Task 12.3: Asociar a entidad
+    Why?
+      - HU012 Task 12.1: Create document record
+      - HU012 Task 12.3: Associate to entity
 
-    ¿Pasos?
-      1. Guardar archivo en filesystem
-      2. Crear registro en BD
-      3. Registrar en auditoría
+    Steps?
+      1. Save file to filesystem
+      2. Create DB record
+      3. Register in audit log
 
-    ¿Impacto?
-      Si falla el guardado del archivo, la BD queda consistente
-      porque se guarda PRIMERO, registra DESPUÉS
+    Impact?
+      If file save fails, DB stays consistent
+      because save happens FIRST, register AFTER
     """
 
-    # 1. Guardar archivo en filesystem
+    # 1. Save file to filesystem
     stored_filename = save_document_file(file_content, request_data.mime_type)
 
-    # 2. Crear documento en BD
+    # 2. Create document in DB
     document = Document(
         farm_id=farm_id,
         original_filename=original_filename,
@@ -223,7 +215,7 @@ def create_document(
     db.add(document)
     db.flush()  # Obtener el ID
 
-    # 3. Registrar en auditoría
+    # 3. Register in audit log
     add_audit_log(
         db,
         user_id=str(user_id),
@@ -256,31 +248,31 @@ def list_documents(
     limit: int = 50,
 ) -> tuple[Sequence[Document], int]:
     """
-    ¿Qué? Lista documentos de una finca con filtros.
+    What? Lists documents for a farm with filters.
 
-    ¿Para qué?
-      - HU012 Task 12.4: Repositorio documental
-      - Permitir búsqueda y filtrado
+    Why?
+      - HU012 Task 12.4: Document repository
+      - Allow search and filtering
 
-    ¿Parámetros?
-      association_type: Filtro por tipo (farm, bovine, etc)
-      associated_entity_id: Filtro por entidad específica
-      search: Búsqueda en nombre o descripción
+    Params?
+      association_type: Filter by type (farm, bovine, etc)
+      associated_entity_id: Filter by specific entity
+      search: Search in name or description
 
-    ¿Retorna?
-      (documentos, total_count)
+    Returns?
+      (documents, total_count)
 
-    ¿Impacto?
-      Solo retorna documentos activos (is_active=True)
+    Impact?
+      Only returns active documents (is_active=True)
     """
 
-    # Query base: solo documentos activos
+    # Base query: only active documents
     stmt = select(Document).where(
         Document.farm_id == farm_id,
         Document.is_active.is_(True),
     )
 
-    # Filtros opcionales
+    # Optional filters
     if association_type:
         stmt = stmt.where(Document.association_type == association_type)
 
@@ -288,7 +280,7 @@ def list_documents(
         stmt = stmt.where(Document.associated_entity_id == associated_entity_id)
 
     if search:
-        # Búsqueda en nombre o descripción (case-insensitive)
+        # Search in name or description (case-insensitive)
         search_pattern = f"%{search}%"
         stmt = stmt.where(
             or_(
@@ -297,7 +289,7 @@ def list_documents(
             )
         )
 
-    # Contar total
+    # Count total
     count_stmt = select(func.count()).select_from(Document).where(
         and_(
             Document.farm_id == farm_id,
@@ -319,7 +311,7 @@ def list_documents(
 
     total = db.execute(count_stmt).scalar() or 0
 
-    # Ordenamiento y paginación
+    # Sorting and pagination
     stmt = stmt.order_by(Document.uploaded_at.desc())
     stmt = stmt.offset(skip).limit(limit)
 
@@ -334,17 +326,17 @@ def get_document(
     document_id: uuid.UUID,
 ) -> Document:
     """
-    ¿Qué? Obtiene un documento específico.
+    What? Gets a specific document.
 
-    ¿Para qué?
-      - Validar que existe antes de descargar
-      - Verificar que pertenece a la finca (multitenancy)
+    Why?
+      - Validate it exists before download
+      - Verify it belongs to the farm (multitenancy)
 
-    ¿Retorna?
+    Returns?
       Document
 
-    ¿Impacto?
-      Lanza 404 si no existe
+    Impact?
+      Raises 404 if not found
     """
 
     stmt = select(Document).where(
@@ -358,7 +350,7 @@ def get_document(
     if not document:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Documento no encontrado"
+            detail="Document not found"
         )
 
     return document
@@ -371,36 +363,36 @@ def delete_document(
     user_id: uuid.UUID,
 ) -> Document:
     """
-    ¿Qué? Soft delete de un documento.
+    What? Soft delete a document.
 
-    ¿Para qué?
+    Why?
       - HU012 Task 12.2: Delete endpoint
-      - Mantener auditoría (no elimina BD)
-      - Elimina archivo del filesystem
+      - Keep audit trail (doesn't delete from DB)
+      - Deletes file from filesystem
 
-    ¿Pasos?
-      1. Marcar como inactivo en BD
-      2. Eliminar archivo físico
-      3. Registrar en auditoría
+    Steps?
+      1. Mark as inactive in DB
+      2. Delete physical file
+      3. Register in audit log
 
-    ¿Impacto?
-      Documento desaparece de listados (is_active=False)
-      Archivo se elimina del filesystem
-      Historial se mantiene para auditoría
+    Impact?
+      Document disappears from lists (is_active=False)
+      File is deleted from filesystem
+      History is kept for audit
     """
 
-    # 1. Obtener documento
+    # 1. Get document
     document = get_document(db, farm_id, document_id)
 
-    # 2. Marcar como eliminado en BD
+    # 2. Mark as deleted in DB
     document.is_active = False
     document.deleted_at = datetime.now(timezone.utc)
     document.deleted_by = user_id
 
-    # 3. Eliminar archivo físico
+    # 3. Delete physical file
     delete_document_file(document.stored_filename)
 
-    # 4. Registrar en auditoría
+    # 4. Register in audit log
     add_audit_log(
         db,
         user_id=str(user_id),
@@ -423,23 +415,23 @@ def get_document_for_download(
     document_id: uuid.UUID,
 ) -> tuple[bytes, str, str]:
     """
-    ¿Qué? Obtiene el archivo + metadatos para descargar.
+    What? Gets file + metadata for download.
 
-    ¿Para qué?
+    Why?
       - HU012 Task 12.2: Download endpoint
-      - Retornar archivo con headers correctos
+      - Return file with correct headers
 
-    ¿Retorna?
+    Returns?
       (file_content, original_filename, mime_type)
 
-    ¿Impacto?
-      El cliente recibe el archivo con nombre original
+    Impact?
+      Client receives file with original name
     """
 
-    # Obtener metadatos
+    # Get metadata
     document = get_document(db, farm_id, document_id)
 
-    # Obtener contenido del archivo
+    # Get file content
     file_content = retrieve_document_file(document.stored_filename)
 
     return file_content, document.original_filename, document.mime_type

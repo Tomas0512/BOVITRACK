@@ -1,344 +1,254 @@
-/**
- * ╔════════════════════════════════════════════════════════════════════════╗
- * ║ COMPONENTE: DocumentManager.tsx                                        ║
- * ║ PROPÓSITO: Gestor de documentos (upload, lista, descarga, eliminar)   ║
- * ║ HU012: Document Management                                            ║
- * ║                                                                        ║
- * ║ ¿QUÉ?                                                                  ║
- * ║   Interfaz para subir, listar, descargar y eliminar documentos        ║
- * ║   - Modal de upload con validación                                    ║
- * ║   - Tabla con listado paginado                                        ║
- * ║   - Filtros por tipo de asociación                                    ║
- * ║   - Búsqueda de documentos                                            ║
- * ║                                                                        ║
- * ║ ¿PARA QUÉ?                                                             ║
- * ║   HU012 Task 12.4: Interfaz de repositorio documental                ║
- * ║                                                                        ║
- * ║ ¿IMPACTO?                                                              ║
- * ║   Permite a usuarios adjuntar archivos a fincas/bovinos/eventos      ║
- * ╚════════════════════════════════════════════════════════════════════════╝
- */
-
-import { useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-
-interface Document {
-  id: string;
-  original_filename: string;
-  file_size: number;
-  mime_type: string;
-  document_type: string;
-  association_type: string;
-  associated_entity_id: string;
-  description?: string;
-  uploaded_by: string;
-  uploaded_at: string;
-  is_active: boolean;
-}
-
-interface DocumentListResponse {
-  documents: Document[];
-  total: number;
-  page: number;
-  page_size: number;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 🎨 TIPOS Y CONSTANTES
-// ═══════════════════════════════════════════════════════════════════════════
-
-type DocumentType = 'pdf' | 'image' | 'word' | 'excel' | 'text';
-type AssociationType = 'farm' | 'bovine' | 'reproductive_event' | 'treatment' | 'sanitary_plan';
+import { useEffect, useState, useCallback } from "react";
+import { Plus, Trash2, Download, Search, AlertTriangle } from "lucide-react";
+import {
+  listDocuments,
+  uploadDocument,
+  downloadDocument,
+  deleteDocument,
+  type IDocument,
+  type DocumentType,
+  type AssociationType,
+} from "../../api/documents";
 
 const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
-  pdf: '📄 PDF',
-  image: '🖼️ Imagen',
-  word: '📝 Word',
-  excel: '📊 Excel',
-  text: '📋 Texto',
+  pdf: "PDF",
+  image: "Imagen",
+  word: "Word",
+  excel: "Excel",
+  text: "Texto",
+};
+
+const TYPE_BADGE: Record<string, string> = {
+  pdf: "bg-red-100 text-red-800",
+  image: "bg-purple-100 text-purple-800",
+  word: "bg-blue-100 text-blue-800",
+  excel: "bg-green-100 text-green-800",
+  text: "bg-gray-100 text-gray-600",
 };
 
 const ASSOCIATION_LABELS: Record<AssociationType, string> = {
-  farm: 'Finca',
-  bovine: 'Bovino',
-  reproductive_event: 'Evento Reproductivo',
-  treatment: 'Tratamiento',
-  sanitary_plan: 'Plan Sanitario',
+  farm: "Finca",
+  bovine: "Bovino",
+  reproductive_event: "Evento Reproductivo",
+  treatment: "Tratamiento",
+  sanitary_plan: "Plan Sanitario",
 };
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+interface Props {
+  farmId: string;
+}
 
-// ═══════════════════════════════════════════════════════════════════════════
-// 🧩 COMPONENTE
-// ═══════════════════════════════════════════════════════════════════════════
-
-export function DocumentManager() {
-  const { farm_id } = useParams<{ farm_id: string }>();
-
-  // 📌 Estado
-  const [documents, setDocuments] = useState<Document[]>([]);
+export default function DocumentManager({ farmId }: Props) {
+  const [documents, setDocuments] = useState<IDocument[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [pageSize] = useState(10);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<AssociationType | ''>('');
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<AssociationType | "">("");
 
-  // Upload modal
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadDocType, setUploadDocType] = useState<DocumentType>('pdf');
-  const [uploadAssocType, setUploadAssocType] = useState<AssociationType>('farm');
-  const [uploadEntityId, setUploadEntityId] = useState('');
-  const [uploadDesc, setUploadDesc] = useState('');
+  const [uploadDocType, setUploadDocType] = useState<DocumentType>("pdf");
+  const [uploadAssocType, setUploadAssocType] = useState<AssociationType>("farm");
+  const [uploadEntityId, setUploadEntityId] = useState("");
+  const [uploadDesc, setUploadDesc] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
+  const [uploadError, setUploadError] = useState("");
 
-  // 🔄 Cargar documentos
   const loadDocuments = useCallback(async () => {
-    if (!farm_id) return;
-
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        skip: String(page * pageSize),
-        limit: String(pageSize),
+      const data = await listDocuments(farmId, {
+        skip: page * pageSize,
+        limit: pageSize,
+        search: search || undefined,
+        association_type: filterType || undefined,
       });
-
-      if (search) params.append('search', search);
-      if (filterType) params.append('association_type', filterType);
-
-      const response = await axios.get<DocumentListResponse>(
-        `/api/v1/farms/${farm_id}/documents?${params}`,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-      );
-
-      setDocuments(response.data.documents);
-      setTotal(response.data.total);
-    } catch (error) {
-      console.error('Error cargando documentos:', error);
+      setDocuments(data.documents);
+      setTotal(data.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar documentos");
     } finally {
       setLoading(false);
     }
-  }, [farm_id, page, pageSize, search, filterType]);
+  }, [farmId, page, pageSize, search, filterType]);
 
-  // Cargar al montar o cambiar filtros
-  // useEffect(() => { loadDocuments(); }, [loadDocuments]);
+  useEffect(() => { loadDocuments(); }, [loadDocuments]);
 
-  // ⬆️ Subir documento
   const handleUpload = async () => {
     if (!uploadFile || !uploadEntityId) {
-      setUploadError('Selecciona archivo y entidad');
+      setUploadError("Selecciona archivo y entidad");
       return;
     }
-
-    if (uploadFile.size > MAX_FILE_SIZE) {
-      setUploadError('Archivo demasiado grande (máx 50MB)');
+    if (uploadFile.size > 52428800) {
+      setUploadError("Archivo demasiado grande (max 50MB)");
       return;
     }
-
     try {
       setUploading(true);
-      setUploadError('');
-
-      const formData = new FormData();
-      formData.append('file', uploadFile);
-      formData.append('document_type', uploadDocType);
-      formData.append('association_type', uploadAssocType);
-      formData.append('associated_entity_id', uploadEntityId);
-      if (uploadDesc) formData.append('description', uploadDesc);
-
-      await axios.post(
-        `/api/v1/farms/${farm_id}/documents`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+      setUploadError("");
+      await uploadDocument(
+        farmId,
+        uploadFile,
+        uploadDocType,
+        uploadAssocType,
+        uploadEntityId,
+        uploadDesc || undefined
       );
-
-      // Limpiar modal y recargar
       setUploadFile(null);
-      setUploadDocType('pdf');
-      setUploadAssocType('farm');
-      setUploadEntityId('');
-      setUploadDesc('');
+      setUploadDocType("pdf");
+      setUploadAssocType("farm");
+      setUploadEntityId("");
+      setUploadDesc("");
       setShowUploadModal(false);
-      await loadDocuments();
-    } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Error al subir');
+      loadDocuments();
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Error al subir");
     } finally {
       setUploading(false);
     }
   };
 
-  // 📥 Descargar documento
-  const handleDownload = async (docId: string, filename: string) => {
+  const handleDownload = async (doc: IDocument) => {
     try {
-      const response = await axios.get(
-        `/api/v1/farms/${farm_id}/documents/${docId}/download`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-          responseType: 'blob',
-        }
-      );
-
-      const blob = new Blob([response.data]);
-      const link = document.createElement('a');
+      const blob = await downloadDocument(farmId, doc.id);
+      const link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = filename;
+      link.download = doc.original_filename;
       link.click();
       window.URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error('Error descargando:', error);
+    } catch {
+      setError("Error al descargar");
     }
   };
 
-  // 🗑️ Eliminar documento
-  const handleDelete = async (docId: string) => {
-    if (!confirm('¿Eliminar documento?')) return;
-
+  const handleDelete = async (id: string) => {
+    if (!confirm("Eliminar documento?")) return;
     try {
-      await axios.delete(
-        `/api/v1/farms/${farm_id}/documents/${docId}`,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-      );
-      await loadDocuments();
-    } catch (error) {
-      console.error('Error eliminando:', error);
+      await deleteDocument(farmId, id);
+      loadDocuments();
+    } catch {
+      setError("No se pudo eliminar el documento");
     }
   };
 
-  // 📊 Tamaño legible
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)}KB`;
+    return `${(bytes / 1048576).toFixed(1)}MB`;
   };
 
-  // 📅 Fecha legible
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("es-CO", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg shadow">
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* 🎯 ENCABEZADO Y CONTROLES */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">📁 Documentos</h2>
-        <button
-          onClick={() => setShowUploadModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          ⬆️ Subir Documento
-        </button>
+    <div className="mt-6">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-bold text-gray-900">Documentos</h2>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar documentos..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+              className="rounded-lg border border-gray-200 py-1.5 pl-8 pr-3 text-sm focus:border-primary focus:outline-none"
+            />
+          </div>
+          <select
+            value={filterType}
+            onChange={(e) => { setFilterType(e.target.value as AssociationType | ""); setPage(0); }}
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
+          >
+            <option value="">Todos</option>
+            {(Object.keys(ASSOCIATION_LABELS) as AssociationType[]).map((type) => (
+              <option key={type} value={type}>{ASSOCIATION_LABELS[type]}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => setShowUploadModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-sm font-bold text-white hover:bg-primary-light"
+          >
+            <Plus size={16} />
+            Subir
+          </button>
+        </div>
       </div>
 
-      {/* Búsqueda y filtros */}
-      <div className="flex gap-4 flex-wrap">
-        <input
-          type="text"
-          placeholder="Buscar documentos..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(0);
-          }}
-          className="flex-1 min-w-64 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      {error && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          <AlertTriangle size={16} /> {error}
+          <button onClick={() => setError("")} className="ml-auto font-bold">X</button>
+        </div>
+      )}
 
-        <select
-          value={filterType}
-          onChange={(e) => {
-            setFilterType(e.target.value as AssociationType | '');
-            setPage(0);
-          }}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Todos los tipos</option>
-          {(Object.keys(ASSOCIATION_LABELS) as AssociationType[]).map((type) => (
-            <option key={type} value={type}>
-              {ASSOCIATION_LABELS[type]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* 📋 TABLA DE DOCUMENTOS */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Nombre</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Tipo</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Tamaño</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Fecha</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Asociado a</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Acciones</th>
+              <th className="px-4 py-3">Nombre</th>
+              <th className="px-4 py-3">Tipo</th>
+              <th className="px-4 py-3">Tamanio</th>
+              <th className="px-4 py-3">Fecha</th>
+              <th className="px-4 py-3">Asociado a</th>
+              <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                  ⏳ Cargando...
+                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                  <div className="flex justify-center py-8">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                  </div>
                 </td>
               </tr>
             ) : documents.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
                   No hay documentos
                 </td>
               </tr>
             ) : (
               documents.map((doc) => (
                 <tr key={doc.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm text-gray-900 truncate max-w-xs">
-                    {doc.original_filename}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-                      {DOCUMENT_TYPE_LABELS[doc.document_type as DocumentType]}
+                  <td className="max-w-xs truncate px-4 py-3 text-gray-900">{doc.original_filename}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_BADGE[doc.document_type] || "bg-gray-100 text-gray-600"}`}>
+                      {DOCUMENT_TYPE_LABELS[doc.document_type as DocumentType] || doc.document_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {formatFileSize(doc.file_size)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {formatDate(doc.uploaded_at)}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                      {ASSOCIATION_LABELS[doc.association_type as AssociationType]}
+                  <td className="px-4 py-3 text-gray-700">{formatFileSize(doc.file_size)}</td>
+                  <td className="px-4 py-3 text-gray-700">{formatDate(doc.uploaded_at)}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                      {ASSOCIATION_LABELS[doc.association_type as AssociationType] || doc.association_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm space-x-2">
+                  <td className="px-4 py-3 text-right">
                     <button
-                      onClick={() => handleDownload(doc.id, doc.original_filename)}
-                      className="text-blue-600 hover:text-blue-800 underline"
+                      onClick={() => handleDownload(doc)}
+                      className="mr-1 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                      title="Descargar"
                     >
-                      📥
+                      <Download size={15} />
                     </button>
                     <button
                       onClick={() => handleDelete(doc.id)}
-                      className="text-red-600 hover:text-red-800 underline"
+                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                      title="Eliminar"
                     >
-                      🗑️
+                      <Trash2 size={15} />
                     </button>
                   </td>
                 </tr>
@@ -348,152 +258,116 @@ export function DocumentManager() {
         </table>
       </div>
 
-      {/* Paginación */}
       {total > pageSize && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">
-            Mostrando {page * pageSize + 1} a {Math.min((page + 1) * pageSize, total)} de {total}
+        <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+          <span>
+            {page * pageSize + 1}-{Math.min((page + 1) * pageSize, total)} de {total}
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(Math.max(0, page - 1))}
               disabled={page === 0}
-              className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50"
+              className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-50"
             >
-              ⬅️
+              Anterior
             </button>
             <button
               onClick={() => setPage(page + 1)}
               disabled={(page + 1) * pageSize >= total}
-              className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50"
+              className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-50"
             >
-              ➡️
+              Siguiente
             </button>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* 📤 MODAL DE UPLOAD */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full space-y-6 p-6">
-            <h3 className="text-xl font-bold text-gray-900">Subir Documento</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg space-y-4 rounded-xl bg-white p-6 shadow-lg">
+            <h3 className="text-lg font-bold text-gray-900">Subir Documento</h3>
 
-            {/* Archivo */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Archivo (máx 50MB)
-              </label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Archivo (max 50MB)</label>
               <input
                 type="file"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) setUploadFile(file);
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) setUploadFile(f); }}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
               />
               {uploadFile && (
-                <p className="text-sm text-gray-600 mt-2">
-                  ✅ {uploadFile.name} ({formatFileSize(uploadFile.size)})
-                </p>
+                <p className="mt-1 text-xs text-gray-500">{uploadFile.name} ({formatFileSize(uploadFile.size)})</p>
               )}
             </div>
 
-            {/* Tipo de documento */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Documento
-              </label>
-              <select
-                value={uploadDocType}
-                onChange={(e) => setUploadDocType(e.target.value as DocumentType)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, string][]).map(
-                  ([key, label]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-
-            {/* Asociación */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Asociado a
-                </label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
+                <select
+                  value={uploadDocType}
+                  onChange={(e) => setUploadDocType(e.target.value as DocumentType)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                >
+                  {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, string][]).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">Asociado a</label>
                 <select
                   value={uploadAssocType}
                   onChange={(e) => setUploadAssocType(e.target.value as AssociationType)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 >
-                  {(Object.entries(ASSOCIATION_LABELS) as [AssociationType, string][]).map(
-                    ([key, label]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    )
-                  )}
+                  {(Object.entries(ASSOCIATION_LABELS) as [AssociationType, string][]).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ID de la Entidad
-                </label>
-                <input
-                  type="text"
-                  value={uploadEntityId}
-                  onChange={(e) => setUploadEntityId(e.target.value)}
-                  placeholder="UUID de finca/bovino/etc"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                />
               </div>
             </div>
 
-            {/* Descripción */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Descripción (opcional)
-              </label>
-              <textarea
-                value={uploadDesc}
-                onChange={(e) => setUploadDesc(e.target.value)}
-                placeholder="Descripción del documento..."
-                maxLength={500}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              <label className="mb-1 block text-sm font-medium text-gray-700">ID de la Entidad</label>
+              <input
+                type="text"
+                value={uploadEntityId}
+                onChange={(e) => setUploadEntityId(e.target.value)}
+                placeholder="UUID de la entidad"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
               />
             </div>
 
-            {/* Error */}
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">Descripcion (opcional)</label>
+              <textarea
+                value={uploadDesc}
+                onChange={(e) => setUploadDesc(e.target.value)}
+                maxLength={500}
+                rows={2}
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+              />
+            </div>
+
             {uploadError && (
-              <div className="px-4 py-3 bg-red-100 text-red-800 rounded-lg text-sm">
-                ❌ {uploadError}
+              <div className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                <AlertTriangle size={16} /> {uploadError}
               </div>
             )}
 
-            {/* Botones */}
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowUploadModal(false)}
                 disabled={uploading}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleUpload}
                 disabled={uploading || !uploadFile}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50"
               >
-                {uploading ? '⏳ Subiendo...' : '⬆️ Subir'}
+                {uploading ? "Subiendo..." : "Subir"}
               </button>
             </div>
           </div>
