@@ -17,6 +17,7 @@ dependencies = [
     "pydantic[email]==2.9.2",
     "python-dotenv==1.0.1",
     "slowapi==0.1.9",
+    "resend==2.25.0",
 ]
 
 [dependency-groups]

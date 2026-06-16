@@ -1,15 +1,17 @@
 """
-Módulo: utils/email.py
-Descripción: Envío de correos transaccionales vía SMTP (Mailpit en Docker, Gmail en producción).
-¿Para qué? Enviar correos de recuperación de contraseña, verificación de cuenta e invitaciones.
-¿Impacto? Sin esto, el flujo de "Olvidé mi contraseña" no puede notificar al usuario.
+Module: utils/email.py
+Description: Transactional email sending (password reset, verification, invitations).
+Purpose: Send emails via SMTP (Mailpit in dev, any SMTP in prod) or Resend API.
+         Falls back to console logging when no backend is configured.
+Impact: Without this, users cannot receive password reset or verification emails.
 
-Prioridad de backend:
-  1. SMTP_HOST configurado → usa smtplib (stdlib, sin dependencias extra)
-  2. Ninguno → simula en consola (el enlace aparece en los logs del servidor)
+Email backend priority:
+  1. SMTP_HOST configured → uses stdlib smtplib (Mailpit in Docker dev, Gmail in prod)
+  2. RESEND_API_KEY configured → uses Resend API
+  3. Neither → simulates in logs (link appears in server console)
 
-Mailpit (desarrollo local):
-  Web UI: http://localhost:8025 — todos los correos aparecen en tiempo real.
+Mailpit — test emails locally without an account or domain:
+  Web UI: http://localhost:8025 — all sent emails appear in real time.
 """
 
 import asyncio
@@ -18,9 +20,16 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import resend
+
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+def _send_email_resend(params: resend.Emails.SendParams) -> None:
+    resend.api_key = settings.RESEND_API_KEY
+    resend.Emails.send(params)
 
 
 def _send_email_smtp(to_email: str, subject: str, html: str) -> None:
@@ -128,16 +137,29 @@ async def send_farm_invitation_email(email: str, token: str, farm_name: str) -> 
 
 
 async def _dispatch_email(email: str, subject: str, html: str, label: str, link: str) -> None:
-    if not settings.SMTP_HOST:
-        _log_fallback(label, email, link)
-        return
+    if settings.SMTP_HOST:
+        try:
+            await asyncio.to_thread(_send_email_smtp, email, subject, html)
+            logger.info("✅ Email de %s enviado vía SMTP a %s", label, email)
+            return
+        except Exception as exc:
+            logger.error("❌ Error enviando email de %s vía SMTP a %s: %s", label, email, exc)
 
-    try:
-        await asyncio.to_thread(_send_email_smtp, email, subject, html)
-        logger.info("✅ Email de %s enviado vía SMTP a %s", label, email)
-    except Exception as exc:
-        logger.error("❌ Error enviando email de %s vía SMTP a %s: %s", label, email, exc)
-        _log_fallback(label, email, link)
+    if settings.RESEND_API_KEY:
+        params: resend.Emails.SendParams = {
+            "from": f"{settings.RESEND_FROM_NAME} <{settings.RESEND_FROM_EMAIL}>",
+            "to": [email],
+            "subject": subject,
+            "html": html,
+        }
+        try:
+            await asyncio.to_thread(_send_email_resend, params)
+            logger.info("✅ Email de %s enviado vía Resend a %s", label, email)
+            return
+        except Exception as exc:
+            logger.error("❌ Error enviando email de %s vía Resend a %s: %s", label, email, exc)
+
+    _log_fallback(label, email, link)
 
 
 def _log_fallback(label: str, email: str, link: str) -> None:

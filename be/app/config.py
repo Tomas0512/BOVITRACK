@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # 📧 Email — Resend API (alternativa a SMTP para producción)
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "noreply@bovitrack.com"
+    RESEND_FROM_NAME: str = "BoviTrack"
+
     # 📧 Email — SMTP (Mailpit en Docker, Gmail en desarrollo/producción)
     MAIL_FROM: str = "noreply@bovitrack.com"
     MAIL_FROM_NAME: str = "BoviTrack"
