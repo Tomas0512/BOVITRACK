@@ -10,6 +10,7 @@ import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
 import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
 import AlertBanner from "../components/layout/AlertBanner";
+import MovementList from "../components/movements/MovementList";
 
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
@@ -207,6 +208,7 @@ export default function FarmDetailPage() {
         </div>
       </div>
 
+      <MovementList farmId={farm.id} />
       <AlertBanner farmId={farm.id} />
       <LandPlotList farmId={farm.id} />
       <PaddockList farmId={farm.id} />
