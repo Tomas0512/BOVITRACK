@@ -126,3 +126,82 @@ class ConsumptionResponse(BaseModel):
     observations: str | None
     registered_by: uuid.UUID
     created_at: datetime
+
+
+class StockMovementResponse(BaseModel):
+    """What? Schema for a stock movement record.
+    Why? Return complete movement data to the frontend for traceability.
+    Impact? movement_type can be: purchase, adjustment, consumption, return.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    farm_id: uuid.UUID
+    food_id: uuid.UUID
+    movement_type: str
+    quantity: Decimal
+    unit_cost: Decimal | None
+    total_cost: Decimal | None
+    stock_before: Decimal
+    stock_after: Decimal
+    reference_type: str | None
+    reference_id: str | None
+    notes: str | None
+    registered_by: uuid.UUID
+    movement_date: datetime
+    created_at: datetime
+
+
+class PurchaseCreate(BaseModel):
+    """What? Data required to record a stock purchase.
+    Why? Increase stock of a food item and record the cost automatically.
+    Impact? Creates both a StockMovement entry and updates Food.current_stock.
+    """
+
+    food_id: uuid.UUID
+    quantity: Decimal
+    unit_cost: Decimal
+    movement_date: datetime | None = None
+    notes: str | None = None
+
+    @field_validator("quantity")
+    @classmethod
+    def validate_quantity(cls, v: Decimal) -> Decimal:
+        if v <= 0:
+            raise ValueError("Quantity must be greater than 0")
+        return v
+
+    @field_validator("unit_cost")
+    @classmethod
+    def validate_cost(cls, v: Decimal) -> Decimal:
+        if v < 0:
+            raise ValueError("Unit cost must be 0 or greater")
+        return v
+
+
+class StockAdjustmentCreate(BaseModel):
+    """What? Data required to manually adjust stock.
+    Why? Correct inventory levels when physical count differs.
+    Impact? positive quantity = increase stock, negative = decrease.
+    """
+
+    food_id: uuid.UUID
+    quantity: Decimal
+    reason: str
+    movement_date: datetime | None = None
+
+    @field_validator("quantity")
+    @classmethod
+    def validate_nonzero(cls, v: Decimal) -> Decimal:
+        if v == 0:
+            raise ValueError("Adjustment quantity cannot be 0")
+        return v
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 3:
+            raise ValueError("Reason must be at least 3 characters")
+        return v

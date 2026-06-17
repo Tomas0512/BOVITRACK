@@ -56,3 +56,30 @@ class Consumption(Base):
 
     def __repr__(self) -> str:
         return f"Consumption(id={self.id}, food={self.food_id})"
+
+
+class StockMovement(Base):
+    __tablename__ = "stock_movement"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
+    food_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("food.id", ondelete="RESTRICT"), nullable=False)
+    movement_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    unit_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    total_cost: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    stock_before: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    stock_after: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    reference_type: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    reference_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    registered_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    movement_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    farm: Mapped["Farm"] = relationship()
+    food: Mapped["Food"] = relationship()
+    registrant: Mapped["User"] = relationship(foreign_keys=[registered_by])
+
+    def __repr__(self) -> str:
+        return f"StockMovement(id={self.id}, type={self.movement_type}, food={self.food_id}, qty={self.quantity})"

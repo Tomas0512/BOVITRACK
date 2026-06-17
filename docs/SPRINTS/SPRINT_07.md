@@ -76,10 +76,10 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 11.1 | Completar flujo de compras con impacto en stock y costo | Edwin | 🔲 Por hacer | 4h |
-| 11.2 | Trazabilidad de entradas/salidas por modulo origen | Edwin | 🔲 Por hacer | 3h |
-| 11.3 | Ajustes de alertas de stock minimo | Edwin | 🔲 Por hacer | 2h |
-| 11.4 | Pantalla de inventario y compras | Edwin | 🔲 Por hacer | 4h |
+| 11.1 | Completar flujo de compras con impacto en stock y costo | Edwin | ✅ Hecho | 4h |
+| 11.2 | Trazabilidad de entradas/salidas por modulo origen | Edwin | ✅ Hecho | 3h |
+| 11.3 | Ajustes de alertas de stock minimo | Edwin | ✅ Hecho | 2h |
+| 11.4 | Pantalla de inventario y compras | Edwin | ✅ Hecho | 4h |
 
 ### HU012 - Gestion de Documentos — **Camilo** (asignacion vertical)
 
@@ -97,8 +97,8 @@ Antes de iniciar las HU en este sprint se verifica:
 
 - [x] Reportes exportables en formatos solicitados (HU013 — Tomas)
 - [x] Indicadores visibles y con filtros funcionales (HU013 — Tomas)
-- [ ] Stock se actualiza automaticamente por compras/consumos (HU011 — Edwin, pendiente)
-- [ ] Alertas de stock minimo funcionales (HU011 — Edwin, pendiente)
+- [x] Stock se actualiza automaticamente por compras/consumos (HU011 — Edwin)
+- [x] Alertas de stock minimo funcionales (HU011 — Edwin)
 - [x] Documentos suben, se listan y se descargan correctamente (HU012 — Camilo)
 - [x] Asociaciones a entidades del sistema funcionales (HU012 — Camilo)
 - [x] Sin errores de seguridad evidentes en archivos
@@ -129,9 +129,9 @@ Antes de iniciar las HU en este sprint se verifica:
 | Reportes con filtros por fecha/categoria | ✅ Entregado | HU013 — Tomas |
 | Exportacion PDF/Excel funcional | ✅ Entregado | HU013 — Tomas |
 | Indicadores productivos/sanitarios/economicos | ✅ Entregado | HU013 — Tomas |
-| Stock actualizado por compras/consumos | 🔲 Pendiente | HU011 — Edwin |
-| Alertas de stock minimo funcionales | 🔲 Pendiente | HU011 — Edwin |
-| UI de inventario y compras | 🔲 Pendiente | HU011 — Edwin |
+| Stock actualizado por compras/consumos | ✅ Entregado | HU011 — Edwin |
+| Alertas de stock minimo funcionales | ✅ Entregado | HU011 — Edwin |
+| UI de inventario y compras | ✅ Entregado | HU011 — Edwin |
 | Upload/download/delete de documentos | ✅ Entregado | HU012 — Camilo |
 | Asociacion documental a finca/bovino/evento | ✅ Entregado | HU012 — Camilo |
 
