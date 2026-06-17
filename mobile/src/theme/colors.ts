@@ -1,33 +1,47 @@
-export const colors = {
-  // Primarios
-  primary: '#2D6A4F',
+export const lightColors = {
+  primary: '#59930a',
   primaryDark: '#1B4332',
-  primaryLight: '#52B788',
-
-  // Secundarios
-  secondary: '#74C69D',
-  secondaryLight: '#B7E4C7',
-
-  // Fondos
-  background: '#F8FAF9',
-  surface: '#FFFFFF',
-  surfaceAlt: '#F0F4F1',
-
-  // Textos
-  textPrimary: '#1B1B1B',
-  textSecondary: '#555F57',
-  textMuted: '#9CA3AF',
-  textOnPrimary: '#FFFFFF',
-
-  // Estados
-  error: '#DC2626',
-  errorLight: '#FEE2E2',
-  success: '#16A34A',
-  successLight: '#DCFCE7',
-  warning: '#D97706',
-  warningLight: '#FEF3C7',
-
-  // Bordes
-  border: '#D1D5DB',
-  borderFocus: '#2D6A4F',
+  primaryLight: '#a0b53a',
+  accent: '#e4da7e',
+  cream: '#f8efbc',
+  background: '#ffffff',
+  surface: '#f8efeb',
+  surfaceAlt: '#f0f4f1',
+  textPrimary: '#1f2937',
+  textSecondary: '#6b7280',
+  textMuted: '#9ca3af',
+  textOnPrimary: '#ffffff',
+  error: '#dc2626',
+  errorLight: '#fee2e2',
+  success: '#16a34a',
+  successLight: '#dcfce7',
+  warning: '#d97706',
+  warningLight: '#fef3c7',
+  border: '#e5e7eb',
+  borderFocus: '#59930a',
 };
+
+export const darkColors = {
+  primary: '#74b83e',
+  primaryDark: '#0f172a',
+  primaryLight: '#8fd15a',
+  accent: '#c4b85e',
+  cream: '#3d3a2e',
+  background: '#0f172a',
+  surface: '#1e293b',
+  surfaceAlt: '#334155',
+  textPrimary: '#f1f5f9',
+  textSecondary: '#94a3b8',
+  textMuted: '#64748b',
+  textOnPrimary: '#ffffff',
+  error: '#ef4444',
+  errorLight: '#7f1d1d',
+  success: '#22c55e',
+  successLight: '#14532d',
+  warning: '#f59e0b',
+  warningLight: '#713f12',
+  border: '#475569',
+  borderFocus: '#74b83e',
+};
+
+export type ThemeColors = typeof lightColors;

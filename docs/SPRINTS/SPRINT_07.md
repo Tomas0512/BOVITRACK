@@ -67,10 +67,10 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 13.1 | Completar filtros de reportes por fecha/categoria | Tomas | 🔲 Por hacer | 3h |
-| 13.2 | Exportacion PDF/Excel | Tomas | 🔲 Por hacer | 4h |
-| 13.3 | Pantalla de reportes con descarga | Tomas | 🔲 Por hacer | 4h |
-| 13.4 | Ajustes de indicadores productivos/sanitarios/economicos | Tomas | 🔲 Por hacer | 3h |
+| 13.1 | Completar filtros de reportes por fecha/categoria | Tomas | ✅ Hecho | 3h |
+| 13.2 | Exportacion PDF/Excel | Tomas | ✅ Hecho | 4h |
+| 13.3 | Pantalla de reportes con descarga | Tomas | ✅ Hecho | 4h |
+| 13.4 | Ajustes de indicadores productivos/sanitarios/economicos | Tomas | ✅ Hecho | 3h |
 
 ### HU011 - Inventarios y Compras de Insumos (cierre) — **Edwin** (asignacion vertical)
 
@@ -85,25 +85,25 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 12.1 | Modelo `Document` + almacenamiento y metadata | Camilo | 🔲 Por hacer | 4h |
-| 12.2 | Endpoints upload/list/download/delete | Camilo | 🔲 Por hacer | 4h |
-| 12.3 | Asociacion a finca, bovino o evento | Camilo | 🔲 Por hacer | 3h |
-| 12.4 | UI de carga y repositorio documental | Camilo | 🔲 Por hacer | 5h |
+| 12.1 | Modelo `Document` + almacenamiento y metadata | Camilo | ✅ Hecho | 4h |
+| 12.2 | Endpoints upload/list/download/delete | Camilo | ✅ Hecho | 4h |
+| 12.3 | Asociacion a finca, bovino o evento | Camilo | ✅ Hecho | 3h |
+| 12.4 | UI de carga y repositorio documental | Camilo | ✅ Hecho | 5h |
 | 12.5 | QA funcional HU011/HU012/HU013 | Camilo | 🔲 Por hacer | 3h |
 
 ---
 
 ## Definition of Done (DoD)
 
-- [ ] Reportes exportables en formatos solicitados
-- [ ] Indicadores visibles y con filtros funcionales
-- [ ] Stock se actualiza automaticamente por compras/consumos
-- [ ] Alertas de stock minimo funcionales
-- [ ] Documentos suben, se listan y se descargan correctamente
-- [ ] Asociaciones a entidades del sistema funcionales
-- [ ] Sin errores de seguridad evidentes en archivos
-- [ ] Sin errores tecnicos en backend/frontend
-- [ ] Evidencia funcional y pruebas minimas
+- [x] Reportes exportables en formatos solicitados (HU013 — Tomas)
+- [x] Indicadores visibles y con filtros funcionales (HU013 — Tomas)
+- [ ] Stock se actualiza automaticamente por compras/consumos (HU011 — Edwin, pendiente)
+- [ ] Alertas de stock minimo funcionales (HU011 — Edwin, pendiente)
+- [x] Documentos suben, se listan y se descargan correctamente (HU012 — Camilo)
+- [x] Asociaciones a entidades del sistema funcionales (HU012 — Camilo)
+- [x] Sin errores de seguridad evidentes en archivos
+- [x] Sin errores tecnicos en backend/frontend
+- [x] Evidencia funcional y pruebas minimas
 
 ---
 
@@ -126,14 +126,14 @@ Antes de iniciar las HU en este sprint se verifica:
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| Reportes con filtros por fecha/categoria | 🔲 Pendiente | |
-| Exportacion PDF/Excel funcional | 🔲 Pendiente | |
-| Indicadores productivos/sanitarios/economicos | 🔲 Pendiente | |
-| Stock actualizado por compras/consumos | 🔲 Pendiente | |
-| Alertas de stock minimo funcionales | 🔲 Pendiente | |
-| UI de inventario y compras | 🔲 Pendiente | |
-| Upload/download/delete de documentos | 🔲 Pendiente | |
-| Asociacion documental a finca/bovino/evento | 🔲 Pendiente | |
+| Reportes con filtros por fecha/categoria | ✅ Entregado | HU013 — Tomas |
+| Exportacion PDF/Excel funcional | ✅ Entregado | HU013 — Tomas |
+| Indicadores productivos/sanitarios/economicos | ✅ Entregado | HU013 — Tomas |
+| Stock actualizado por compras/consumos | 🔲 Pendiente | HU011 — Edwin |
+| Alertas de stock minimo funcionales | 🔲 Pendiente | HU011 — Edwin |
+| UI de inventario y compras | 🔲 Pendiente | HU011 — Edwin |
+| Upload/download/delete de documentos | ✅ Entregado | HU012 — Camilo |
+| Asociacion documental a finca/bovino/evento | ✅ Entregado | HU012 — Camilo |
 
 ### Story Points completados
 
