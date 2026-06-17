@@ -39,12 +39,14 @@ export default function DashboardPage() {
             </p>
           )}
         </div>
-        <Link
-          to="/farms/new"
-          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white no-underline transition-colors hover:bg-primary-light"
-        >
-          + Crear finca
-        </Link>
+        {(!user?.role_name || user.role_name === "Administrador") && (
+          <Link
+            to="/farms/new"
+            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white no-underline transition-colors hover:bg-primary-light"
+          >
+            + Crear finca
+          </Link>
+        )}
       </div>
 
       {/* Estado de carga */}
@@ -67,14 +69,18 @@ export default function DashboardPage() {
           <div className="mb-3 text-primary"><Building2 size={48} className="mx-auto" /></div>
           <h2 className="mb-2 text-lg font-bold text-text-primary">Aún no tienes fincas</h2>
           <p className="mb-6 text-sm text-text-secondary">
-            Crea tu primera finca para empezar a gestionar tu ganado.
+            {(!user?.role_name || user.role_name === "Administrador")
+              ? "Crea tu primera finca para empezar a gestionar tu ganado."
+              : "Espera a que un administrador te asigne a una finca."}
           </p>
-          <Link
-            to="/farms/new"
-            className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white no-underline transition-colors hover:bg-primary-light"
-          >
-            Crear mi primera finca
-          </Link>
+          {(!user?.role_name || user.role_name === "Administrador") && (
+            <Link
+              to="/farms/new"
+              className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white no-underline transition-colors hover:bg-primary-light"
+            >
+              Crear mi primera finca
+            </Link>
+          )}
         </div>
       )}
 

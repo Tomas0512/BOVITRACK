@@ -131,6 +131,35 @@ def get_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> UserFar
     return uf
 
 
+def _last_admin_check(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> None:
+    """¿Qué? Verifica que no se esté desactivando/eliminando al último administrador activo.
+    ¿Para qué? Evitar que una finca se quede sin administradores.
+    ¿Impacto? HTTP 400 si es el último admin activo de la finca.
+    """
+    admin_role = db.execute(select(Role).where(Role.name == "Administrador")).scalar_one_or_none()
+    if not admin_role:
+        return
+
+    uf = get_employee(db, farm_id, user_id)
+    if uf.role_id != admin_role.id:
+        return
+
+    other_admins = db.execute(
+        select(UserFarm).where(
+            UserFarm.farm_id == farm_id,
+            UserFarm.role_id == admin_role.id,
+            UserFarm.is_active.is_(True),
+            UserFarm.user_id != user_id,
+        )
+    ).scalars().all()
+
+    if len(other_admins) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se puede desvincular al último administrador activo de la finca. Asigne otro administrador primero.",
+        )
+
+
 def update_employee(
     db: Session,
     farm_id: uuid.UUID,
@@ -143,6 +172,8 @@ def update_employee(
     ¿Impacto? Solo modifica los campos enviados.
     """
     uf = get_employee(db, farm_id, user_id)
+    if data.is_active is not None and not data.is_active:
+        _last_admin_check(db, farm_id, user_id)
     if data.role_id is not None:
         role = db.execute(select(Role).where(Role.id == data.role_id)).scalar_one_or_none()
         if not role:
@@ -168,6 +199,7 @@ def remove_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID, removed
     ¿Para qué? Desvincular permanentemente a un usuario de la finca.
     ¿Impacto? La operación es irreversible. Para desactivar temporalmente usar update_employee.
     """
+    _last_admin_check(db, farm_id, user_id)
     uf = get_employee(db, farm_id, user_id)
     add_audit_log(db, user_id=str(removed_by) if removed_by else None, farm_id=str(farm_id), action="remove", entity="employee", entity_id=str(user_id))
     db.delete(uf)

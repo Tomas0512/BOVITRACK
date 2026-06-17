@@ -45,13 +45,21 @@ export default function EmployeeList({ farmId }: Props) {
     fetchEmployees();
   }, [farmId, filter]);
 
+  const getApiError = (err: unknown): string => {
+    if (err && typeof err === "object") {
+      const axiosErr = err as { response?: { data?: { detail?: string } } };
+      return axiosErr.response?.data?.detail ?? "";
+    }
+    return "";
+  };
+
   const toggleActive = async (emp: EmployeeResponse) => {
     setActionLoading(emp.user_id);
     try {
       await updateEmployee(farmId, emp.user_id, { is_active: !emp.is_active });
       await fetchEmployees();
-    } catch {
-      setError("No se pudo actualizar el empleado");
+    } catch (err) {
+      setError(getApiError(err) || "No se pudo actualizar el empleado");
     } finally {
       setActionLoading(null);
     }
@@ -63,8 +71,8 @@ export default function EmployeeList({ farmId }: Props) {
     try {
       await removeEmployee(farmId, emp.user_id);
       await fetchEmployees();
-    } catch {
-      setError("No se pudo desvincular al empleado");
+    } catch (err) {
+      setError(getApiError(err) || "No se pudo desvincular al empleado");
     } finally {
       setActionLoading(null);
     }

@@ -14,27 +14,24 @@ interface Props {
   onClose: () => void;
 }
 
-const CATEGORIES = [
-  "concentrado",
-  "forraje",
-  "vitaminas",
-  "suplementos",
-  "medicamentos",
-];
+const CATEGORIES = ["concentrado", "forraje", "vitaminas", "suplementos", "medicamentos"];
 const UNITS = ["kg", "litros", "bolsas", "metros", "unidades"];
+const STEPS = [
+  { label: "Info básica" },
+  { label: "Stock y precio" },
+  { label: "Vencimiento" },
+];
 
 export default function FoodFormModal({
   farmId,
-  isOpen, // 👈 Ya desestructuramos la prop que causaba el error de compilación
+  isOpen,
   existing,
   onSuccess,
   onClose,
 }: Props) {
-  // ─── CONTROL DE VISIBILIDAD ───
-  // Si no está abierto, detenemos el renderizado aquí. Evita renderizar HTML innecesario.
   if (!isOpen) return null;
 
-  // ─── ESTADO DEL FORMULARIO ───
+  const [step, setStep] = useState(0);
   const [form, setForm] = useState<FoodCreate>({
     name: existing?.name ?? "",
     category: existing?.category ?? "concentrado",
@@ -48,6 +45,14 @@ export default function FoodFormModal({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const validateStep = (s: number): boolean => {
+    if (s === 0 && !form.name.trim()) { setError("El nombre es obligatorio"); return false; }
+    setError("");
+    return true;
+  };
+  const nextStep = () => { if (validateStep(step)) setStep((s) => Math.min(s + 1, STEPS.length - 1)); };
+  const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   const isFormComplete =
     form.name.trim() !== "" &&
@@ -117,169 +122,104 @@ export default function FoodFormModal({
           </div>
         )}
 
+        {/* Step indicator */}
+        <div className="mb-4 flex items-center gap-1.5">
+          {STEPS.map((s, i) => (
+            <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+            >
+              {i < step ? "✓ " : ""}{s.label}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Nombre *
-              </label>
-              <input
-                type="text" maxLength={100}
-                value={form.name}
-                onChange={(e) => set("name", e.target.value)}
-                placeholder="Ej: Concentrado Premium"
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                required
-              />
-              <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Categoría *
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => set("category", e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                required
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          {step === 0 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre *</label>
+                  <input type="text" maxLength={100} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Ej: Concentrado Premium"
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                  <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Categoría *</label>
+                  <select value={form.category} onChange={(e) => set("category", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required>
+                    {CATEGORIES.map((cat) => (<option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Unidad *</label>
+                <select value={form.unit_of_measure} onChange={(e) => set("unit_of_measure", e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required>
+                  {UNITS.map((unit) => (<option key={unit} value={unit}>{unit.charAt(0).toUpperCase() + unit.slice(1)}</option>))}
+                </select>
+              </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Unidad *
-              </label>
-              <select
-                value={form.unit_of_measure}
-                onChange={(e) => set("unit_of_measure", e.target.value)}
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                required
-              >
-                {UNITS.map((unit) => (
-                  <option key={unit} value={unit}>
-                    {unit.charAt(0).toUpperCase() + unit.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Stock actual *
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={form.current_stock}
-                onChange={(e) =>
-                  set("current_stock", parseFloat(e.target.value) || 0)
-                }
-                placeholder="0"
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                required
-              />
-            </div>
-          </div>
+          {step === 1 && (
+            <>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Stock actual *</label>
+                <input type="number" step="0.01" value={form.current_stock} onChange={(e) => set("current_stock", parseFloat(e.target.value) || 0)}
+                  placeholder="0" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Stock mínimo</label>
+                  <input type="number" step="0.01" value={form.min_stock_alert ?? ""} onChange={(e) => set("min_stock_alert", e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Ej: 20" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Precio unitario ($)</label>
+                  <input type="number" step="0.01" value={form.cost_per_unit ?? ""} onChange={(e) => set("cost_per_unit", e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Ej: 5000" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                </div>
+              </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Stock mínimo
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={form.min_stock_alert ?? ""}
-                onChange={(e) =>
-                  set(
-                    "min_stock_alert",
-                    e.target.value ? parseFloat(e.target.value) : null
-                  )
-                }
-                placeholder="Ej: 20"
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Precio unitario ($)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={form.cost_per_unit ?? ""}
-                onChange={(e) =>
-                  set(
-                    "cost_per_unit",
-                    e.target.value ? parseFloat(e.target.value) : null
-                  )
-                }
-                placeholder="Ej: 5000"
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              />
-            </div>
-          </div>
+          {step === 2 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Vencimiento</label>
+                  <input type="date" value={form.expiration_date ?? ""} onChange={(e) => set("expiration_date", e.target.value || null)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Proveedor</label>
+                  <input type="text" maxLength={200} value={form.supplier ?? ""} onChange={(e) => set("supplier", e.target.value || null)}
+                    placeholder="Ej: Distribuidora XYZ" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                  <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.supplier ?? "").length}/200</span>
+                </div>
+              </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Vencimiento
-              </label>
-              <input
-                type="date"
-                value={form.expiration_date ?? ""}
-                onChange={(e) =>
-                  set("expiration_date", e.target.value || null)
-                }
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">
-                Proveedor
-              </label>
-              <input
-                type="text" maxLength={200}
-                value={form.supplier ?? ""}
-                onChange={(e) =>
-                  set("supplier", e.target.value || null)
-                }
-                placeholder="Ej: Distribuidora XYZ"
-                className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-              />
-              <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.supplier ?? "").length}/200</span>
-            </div>
-          </div>
-
-          <div className="mt-4 flex gap-2 justify-end">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={!isFormComplete || loading}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {loading && (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              )}
-              {loading
-                ? "Guardando..."
-                : existing
-                  ? "Actualizar"
-                  : "Crear alimento"}
-            </button>
+          <div className="flex gap-2 pt-2">
+            {step > 0 && (
+              <button type="button" onClick={prevStep}
+                className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
+                ← Anterior
+              </button>
+            )}
+            {step < STEPS.length - 1 ? (
+              <button type="button" onClick={nextStep}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+                Siguiente →
+              </button>
+            ) : (
+              <button type="submit" disabled={!isFormComplete || loading}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
+                {loading ? "Guardando..." : existing ? "Actualizar" : "Crear alimento"}
+              </button>
+            )}
           </div>
         </form>
       </div>
