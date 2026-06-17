@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
 from app.models.user import User
+from app.models.food import Food
 from app.models.sanitary_plan import SanitaryPlan
 
 router = APIRouter(prefix="/api/v1/farms/{farm_id}/alerts", tags=["Alertas"])
@@ -45,6 +46,15 @@ def list_alerts(
     )
     upcoming = db.execute(upcoming_stmt).scalars().all()
 
+    # Low stock food alerts (HU011.3)
+    low_stmt = select(Food).where(
+        Food.farm_id == farm_id,
+        Food.is_active.is_(True),
+        Food.min_stock_alert.isnot(None),
+        Food.current_stock <= Food.min_stock_alert,
+    ).order_by(Food.current_stock.asc())
+    low_stock_foods = db.execute(low_stmt).scalars().all()
+
     return {
         "overdue": [
             {
@@ -67,5 +77,16 @@ def list_alerts(
                 "land_plot_id": str(p.land_plot_id) if p.land_plot_id else None,
             }
             for p in upcoming
+        ],
+        "low_stock": [
+            {
+                "id": str(f.id),
+                "name": f.name,
+                "category": f.category,
+                "current_stock": float(f.current_stock),
+                "min_stock_alert": float(f.min_stock_alert) if f.min_stock_alert else None,
+                "unit_of_measure": f.unit_of_measure,
+            }
+            for f in low_stock_foods
         ],
     }
