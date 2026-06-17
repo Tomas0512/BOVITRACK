@@ -12,7 +12,7 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
-    SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, DocumentTemplate,
+    SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
 )
 
 from app.models.user import User

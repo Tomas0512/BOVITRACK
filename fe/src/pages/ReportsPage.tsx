@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Download, FileText, FileSpreadsheet, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, FileSpreadsheet, Loader2 } from "lucide-react";
 import { generateReport, downloadReport, type ReportResponse, type ReportCategory } from "../api/reports";
 
 const CATEGORY_LABELS: Record<string, string> = {

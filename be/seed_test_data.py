@@ -10,7 +10,7 @@ Creates:
 
 import os
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from sqlalchemy import create_engine
@@ -18,14 +18,13 @@ from sqlalchemy.orm import Session
 
 from app.database import Base
 from app.models.user import User
-from app.models.farm import Farm, UserFarm
+from app.models.farm import Farm, UserFarm, LandPlot
 from app.models.role import Role
 from app.models.purpose import Purpose
-from app.models.land_plot import LandPlot
+from app.models.department import Department
 from app.models.paddock import Paddock
 from app.models.bovine import Bovine
-from app.models.food import Food
-from app.models.food_stock_movement import StockMovement
+from app.models.food import Food, StockMovement
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DATABASE_URL)
@@ -65,12 +64,12 @@ def main():
                 first_name="Admin",
                 last_name="BoviTrack",
                 document_type="CC",
-                document_number="123456789",
+                document_number="987654321",
                 phone="+57 300 123 4567",
                 hashed_password=pwd.hash("Demo1234!"),
                 is_active=True,
-                accept_terms=True,
-                accept_data_policy=True,
+                accepted_terms=True,
+                accepted_data_policy=True,
             )
             db.add(user)
             db.flush()
@@ -79,12 +78,14 @@ def main():
         # 2. Create demo farm
         farm = db.query(Farm).where(Farm.farm_identifier == "FIN-DEMO-001").first()
         if not farm:
+            first_dept = db.query(Department).order_by(Department.name.asc()).first()
+            dept_id = first_dept.id if first_dept else uuid.uuid4()
             farm = Farm(
                 id=uuid.uuid4(),
                 owner_id=user.id,
                 name="Hacienda El Porvenir",
                 address="Vereda La Esperanza, Km 5",
-                department_id=uuid.UUID("c9f1a2b3-0001-4000-8000-000000000001"),
+                department_id=dept_id,
                 city_municipality="Rionegro",
                 total_area=Decimal("150.00"),
                 area_unit="hectareas",
@@ -145,14 +146,13 @@ def main():
         # 5. Create bovines
             existing_bovines = db.query(Bovine).where(Bovine.farm_id == farm.id).count()
             if existing_bovines == 0:
-                from app.models.enums import BovineSex
                 plots = db.query(LandPlot).where(LandPlot.farm_id == farm.id).all()
                 plot_id = plots[0].id if plots else None
                 bovines = [
-                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-001", name="Lucero", sex=BovineSex.HEMBRA, breed="Holstein", color="Blanco y negro", birth_date=date(2021, 3, 15), birth_weight=Decimal("38.00"), current_weight=Decimal("520.00"), purpose="leche", status="activo", entry_type="nacimiento", entry_date=date(2021, 3, 15), land_plot_id=plot_id),
-                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-002", name="Torito", sex=BovineSex.MACHO, breed="Brahmán", color="Gris", birth_date=date(2022, 7, 1), birth_weight=Decimal("42.00"), current_weight=Decimal("480.00"), purpose="carne", status="activo", entry_type="compra", entry_date=date(2022, 9, 15), land_plot_id=plot_id),
-                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-003", name="Estrella", sex=BovineSex.HEMBRA, breed="Normando", color="Rojo", birth_date=date(2020, 11, 20), birth_weight=Decimal("36.00"), current_weight=Decimal("550.00"), purpose="leche", status="activo", entry_type="nacimiento", entry_date=date(2020, 11, 20), land_plot_id=plot_id),
-                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-004", name="Rayo", sex=BovineSex.MACHO, breed="Cebú", color="Blanco", birth_date=date(2023, 5, 10), birth_weight=Decimal("40.00"), current_weight=Decimal("200.00"), purpose="cria", status="activo", entry_type="nacimiento", entry_date=date(2023, 5, 10), land_plot_id=plot_id),
+                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-001", name="Lucero", sex="hembra", breed="Holstein", color="Blanco y negro", birth_date=date(2021, 3, 15), birth_weight=Decimal("38.00"), current_weight=Decimal("520.00"), purpose="leche", status="activo", entry_type="nacimiento", entry_date=date(2021, 3, 15), land_plot_id=plot_id, registered_by=user.id),
+                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-002", name="Torito", sex="macho", breed="Brahmán", color="Gris", birth_date=date(2022, 7, 1), birth_weight=Decimal("42.00"), current_weight=Decimal("480.00"), purpose="carne", status="activo", entry_type="compra", entry_date=date(2022, 9, 15), land_plot_id=plot_id, registered_by=user.id),
+                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-003", name="Estrella", sex="hembra", breed="Normando", color="Rojo", birth_date=date(2020, 11, 20), birth_weight=Decimal("36.00"), current_weight=Decimal("550.00"), purpose="leche", status="activo", entry_type="nacimiento", entry_date=date(2020, 11, 20), land_plot_id=plot_id, registered_by=user.id),
+                    Bovine(id=uuid.uuid4(), farm_id=farm.id, identification_number="BOV-004", name="Rayo", sex="macho", breed="Cebú", color="Blanco", birth_date=date(2023, 5, 10), birth_weight=Decimal("40.00"), current_weight=Decimal("200.00"), purpose="cria", status="activo", entry_type="nacimiento", entry_date=date(2023, 5, 10), land_plot_id=plot_id, registered_by=user.id),
                 ]
                 for b in bovines:
                     db.add(b)
@@ -177,9 +177,9 @@ def main():
                 existing_movements = db.query(StockMovement).where(StockMovement.farm_id == farm.id).count()
                 if existing_movements == 0 and len(food_ids) >= 2:
                     movements = [
-                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[0], movement_type="purchase", quantity=Decimal("500.00"), unit_cost=Decimal("2500.00"), movement_date=date.today() - timedelta(days=30), notes="Compra inicial"),
-                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[0], movement_type="adjustment", quantity=Decimal("-50.00"), unit_cost=None, movement_date=date.today() - timedelta(days=7), notes="Consumo semanal"),
-                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[1], movement_type="purchase", quantity=Decimal("100.00"), unit_cost=Decimal("1200.00"), movement_date=date.today() - timedelta(days=15), notes="Compra de sal mineralizada"),
+                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[0], movement_type="purchase", quantity=Decimal("500.00"), unit_cost=Decimal("2500.00"), stock_before=Decimal("0"), stock_after=Decimal("500.00"), movement_date=datetime.now() - timedelta(days=30), registered_by=user.id, notes="Compra inicial"),
+                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[0], movement_type="adjustment", quantity=Decimal("-50.00"), unit_cost=None, stock_before=Decimal("500.00"), stock_after=Decimal("450.00"), movement_date=datetime.now() - timedelta(days=7), registered_by=user.id, notes="Consumo semanal"),
+                        StockMovement(id=uuid.uuid4(), farm_id=farm.id, food_id=food_ids[1], movement_type="purchase", quantity=Decimal("100.00"), unit_cost=Decimal("1200.00"), stock_before=Decimal("0"), stock_after=Decimal("100.00"), movement_date=datetime.now() - timedelta(days=15), registered_by=user.id, notes="Compra de sal mineralizada"),
                     ]
                     for m in movements:
                         db.add(m)
