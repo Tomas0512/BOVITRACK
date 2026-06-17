@@ -1,56 +1,52 @@
 """
-Módulo: routers/reports.py
-¿Qué? Router de FastAPI para endpoints de reportes y estadísticas.
-¿Para qué? Exponer datos agregados consumiendo las vistas SQL y funciones
-           almacenadas creadas en las migraciones de Alembic.
-¿Impacto? Los reportes son un requisito de la rúbrica de evaluación.
-          Sin este router, las vistas SQL existirían pero no serían accesibles
-          desde el frontend.
+Module: routers/reports.py
+What? FastAPI router for report and statistics endpoints.
+Why? Expose aggregated data using SQL views and stored functions.
+Impact? Reports are a grading rubric requirement.
 """
 
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import Response
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
 from app.models.user import User
 from app.permissions import require_permission
+from app.schemas.report import (
+    ExportFormat,
+    ReportCategory,
+    ReportFilterParams,
+    ReportResponse,
+)
+from app.services import report_service
+from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/v1", tags=["Reportes"])
 
 
-@router.get("/farms/{farm_id}/statistics", summary="Estadísticas completas de finca", dependencies=[Depends(require_permission("fincas", "can_read"))])
+@router.get("/farms/{farm_id}/statistics", summary="Estadisticas completas de finca", dependencies=[Depends(require_permission("fincas", "can_read"))])
 def farm_statistics(
     farm_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> dict:
-    """¿Qué? Ejecuta la función SQL fn_farm_statistics y retorna JSON.
-    ¿Para qué? Obtener métricas consolidadas de la finca: total bovinos,
-               producción, tratamientos, inventario, etc.
-    ¿Impacto? Los datos los calcula la BD (no Python) para mayor eficiencia.
-              Si la finca no tiene datos, retorna un mensaje informativo.
-    """
     _ = current_user
     result = db.execute(text("SELECT fn_farm_statistics(:farm_id)"), {"farm_id": str(farm_id)})
     row = result.scalar_one_or_none()
     if row is None:
-        return {"message": "Finca sin estadísticas"}
+        return {"message": "Farm without statistics"}
     return row
 
 
-@router.get("/farms/{farm_id}/milk-daily", summary="Producción lechera diaria", dependencies=[Depends(require_permission("produccion_leche", "can_read"))])
+@router.get("/farms/{farm_id}/milk-daily", summary="Produccion lechera diaria", dependencies=[Depends(require_permission("produccion_leche", "can_read"))])
 def milk_daily(
     farm_id: uuid.UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
-    """¿Qué? Consulta la vista v_milk_production_daily filtrada por finca.
-    ¿Para qué? Obtener la producción diaria agregada para gráficos en el dashboard.
-    ¿Impacto? La vista agrupa por fecha y suma litros — el cálculo lo hace la BD.
-    """
     _ = current_user
     result = db.execute(
         text("SELECT * FROM v_milk_production_daily WHERE farm_id = :farm_id ORDER BY milking_date DESC"),
@@ -64,10 +60,6 @@ def farm_summary(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
-    """¿Qué? Consulta la vista v_farm_summary para un resumen general.
-    ¿Para qué? Dashboard global con métricas de todas las fincas del usuario.
-    ¿Impacto? La vista cruza datos de fincas, bovinos, potreros y producción.
-    """
     _ = current_user
     result = db.execute(text("SELECT * FROM v_farm_summary"))
     return [dict(row._mapping) for row in result]
@@ -78,10 +70,6 @@ def low_stock_alerts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
-    """¿Qué? Consulta la vista v_low_stock_alerts.
-    ¿Para qué? Identificar alimentos cuyo stock actual está por debajo del mínimo.
-    ¿Impacto? Permite al usuario reabastecerse antes de que se agoten los insumos.
-    """
     _ = current_user
     result = db.execute(text("SELECT * FROM v_low_stock_alerts"))
     return [dict(row._mapping) for row in result]
@@ -92,10 +80,49 @@ def pending_tasks(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
-    """¿Qué? Consulta la vista v_pending_tasks.
-    ¿Para qué? Mostrar tareas pendientes ordenadas por urgencia para el dashboard.
-    ¿Impacto? La vista filtra automáticamente las tareas con status='pendiente'.
-    """
     _ = current_user
     result = db.execute(text("SELECT * FROM v_pending_tasks"))
     return [dict(row._mapping) for row in result]
+
+
+@router.get("/farms/{farm_id}/reports", summary="Generar reporte con filtros")
+@limiter.limit("10/minute")
+def generate_farm_report(
+    request: Request,
+    farm_id: uuid.UUID,
+    category: ReportCategory | None = Query(None, description="productivo, sanitario, economico"),
+    start_date: str | None = Query(None, description="YYYY-MM-DD"),
+    end_date: str | None = Query(None, description="YYYY-MM-DD"),
+    export: ExportFormat = Query(ExportFormat.JSON, description="Formato: json, pdf, excel"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from datetime import date
+
+    params = ReportFilterParams(
+        category=category,
+        start_date=date.fromisoformat(start_date) if start_date else None,
+        end_date=date.fromisoformat(end_date) if end_date else None,
+        export=export,
+    )
+
+    report = report_service.generate_report(db, farm_id, current_user, params)
+
+    if export == ExportFormat.JSON:
+        return report
+
+    if export == ExportFormat.EXCEL:
+        content = report_service.export_to_excel(report)
+        return Response(
+            content=content,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=reporte_{farm_id}.xlsx"},
+        )
+
+    if export == ExportFormat.PDF:
+        content = report_service.export_to_pdf(report)
+        return Response(
+            content=content,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=reporte_{farm_id}.pdf"},
+        )
