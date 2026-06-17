@@ -15,13 +15,15 @@
  */
 
 import { useEffect, useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, ShoppingCart, LayoutDashboard } from "lucide-react";
 import {
   listFoods,
   deleteFood,
   type FoodResponse,
 } from "../../api/food";
 import FoodFormModal from "./FoodFormModal";
+import PurchaseFormModal from "./PurchaseFormModal";
+import InventoryDashboard from "./InventoryDashboard";
 
 interface Props {
   farmId: string;
@@ -57,6 +59,8 @@ export default function FoodList({ farmId }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [editing, setEditing] = useState<FoodResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -194,7 +198,7 @@ export default function FoodList({ farmId }: Props) {
 
   return (
     <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
-      {/* ─── HEADER (Título + Botón Nuevo) ─── */}
+      {/* ─── HEADER (Título + Botones) ─── */}
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-text-primary">Inventario de Alimentos</h2>
@@ -205,16 +209,45 @@ export default function FoodList({ farmId }: Props) {
             )}
           </p>
         </div>
-        <button
-          onClick={() => {
-            setEditing(undefined);
-            setShowModal(true);
-          }}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light"
-        >
-          + Nuevo alimento
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowDashboard(!showDashboard)}
+            className={`rounded-lg px-4 py-2 text-sm font-bold transition-colors ${
+              showDashboard
+                ? "bg-primary-light text-white"
+                : "border border-border text-text-secondary hover:bg-surface-alt"
+            }`}
+          >
+            <LayoutDashboard size={16} className="inline-block mr-1 -mt-0.5" />
+            {showDashboard ? "List" : "Dashboard"}
+          </button>
+          <button
+            onClick={() => {
+              setEditing(undefined);
+              setShowPurchaseModal(true);
+            }}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-bold text-text-secondary hover:bg-surface-alt"
+          >
+            <ShoppingCart size={16} className="inline-block mr-1 -mt-0.5" />
+            Purchase
+          </button>
+          <button
+            onClick={() => {
+              setEditing(undefined);
+              setShowModal(true);
+            }}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light"
+          >
+            + New Item
+          </button>
+        </div>
       </div>
+
+      {showDashboard && (
+        <div className="mb-4">
+          <InventoryDashboard farmId={farmId} />
+        </div>
+      )}
 
       {/* ─── FILTROS POR CATEGORÍA ─── */}
       <div className="mb-4 flex flex-wrap gap-2">
@@ -376,6 +409,18 @@ export default function FoodList({ farmId }: Props) {
         }}
         onSuccess={handleSuccess}
         existing={editing}
+      />
+
+      {/* ─── MODAL (Purchase) ─── */}
+      <PurchaseFormModal
+        farmId={farmId}
+        foods={foods}
+        isOpen={showPurchaseModal}
+        onSuccess={() => {
+          setShowPurchaseModal(false);
+          fetchFoods();
+        }}
+        onClose={() => setShowPurchaseModal(false)}
       />
     </div>
   );

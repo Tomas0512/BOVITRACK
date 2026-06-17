@@ -23,6 +23,9 @@ from app.schemas.food import (
     FoodCreate,
     FoodResponse,
     FoodUpdate,
+    PurchaseCreate,
+    StockAdjustmentCreate,
+    StockMovementResponse,
 )
 from app.services import food_service
 
@@ -147,3 +150,79 @@ def list_consumptions(
     _ = current_user
     consumptions = food_service.list_consumptions(db, farm_id, food_id, bovine_id)
     return [ConsumptionResponse.model_validate(c) for c in consumptions]
+
+
+# ═══════════════════════════════════════════════════════
+# 📦 Compras y Movimientos de Stock (HU011)
+# ═══════════════════════════════════════════════════════
+
+
+@router.post("/purchases", response_model=dict, status_code=status.HTTP_201_CREATED, summary="Registrar compra de insumo", dependencies=[Depends(require_permission("alimentos", "can_create"))])
+def record_purchase(
+    farm_id: uuid.UUID,
+    data: PurchaseCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Record a purchase of a food item. Increases stock and logs cost.
+    Why? Track both inventory levels and purchase costs (HU011).
+    """
+    food, movement = food_service.record_purchase(
+        db, farm_id, data.food_id, data.quantity,
+        data.unit_cost, current_user.id, data.movement_date, data.notes,
+    )
+    return {
+        "food": FoodResponse.model_validate(food).model_dump(),
+        "movement": StockMovementResponse.model_validate(movement).model_dump(),
+    }
+
+
+@router.post("/adjust-stock", response_model=dict, status_code=status.HTTP_201_CREATED, summary="Ajustar stock manualmente", dependencies=[Depends(require_permission("alimentos", "can_update"))])
+def adjust_stock(
+    farm_id: uuid.UUID,
+    data: StockAdjustmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Manually adjust stock level for inventory corrections (HU011).
+    positive quantity = increase stock, negative = decrease.
+    """
+    food, movement = food_service.record_stock_adjustment(
+        db, farm_id, data.food_id, data.quantity,
+        data.reason, current_user.id, data.movement_date,
+    )
+    return {
+        "food": FoodResponse.model_validate(food).model_dump(),
+        "movement": StockMovementResponse.model_validate(movement).model_dump(),
+    }
+
+
+@router.get("/movements", response_model=list[StockMovementResponse], summary="Historial de movimientos de stock", dependencies=[Depends(require_permission("alimentos", "can_read"))])
+def list_stock_movements(
+    farm_id: uuid.UUID,
+    food_id: uuid.UUID | None = Query(None),
+    movement_type: str | None = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[StockMovementResponse]:
+    """Get full stock movement history for traceability (HU011.2).
+    Filterable by food_id and movement_type. Newest first.
+    """
+    _ = current_user
+    movements = food_service.get_stock_movements(db, farm_id, food_id, movement_type, limit)
+    return [StockMovementResponse.model_validate(m) for m in movements]
+
+
+@router.get("/low-stock", response_model=list[FoodResponse], summary="Alertas de stock bajo", dependencies=[Depends(require_permission("alimentos", "can_read"))])
+def low_stock_alerts(
+    farm_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[FoodResponse]:
+    """Get all food items below minimum stock threshold (HU011.3).
+    Why? Frontend can show reorder alerts.
+    """
+    _ = current_user
+    foods = food_service.get_low_stock_foods(db, farm_id)
+    return [FoodResponse.model_validate(f) for f in foods]

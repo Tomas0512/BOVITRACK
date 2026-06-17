@@ -12,7 +12,7 @@ from app.models.purpose import Purpose
 from app.models.farm import Farm, UserFarm, LandPlot
 from app.models.paddock import Paddock, PaddockHerd
 from app.models.bovine import Bovine, BovineIdentification, BovineAudit
-from app.models.food import Food, Consumption
+from app.models.food import Food, Consumption, StockMovement
 from app.models.treatment import Treatment
 from app.models.sanitary_plan import SanitaryPlan
 from app.models.milk_production import MilkProduction
@@ -33,7 +33,7 @@ __all__ = [
     "Farm", "UserFarm", "LandPlot",
     "Paddock", "PaddockHerd",
     "Bovine", "BovineIdentification", "BovineAudit",
-    "Food", "Consumption",
+    "Food", "Consumption", "StockMovement",
     "Treatment",
     "SanitaryPlan",
     "MilkProduction",
