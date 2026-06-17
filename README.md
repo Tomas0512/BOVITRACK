@@ -45,10 +45,9 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 - **Inventario** — insumos, compras y consumos con control de stock
 - **Economía** — ingresos, egresos e indicadores de rentabilidad
 - **Reportes** — exportables en PDF y Excel con paneles interactivos
-- **Alertas** — notificaciones automáticas por correo y WhatsApp
-- **Documentos** — adjuntar archivos a animales, fincas o eventos
-- **Auditoría** — registro automático de acciones de usuarios
-- **Modo offline** — registro sin conexión con sincronización automática
+- **Documentos** — adjuntar archivos a fincas
+- **Alertas** — alertas de stock bajo de alimentos (correo vía SMTP/Resend)
+- **Auditoría** — registro básico de acciones de usuarios (pendiente exportación avanzada)
 
 ## Requisitos previos
 

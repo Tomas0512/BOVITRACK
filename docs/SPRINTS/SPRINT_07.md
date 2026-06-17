@@ -12,6 +12,7 @@
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 27 de junio de 2026 |
 | **Fecha fin** | 10 de julio de 2026 |
+| **Cierre real** | 17 de junio de 2026 (completado anticipadamente) |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
 | **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
 

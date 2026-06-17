@@ -1,237 +1,374 @@
-# Resumen Tecnico Actual del Proyecto BoviTrack
+# Resumen Técnico del Proyecto BoviTrack
+
+**Fecha:** 17 de junio de 2026
 
-Fecha: 18 de marzo de 2026
+---
+
+## 1. ¿Qué es BoviTrack hoy?
 
-## 1. Que es BoviTrack hoy
+BoviTrack es una aplicación full stack para la gestión ganadera que cubre administración de fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra.
 
-BoviTrack es un sistema para gestion ganadera, pero el desarrollo implementado actualmente esta concentrado en el modulo de autenticacion de usuarios.
+**Stack tecnológico:**
+- **Backend:** FastAPI (Python) con SQLAlchemy + Alembic + PostgreSQL
+- **Frontend web:** React + Vite + TailwindCSS 4 + Nginx
+- **App móvil:** React Native + Expo
+- **Orquestación:** Docker Compose con healthchecks
+- **Correo desarrollo:** Mailpit (SMTP dummy + UI web en :8025)
 
-Hoy el sistema ya permite:
+**Cobertura actual:** 13 Historias de Usuario (HU001–HU013) distribuidas en 7 Sprints, con ~91 endpoints, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos, RBAC completo con 4 roles y 32 permisos, y autenticación JWT con access/refresh tokens.
 
-1. Registro de usuario.
-2. Inicio de sesion con JWT.
-3. Renovacion de tokens con refresh token.
-4. Flujo de olvide mi contrasena.
-5. Restablecimiento de contrasena con token temporal.
-6. Despliegue con Docker Compose de frontend, backend y base de datos.
+---
 
-Referencia general: [README](../README.md)
+## 2. Arquitectura
 
-## 2. Arquitectura y funcionamiento general
+El sistema se despliega con **Docker Compose** en 4 servicios:
 
-El proyecto corre en tres servicios orquestados por Docker Compose:
+| Servicio | Puerto | Rol |
+|---|---|---|
+| `db` | 5432 (solo localhost) | PostgreSQL 17 con volumen persistente |
+| `be` | 8000 | FastAPI en contenedor no-root |
+| `fe` | 5173 → 80 | Nginx sirviendo React SPA + proxy reverso a `/api` |
+| `mailpit` | 8025 (UI), 1025 (SMTP) | SMTP dummy para desarrollo |
 
-1. Base de datos PostgreSQL en [docker-compose.yml](../docker-compose.yml).
-2. Backend FastAPI en [docker-compose.yml](../docker-compose.yml).
-3. Frontend React compilado y servido por Nginx en [docker-compose.yml](../docker-compose.yml).
+**Redes segmentadas:**
+- `backend_net`: db ↔ be ↔ mailpit
+- `frontend_net`: fe ↔ be
 
-Flujo de una peticion tipica:
+**Healthchecks:** db usa `pg_isready`, be tiene endpoint `/health`.
 
-1. El usuario entra por http://localhost:5173.
-2. El frontend lo sirve Nginx segun [fe/nginx.conf](../fe/nginx.conf).
-3. Si la app llama rutas de API, Nginx proxia /api hacia el backend.
-4. FastAPI recibe la solicitud en [be/app/main.py](../be/app/main.py).
-5. FastAPI valida datos con esquemas Pydantic en [be/app/schemas/user.py](../be/app/schemas/user.py).
-6. La logica de negocio se ejecuta en [be/app/services/auth_service.py](../be/app/services/auth_service.py).
-7. SQLAlchemy persiste o consulta en PostgreSQL usando [be/app/database.py](../be/app/database.py) y modelos ORM.
-8. El backend responde al frontend y la UI actualiza el estado sin recargar pagina.
+Archivo: [`docker-compose.yml`](../docker-compose.yml)
 
-## 3. Frontend: que hay y para que sirve
-
-Carpeta principal: [fe/src](../fe/src)
-
-### 3.1 Entrada y ruteo
-
-1. [fe/src/main.tsx](../fe/src/main.tsx): punto de entrada de React.
-2. [fe/src/App.tsx](../fe/src/App.tsx): define rutas de autenticacion.
-
-Rutas actuales:
-
-1. /register
-2. /login
-3. /forgot-password
-4. /reset-password
-5. / redirige a /register
-
-### 3.2 Capa de llamadas HTTP
-
-1. [fe/src/api/auth.ts](../fe/src/api/auth.ts): cliente Axios y funciones para endpoints de autenticacion.
-
-Funciones implementadas:
-
-1. registerUser
-2. loginUser
-3. forgotPassword
-4. resetPassword
-
-### 3.3 Paginas implementadas
-
-1. [fe/src/pages/RegisterPage.tsx](../fe/src/pages/RegisterPage.tsx): formulario de registro con validaciones de nombres, correo, contrasena y confirmacion.
-2. [fe/src/pages/LoginPage.tsx](../fe/src/pages/LoginPage.tsx): login y guardado de access_token y refresh_token en localStorage.
-3. [fe/src/pages/ForgotPasswordPage.tsx](../fe/src/pages/ForgotPasswordPage.tsx): solicitud de enlace de recuperacion por correo.
-4. [fe/src/pages/ResetPasswordPage.tsx](../fe/src/pages/ResetPasswordPage.tsx): cambio de contrasena con token de URL.
-
-### 3.4 Layout y estilo
-
-1. [fe/src/components/layout/AuthLayout.tsx](../fe/src/components/layout/AuthLayout.tsx): estructura comun de paginas de auth.
-2. [fe/src/components/layout/Header.tsx](../fe/src/components/layout/Header.tsx): logo y boton de accion.
-3. [fe/src/components/layout/Footer.tsx](../fe/src/components/layout/Footer.tsx): pie de pagina legal y de contacto.
-4. [fe/src/index.css](../fe/src/index.css): variables de color y estilos globales.
-
-### 3.5 Configuracion y build frontend
-
-1. [fe/vite.config.ts](../fe/vite.config.ts): configuracion de Vite y tests.
-2. [fe/Dockerfile](../fe/Dockerfile): build multi-stage para compilar React y servir con Nginx.
-3. [fe/nginx.conf](../fe/nginx.conf): soporte SPA y proxy de API.
-4. [fe/package.json](../fe/package.json): scripts y dependencias.
-
-### 3.6 Estado funcional del frontend
-
-1. Existe el modulo de autenticacion completo en UI.
-2. Aun no existe dashboard funcional.
-3. Carpetas [fe/src/context](../fe/src/context), [fe/src/hooks](../fe/src/hooks) y [fe/src/types](../fe/src/types) estan en estado base con .gitkeep.
-
-## 4. Backend: que hay y para que sirve
-
-Carpeta principal: [be/app](../be/app)
-
-### 4.1 Entrada y configuracion
-
-1. [be/app/main.py](../be/app/main.py): app FastAPI, CORS, routers y health endpoint.
-2. [be/app/config.py](../be/app/config.py): carga y validacion de variables de entorno con pydantic-settings.
-3. [be/app/database.py](../be/app/database.py): engine SQLAlchemy, sesiones y Base ORM.
-4. [be/app/dependencies.py](../be/app/dependencies.py): dependencias de DB y autenticacion por token.
-
-### 4.2 API de autenticacion
-
-Archivo principal: [be/app/routers/auth.py](../be/app/routers/auth.py)
-
-Endpoints actuales:
-
-1. POST /api/v1/auth/register
-2. POST /api/v1/auth/login
-3. POST /api/v1/auth/refresh
-4. POST /api/v1/auth/forgot-password
-5. POST /api/v1/auth/reset-password
-
-### 4.3 Logica de negocio
-
-Archivo principal: [be/app/services/auth_service.py](../be/app/services/auth_service.py)
-
-Funciones clave:
-
-1. register_user
-2. login_user
-3. refresh_access_token
-4. request_password_reset
-5. reset_password
-
-### 4.4 Modelos y validaciones
-
-1. [be/app/models/user.py](../be/app/models/user.py): tabla users.
-2. [be/app/models/password_reset_token.py](../be/app/models/password_reset_token.py): tabla de tokens de recuperacion.
-3. [be/app/schemas/user.py](../be/app/schemas/user.py): validaciones de request/response con Pydantic.
-
-### 4.5 Utilidades de seguridad y correo
-
-1. [be/app/utils/security.py](../be/app/utils/security.py): hashing bcrypt, creacion y validacion de JWT.
-2. [be/app/utils/email.py](../be/app/utils/email.py): envio de correo de recuperacion en modo desarrollo (log de enlace).
-
-### 4.6 Migraciones y configuracion de Alembic
-
-1. [be/alembic/env.py](../be/alembic/env.py): integra Alembic con modelos y settings.
-2. [be/alembic/versions/eeee1c29cefa_create_users_and_password_reset_tokens_.py](../be/alembic/versions/eeee1c29cefa_create_users_and_password_reset_tokens_.py): migracion inicial.
-3. [be/alembic.ini](../be/alembic.ini): configuracion de Alembic.
-
-## 5. Base de datos: que hay y como funciona
-
-### 5.1 Motor y arranque
-
-1. PostgreSQL corre como servicio db en [docker-compose.yml](../docker-compose.yml).
-2. [db/Dockerfile](../db/Dockerfile): imagen de la base.
-3. [db/init.sql](../db/init.sql): habilita extension uuid-ossp y valida inicializacion.
-
-### 5.2 Esquema actual
-
-La migracion inicial crea:
-
-1. Tabla users.
-2. Tabla password_reset_tokens.
-3. Indices unicos para email, document_number y token.
-4. Llave foranea user_id con eliminacion en cascada.
-
-Fuente: [be/alembic/versions/eeee1c29cefa_create_users_and_password_reset_tokens_.py](../be/alembic/versions/eeee1c29cefa_create_users_and_password_reset_tokens_.py)
-
-## 6. Seguridad actual implementada
-
-1. Contrasenas hasheadas con bcrypt.
-2. Access token y refresh token con expiracion.
-3. Validacion fuerte de contrasena en frontend y backend.
-4. Prevencion de enumeracion de usuarios en forgot-password (respuesta generica).
-5. Token de recuperacion de un solo uso con expiracion.
-6. CORS con origen permitido configurado por FRONTEND_URL.
-7. Backend en contenedor ejecutando como usuario no root.
-8. Base de datos no expuesta por puerto al host en compose.
-
-Archivos de referencia:
-
-1. [be/app/utils/security.py](../be/app/utils/security.py)
-2. [be/app/services/auth_service.py](../be/app/services/auth_service.py)
-3. [be/app/main.py](../be/app/main.py)
-4. [be/Dockerfile](../be/Dockerfile)
-
-## 7. Riesgos y pendientes de seguridad
-
-1. No hay logout con invalidacion de tokens.
-2. No hay blacklist ni rotacion de refresh tokens.
-3. No hay rate limiting ni bloqueo por intentos fallidos.
-4. Tokens se guardan en localStorage.
-5. No hay roles y permisos todavia.
-6. No hay auditoria de acciones criticas.
-7. No hay HTTPS configurado para produccion.
-8. Envio SMTP real aun no habilitado (modo desarrollo/log).
-
-## 8. Infraestructura y despliegue
-
-Archivo principal: [docker-compose.yml](../docker-compose.yml)
-
-Servicios:
-
-1. db: PostgreSQL con volumen persistente y healthcheck.
-2. be: FastAPI en puerto 8000.
-3. fe: Nginx sirviendo frontend, publicado en 5173 hacia el host.
-
-Imagenes:
-
-1. [be/Dockerfile](../be/Dockerfile): multi-stage backend + healthcheck.
-2. [fe/Dockerfile](../fe/Dockerfile): multi-stage frontend con Nginx.
-
-Variables de entorno:
-
-1. [../.env.example](../.env.example)
-2. [be/.env.example](../be/.env.example)
-3. [fe/.env.example](../fe/.env.example)
-
-## 9. Estado de pruebas y calidad
-
-### 9.1 Frontend
-
-1. Pruebas ejecutan con Vitest.
-2. Actualmente fallan pruebas en [fe/src/App.test.tsx](../fe/src/App.test.tsx) porque esperan contenido antiguo que ya no coincide con la app actual.
-3. Archivo de setup [fe/src/__tests__/setup.ts](../fe/src/__tests__/setup.ts) esta vacio.
-
-### 9.2 Backend
-
-1. No hay casos de prueba implementados aun.
-2. La carpeta de tests existe, pero sin pruebas funcionales.
-
-## 10. Resumen ejecutivo
-
-El proyecto tiene una base tecnica solida para autenticacion y despliegue con contenedores. La arquitectura esta bien separada por capas y el flujo principal funciona de extremo a extremo.
-
-Lo siguiente para evolucionar el producto es:
-
-1. Implementar dashboard y modulos de negocio ganadero.
-2. Incorporar roles y permisos.
-3. Fortalecer seguridad operativa (logout real, rate limiting, hardening).
-4. Completar estrategia de pruebas frontend y backend.
+---
+
+## 3. Frontend — Todo lo implementado
+
+### 3.1 Páginas (15+)
+
+| Ruta | Archivo |
+|---|---|
+| `/login` | [`LoginPage.tsx`](../fe/src/pages/LoginPage.tsx) |
+| `/register` | [`RegisterPage.tsx`](../fe/src/pages/RegisterPage.tsx) |
+| `/register?invited=1` | [`InvitedRegisterPage.tsx`](../fe/src/pages/InvitedRegisterPage.tsx) |
+| `/forgot-password` | [`ForgotPasswordPage.tsx`](../fe/src/pages/ForgotPasswordPage.tsx) |
+| `/reset-password` | [`ResetPasswordPage.tsx`](../fe/src/pages/ResetPasswordPage.tsx) |
+| `/dashboard` | [`DashboardPage.tsx`](../fe/src/pages/DashboardPage.tsx) |
+| `/farms/:id` | [`FarmDetailPage.tsx`](../fe/src/pages/FarmDetailPage.tsx) |
+| `/farms/new` | [`CreateFarmPage.tsx`](../fe/src/pages/CreateFarmPage.tsx) |
+| `/economics` | [`EconomicDashboard.tsx`](../fe/src/pages/EconomicDashboard.tsx) |
+| `/reports` | [`ReportsPage.tsx`](../fe/src/pages/ReportsPage.tsx) |
+| `/bovines/:id` | [`BovineDetailPage.tsx`](../fe/src/pages/BovineDetailPage.tsx) |
+| `/terms` | [`TermsPage.tsx`](../fe/src/pages/TermsPage.tsx) |
+| `/privacy` | [`PrivacyPage.tsx`](../fe/src/pages/PrivacyPage.tsx) |
+| `/reactivation` | [`RequestReactivationPage.tsx`](../fe/src/pages/RequestReactivationPage.tsx) |
+| `/` | [`HomePage.tsx`](../fe/src/pages/HomePage.tsx) |
+
+### 3.2 Formularios multi-step con paginación
+
+Se implementaron **9 flujos multi-step** (CreateFarmPage, bovines, movements, food, reports, documents, economics, employees, land_plots) con navegación entre pasos, validación por paso y estado compartido.
+
+### 3.3 API clients
+
+[`fe/src/api/`](../fe/src/api) contiene 20 módulos Axios:
+
+| Archivo | Funcionalidad |
+|---|---|
+| `auth.ts` | Login, register, refresh, forgot/reset password |
+| `farms.ts` | CRUD fincas, listar, detalle |
+| `bovines.ts` | CRUD bovinos, historial, filtros |
+| `movements.ts` | Movimientos de animales |
+| `food.ts` | Alimentación y consumos |
+| `reports.ts` | Reportes y estadísticas |
+| `documents.ts` | Subida y gestión de documentos |
+| `economics.ts` | Registros económicos |
+| `employees.ts` | Empleados por finca |
+| `land_plots.ts` | Lotes de tierra |
+| `paddocks.ts` | Potreros y pastoreo |
+| `sanitary_plans.ts` | Planes sanitarios |
+| `treatments.ts` | Tratamientos veterinarios |
+| `calves.ts` | Gestión de crías/terneros |
+| `milk_production.ts` | Producción de leche |
+| `reproductive_events.ts` | Eventos reproductivos |
+| `weights.ts` | Pesajes y curvas de peso |
+| `tasks.ts` | Tareas asignadas |
+| `alerts.ts` | Alertas y notificaciones |
+| `audit_logs.ts` | Logs de auditoría |
+
+### 3.4 Contextos y tema
+
+- [`ThemeContext.tsx`](../fe/src/context/ThemeContext.tsx) — Dark/light mode con persistencia + `ThemeToggle`
+- [`AuthContext.tsx`](../fe/src/context/AuthContext.tsx) — Estado de autenticación global
+- [`ProtectedRoute.tsx`](../fe/src/components/ProtectedRoute.tsx) — Guard de rutas autenticadas
+
+### 3.5 Componentes reutilizables
+
+- **FormModal pattern:** Modal genérico reutilizable para formularios CRUD
+- Componentes UI modulares en [`fe/src/components/ui/`](../fe/src/components/ui/)
+- Componentes específicos por módulo: bovines/, calves/, documents/, employees/, food/, land_plots/, movements/, paddocks/, audit/
+
+### 3.6 Estilo
+
+- **TailwindCSS 4** con configuración personalizada
+- Tema claro/oscuro completamente implementado
+- Diseño responsivo
+
+### 3.7 Configuración
+
+- [`vite.config.ts`](../fe/vite.config.ts) — Vite + configuración de tests
+- [`Dockerfile`](../fe/Dockerfile) — Build multi-stage (compilación React + Nginx)
+- [`nginx.conf`](../fe/nginx.conf) — SPA routing + proxy `/api` al backend
+- [`package.json`](../fe/package.json) — Dependencias y scripts
+
+---
+
+## 4. Backend — Todo lo implementado
+
+### 4.1 Routers y endpoints
+
+[`be/app/routers/`](../be/app/routers) contiene **23 routers** con aproximadamente **91 endpoints**:
+
+| Router | Endpoints clave |
+|---|---|
+| `auth.py` | register, login, refresh, forgot-password, reset-password, logout, verify-email |
+| `users.py` | CRUD usuarios, perfil, cambiar contraseña |
+| `farms.py` | CRUD fincas, listar, detalle, estadísticas |
+| `bovines.py` | CRUD bovinos, filtrar, historial |
+| `movements.py` | Registrar movimientos, historial |
+| `food.py` | Alimentación, consumos, stocks |
+| `reports.py` | Reportes agregados |
+| `documents.py` | Subir, listar, descargar documentos |
+| `economics.py` | Registros económicos, balances |
+| `employees.py` | CRUD empleados por finca |
+| `land_plots.py` | CRUD lotes de tierra |
+| `paddocks.py` | CRUD potreros, asignación de bovinos |
+| `sanitary_plan.py` | Planes sanitarios, programación |
+| `treatments.py` | Tratamientos, historial clínico |
+| `calves.py` | Gestión de crías |
+| `milk_production.py` | Registro de producción de leche |
+| `reproductive_events.py` | Eventos: celo, monta, diagnóstico, parto |
+| `weights.py` | Pesajes y curvas de peso |
+| `tasks.py` | CRUD tareas, asignación |
+| `alerts.py` | Alertas, notificaciones |
+| `admin.py` | Panel administrativo |
+| `invitations.py` | Invitaciones a fincas |
+| `departments.py` | Departamentos y ciudades |
+
+### 4.2 Modelos ORM (20+)
+
+Definidos en [`be/app/models/`](../be/app/models/):
+
+| Modelo | Tabla |
+|---|---|
+| `User` | `users` |
+| `Role` | `role` |
+| `Permission` | `permission` |
+| `Farm` | `farm` |
+| `UserFarm` | `user_farm` |
+| `LandPlot` | `land_plot` |
+| `Paddock` | `paddock` |
+| `PaddockHerd` | `paddock_herd` |
+| `Bovine` | `bovine` |
+| `BovineIdentification` | `bovine_identification` |
+| `BovineAudit` | `bovine_audit` |
+| `Movement` | `animal_movement` |
+| `Food` | `food` |
+| `Consumption` | `consumption` |
+| `StockMovement` | `stock_movement` |
+| `Weight` | `weight` |
+| `SanitaryPlan` | `sanitary_plan` |
+| `Treatment` | `treatment` |
+| `ReproductiveEvent` | `reproductive_event` |
+| `MilkProduction` | `milk_production` |
+| `EconomicRecord` | `economic_record` |
+| `Document` | `document` |
+| `Task` | `task` |
+| `AuditLog` | `audit_log` |
+| `FarmInvitation` | `farm_invitation` |
+| `EmailVerificationToken` | `email_verification_token` |
+| `PasswordResetToken` | `password_reset_token` |
+| `ReactivationRequest` | `reactivation_request` |
+| `Department` | `department` |
+| `City` | `city` |
+| `Purpose` | `purpose` |
+
+### 4.3 Servicios
+
+[`be/app/services/`](../be/app/services/) contiene **22 servicios** desacoplados por módulo de negocio (auth_service, farm_service, bovine_service, food_service, etc.), cada uno con su lógica de negocio específica.
+
+### 4.4 Seguridad y RBAC
+
+- **4 roles:** Administrador, Propietario, Empleado, Visitante
+- **32 permisos** (8 módulos × 4 operaciones CRUD)
+- Control de acceso por finca (`UserFarm`)
+- JWT con **access token** (corto) + **refresh token** (largo)
+- **Token versioning:** permite invalidar sesiones (logout real)
+- Protección de **último administrador** (no se puede eliminar ni degradar)
+- Contraseñas hasheadas con **bcrypt**
+- CORS configurado desde variable `FRONTEND_URL`
+- Backend ejecuta como **usuario no-root** en contenedor
+
+### 4.5 Email
+
+- **Desarrollo:** SMTP con Mailpit (mailpit:1025), UI en http://localhost:8025
+- **Producción:** API Resend configurada como respaldo
+- **Fallback:** Log a consola si no hay SMTP ni Resend
+- Flujos: bienvenida, verificación de email, recuperación de contraseña, invitación a finca
+
+### 4.6 Migraciones Alembic
+
+[`be/alembic/versions/`](../be/alembic/versions/) contiene **16 migraciones lineales** (sin cabezas múltiples):
+
+1. `eeee1c29cefa` — Tablas users + password_reset_tokens
+2. `c9ff44fd3509` — Schema inicial completo
+3. `e1f2a3b4c5d6` — Seed roles y permisos
+4. `a1b2c3d4e5f6` — Vistas y funciones
+5. `c1d2e3f4a5b6` — Seguridad, consentimiento, auditoría
+6. `f1a2b3c4d5e6` — Farm invitation
+7. `fb563e20cc8e` — Tablas de dominio (departamentos, ciudades)
+8. `9d8e7f6a5b4c` — Seed departamentos + cambio farm city
+9. `g1h2i3j4k5l6` — Reactivación, ubicación, pastoreo
+10. `h1i2j3k4l5m6` — Farm ID en audit log
+11. `i1j2k3l4m5n6` — Sanitary plan
+12. `j1k2l3m4n5o6` — Reproductive event
+13. `k1l2m3n4o5p6` — Economic record
+14. `l1m2n3o4p5q6` — Animal movement
+15. `m1n2o3p4q5r6` — Document
+16. `n1o2p3q4r5s6` — Stock movement
+
+Configuración: [`be/alembic.ini`](../be/alembic.ini), [`be/alembic/env.py`](../be/alembic/env.py)
+
+---
+
+## 5. Base de datos
+
+**Motor:** PostgreSQL 17
+
+**Esquema actual:** 30 tablas normalizadas que cubren:
+- Usuarios y autenticación
+- Roles y permisos (RBAC)
+- Fincas y relación usuario-finca
+- Departamentos y ciudades
+- Propósitos productivos
+- Lotes de tierra y potreros
+- Bovinos, identificaciones y auditoría
+- Planes sanitarios y tratamientos
+- Eventos reproductivos
+- Alimentación, consumos y movimientos de stock
+- Pesajes
+- Producción de leche
+- Movimientos de animales
+- Registros económicos
+- Documentos
+- Tareas
+- Invitaciones a fincas
+- Solicitudes de reactivación
+- Logs de auditoría
+- Tokens de verificación de email y recuperación de contraseña
+
+**Migraciones:** Lineales con Alembic (sin cabezas múltiples). Cada migración es revisada antes de crear la siguiente.
+
+Archivos de inicialización: [`db/Dockerfile`](../db/Dockerfile), [`db/init.sql`](../db/init.sql)
+
+---
+
+## 6. Seguridad
+
+| Medida | Estado |
+|---|---|
+| Hashing bcrypt | Implementado |
+| JWT access + refresh tokens | Implementado |
+| Token versioning (logout real) | Implementado |
+| Expiración configurable de tokens | Implementado |
+| CORS con origen permitido | Implementado |
+| Contenedor no-root (backend) | Implementado |
+| Puerto DB no expuesto al host | Implementado |
+| Prevención enumeración usuarios | Implementado |
+| Token recuperación un solo uso | Implementado |
+| RBAC completo (4 roles, 32 permisos) | Implementado |
+| Protección último administrador | Implementado |
+| Auditoría de acciones críticas | Implementado |
+| Rate limiting | Pendiente (HU014, fuera de alcance) |
+| HTTPS en producción | Pendiente (despliegue futuro) |
+
+---
+
+## 7. Mobile App (React Native + Expo)
+
+Carpeta: [`mobile/`](../mobile/)
+
+**Pantallas de autenticación:**
+- [`LoginScreen.tsx`](../mobile/src/screens/auth/LoginScreen.tsx)
+- [`RegisterScreen.tsx`](../mobile/src/screens/auth/RegisterScreen.tsx)
+- [`ForgotPasswordScreen.tsx`](../mobile/src/screens/auth/ForgotPasswordScreen.tsx)
+- [`ResetPasswordScreen.tsx`](../mobile/src/screens/auth/ResetPasswordScreen.tsx)
+
+**Pantallas internas:**
+- [`DashboardScreen.tsx`](../mobile/src/screens/DashboardScreen.tsx)
+- [`FarmDetailScreen.tsx`](../mobile/src/screens/FarmDetailScreen.tsx)
+- [`HomeScreen.tsx`](../mobile/src/screens/HomeScreen.tsx)
+
+**Características:**
+- Navegación con React Navigation (AuthNavigator + AppNavigator + RootNavigator)
+- Dark/light mode con ThemeContext
+- Validación inline en formularios
+- Paleta de colores web: `#59930a`
+- Arquitectura modular (screens/, navigation/, theme/)
+
+---
+
+## 8. Infraestructura
+
+### Docker Compose
+
+4 servicios orquestados:
+
+```yaml
+services:
+  mailpit:    # SMTP dummy para desarrollo
+  db:         # PostgreSQL 17 + healthcheck + volumen persistente
+  be:         # FastAPI, multi-stage build, usuario no-root
+  fe:         # React + Nginx, multi-stage build
+```
+
+Redes: `backend_net` (db, be, mailpit) + `frontend_net` (fe, be)
+Volumen: `bovitrack_data` (persistencia PostgreSQL)
+
+### Variables de entorno
+
+- [`.env.example`](../.env.example) — Variables raíz del proyecto
+- [`be/.env.example`](../be/.env.example) — Variables específicas del backend
+- [`fe/.env.example`](../fe/.env.example) — Variables del frontend (VITE_API_URL)
+
+---
+
+## 9. Tablero ClickUp
+
+- **Space:** BOVITRACK
+- **7 listas** (una por Sprint: 1 al 7)
+- **13 Historias de Usuario** (HU001–HU013) con checklists desglosados por tarea técnica
+- Cada HU incluye criterios de aceptación, subtareas y asignación
+
+---
+
+## 10. Resumen Ejecutivo
+
+**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra.
+
+**Métrica general:**
+- ~91 endpoints en 23 routers
+- 15+ páginas web con TailwindCSS 4 y modo oscuro
+- 7 pantallas móviles (4 auth + 3 internas)
+- 30 tablas en PostgreSQL con migraciones lineales
+- 22 servicios backend desacoplados
+- 20 API clients en el frontend
+- RBAC con 4 roles y 32 permisos
+- Autenticación JWT con token versioning
+- 9 formularios multi-step con paginación
+- Docker Compose con 4 servicios y healthchecks
+- 16 migraciones Alembic lineales
+
+**Pendiente (fuera de alcance):**
+- HU014 — Reportes avanzados e inteligencia de negocio
+- HU015 — Integración con dispositivos IoT (caravanas electrónicas, balanzas)
+- HU016 — Marketplace de compra/venta de ganado
+
+**Documentación relacionada:** [`README.md`](../README.md)
