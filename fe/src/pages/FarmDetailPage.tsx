@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, Tractor, BarChart3 } from "lucide-react";
+import { AlertTriangle, Tractor, BarChart3, FileText } from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
@@ -11,6 +11,7 @@ import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
 import AlertBanner from "../components/layout/AlertBanner";
 import MovementList from "../components/movements/MovementList";
+import DocumentManager from "../components/documents/DocumentManager";
 
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
@@ -123,6 +124,11 @@ export default function FarmDetailPage() {
               <BarChart3 size={16} />
               Económico
             </Link>
+            <Link to={`/farms/${farmId}/reports`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              <FileText size={16} />
+              Reportes
+            </Link>
             <button onClick={handleEdit}
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
               Editar
@@ -215,6 +221,7 @@ export default function FarmDetailPage() {
       <BovineList farmId={farm.id} />
       <SanitaryPlanList farmId={farm.id} />
       <FoodList farmId={farm.id} />
+      <DocumentManager farmId={farm.id} />
       <EmployeeList farmId={farm.id} />
       <AuditLogList farmId={farm.id} />
     </div>

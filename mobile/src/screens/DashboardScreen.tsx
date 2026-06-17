@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl,
@@ -7,13 +8,14 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { listFarms } from '../services/farms';
 import { FarmResponse } from '../types/farms';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../navigation/AppNavigator';
 
 export default function DashboardScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
+  const { colors, toggleTheme, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
 
   const { data: farms, isLoading, isError, refetch } = useQuery({
@@ -21,20 +23,25 @@ export default function DashboardScreen() {
     queryFn: listFarms,
   });
 
+  const styles = useMemo(() => makeStyles(colors), [colors]);
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>¡Hola, {user?.first_name}! 👋</Text>
+          <Text style={styles.greeting}>Hola, {user?.first_name}!</Text>
           <Text style={styles.headerSub}>Tus fincas</Text>
         </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>Salir</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity style={styles.themeBtn} onPress={toggleTheme}>
+            <Text style={styles.themeBtnText}>{isDark ? '☀️' : '🌙'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+            <Text style={styles.logoutText}>Salir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      {/* States */}
       {isLoading && (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -55,7 +62,7 @@ export default function DashboardScreen() {
       {!isLoading && !isError && farms?.length === 0 && (
         <View style={styles.center}>
           <Text style={styles.emptyIcon}>🏡</Text>
-          <Text style={styles.stateText}>Aún no tienes fincas registradas</Text>
+          <Text style={styles.stateText}>Aun no tienes fincas registradas</Text>
         </View>
       )}
 
@@ -66,30 +73,34 @@ export default function DashboardScreen() {
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={false} onRefresh={() => refetch()} />}
           renderItem={({ item }: { item: FarmResponse }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={() => navigation.navigate('FarmDetail', { farmId: item.id })}
-  >
-    <Text style={styles.farmName}>{item.name}</Text>
-    <Text style={styles.farmDetail}>📍 {item.city}, {item.department}</Text>
-    <Text style={styles.farmDetail}>📐 {item.hectares} hectáreas</Text>
-    <Text style={styles.farmArrow}>Ver detalle →</Text>
-  </TouchableOpacity>
-)}
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate('FarmDetail', { farmId: item.id })}
+            >
+              <Text style={styles.farmName}>{item.name}</Text>
+              <Text style={styles.farmDetail}>📍 {item.city}, {item.department}</Text>
+              <Text style={styles.farmArrow}>Ver detalle →</Text>
+            </TouchableOpacity>
+          )}
         />
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: colors.primary, padding: 24, paddingTop: 56,
   },
   greeting: { fontSize: 22, fontWeight: 'bold', color: colors.textOnPrimary },
-  headerSub: { fontSize: 14, color: colors.secondaryLight, marginTop: 2 },
+  headerSub: { fontSize: 14, color: colors.cream, marginTop: 2 },
+  themeBtn: {
+    backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 8, marginRight: 4,
+  },
+  themeBtnText: { fontSize: 16 },
   logoutBtn: {
     backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8,
     paddingHorizontal: 14, paddingVertical: 8,
