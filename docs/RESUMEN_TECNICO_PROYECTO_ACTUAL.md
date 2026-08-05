@@ -9,13 +9,13 @@
 BoviTrack es una aplicación full stack para la gestión ganadera que cubre administración de fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra.
 
 **Stack tecnológico:**
-- **Backend:** FastAPI (Python) con SQLAlchemy + Alembic + PostgreSQL
+- **Backend:** FastAPI (Python) con SQLAlchemy + Alembic + PostgreSQL (hot reload vía volúmenes)
 - **Frontend web:** React + Vite + TailwindCSS 4 + Nginx
 - **App móvil:** React Native + Expo
-- **Orquestación:** Docker Compose con healthchecks
+- **Orquestación:** Docker Compose con healthchecks + volúmenes para desarrollo
 - **Correo desarrollo:** Mailpit (SMTP dummy + UI web en :8025)
 
-**Cobertura actual:** 13 Historias de Usuario (HU001–HU013) distribuidas en 7 Sprints, con ~91 endpoints, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos, RBAC completo con 4 roles y 32 permisos, y autenticación JWT con access/refresh tokens.
+**Cobertura actual:** 13 Historias de Usuario (HU001–HU013) distribuidas en 7 Sprints, con ~91 endpoints, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos, RBAC completo con 4 roles y 32 permisos, autenticación JWT con access/refresh tokens, y **flujo de invitación de empleados funcional**.
 
 ---
 
@@ -26,7 +26,7 @@ El sistema se despliega con **Docker Compose** en 4 servicios:
 | Servicio | Puerto | Rol |
 |---|---|---|
 | `db` | 5432 (solo localhost) | PostgreSQL 17 con volumen persistente |
-| `be` | 8000 | FastAPI en contenedor no-root |
+| `be` | 8000 | FastAPI en contenedor no-root (con hot reload por volumen) |
 | `fe` | 5173 → 80 | Nginx sirviendo React SPA + proxy reverso a `/api` |
 | `mailpit` | 8025 (UI), 1025 (SMTP) | SMTP dummy para desarrollo |
 
@@ -205,6 +205,7 @@ Definidos en [`be/app/models/`](../be/app/models/):
 - Contraseñas hasheadas con **bcrypt**
 - CORS configurado desde variable `FRONTEND_URL`
 - Backend ejecuta como **usuario no-root** en contenedor
+- **Invitación de empleados:** usuarios invitados via `UserFarm` pueden listar y acceder a la finca (no solo el `owner_id`)
 
 ### 4.5 Email
 
@@ -351,7 +352,7 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 
 ## 10. Resumen Ejecutivo
 
-**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra.
+**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra. El flujo de invitación de empleados a fincas funciona correctamente.
 
 **Métrica general:**
 - ~91 endpoints en 23 routers
@@ -364,6 +365,7 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 - Autenticación JWT con token versioning
 - 9 formularios multi-step con paginación
 - Docker Compose con 4 servicios y healthchecks
+- Backend con hot reload vía volúmenes Docker (sin rebuild)
 - 16 migraciones Alembic lineales
 
 **Pendiente (fuera de alcance):**
