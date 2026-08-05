@@ -43,7 +43,7 @@ from app.utils.limiter import limiter
 router = APIRouter(
     prefix="/api/v1/farms/{farm_id}/documents",
     tags=["Documentos (HU012)"],
-    dependencies=[Depends(require_permission("bovines", "can_read"))],
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 
 
