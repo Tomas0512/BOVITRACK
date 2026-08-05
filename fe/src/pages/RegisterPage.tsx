@@ -250,7 +250,13 @@ export function RegisterPage() {
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={handleSubmit} noValidate
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && step < STEPS.length - 1) {
+                e.preventDefault();
+                nextStep();
+              }
+            }}>
             {step === 0 && (
               <>
                 <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">

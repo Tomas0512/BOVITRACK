@@ -119,7 +119,13 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && step < STEPS.length - 1) {
+              e.preventDefault();
+              nextStep();
+            }
+          }}>
           {step === 0 && (
             <>
               <div className="grid grid-cols-2 gap-3">

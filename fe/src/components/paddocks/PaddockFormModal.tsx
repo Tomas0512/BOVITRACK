@@ -72,8 +72,8 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">{existing ? "Editar potrero" : "Nuevo potrero"}</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
@@ -92,7 +92,13 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && step < STEPS.length - 1) {
+              e.preventDefault();
+              nextStep();
+            }
+          }}>
           {step === 0 && (
             <>
               <div>
