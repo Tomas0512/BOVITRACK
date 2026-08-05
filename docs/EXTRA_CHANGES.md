@@ -162,3 +162,40 @@ causing 403 errors on their endpoints.
 - `be/Dockerfile` — Added `mkdir -p /app/storage/documents`
 - `fe/src/pages/ReportsPage.tsx` — Removed unused `Download` import
 - `fe/src/components/food/InventoryDashboard.tsx` — Fixed `listStockMovements` call signature
+
+## [2026-06-17] Bug fix: Employee invited via invitation could not see the farm
+
+**Reason:** `get_farms_by_owner()` only queried `Farm.owner_id`, but an invited employee is linked via `UserFarm`, not as `owner_id`. Also `get_farm_by_id()` rejected non-owners with 404.
+
+**Files:**
+- `be/app/services/farm_service.py`:
+  - `get_farms_by_owner()` now returns farms where user is owner OR has active `UserFarm`
+  - `get_farm_by_id()` now checks `UserFarm` access if user is not the owner
+
+**Impact:** Invited employees now see the farm in their dashboard and can access farm detail.
+
+## [2026-06-17] Form modals: overflow-y-auto and theme colors
+
+**Reason:** Some form modals lacked scroll support and used hardcoded colors instead of theme variables.
+
+**Files:**
+- `fe/src/components/movements/MovementFormModal.tsx` — Added `overflow-y-auto py-4`; changed `bg-white`/`text-gray-*` to `bg-surface`/`text-text-*`
+- `fe/src/components/paddocks/PaddockFormModal.tsx` — Added `overflow-y-auto py-4 mx-4`
+- `fe/src/components/land_plots/LandPlotFormModal.tsx` — Added `overflow-y-auto py-4 mx-4`
+
+## [2026-06-17] Seed script: audit log entries
+
+**Reason:** Seed-created data had no audit trail, causing empty audit history in the UI.
+
+**Files:**
+- `be/seed_test_data.py` — Added `add_audit_log()` calls for farm creation, land plot creation, and a master seed audit log
+
+## [2026-06-17] Docker: backend hot reload with volumes
+
+**Reason:** Every Python change required rebuilding the image; now source is mounted as a volume with `uvicorn --reload`.
+
+**Files:**
+- `docker-compose.yml` — Added `volumes: - ./be:/app` to backend service
+- `be/entrypoint.sh` — Added `--reload` flag to uvicorn command
+
+**Impact:** Changes to Python files are detected automatically and restart uvicorn within ~1-2 seconds. No rebuild needed.

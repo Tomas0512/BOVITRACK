@@ -218,7 +218,13 @@ export default function CreateFarmPage() {
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form onSubmit={handleSubmit} noValidate
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && step < STEPS.length - 1) {
+              e.preventDefault();
+              nextStep();
+            }
+          }}>
           {error && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">
               {error}

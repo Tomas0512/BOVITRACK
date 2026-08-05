@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import (
@@ -51,19 +51,24 @@ def build_productive_report(
     females = 0
     avg_weight = None
     if stats:
-        s = stats if isinstance(stats, dict) else {}
+        s = stats
+        if isinstance(s, str):
+            import json
+            s = json.loads(s)
+        if not isinstance(s, dict):
+            s = {}
         total_bovines = s.get("total_bovines", 0)
         males = s.get("males", 0)
         females = s.get("females", 0)
         avg_weight = s.get("avg_weight")
 
-    milk_query = "SELECT COALESCE(SUM(liters), 0) AS total FROM milk_production WHERE farm_id = :farm_id"
+    milk_query = "SELECT COALESCE(SUM(quantity_liters), 0) AS total FROM milk_production WHERE farm_id = :farm_id"
     milk_params = {"farm_id": str(farm_id)}
     if start_date:
-        milk_query += " AND production_date >= :start_date"
+        milk_query += " AND milking_date >= :start_date"
         milk_params["start_date"] = start_date
     if end_date:
-        milk_query += " AND production_date <= :end_date"
+        milk_query += " AND milking_date <= :end_date"
         milk_params["end_date"] = end_date
 
     total_milk = db.execute(text(milk_query), milk_params).scalar() or 0
@@ -72,19 +77,16 @@ def build_productive_report(
         text("""
             SELECT
                 CASE
-                    WHEN age_days <= 90 THEN '0-3 meses'
-                    WHEN age_days <= 180 THEN '3-6 meses'
-                    WHEN age_days <= 365 THEN '6-12 meses'
+                    WHEN (CURRENT_DATE - birth_date) <= 90 THEN '0-3 meses'
+                    WHEN (CURRENT_DATE - birth_date) <= 180 THEN '3-6 meses'
+                    WHEN (CURRENT_DATE - birth_date) <= 365 THEN '6-12 meses'
                     ELSE '12+ meses'
                 END AS age_group,
                 COUNT(*) AS total
-            FROM (
-                SELECT EXTRACT(DAY FROM NOW() - birth_date) AS age_days
-                FROM bovine
-                WHERE farm_id = :farm_id AND is_active AND sex = 'hembra'
-                AND birth_date IS NOT NULL
-                AND age_days <= 365 * 2
-            ) sub
+            FROM bovine
+            WHERE farm_id = :farm_id AND is_active
+            AND birth_date IS NOT NULL
+            AND (CURRENT_DATE - birth_date) <= 730
             GROUP BY age_group
         """),
         {"farm_id": str(farm_id)},
@@ -112,7 +114,6 @@ def build_sanitary_report(
 ) -> SanitaryReport:
     treatment_query = """
         SELECT
-            COALESCE(SUM(CASE WHEN t.status = 'pendiente' THEN 1 ELSE 0 END), 0) AS pending,
             t.treatment_type,
             COUNT(*) AS total
         FROM treatment t
@@ -131,8 +132,7 @@ def build_sanitary_report(
     pending = 0
     by_type = {}
     for row in rows:
-        pending += row[0]
-        by_type[row[1]] = row[2]
+        by_type[row[0]] = row[1]
 
     total_treatments = sum(by_type.values())
     active_plans = db.execute(
@@ -153,9 +153,9 @@ def build_economic_report(
 ) -> EconomicReport:
     query = """
         SELECT
-            COALESCE(SUM(CASE WHEN er.record_type = 'income' THEN er.amount ELSE 0 END), 0) AS total_income,
-            COALESCE(SUM(CASE WHEN er.record_type = 'expense' THEN er.amount ELSE 0 END), 0) AS total_expense,
-            er.activity_type
+            COALESCE(SUM(CASE WHEN er.record_type = 'ingreso' THEN er.amount ELSE 0 END), 0) AS total_income,
+            COALESCE(SUM(CASE WHEN er.record_type IN ('egreso', 'gasto') THEN er.amount ELSE 0 END), 0) AS total_expense,
+            er.category
         FROM economic_record er
         WHERE er.farm_id = :farm_id
     """
@@ -166,7 +166,7 @@ def build_economic_report(
     if end_date:
         query += " AND er.record_date <= :end_date"
         params["end_date"] = end_date
-    query += " GROUP BY er.activity_type, er.record_type"
+    query += " GROUP BY er.category, er.record_type"
 
     rows = db.execute(text(query), params).all()
     total_income = 0.0
