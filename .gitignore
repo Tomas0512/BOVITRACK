@@ -30,6 +30,7 @@ fe/.vite/
 # ─── Sistema operativo ────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # ─── Docker ───────────────────────────────────────
 *.log
