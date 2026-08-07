@@ -1,5 +1,20 @@
-﻿# SCRUM - Sprint 10
+﻿# SCRUM - Sprint 10 (Cancelado / Absorbido)
 ## BoviTrack · Cierre de Proyecto y Despliegue Final
+
+> ## 📌 REPROGRAMACION — SPRINT ABSORBIDO
+>
+> **Este sprint ya NO se ejecuta como tal.** Debido a la fecha limite real del proyecto (23 de agosto de 2026), las actividades de cierre y demo fueron **absorbidas en el [Sprint 8 (Final)](./SPRINT_08.md)** (8–23 de agosto). Ademas, **no se realiza despliegue en produccion** (sin servidor, dominio, SSL ni CI/CD en la nube): al ser un proyecto educativo, el cierre se entrega como **demo funcional en Docker** con datos de prueba.
+>
+> **Mapeo de actividades reubicadas en Sprint 8:**
+> | Actividad original (Sprint 10) | Dónde quedó |
+> |---|---|
+> | Demo final con el cliente | DoD Sprint 8 (demo antes del 23 de agosto) |
+> | Despliegue en produccion | Descarta — se entrega demo funcional en Docker |
+> | Documentacion final | Tareas 16.8–16.9 (Edwin) |
+> | Deuda tecnica / ajustes finales | Tareas 16.6–16.7 (Edwin) + QA por modulo |
+> | Retrospectiva final | Sprint 8 (cierre) |
+>
+> **El contenido siguiente queda como historial de la planificacion original.**
 
 ---
 

@@ -93,6 +93,7 @@ class FarmResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    my_role_name: str | None = None
 
 
 class FarmUpdate(BaseModel):

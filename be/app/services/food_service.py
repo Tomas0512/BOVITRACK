@@ -8,6 +8,7 @@ Módulo: services/food_service.py
 """
 
 import uuid
+from decimal import Decimal
 from typing import Sequence
 
 from fastapi import HTTPException, status

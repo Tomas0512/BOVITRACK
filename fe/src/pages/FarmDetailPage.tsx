@@ -20,10 +20,14 @@ export default function FarmDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
+  const [editStep, setEditStep] = useState(0);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
   const [editForm, setEditForm] = useState<FarmRequest | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const nextEditStep = () => setEditStep((s) => Math.min(s + 1, 1));
+  const prevEditStep = () => setEditStep((s) => Math.max(s - 1, 0));
 
   const loadFarm = async () => {
     if (!farmId) return;
@@ -55,6 +59,7 @@ export default function FarmDetailPage() {
       farm_identifier: farm.farm_identifier,
       phone: farm.phone,
     });
+    setEditStep(0);
     setEditing(true);
   };
 
@@ -143,62 +148,97 @@ export default function FarmDetailPage() {
         {editing && editForm && (
           <form onSubmit={handleSaveEdit} className="mb-6 rounded-xl border border-border bg-surface p-4">
             <h3 className="mb-3 text-sm font-bold text-text-secondary">Editar finca</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Nombre</label>
-                <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Dirección</label>
-                <input type="text" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Departamento</label>
-                <select value={editForm.department_id} onChange={(e) => setEditForm({ ...editForm, department_id: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
-                  {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Ciudad / Municipio</label>
-                <input type="text" value={editForm.city_municipality} onChange={(e) => setEditForm({ ...editForm, city_municipality: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Área total</label>
-                <input type="number" min={0.01} step={0.01} value={editForm.total_area}
-                  onChange={(e) => setEditForm({ ...editForm, total_area: parseFloat(e.target.value) })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Propósito</label>
-                <select value={editForm.purpose_id} onChange={(e) => setEditForm({ ...editForm, purpose_id: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
-                  {purposes.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Identificador</label>
-                <input type="text" value={editForm.farm_identifier} onChange={(e) => setEditForm({ ...editForm, farm_identifier: e.target.value })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">Teléfono</label>
-                <input type="text" value={editForm.phone ?? ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value || null })}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
-              </div>
+
+            {/* Step indicator */}
+            <div className="mb-4 flex items-center gap-1.5">
+              {["Ubicación", "Área y ID"].map((label, i) => (
+                <button key={i} type="button" onClick={() => { if (i < editStep) setEditStep(i); }} disabled={i > editStep}
+                  className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === editStep ? "bg-primary text-white" : i < editStep ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+                >
+                  {i < editStep ? "✓ " : ""}{label}
+                </button>
+              ))}
             </div>
+
+            {editStep === 0 && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Nombre</label>
+                  <input type="text" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Dirección</label>
+                  <input type="text" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Departamento</label>
+                  <select value={editForm.department_id} onChange={(e) => setEditForm({ ...editForm, department_id: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    {departments.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Ciudad / Municipio</label>
+                  <input type="text" value={editForm.city_municipality} onChange={(e) => setEditForm({ ...editForm, city_municipality: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+              </div>
+            )}
+
+            {editStep === 1 && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Área total</label>
+                  <input type="number" min={0.01} step={0.01} value={editForm.total_area}
+                    onChange={(e) => setEditForm({ ...editForm, total_area: parseFloat(e.target.value) })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Propósito</label>
+                  <select value={editForm.purpose_id} onChange={(e) => setEditForm({ ...editForm, purpose_id: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    {purposes.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Identificador</label>
+                  <input type="text" value={editForm.farm_identifier} onChange={(e) => setEditForm({ ...editForm, farm_identifier: e.target.value })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Teléfono</label>
+                  <input type="text" value={editForm.phone ?? ""} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value || null })}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex gap-2">
-              <button type="button" onClick={() => setEditing(false)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
-                Cancelar
-              </button>
-              <button type="submit" disabled={saving}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
-                {saving ? "Guardando..." : "Guardar cambios"}
-              </button>
+              {editStep > 0 && (
+                <button type="button" onClick={prevEditStep}
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
+                  ← Anterior
+                </button>
+              )}
+              {editStep < 1 ? (
+                <button type="button" onClick={nextEditStep}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+                  Siguiente →
+                </button>
+              ) : (
+                <>
+                  <button type="button" onClick={() => setEditing(false)}
+                    className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
+                    Cancelar
+                  </button>
+                  <button type="submit" disabled={saving}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
+                    {saving ? "Guardando..." : "Guardar cambios"}
+                  </button>
+                </>
+              )}
             </div>
           </form>
         )}

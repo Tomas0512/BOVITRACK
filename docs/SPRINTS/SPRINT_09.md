@@ -1,5 +1,20 @@
-﻿# SCRUM - Sprint 9
+﻿# SCRUM - Sprint 9 (Cancelado / Absorbido)
 ## BoviTrack · Estabilizacion, QA Final y Preparacion de Cierre
+
+> ## 📌 REPROGRAMACION — SPRINT ABSORBIDO
+>
+> **Este sprint ya NO se ejecuta como tal.** Debido a la fecha limite real del proyecto (23 de agosto de 2026), las actividades de estabilizacion, QA y preparacion de cierre fueron **absorbidas en el [Sprint 8 (Final)](./SPRINT_08.md)** (8–23 de agosto).
+>
+> **Mapeo de actividades reubicadas en Sprint 8:**
+> | Actividad original (Sprint 9) | Dónde quedó |
+> |---|---|
+> | QA y pruebas de regresion HU001–HU013 | Tareas 16.1–16.5 (Edwin) |
+> | Correccion de bugs | Tarea 16.6 (Edwin) + fixes propios de cada HU |
+> | Revision de seguridad (OWASP) | Cubierta dentro del QA final (16.x) |
+> | Optimizacion de rendimiento | Priorizada dentro de la correccion de bugs (16.6) |
+> | Documentacion tecnica y de usuario | Tareas 16.8–16.9 (Edwin) |
+>
+> **El contenido siguiente queda como historial de la planificacion original.**
 
 ---
 

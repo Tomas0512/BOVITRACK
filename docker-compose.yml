@@ -62,6 +62,12 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       SMTP_USE_TLS: false
+    volumes:
+      # What?    Monta el código fuente local dentro del contenedor.
+      # ¿Para?   Los cambios en archivos Python se reflejan al instante
+      #          (uvicorn --reload detecta cambios y reinicia solo).
+      # Impact?  Sin esto, cada cambio requiere rebuild de la imagen.
+      - ./be:/app
     depends_on:
       db:
         condition: service_healthy

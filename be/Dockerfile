@@ -50,6 +50,9 @@ RUN addgroup --system appgroup && \
 # --chown: asigna ownership en la misma instrucción COPY (evita capa extra).
 COPY --chown=appuser:appgroup . .
 
+# Directorio para documentos subidos (creado con permisos para appuser)
+RUN mkdir -p /app/storage/documents && chown -R appuser:appgroup /app/storage
+
 USER appuser
 
 EXPOSE 8000

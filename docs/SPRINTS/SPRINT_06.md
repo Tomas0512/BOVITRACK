@@ -146,7 +146,6 @@ HU009 (5 SP) + HU010 (10 SP) + HU007 (10 SP) = **25 SP completados**.
 
 ### Que se puede mejorar?
 
-- HU009 quedo pendiente por falta de disponibilidad de Tomas — mejorar coordinacion de asignaciones
 - Sincronizacion entre ramas: Tomas trabajo directamente en main sin usar feature branch, lo que dificulta el seguimiento por HU
 - Documentacion de scripts (SPRINT_06_HU007_QUICKSTART.md, etc.) quedo en branch de feature y debe consolidarse en main
 

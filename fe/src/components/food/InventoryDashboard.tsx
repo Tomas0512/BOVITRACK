@@ -18,7 +18,7 @@ export default function InventoryDashboard({ farmId }: Props) {
     try {
       const [foodData, movementData] = await Promise.all([
         listFoods(farmId),
-        listStockMovements(farmId, undefined, undefined, 10),
+        listStockMovements(farmId, { limit: 10 }),
       ]);
       setFoods(foodData);
       setRecentMovements(movementData);

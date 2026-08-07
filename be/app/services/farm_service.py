@@ -66,24 +66,52 @@ def create_farm(db: Session, farm_data: FarmCreate, owner_id: uuid.UUID) -> Farm
 
 
 def get_farms_by_owner(db: Session, owner_id: uuid.UUID) -> list[Farm]:
-    """Retorna todas las fincas activas del usuario."""
+    """Retorna todas las fincas del usuario (como owner o como empleado asignado)."""
     stmt = (
         select(Farm)
-        .where(Farm.owner_id == owner_id, Farm.is_active.is_(True))
+        .where(
+            Farm.is_active.is_(True),
+            (
+                Farm.owner_id == owner_id
+            )
+            | (
+                Farm.id.in_(
+                    select(UserFarm.farm_id).where(
+                        UserFarm.user_id == owner_id,
+                        UserFarm.is_active.is_(True),
+                    )
+                )
+            ),
+        )
         .order_by(Farm.created_at.desc())
     )
     return list(db.execute(stmt).scalars().all())
 
 
-def get_farm_by_id(db: Session, farm_id: uuid.UUID, owner_id: uuid.UUID) -> Farm:
-    """Retorna una finca por ID, verificando que pertenezca al usuario."""
-    stmt = select(Farm).where(Farm.id == farm_id, Farm.owner_id == owner_id)
-    farm = db.execute(stmt).scalar_one_or_none()
+def get_farm_by_id(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> Farm:
+    """Retorna una finca por ID, verificando que el usuario tenga acceso."""
+    farm = db.execute(
+        select(Farm).where(Farm.id == farm_id, Farm.is_active.is_(True))
+    ).scalar_one_or_none()
     if not farm:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Finca no encontrada",
         )
+    # Verificar que el usuario sea owner o esté asignado vía UserFarm
+    if farm.owner_id != user_id:
+        uf = db.execute(
+            select(UserFarm).where(
+                UserFarm.user_id == user_id,
+                UserFarm.farm_id == farm_id,
+                UserFarm.is_active.is_(True),
+            )
+        ).scalar_one_or_none()
+        if not uf:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tienes acceso a esta finca",
+            )
     return farm
 
 

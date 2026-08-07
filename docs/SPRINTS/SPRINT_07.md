@@ -12,6 +12,7 @@
 | **Duracion** | 2 semanas (14 días calendario) |
 | **Fecha inicio** | 27 de junio de 2026 |
 | **Fecha fin** | 10 de julio de 2026 |
+| **Cierre real** | 17 de junio de 2026 (completado anticipadamente) |
 | **Equipo** | Camilo Ortiz, Tomas Canon, Edwin Delgado |
 | **Roles Scrum** | Camilo Ortiz (Developer / Scrum Master), Tomas Canon (Developer / Product Owner), Edwin Delgado (Developer) |
 
@@ -89,7 +90,7 @@ Antes de iniciar las HU en este sprint se verifica:
 | 12.2 | Endpoints upload/list/download/delete | Camilo | ✅ Hecho | 4h |
 | 12.3 | Asociacion a finca, bovino o evento | Camilo | ✅ Hecho | 3h |
 | 12.4 | UI de carga y repositorio documental | Camilo | ✅ Hecho | 5h |
-| 12.5 | QA funcional HU011/HU012/HU013 | Camilo | 🔲 Por hacer | 3h |
+| 12.5 | QA funcional HU011/HU012/HU013 | Tomas | ✅ Hecho | 3h |
 
 ---
 
@@ -137,7 +138,7 @@ Antes de iniciar las HU en este sprint se verifica:
 
 ### Story Points completados
 
-Pendiente de cierre.
+**21/21 (100%)** — 8 HU013 + 8 HU011 + 5 HU012
 
 ---
 
@@ -145,14 +146,21 @@ Pendiente de cierre.
 
 ### Que salio bien?
 
-Pendiente de completar al cierre del sprint.
+1. Las tres HU del sprint se completaron dentro del tiempo estimado (21/21 SP).
+2. La integracion entre modulos (consumos descuentan stock, compras registran costo) quedo cohesiva.
+3. El flujo de ramas por persona evito conflictos mayores.
+4. La app mobile ahora tiene modo oscuro y validaciones consistentes con web.
 
 ### Que se puede mejorar?
 
-Pendiente de completar al cierre del sprint.
+1. HU011 debio haber comenzado antes para no quedar tan ajustada al final del sprint.
+2. Los comentarios tipo `¿Qué?`/`¿Para qué?` en espanol persisten en archivos nuevos — estandarizar a ingles en toda la base.
+3. La mayoria de modulos carecen de tests automatizados.
 
-### Acciones para Sprint 8
+### Acciones para proximos sprints
 
-- Verificar que los modulos de reportes exponen datos consumibles por HU015 (auditoria)
-- Validar seguridad en manejo de archivos antes de avanzar (OWASP: file upload)
-- Revisar velocidad real del equipo vs 21 puntos planificados
+Dado que el alcance del proyecto se cierra en Sprint 7, las acciones siguientes se orientan a preparar la presentacion final:
+- Generar datos de prueba representativos para la demostracion
+- Preparar explicacion paso a paso del flujo completo del sistema
+- Crear tablero de seguimiento (ClickUp) con todas las HU de Sprints 1-7
+- Revisar y limpiar ramas feature una vez validadas en main
