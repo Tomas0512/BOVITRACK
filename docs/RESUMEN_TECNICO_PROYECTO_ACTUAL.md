@@ -344,15 +344,17 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 ## 9. Tablero ClickUp
 
 - **Space:** BOVITRACK
-- **7 listas** (una por Sprint: 1 al 7)
-- **13 Historias de Usuario** (HU001–HU013) con checklists desglosados por tarea técnica
+- **8 listas** (una por Sprint: 1 al 7 + **Sprint 8 – Cierre Web**)
+- **15 Historias de Usuario** (HU001–HU015) con checklists desglosados por tarea técnica
 - Cada HU incluye criterios de aceptación, subtareas y asignación
+- Guía paso a paso para armar/terminar el tablero: `CLICKUP_BOARD.md` (en el escritorio)
+- HU016 (modo offline): **fuera de alcance** (pospuesta por fecha límite 23/08/2026)
 
 ---
 
 ## 10. Resumen Ejecutivo
 
-**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra. El flujo de invitación de empleados a fincas funciona correctamente.
+**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra. El flujo de invitación de empleados a fincas funciona correctamente. Los Sprints 8 (HU014 Alertas + HU015 Auditorías) y el QA/cierre web están **en curso (Sprint 8 Final, 08–23 agosto 2026)**.
 
 **Métrica general:**
 - ~91 endpoints en 23 routers
@@ -369,8 +371,7 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 - 16 migraciones Alembic lineales
 
 **Pendiente (fuera de alcance):**
-- HU014 — Reportes avanzados e inteligencia de negocio
-- HU015 — Integración con dispositivos IoT (caravanas electrónicas, balanzas)
-- HU016 — Marketplace de compra/venta de ganado
+- HU016 — Modo offline (pospuesta por fecha límite 23/08/2026)
+- HU014 y HU015 — en curso dentro del **Sprint 8 (Final)** (08–23 agosto 2026): alertas/notificaciones (Tomas) y auditorías (Camilo)
 
 **Documentación relacionada:** [`README.md`](../README.md)
