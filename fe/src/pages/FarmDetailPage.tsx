@@ -12,6 +12,7 @@ import AuditLogList from "../components/audit/AuditLogList";
 import AlertBanner from "../components/layout/AlertBanner";
 import MovementList from "../components/movements/MovementList";
 import DocumentManager from "../components/documents/DocumentManager";
+import CalfList from "../components/calves/CalfList";
 
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
@@ -259,6 +260,21 @@ export default function FarmDetailPage() {
       <LandPlotList farmId={farm.id} />
       <PaddockList farmId={farm.id} />
       <BovineList farmId={farm.id} />
+      {/*
+        HU007 - Desarrollo y seguimiento de terneros (Sprint 6 - Camilo)
+
+        COMO: Capataz de la finca
+        QUIERO: ver el listado de terneros con sus indicadores de crecimiento
+                y poder registrar pesajes desde la misma pantalla de la finca
+        PARA:   detectar a tiempo terneros por debajo del peso esperado para su
+                edad y raza, y tomar decisiones de alimentacion o manejo.
+
+        Nota de integracion (Sprint 8): el componente CalfList existia desde el
+        Sprint 6 pero nunca se monto en ninguna pagina, por lo que la HU007
+        quedaba inaccesible para el usuario final. Aqui se cierra la tarea 7.5
+        "Integracion con la ficha general".
+      */}
+      <CalfList farmId={farm.id} />
       <SanitaryPlanList farmId={farm.id} />
       <FoodList farmId={farm.id} />
       <DocumentManager farmId={farm.id} />
