@@ -36,6 +36,7 @@ from app.routers.calves import router as calves_router
 from app.routers.economics import router as economics_router
 from app.routers.movements import router as movements_router
 from app.routers.documents import router as documents_router
+from app.routers.audit import router as audit_router  # HU015: Auditoria del sistema
 from app.utils.limiter import limiter
 
 
@@ -127,6 +128,7 @@ app.include_router(calves_router)  # HU007: Desarrollo de terneros
 app.include_router(economics_router)  # HU010: Información económica
 app.include_router(movements_router)  # HU009: Movimientos de animales
 app.include_router(documents_router)  # HU012: Gestión de documentos
+app.include_router(audit_router)  # HU015: Auditoría del sistema (filtros y exportación)
 
 
 # ── Health check ──────────────────────────────────
