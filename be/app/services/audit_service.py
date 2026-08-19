@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import csv
+import io
 import json
 import uuid
 from datetime import datetime, time
 
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -206,3 +210,142 @@ def list_audit_logs(
         )
 
     return AuditLogPage(total=total, limit=limit, offset=offset, items=items)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HU015 - Tarea 15.2: Exportación filtrada de la auditoría (Sprint 8 - Camilo)
+#
+# COMO: Administrador del sistema
+# QUIERO: descargar en CSV o Excel exactamente los registros de auditoría que
+#         estoy viendo con mis filtros aplicados
+# PARA:   conservar la evidencia fuera del sistema, adjuntarla a un informe o
+#         entregarla a un tercero sin darle acceso a la aplicación.
+#
+# Nota: la exportación NO reutiliza la paginación de pantalla. Se exporta todo
+# lo que cumple los filtros (hasta EXPORT_MAX_ROWS) para que el archivo no
+# quede recortado a los 100 registros visibles.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ¿Qué? Tope de filas por archivo exportado.
+# ¿Para qué? Evitar que una exportación sin filtros agote la memoria del servidor.
+# ¿Impacto? Si se alcanza el tope, el administrador debe acotar el rango de
+#           fechas; el archivo indica cuántos registros se incluyeron.
+EXPORT_MAX_ROWS = 10_000
+
+# ¿Qué? Encabezados del archivo, en español y en el orden de lectura natural.
+# ¿Para qué? Que el archivo sea entendible por alguien que no conoce la base de datos.
+EXPORT_HEADERS = [
+    "Fecha y hora",
+    "Usuario",
+    "Correo",
+    "Accion",
+    "Entidad",
+    "ID entidad",
+    "Finca",
+    "Detalles",
+]
+
+
+def _record_to_row(record: AuditLogRecord) -> list[str]:
+    """¿Qué? Convierte un registro de auditoría en una fila plana de texto.
+
+    COMO: Administrador que abre el archivo descargado
+    QUIERO: ver la fecha legible y el nombre del responsable, no identificadores
+    PARA:   poder interpretar la evidencia sin consultar la base de datos.
+
+    ¿Impacto? Los valores nulos se muestran como texto vacío o como
+              "Usuario eliminado", nunca como "None".
+    """
+    return [
+        record.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        record.user_full_name or "Usuario eliminado",
+        record.user_email or "",
+        record.action,
+        record.entity,
+        record.entity_id or "",
+        record.farm_name or "",
+        record.details or "",
+    ]
+
+
+def collect_logs_for_export(
+    db: Session,
+    *,
+    current_user_id: str | uuid.UUID,
+    filters: AuditLogFilters,
+) -> list[AuditLogRecord]:
+    """¿Qué? Obtiene todos los registros que cumplen los filtros, sin paginar.
+
+    COMO: Administrador exportando evidencia
+    QUIERO: que el archivo contenga todos los registros filtrados
+    PARA:   que la evidencia esté completa y no limitada a la página que veía
+            en pantalla en ese momento.
+    """
+    page = list_audit_logs(
+        db,
+        current_user_id=current_user_id,
+        filters=filters,
+        limit=EXPORT_MAX_ROWS,
+        offset=0,
+    )
+    return page.items
+
+
+def export_to_csv(records: list[AuditLogRecord]) -> bytes:
+    """¿Qué? Genera un archivo CSV con los registros recibidos.
+
+    COMO: Administrador
+    QUIERO: un archivo liviano que pueda abrir en cualquier herramienta
+    PARA:   filtrar o cruzar los datos con otras fuentes rápidamente.
+
+    ¿Impacto? Se codifica en UTF-8 con BOM (utf-8-sig) porque Excel en Windows
+              muestra mal las tildes y las eñes si el archivo no lo lleva.
+    """
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, delimiter=";", quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(EXPORT_HEADERS)
+    for record in records:
+        writer.writerow(_record_to_row(record))
+    return buffer.getvalue().encode("utf-8-sig")
+
+
+def export_to_excel(records: list[AuditLogRecord]) -> bytes:
+    """¿Qué? Genera un archivo Excel (.xlsx) con los registros recibidos.
+
+    COMO: Administrador que presenta la auditoría en una reunión
+    QUIERO: un archivo con encabezados resaltados y columnas legibles
+    PARA:   poder mostrarlo o imprimirlo sin tener que darle formato a mano.
+
+    ¿Impacto? Usa la misma paleta institucional del módulo de reportes (HU013)
+              para que los entregables del sistema se vean consistentes.
+    """
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Auditoria"
+
+    header_font = Font(bold=True, color="FFFFFF", size=11)
+    header_fill = PatternFill(start_color="59930A", end_color="59930A", fill_type="solid")
+
+    sheet.append(EXPORT_HEADERS)
+    for cell in sheet[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal="center")
+
+    for record in records:
+        sheet.append(_record_to_row(record))
+
+    # Anchos pensados para el contenido real de cada columna.
+    for column, width in zip(
+        ["A", "B", "C", "D", "E", "F", "G", "H"],
+        [20, 28, 30, 22, 20, 38, 25, 60],
+        strict=False,
+    ):
+        sheet.column_dimensions[column].width = width
+
+    # Congelar la fila de encabezados para no perderla al desplazarse.
+    sheet.freeze_panes = "A2"
+
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    return buffer.getvalue()

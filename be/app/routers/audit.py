@@ -11,6 +11,7 @@ PARA:   rastrear quién modificó qué información y cuándo, y sustentar
 Endpoints expuestos:
   GET /api/v1/admin/audit-logs         → Listado paginado con filtros
   GET /api/v1/admin/audit-logs/actions → Catálogo de acciones y entidades
+  GET /api/v1/admin/audit-logs/export  → Descarga en CSV o Excel
 
 ¿Impacto de seguridad?
   El endpoint NO recibe farm_id en la ruta, por lo que no puede usarse la
@@ -26,6 +27,7 @@ import uuid
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -34,7 +36,7 @@ from app.models.audit_log import AuditLog
 from app.models.farm import UserFarm
 from app.models.role import Permission
 from app.models.user import User
-from app.schemas.audit import AuditLogFilters, AuditLogPage
+from app.schemas.audit import AuditExportFormat, AuditLogFilters, AuditLogPage
 from app.services import audit_service
 
 router = APIRouter(prefix="/api/v1/admin/audit-logs", tags=["Auditoría"])
@@ -162,3 +164,82 @@ def list_audit_catalog(
     ).scalars().all()
 
     return {"actions": list(actions), "entities": list(entities)}
+
+
+@router.get(
+    "/export",
+    summary="Exportar la auditoría filtrada a CSV o Excel",
+    response_class=Response,
+)
+def export_audit_logs(
+    export: AuditExportFormat = Query(
+        AuditExportFormat.EXCEL,
+        description="Formato del archivo: csv o excel",
+    ),
+    user_id: uuid.UUID | None = Query(None, description="Usuario que ejecutó la acción"),
+    farm_id: uuid.UUID | None = Query(None, description="Finca a consultar"),
+    action: str | None = Query(None, max_length=100, description="Acción (coincidencia parcial)"),
+    entity: str | None = Query(None, max_length=100, description="Entidad (coincidencia parcial)"),
+    start_date: date | None = Query(None, description="Fecha inicial inclusive (YYYY-MM-DD)"),
+    end_date: date | None = Query(None, description="Fecha final inclusive (YYYY-MM-DD)"),
+    include_auth_events: bool = Query(True, description="Incluir login/logout/registro"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_audit_reader),
+) -> Response:
+    """¿Qué? Descarga la auditoría filtrada como archivo CSV o Excel.
+
+    COMO: Administrador del sistema
+    QUIERO: descargar exactamente los registros que estoy viendo con mis
+            filtros aplicados
+    PARA:   conservar la evidencia fuera del sistema, adjuntarla a un informe
+            o entregarla a un tercero sin darle acceso a la aplicación.
+
+    ¿Impacto? Acepta los mismos filtros que el listado, pero NO pagina: exporta
+              todos los registros que los cumplen (hasta el tope definido en
+              `audit_service.EXPORT_MAX_ROWS`), de modo que el archivo no quede
+              recortado a la página visible en pantalla.
+
+    ¿Formato JSON? Se rechaza con 400: para consultar en JSON existe el
+              endpoint de listado, que además entrega la paginación.
+    """
+    if export == AuditExportFormat.JSON:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Para consultar en JSON usa GET /api/v1/admin/audit-logs",
+        )
+
+    filters = AuditLogFilters(
+        user_id=user_id,
+        farm_id=farm_id,
+        action=action,
+        entity=entity,
+        start_date=start_date,
+        end_date=end_date,
+        include_auth_events=include_auth_events,
+    )
+
+    records = audit_service.collect_logs_for_export(
+        db,
+        current_user_id=current_user.id,
+        filters=filters,
+    )
+
+    # Nombre con la fecha de descarga para no sobrescribir archivos anteriores.
+    stamp = date.today().isoformat()
+
+    if export == AuditExportFormat.CSV:
+        return Response(
+            content=audit_service.export_to_csv(records),
+            media_type="text/csv; charset=utf-8",
+            headers={
+                "Content-Disposition": f"attachment; filename=auditoria_{stamp}.csv"
+            },
+        )
+
+    return Response(
+        content=audit_service.export_to_excel(records),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename=auditoria_{stamp}.xlsx"
+        },
+    )
