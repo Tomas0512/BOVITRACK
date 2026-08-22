@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, Tractor, BarChart3, FileText } from "lucide-react";
+import { AlertTriangle, Tractor, BarChart3, FileText, Bell } from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
@@ -134,6 +134,11 @@ export default function FarmDetailPage() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
               <FileText size={16} />
               Reportes
+            </Link>
+            <Link to={`/farms/${farmId}/alerts`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              <Bell size={16} />
+              Alertas
             </Link>
             <button onClick={handleEdit}
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
