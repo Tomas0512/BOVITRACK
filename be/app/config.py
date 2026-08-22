@@ -23,7 +23,15 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # 📧 Email — Resend API (alternativa a SMTP para producción)
+    # 📧 Email — Backend de entrega seleccionable
+    # Valores: mailpit | smtp | resend | log
+    #   mailpit → SMTP local de desarrollo (Mailpit en Docker), NO entrega real.
+    #   smtp    → Correo real vía SMTP (Gmail u otro proveedor).
+    #   resend  → Correo real vía Resend API.
+    #   log     → Solo imprime el enlace/correo en consola (sin envío).
+    EMAIL_BACKEND: str = "mailpit"
+
+    # 📧 Email — Resend API (correo real vía API)
     RESEND_API_KEY: str = ""
     RESEND_FROM_EMAIL: str = "noreply@bovitrack.com"
     RESEND_FROM_NAME: str = "BoviTrack"
