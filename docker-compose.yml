@@ -59,9 +59,14 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
       FRONTEND_URL: ${FRONTEND_URL}
-      SMTP_HOST: mailpit
-      SMTP_PORT: 1025
-      SMTP_USE_TLS: false
+      # Backend de correo seleccionable desde el .env raíz.
+      #   Dev:    EMAIL_BACKEND=mailpit (SMTP local, sin entrega real)
+      #   Real:   EMAIL_BACKEND=resend (con RESEND_API_KEY) o EMAIL_BACKEND=smtp (con SMTP_HOST real)
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-mailpit}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
     volumes:
       # What?    Monta el código fuente local dentro del contenedor.
       # ¿Para?   Los cambios en archivos Python se reflejan al instante

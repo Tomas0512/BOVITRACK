@@ -1,6 +1,6 @@
 # Utilidades de Bovitrack (funciones auxiliares reutilizables)
 
-from app.utils.email import send_password_reset_email
+from app.utils.email import send_generic_email, send_password_reset_email
 from app.utils.security import (
     create_access_token,
     create_refresh_token,
@@ -16,4 +16,5 @@ __all__ = [
     "create_refresh_token",
     "decode_token",
     "send_password_reset_email",
+    "send_generic_email",
 ]

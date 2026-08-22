@@ -24,6 +24,7 @@ from app.models.weight import Weight
 from app.models.economics import EconomicRecord
 from app.models.movement import AnimalMovement
 from app.models.document import Document
+from app.models.notification import NotificationLog, UserNotificationPref
 
 __all__ = [
     "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
@@ -45,4 +46,6 @@ __all__ = [
     "EconomicRecord",
     "AnimalMovement",
     "Document",
+    "UserNotificationPref",
+    "NotificationLog",
 ]
