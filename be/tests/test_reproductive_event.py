@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -66,11 +66,12 @@ def user_id():
 
 
 class MockReproductiveEvent:
-    def __init__(self, bovine_id, event_type, event_date, result):
+    def __init__(self, bovine_id, event_type, event_date, result, due_date=None):
         self.bovine_id = bovine_id
         self.event_type = event_type
         self.event_date = event_date
         self.result = result
+        self.due_date = due_date
 
 
 class TestAutoCalfGeneration:

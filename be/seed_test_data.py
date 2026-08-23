@@ -187,6 +187,32 @@ def main():
         else:
             print("→ Demo user already exists")
 
+        # 2b. Usuario desactivado — necesario para probar el flujo público
+        # de "solicitar reactivación" (el endpoint rechaza con 400 a
+        # cuentas activas, así que la suite E2E necesita una cuenta off).
+        inactive_user = db.query(User).where(User.email == "exempleado@bovitrack.com").first()
+        if not inactive_user:
+            from passlib.context import CryptContext
+            pwd = CryptContext(schemes=["bcrypt"])
+            inactive_user = User(
+                id=uuid.uuid4(),
+                email="exempleado@bovitrack.com",
+                first_name="Ex",
+                last_name="Empleado",
+                document_type="CC",
+                document_number="987654322",
+                phone="+57 300 123 4568",
+                hashed_password=pwd.hash("Demo1234!"),
+                is_active=False,
+                accepted_terms=True,
+                accepted_data_policy=True,
+            )
+            db.add(inactive_user)
+            db.flush()
+            print("✓ Inactive user created: exempleado@bovitrack.com (para QA de reactivación)")
+        else:
+            print("→ Inactive user already exists")
+
         # 3. Demo farm
         farm = db.query(Farm).where(Farm.farm_identifier == "FIN-DEMO-001").first()
         if not farm:
