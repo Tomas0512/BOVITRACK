@@ -46,8 +46,8 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 - **Economía** — ingresos, egresos e indicadores de rentabilidad
 - **Reportes** — exportables en PDF y Excel con paneles interactivos
 - **Documentos** — adjuntar archivos a fincas
-- **Alertas** — alertas de stock bajo de alimentos (correo vía SMTP/Resend)
-- **Auditoría** — registro básico de acciones de usuarios (pendiente exportación avanzada)
+- **Alertas** — alertas de stock bajo de alimentos y notificaciones configurables por usuario (canal correo/in-app, eventos y frecuencia) con historial de envíos
+- **Auditoría** — consulta filtrable por usuario, acción, entidad, finca y rango de fechas, con paginación y exportación en CSV/Excel
 
 ## Requisitos previos
 

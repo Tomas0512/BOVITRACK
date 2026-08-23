@@ -117,15 +117,15 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 16.1 | QA de regresion modulo auth (HU001) y fincas/potreros (HU002-HU003) | Edwin | 🔲 Por hacer | 4h |
-| 16.2 | QA de regresion bovinos y productivo (HU004-HU005) | Edwin | 🔲 Por hacer | 4h |
-| 16.3 | QA de regresion reproductivo, terneros y sanitario (HU006-HU008) | Edwin | 🔲 Por hacer | 4h |
-| 16.4 | QA de regresion movimientos, economia e inventario (HU009-HU011) | Edwin | 🔲 Por hacer | 4h |
-| 16.5 | QA de regresion documentos, reportes y mobile auth (HU012-HU013 + app movil) | Edwin | 🔲 Por hacer | 3h |
-| 16.6 | Correccion de bugs en modulos estables (los bugs de HU014/HU015 los corrigen sus duenos) | Edwin | 🔲 Por hacer | 6h |
-| 16.7 | Seed de datos demo representativos + prueba de flujo completo end-to-end | Edwin | 🔲 Por hacer | 3h |
-| 16.8 | Actualizar Postman collection + documentacion (README / API) | Edwin | 🔲 Por hacer | 3h |
-| 16.9 | Preparar evidencias de cierre por modulo | Edwin | 🔲 Por hacer | 2h |
+| 16.1 | QA de regresion modulo auth (HU001) y fincas/potreros (HU002-HU003) | Edwin | ✅ Hecho | 4h |
+| 16.2 | QA de regresion bovinos y productivo (HU004-HU005) | Edwin | ✅ Hecho | 4h |
+| 16.3 | QA de regresion reproductivo, terneros y sanitario (HU006-HU008) | Edwin | ✅ Hecho | 4h |
+| 16.4 | QA de regresion movimientos, economia e inventario (HU009-HU011) | Edwin | ✅ Hecho | 4h |
+| 16.5 | QA de regresion documentos, reportes y mobile auth (HU012-HU013 + app movil) | Edwin | ✅ Hecho | 3h |
+| 16.6 | Correccion de bugs en modulos estables (los bugs de HU014/HU015 los corrigen sus duenos) | Edwin | ✅ Hecho | 6h |
+| 16.7 | Seed de datos demo representativos + prueba de flujo completo end-to-end | Edwin | ✅ Hecho | 3h |
+| 16.8 | Actualizar Postman collection + documentacion (README / API) | Edwin | ✅ Hecho | 3h |
+| 16.9 | Preparar evidencias de cierre por modulo | Edwin | ✅ Hecho | 2h |
 
 ---
 
