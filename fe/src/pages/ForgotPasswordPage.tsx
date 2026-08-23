@@ -83,6 +83,7 @@ export function ForgotPasswordPage() {
                     id="email"
                     name="email"
                     type="email"
+                    required
                     placeholder="correo@ejemplo.com"
                     value={email}
                     onChange={handleChange}

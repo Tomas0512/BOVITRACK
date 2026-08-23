@@ -29,9 +29,20 @@ export function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  /** ¿Están ambos campos llenos? */
-  const isFormComplete =
-    formData.password !== "" && formData.confirmPassword !== "";
+  /**
+   * ¿Los datos cumplen las reglas de negocio?
+   * El botón de envío permanece deshabilitado mientras la contraseña
+   * no cumpla los requisitos mínimos o no coincida con su confirmación:
+   * es la última barrera antes de guardar una contraseña débil.
+   */
+  const isPasswordPolicyMet =
+    formData.password.length >= 8 &&
+    /[A-Z]/.test(formData.password) &&
+    /[a-z]/.test(formData.password) &&
+    /[0-9]/.test(formData.password) &&
+    /[^A-Za-z0-9]/.test(formData.password);
+  const isFormValid = isPasswordPolicyMet &&
+    formData.password === formData.confirmPassword;
 
   /** Actualiza campos de texto */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,11 +265,11 @@ export function ResetPasswordPage() {
                 <button
                   type="submit"
                   className={`mt-2 w-full rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${
-                    !isFormComplete || loading
+                    !isFormValid || loading
                       ? "cursor-not-allowed bg-gray-400 opacity-70"
                       : "bg-primary hover:bg-primary-light"
                   }`}
-                  disabled={!isFormComplete || loading}
+                  disabled={!isFormValid || loading}
                 >
                   {loading ? "Restableciendo..." : "Restablecer contraseña"}
                 </button>
