@@ -134,9 +134,9 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 - [ ] Web 100% funcional (HU001–HU015), sin bugs criticos ni altos conocidos
 - [ ] HU014: alertas configurables, notificaciones enviadas y registradas en historial
 - [ ] HU015: auditoria filtrable por usuario/accion/fecha y exportable
-- [ ] QA de regresion HU001–HU013 completado sin bloqueantes
+- [x] QA de regresion HU001–HU013 completado sin bloqueantes *(Edwin: 39/39 tests backend, 30/30 E2E — ver `QA_CIERRE_SPRINT_08.md`)*
 - [ ] Demo final preparada y ejecutada con el cliente (Luis Barbosa) antes del 23 de agosto
-- [ ] Documentacion y Postman collection actualizadas
+- [x] Documentacion y Postman collection actualizadas *(Edwin: README + coleccion con HU014/HU015)*
 - [ ] Repositorio con tag de version `v1.0.0`
 - [ ] HU016 documentada como fuera de alcance
 
@@ -162,10 +162,10 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| HU014 — Alertas y notificaciones | 🔲 Pendiente | |
-| HU015 — Auditoria filtrable y exportable | 🔲 Pendiente | |
-| QA de regresion HU001–HU013 | 🔲 Pendiente | |
-| Demo final | 🔲 Pendiente | |
+| HU014 — Alertas y notificaciones | 🔲 Pendiente | Self-QA pendiente (dueno: Tomas) |
+| HU015 — Auditoria filtrable y exportable | 🔲 Pendiente | Self-QA pendiente (dueno: Camilo) |
+| QA de regresion HU001–HU013 | ✅ Completado | Edwin: 39/39 backend, 30/30 E2E con evidencia; 7 bugs corregidos. Detalle en `QA_CIERRE_SPRINT_08.md` |
+| Demo final | 🔲 Pendiente | Requiere integrar HU014/HU015 en main; datos demo ya sembrados |
 
 ### Story Points completados
 
