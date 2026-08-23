@@ -18,6 +18,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # ¿Por qué la guarda? La migración previa c9ff44fd3509 usa
+    # Base.metadata.create_all(checkfirst=True), que ya crea `document`
+    # porque el modelo Document está registrado en app.models. Sin esta
+    # guarda, la cadena completa falla y Alembic revierte TODO (incluidas
+    # las migraciones i1..l1) al ejecutarse en una sola transacción.
+    conn = op.get_bind()
+    if sa.inspect(conn).has_table("document"):
+        return
+
     op.create_table(
         "document",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -48,6 +57,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    conn = op.get_bind()
+    if not sa.inspect(conn).has_table("document"):
+        return
+
     op.drop_index("ix_document_uploaded_at", table_name="document")
     op.drop_index("ix_document_associated_entity_id", table_name="document")
     op.drop_index("ix_document_association_type", table_name="document")

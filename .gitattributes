@@ -1,0 +1,16 @@
+# What?    Fuerza finales de línea correctos por tipo de archivo.
+# ¿Para?   Evitar que los scripts shell (.sh) se conviertan a CRLF en Windows
+#          y rompan los contenedores Linux (--reload\r, head\r).
+# Impact?  Sin esto, un checkout en Windows corrompe entrypoint.sh y el
+#          backend queda en crash-loop al montar ./be como volumen.
+* text=auto
+*.sh text eol=lf
+*.py text
+*.json text
+*.md text
+*.yml text
+*.yaml text
+*.png binary
+*.jpg binary
+*.xlsx binary
+*.pdf binary
