@@ -1,0 +1,4 @@
+# Selenium 4.6+ incluye Selenium Manager, que descarga e instala
+# automaticamente el ChromeDriver correcto (no se necesita
+# webdriver-manager; base_test.py no lo usa).
+selenium>=4.15.0

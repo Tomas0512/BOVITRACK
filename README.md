@@ -31,7 +31,7 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 | **Backend** | Python 3.12+, FastAPI, SQLAlchemy 2.0, Alembic |
 | **Frontend** | React 18+, Vite, TypeScript, TailwindCSS 4 |
 | **Base de datos** | PostgreSQL 17 (Docker) |
-| **Testing** | pytest + pytest-cov (BE), Vitest + Testing Library (FE) |
+| **Testing** | pytest + pytest-cov (BE), Vitest + Testing Library (FE), Selenium E2E (`qa_e2e/`) |
 | **Linting** | Ruff (BE), ESLint + Prettier (FE) |
 
 ## Módulos del sistema
@@ -187,6 +187,12 @@ bovitrack/
 │   │   ├── context/                      # Context providers
 │   │   └── types/                        # Tipos TypeScript
 │   └── package.json
+├── qa_e2e/                                 # Pruebas E2E — Selenium WebDriver + Python
+│   ├── base_test.py                        # Clase base: driver, login y screenshots
+│   ├── config.py                           # URL, credenciales e IDs de prueba
+│   ├── test_01..15_*.py                    # 15 vistas x 2 casos de uso
+│   ├── run_all_tests.py                    # Ejecuta toda la suite
+│   └── screenshots/                        # Evidencia gráfica generada
 └── mobile/                               # App móvil — React Native + Expo
     └── src/
         ├── navigation/                   # Navegación (React Navigation)

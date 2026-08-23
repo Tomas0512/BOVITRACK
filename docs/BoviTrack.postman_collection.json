@@ -1,53 +1,13 @@
 {
   "info": {
-    "name": "BoviTrack API",
-    "description": "Colección de endpoints para BoviTrack — Sistema de gestión ganadera. Updated 2026-06-17.",
+    "name": "BoviTrack API - Suite Automatizada",
+    "description": "Suite automatizada (punto 3.4) para BoviTrack. Flujo: Login → Refresh → Perfil → Fincas → CRUD de bovinos → Reportes. Encadenamiento dinámico mediante variables de environment ({{accessToken}}, {{farmId}}, {{bovineId}}). Requiere el environment 'BoviTrack - Local'.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    { "key": "base_url", "value": "http://localhost:8000" },
-    { "key": "access_token", "value": "" },
-    { "key": "refresh_token", "value": "" },
-    { "key": "farm_id", "value": "" },
-    { "key": "bovine_id", "value": "" },
-    { "key": "food_id", "value": "" },
-    { "key": "movement_id", "value": "" },
-    { "key": "document_id", "value": "" },
-    { "key": "land_plot_id", "value": "" },
-    { "key": "paddock_id", "value": "" },
-    { "key": "task_id", "value": "" }
-  ],
   "item": [
-    {
-      "name": "Health",
-      "item": [
-        {
-          "name": "Health Check",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/",
-            "header": []
-          }
-        }
-      ]
-    },
     {
       "name": "Auth",
       "item": [
-        {
-          "name": "Register",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/register",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"test@bovitrack.com\",\n  \"first_name\": \"Juan\",\n  \"last_name\": \"Pérez\",\n  \"document_type\": \"CC\",\n  \"document_number\": \"1234567890\",\n  \"phone\": \"3001234567\",\n  \"password\": \"Password123!\"\n}"
-            }
-          }
-        },
         {
           "name": "Login",
           "event": [
@@ -56,24 +16,38 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var json = pm.response.json();",
-                  "if (json.access_token) {",
-                  "  pm.collectionVariables.set('access_token', json.access_token);",
-                  "  pm.collectionVariables.set('refresh_token', json.refresh_token);",
-                  "}"
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Autenticación exitosa y extracción de access_token\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"access_token\");",
+                  "    pm.expect(jsonData.access_token).to.be.a('string').and.not.empty;",
+                  "    pm.environment.set(\"accessToken\", jsonData.access_token);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.refresh_token);",
+                  "});",
+                  "",
+                  "pm.test(\"El refresh_token es un string no vacío\", function () {",
+                  "    pm.expect(jsonData.refresh_token).to.be.a('string').and.not.empty;",
+                  "});"
                 ]
               }
             }
           ],
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/login",
+            "url": "{{baseUrl}}/api/v1/auth/login",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"test@bovitrack.com\",\n  \"password\": \"Password123!\"\n}"
+              "raw": "{\n  \"email\": \"admin@bovitrack.com\",\n  \"password\": \"Demo1234!\"\n}"
             }
           }
         },
@@ -85,1383 +59,391 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var json = pm.response.json();",
-                  "if (json.access_token) {",
-                  "  pm.collectionVariables.set('access_token', json.access_token);",
-                  "  pm.collectionVariables.set('refresh_token', json.refresh_token);",
-                  "}"
+                  "pm.test(\"Refresh token responde 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"El nuevo access_token se guarda en el environment\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"access_token\");",
+                  "    pm.expect(jsonData.access_token).to.be.a('string').and.not.empty;",
+                  "    pm.environment.set(\"accessToken\", jsonData.access_token);",
+                  "    pm.environment.set(\"refreshToken\", jsonData.refresh_token);",
+                  "});"
                 ]
               }
             }
           ],
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/refresh",
+            "url": "{{baseUrl}}/api/v1/auth/refresh",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Forgot Password",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/forgot-password",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"test@bovitrack.com\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Reset Password",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/reset-password",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"TOKEN_AQUI\",\n  \"new_password\": \"NewPassword123!\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Verify Email",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/verify-email",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"VERIFICATION_TOKEN\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Get Invitation",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/auth/invitation/{{token}}",
-            "header": []
-          }
-        },
-        {
-          "name": "Register Invited",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/register-invited",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"token\": \"INVITATION_TOKEN\",\n  \"password\": \"Password123!\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Logout All",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/logout-all",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" },
-              { "key": "Content-Type", "value": "application/json" }
-            ]
-          }
-        },
-        {
-          "name": "Request Reactivation",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/auth/request-reactivation",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"test@bovitrack.com\"\n}"
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"
             }
           }
         }
       ]
     },
     {
-      "name": "Users",
+      "name": "Perfil y Finca",
       "item": [
         {
           "name": "Get My Profile",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/users/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Delete My Account",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/users/me",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Farms",
-      "item": [
-        {
-          "name": "Get Departments",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/departments",
-            "header": []
-          }
-        },
-        {
-          "name": "Get Cities by Department",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/departments/{{department_id}}/cities",
-            "header": []
-          }
-        },
-        {
-          "name": "Get Purposes",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/purposes",
-            "header": []
-          }
-        },
-        {
-          "name": "Create Farm",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Hacienda El Porvenir\",\n  \"address\": \"Vereda La Esperanza, Km 5\",\n  \"department_id\": \"UUID_DEPARTAMENTO\",\n  \"city_id\": null,\n  \"total_area\": 150.5,\n  \"area_unit\": \"hectareas\",\n  \"purpose_id\": \"UUID_PROPOSITO\",\n  \"farm_identifier\": \"FIN-001\",\n  \"phone\": \"3001234567\"\n}"
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"El email del usuario es un string\", function () {",
+                  "    pm.expect(jsonData.email).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"El id del usuario existe\", function () {",
+                  "    pm.expect(jsonData.id).to.be.a('string');",
+                  "});"
+                ]
+              }
             }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/users/me",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
           }
         },
         {
           "name": "List My Farms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo de fincas\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData.length).to.be.greaterThan(0);",
+                  "    pm.expect(jsonData[0]).to.have.property(\"id\");",
+                  "    pm.environment.set(\"farmId\", jsonData[0].id);",
+                  "});",
+                  "",
+                  "pm.test(\"farmId quedó almacenado en el environment\", function () {",
+                  "    pm.expect(pm.environment.get(\"farmId\")).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/v1/farms",
+            "url": "{{baseUrl}}/api/v1/farms",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
           }
         },
         {
           "name": "Get Farm Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"El nombre de la finca es un string\", function () {",
+                  "    pm.expect(jsonData.name).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"El id de la finca coincide con farmId\", function () {",
+                  "    pm.expect(jsonData.id).to.equal(pm.environment.get(\"farmId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Farm",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Hacienda El Porvenir (Updated)\",\n  \"address\": \"Vereda La Esperanza, Km 7\",\n  \"total_area\": 200.0,\n  \"phone\": \"3007654321\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Farm",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
           }
         }
       ]
     },
     {
-      "name": "Land Plots",
-      "item": [
-        {
-          "name": "Create Land Plot",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/land-plots",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Lote Norte\",\n  \"area\": 50.0,\n  \"area_unit\": \"hectareas\",\n  \"description\": \"Zona de pastoreo norte\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Land Plots",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/land-plots",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Land Plot Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/land-plots/{{land_plot_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Land Plot",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/land-plots/{{land_plot_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Lote Norte Ampliado\",\n  \"area\": 75.0,\n  \"description\": \"Zona de pastoreo norte ampliada\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Land Plot",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/land-plots/{{land_plot_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Paddocks",
-      "item": [
-        {
-          "name": "Create Paddock",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/paddocks",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Potrero 1\",\n  \"area\": 10.0,\n  \"area_unit\": \"hectareas\",\n  \"capacity\": 20,\n  \"land_plot_id\": \"{{land_plot_id}}\",\n  \"description\": \"Potrero principal\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Paddocks",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/paddocks",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Paddock Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/paddocks/{{paddock_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Paddock",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/paddocks/{{paddock_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Potrero 1 Ampliado\",\n  \"area\": 15.0,\n  \"capacity\": 30,\n  \"description\": \"Potrero principal ampliado\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Paddock",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/paddocks/{{paddock_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Bovines",
+      "name": "Bovinos - CRUD",
       "item": [
         {
           "name": "Create Bovine",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Creación de bovino exitosa - 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"Estructura JSON válida y persistencia de bovineId\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"id\");",
+                  "    pm.expect(jsonData.identification_number).to.be.a('string');",
+                  "    pm.expect(jsonData.is_active).to.be.true;",
+                  "    pm.environment.set(\"bovineId\", jsonData.id);",
+                  "});",
+                  "",
+                  "pm.test(\"bovineId quedó almacenado en el environment\", function () {",
+                  "    pm.expect(pm.environment.get(\"bovineId\")).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/bovines",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tag\": \"BOV-001\",\n  \"name\": \"Lola\",\n  \"species\": \"bovino\",\n  \"breed\": \"Normando\",\n  \"gender\": \"hembra\",\n  \"birth_date\": \"2022-05-15\",\n  \"color\": \"blanco y negro\",\n  \"paddock_id\": \"{{paddock_id}}\"\n}"
+              "raw": "{\n  \"name\": \"Vaquilla QA\",\n  \"identification_number\": \"QA-{{$timestamp}}\",\n  \"sex\": \"hembra\",\n  \"breed\": \"Normando\",\n  \"color\": \"Rojo\",\n  \"birth_date\": \"2024-01-15\",\n  \"birth_weight\": 38,\n  \"purpose\": \"leche\",\n  \"entry_type\": \"nacimiento\",\n  \"entry_date\": \"2024-01-15\"\n}"
             }
           }
         },
         {
           "name": "List Bovines",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"La respuesta es un arreglo de bovinos\", function () {",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test(\"Cada bovino listado tiene id y identification_number\", function () {",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.expect(jsonData[0]).to.have.property(\"id\");",
+                  "        pm.expect(jsonData[0]).to.have.property(\"identification_number\");",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/bovines",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
           }
         },
         {
           "name": "Get Bovine Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"El id del bovino coincide con bovineId\", function () {",
+                  "    pm.expect(jsonData.id).to.equal(pm.environment.get(\"bovineId\"));",
+                  "});",
+                  "",
+                  "pm.test(\"El bovino tiene nombre e identification_number\", function () {",
+                  "    pm.expect(jsonData).to.have.property(\"name\");",
+                  "    pm.expect(jsonData.identification_number).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/bovines/{{bovineId}}",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
           }
         },
         {
           "name": "Update Bovine",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Actualización correcta de datos - 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"El bovino actualizado tiene updated_at\", function () {",
+                  "    pm.expect(jsonData.updated_at).to.exist;",
+                  "    pm.expect(jsonData.updated_at).to.be.a('string');",
+                  "});",
+                  "",
+                  "pm.test(\"El nombre fue actualizado\", function () {",
+                  "    pm.expect(jsonData.name).to.equal(\"Vaquilla QA - Actualizada\");",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/bovines/{{bovineId}}",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Lola Updated\",\n  \"color\": \"negro\",\n  \"paddock_id\": \"{{paddock_id}}\"\n}"
+              "raw": "{\n  \"name\": \"Vaquilla QA - Actualizada\",\n  \"current_weight\": 260\n}"
             }
           }
         },
         {
           "name": "Delete Bovine",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Eliminación exitosa - 200 OK o 204 No Content\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta no contiene contenido\", function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/bovines/{{bovineId}}",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
           }
         }
       ]
     },
     {
-      "name": "Weights",
+      "name": "Reportes",
       "item": [
         {
-          "name": "Create Weight Record",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}/weights",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"weight\": 350.5,\n  \"weight_unit\": \"kg\",\n  \"date\": \"2026-06-17\"\n}"
+          "name": "Farm Statistics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "",
+                  "pm.test(\"La respuesta de estadísticas es un objeto JSON\", function () {",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData).to.not.be.an('array');",
+                  "});"
+                ]
+              }
             }
-          }
-        },
-        {
-          "name": "List Weight Records",
+          ],
           "request": {
             "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}/weights",
+            "url": "{{baseUrl}}/api/v1/farms/{{farmId}}/statistics",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
             ]
-          }
-        },
-        {
-          "name": "Get Weight Record Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}/weights/{{weight_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Delete Weight Record",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/bovines/{{bovine_id}}/weights/{{weight_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Movements",
-      "item": [
-        {
-          "name": "Create Movement",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/movements",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bovine_id\": \"{{bovine_id}}\",\n  \"movement_type\": \"entrada\",\n  \"movement_date\": \"2026-06-17\",\n  \"origin\": \"Compra a proveedor\",\n  \"destination\": \"Hacienda El Porvenir\",\n  \"reason\": \"Adquisición de nuevo ejemplar\",\n  \"document_number\": \"FAC-001\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Movements",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/movements",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Movement Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/movements/{{movement_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Movement",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/movements/{{movement_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Actualización de motivo\",\n  \"destination\": \"Otra finca\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Movement",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/movements/{{movement_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Food / Inventory",
-      "item": [
-        {
-          "name": "Create Food Item",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Concentrado Premium\",\n  \"category\": \"concentrado\",\n  \"quantity\": 1000.0,\n  \"unit\": \"kg\",\n  \"unit_price\": 2500.0,\n  \"supplier\": \"Alimentos S.A.\",\n  \"min_stock\": 100.0\n}"
-            }
-          }
-        },
-        {
-          "name": "List Food Items",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Food Item Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/{{food_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Food Item",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/{{food_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Concentrado Premium Plus\",\n  \"unit_price\": 2800.0,\n  \"min_stock\": 150.0\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Food Item",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/{{food_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Record Food Purchase",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/purchases",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"food_id\": \"{{food_id}}\",\n  \"quantity\": 500.0,\n  \"unit_price\": 2600.0,\n  \"purchase_date\": \"2026-06-17\",\n  \"supplier\": \"Alimentos S.A.\",\n  \"invoice_number\": \"INV-001\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Adjust Stock",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/adjust-stock",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"food_id\": \"{{food_id}}\",\n  \"quantity\": 50.0,\n  \"adjustment_type\": \"addition\",\n  \"reason\": \"Ajuste por inventario físico\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Food Movements",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/movements",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "List Low Stock Items",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/low-stock",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Record Consumption",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/consumptions",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"food_id\": \"{{food_id}}\",\n  \"quantity\": 20.0,\n  \"consumption_date\": \"2026-06-17\",\n  \"bovine_id\": \"{{bovine_id}}\",\n  \"notes\": \"Consumo diario\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Consumptions",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/food/consumptions",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Documents",
-      "item": [
-        {
-          "name": "Upload Document",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/documents",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                { "key": "file", "type": "file", "src": "", "value": "" },
-                { "key": "name", "type": "text", "value": "Documento Ejemplo" },
-                { "key": "description", "type": "text", "value": "Descripción del documento" },
-                { "key": "category", "type": "text", "value": "sanitario" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "List Documents",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/documents",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Download Document",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/documents/{{document_id}}/download",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Delete Document",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/documents/{{document_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Reports",
-      "item": [
-        {
-          "name": "Get Farm Statistics",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/statistics",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Farm Reports",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reports",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Farm Summary Report",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/reports/farm-summary",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Low Stock Alerts Report",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/reports/low-stock-alerts",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Pending Tasks Report",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/reports/pending-tasks",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Economics",
-      "item": [
-        {
-          "name": "Create Economic Record",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"type\": \"ingreso\",\n  \"category\": \"venta_bovinos\",\n  \"amount\": 5000000.0,\n  \"description\": \"Venta de novillo cebú\",\n  \"date\": \"2026-06-17\",\n  \"document_number\": \"FAC-001\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Economic Records",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Economic Indicators",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics/indicators",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Economic Record Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics/{{record_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Economic Record",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics/{{record_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 5500000.0,\n  \"description\": \"Actualización: venta de novillo cebú\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Economic Record",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/economics/{{record_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Milk Production",
-      "item": [
-        {
-          "name": "Create Milk Production Record",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/milk-production",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bovine_id\": \"{{bovine_id}}\",\n  \"date\": \"2026-06-17\",\n  \"quantity\": 15.5,\n  \"unit\": \"litros\",\n  \"shift\": \"mañana\",\n  \"observations\": \"Producción normal\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Milk Production Records",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/milk-production",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Milk Production Record Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/milk-production/{{record_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Delete Milk Production Record",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/milk-production/{{record_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Calves",
-      "item": [
-        {
-          "name": "List Calves",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Calves Summary",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves/summary",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Calf Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves/{{bovine_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "List Calf Weights",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves/{{bovine_id}}/weights",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Create Calf Weight Record",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves/{{bovine_id}}/weights",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"weight\": 45.0,\n  \"weight_unit\": \"kg\",\n  \"date\": \"2026-06-17\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Create Calf Feeding Plan",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/calves/{{bovine_id}}/feeding-plan",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"daily_milk_quantity\": 6.0,\n  \"milk_unit\": \"litros\",\n  \"concentrate_quantity\": 0.5,\n  \"concentrate_unit\": \"kg\",\n  \"frequency\": \"3 veces al día\",\n  \"observations\": \"Plan de alimentación inicial\"\n}"
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Reproductive Events",
-      "item": [
-        {
-          "name": "Create Reproductive Event",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reproductive-events",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bovine_id\": \"{{bovine_id}}\",\n  \"event_type\": \"inseminacion\",\n  \"event_date\": \"2026-06-17\",\n  \"description\": \"Inseminación artificial\",\n  \"technician\": \"Veterinario Juan\",\n  \"result\": \"pendiente\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Reproductive Events",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reproductive-events",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Reproductive Event Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reproductive-events/{{event_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Reproductive Event",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reproductive-events/{{event_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"result\": \"éxito\",\n  \"description\": \"Inseminación exitosa confirmada\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Reproductive Event",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/reproductive-events/{{event_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Sanitary Plans",
-      "item": [
-        {
-          "name": "Create Sanitary Plan",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Plan Vacunación 2026\",\n  \"plan_type\": \"vacunacion\",\n  \"description\": \"Plan anual de vacunación contra fiebre aftosa\",\n  \"start_date\": \"2026-06-01\",\n  \"end_date\": \"2026-12-31\",\n  \"bovine_ids\": [\"{{bovine_id}}\"]\n}"
-            }
-          }
-        },
-        {
-          "name": "List Sanitary Plans",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Sanitary Plan Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans/{{plan_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Sanitary Plan",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans/{{plan_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"description\": \"Plan actualizado con nuevas fechas\",\n  \"end_date\": \"2027-01-31\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Apply Sanitary Plan",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans/{{plan_id}}/apply",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bovine_ids\": [\"{{bovine_id}}\"],\n  \"application_date\": \"2026-06-17\",\n  \"notes\": \"Aplicación realizada\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Sanitary Plan",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/sanitary-plans/{{plan_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Treatments",
-      "item": [
-        {
-          "name": "Create Treatment",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/treatments",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bovine_id\": \"{{bovine_id}}\",\n  \"treatment_type\": \"medicamento\",\n  \"medication\": \"Ivermectina\",\n  \"dose\": \"5 ml\",\n  \"application_date\": \"2026-06-17\",\n  \"veterinarian\": \"Dr. Pérez\",\n  \"diagnosis\": \"Parásitos internos\",\n  \"notes\": \"Aplicación subcutánea\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Treatments",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/treatments",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Treatment Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/treatments/{{treatment_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Delete Treatment",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/treatments/{{treatment_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Employees",
-      "item": [
-        {
-          "name": "Get Farm Roles",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/roles",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Invite Employee",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/employees/invite",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"empleado@example.com\",\n  \"role\": \"empleado\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Employees",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/employees",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Employee Role",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/employees/{{user_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"role\": \"admin\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Remove Employee",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/employees/{{user_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Tasks",
-      "item": [
-        {
-          "name": "Create Task",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/tasks",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Revisar potreros\",\n  \"description\": \"Inspeccionar estado de los pastos y cercas\",\n  \"assigned_to\": \"USER_ID\",\n  \"priority\": \"alta\",\n  \"status\": \"pendiente\",\n  \"due_date\": \"2026-06-20\"\n}"
-            }
-          }
-        },
-        {
-          "name": "List Tasks",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/tasks",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Get Task Detail",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/tasks/{{task_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Update Task",
-          "request": {
-            "method": "PUT",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/tasks/{{task_id}}",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"status\": \"completada\",\n  \"description\": \"Tarea completada satisfactoriamente\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Task",
-          "request": {
-            "method": "DELETE",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/tasks/{{task_id}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Alerts",
-      "item": [
-        {
-          "name": "List Alerts",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/alerts",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Audit Logs",
-      "item": [
-        {
-          "name": "List Audit Logs",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/farms/{{farm_id}}/audit-logs",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Admin",
-      "item": [
-        {
-          "name": "List Reactivation Requests",
-          "request": {
-            "method": "GET",
-            "url": "{{base_url}}/api/v1/admin/reactivation-requests",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Approve Reactivation Request",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/admin/reactivation-requests/{{request_id}}/approve",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ]
-          }
-        },
-        {
-          "name": "Reject Reactivation Request",
-          "request": {
-            "method": "POST",
-            "url": "{{base_url}}/api/v1/admin/reactivation-requests/{{request_id}}/reject",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{access_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"reason\": \"Solicitud rechazada por documentación incompleta\"\n}"
-            }
           }
         }
       ]
