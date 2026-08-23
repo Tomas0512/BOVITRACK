@@ -43,8 +43,12 @@ class TestEconomicDashboardPage(BaseTest):
         )
         self.assertTrue(title.is_displayed(), "No se muestra el título del Dashboard Económico")
 
-        balance_section = self.driver.find_element(
-            By.XPATH, "//h2[contains(., 'Balance mensual')]"
+        # Espera explícita: la sección se renderiza tras cargar los
+        # indicadores del backend; un find_element inmediato es flaky.
+        balance_section = self.wait.until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//h2[contains(., 'Balance mensual')]")
+            )
         )
         self.assertTrue(balance_section.is_displayed(),
                          "No se muestra la sección de 'Balance mensual'")
