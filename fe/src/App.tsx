@@ -20,6 +20,8 @@ import FarmDetailPage from "./pages/FarmDetailPage";
 import BovineDetailPage from "./pages/BovineDetailPage";
 import EconomicDashboard from "./pages/EconomicDashboard";
 import ReportsPage from "./pages/ReportsPage";
+import AuditPage from "./pages/AuditPage";  // HU015: Auditoria del sistema
+import AlertasPage from "./pages/AlertasPage";  // HU014: Alertas y notificaciones
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import { InvitedRegisterPage } from "./pages/InvitedRegisterPage";
@@ -50,6 +52,25 @@ function App() {
             <Route path="/farms/:farmId/bovines/:bovineId" element={<BovineDetailPage />} />
             <Route path="/farms/:farmId/economics" element={<EconomicDashboard />} />
             <Route path="/farms/:farmId/reports" element={<ReportsPage />} />
+            {/*
+              HU014 - Alertas y notificaciones (Sprint 8 - Tomas)
+
+              COMO: miembro de la finca
+              QUIERO: una ruta para configurar mis preferencias de notificación
+                      y ver el historial de alertas de la finca
+              PARA:   que la finca no dependa de avisos externos y pueda saber
+                      a tiempo qué tratamientos vencen o qué insumos faltan.
+            */}
+            <Route path="/farms/:farmId/alerts" element={<AlertasPage />} />
+            {/*
+              HU015 - Revision de auditorias del sistema (Sprint 8 - Camilo)
+
+              COMO: Administrador del sistema
+              QUIERO: una ruta propia para la auditoria, fuera del detalle de finca
+              PARA:   poder revisar en una sola pantalla la actividad de todas
+                      mis fincas y llegar directo con un enlace.
+            */}
+            <Route path="/audit" element={<AuditPage />} />
           </Route>
 
           {/* Catch-all */}

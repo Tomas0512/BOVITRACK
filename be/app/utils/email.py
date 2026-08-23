@@ -1,14 +1,17 @@
 """
 Module: utils/email.py
-Description: Transactional email sending (password reset, verification, invitations).
-Purpose: Send emails via SMTP (Mailpit in dev, any SMTP in prod) or Resend API.
-         Falls back to console logging when no backend is configured.
+Description: Transactional email sending (password reset, verification, invitations, notifications).
+Purpose: Send emails to the backend chosen via settings.EMAIL_BACKEND.
+         Backends: mailpit (SMTP local de desarrollo), smtp (SMTP real),
+         resend (Resend API), log (solo consola).
 Impact: Without this, users cannot receive password reset or verification emails.
 
-Email backend priority:
-  1. SMTP_HOST configured → uses stdlib smtplib (Mailpit in Docker dev, Gmail in prod)
-  2. RESEND_API_KEY configured → uses Resend API
-  3. Neither → simulates in logs (link appears in server console)
+Backend selection (settings.EMAIL_BACKEND):
+  - mailpit → smtplib hacia Mailpit (SMTP_HOST). NO entrega real, ideal para dev.
+  - smtp    → smtplib hacia un proveedor SMTP real (Gmail, etc.).
+  - resend  → Resend API (correo real).
+  - log     → simula en consola (el enlace aparece en el log del servidor).
+  Si el backend elegido falla, se degrada a log (consola).
 
 Mailpit — test emails locally without an account or domain:
   Web UI: http://localhost:8025 — all sent emails appear in real time.
@@ -137,7 +140,15 @@ async def send_farm_invitation_email(email: str, token: str, farm_name: str) -> 
 
 
 async def _dispatch_email(email: str, subject: str, html: str, label: str, link: str) -> None:
-    if settings.SMTP_HOST:
+    """¿Qué? Envía un email al backend configurado en settings.EMAIL_BACKEND.
+
+    ¿Para qué? Centralizar la entrega para que dev y producción usen el canal
+               correcto sin tocar el resto del código.
+    ¿Impacto? Si el backend elegido falla, se degrada a log en consola.
+    """
+    backend = (settings.EMAIL_BACKEND or "mailpit").lower()
+
+    if backend in ("mailpit", "smtp"):
         try:
             await asyncio.to_thread(_send_email_smtp, email, subject, html)
             logger.info("✅ Email de %s enviado vía SMTP a %s", label, email)
@@ -145,19 +156,22 @@ async def _dispatch_email(email: str, subject: str, html: str, label: str, link:
         except Exception as exc:
             logger.error("❌ Error enviando email de %s vía SMTP a %s: %s", label, email, exc)
 
-    if settings.RESEND_API_KEY:
-        params: resend.Emails.SendParams = {
-            "from": f"{settings.RESEND_FROM_NAME} <{settings.RESEND_FROM_EMAIL}>",
-            "to": [email],
-            "subject": subject,
-            "html": html,
-        }
-        try:
-            await asyncio.to_thread(_send_email_resend, params)
-            logger.info("✅ Email de %s enviado vía Resend a %s", label, email)
-            return
-        except Exception as exc:
-            logger.error("❌ Error enviando email de %s vía Resend a %s: %s", label, email, exc)
+    elif backend == "resend":
+        if not settings.RESEND_API_KEY:
+            logger.error("❌ EMAIL_BACKEND=resend pero RESEND_API_KEY no está configurada")
+        else:
+            params: resend.Emails.SendParams = {
+                "from": f"{settings.RESEND_FROM_NAME} <{settings.RESEND_FROM_EMAIL}>",
+                "to": [email],
+                "subject": subject,
+                "html": html,
+            }
+            try:
+                await asyncio.to_thread(_send_email_resend, params)
+                logger.info("✅ Email de %s enviado vía Resend a %s", label, email)
+                return
+            except Exception as exc:
+                logger.error("❌ Error enviando email de %s vía Resend a %s: %s", label, email, exc)
 
     _log_fallback(label, email, link)
 
@@ -175,3 +189,28 @@ def _log_fallback(label: str, email: str, link: str) -> None:
         link,
         "=" * 60,
     )
+
+
+async def send_generic_email(
+    to_email: str,
+    subject: str,
+    body_html: str,
+    cta_url: str | None = None,
+    cta_text: str | None = None,
+    label: str = "NOTIFICACIÓN",
+) -> None:
+    """¿Qué? Envía un email de propósito general (útil para notificaciones HU014).
+
+    ¿Para qué? Reutilizar el mismo pipeline de envío (EMAIL_BACKEND) para
+               correos que no son de autenticación, sin escribir HTML a mano.
+    ¿Impacto? Si cta_url se provee, se muestra un botón de acción en el cuerpo;
+              si no, se envía solo el texto. Se degrada a log si falla el backend.
+    """
+    html_content = body_html
+    if cta_url:
+        html_content = _build_html(
+            body_html=body_html,
+            cta_url=cta_url,
+            cta_text=cta_text or "Ver más",
+        )
+    await _dispatch_email(email=to_email, subject=subject, html=html_content, label=label, link=cta_url or subject)

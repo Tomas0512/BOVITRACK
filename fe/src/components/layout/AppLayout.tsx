@@ -37,6 +37,28 @@ export default function AppLayout() {
             >
               Mis Fincas
             </Link>
+            {/*
+              HU015 - Revision de auditorias del sistema (Sprint 8 - Camilo)
+
+              COMO: Administrador del sistema
+              QUIERO: llegar a la auditoria desde la barra superior
+              PARA:   consultarla en cualquier momento sin tener que entrar
+                      primero al detalle de una finca especifica.
+
+              Nota: el backend responde 403 si el rol no tiene el permiso
+              'usuarios:can_read', por lo que la pantalla es inofensiva para
+              quien no deberia verla.
+            */}
+            <Link
+              to="/audit"
+              className={`text-sm font-medium no-underline transition-colors hover:text-primary ${
+                isActive("/audit")
+                  ? "border-b-2 border-primary pb-0.5 text-primary"
+                  : "text-text-secondary"
+              }`}
+            >
+              Auditoría
+            </Link>
             <div className="text-right leading-tight">
               <p className="text-sm text-text-primary">
                 {user?.first_name} {user?.last_name}

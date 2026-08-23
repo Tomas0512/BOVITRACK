@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FileText, BarChart3, Dna, Syringe, AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Tag, Mars, Venus } from "lucide-react";
+import { FileText, BarChart3, Dna, Syringe, AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Tag, Mars, Venus, TrendingUp } from "lucide-react";
 import { getBovine, type BovineResponse } from "../api/bovines";
 import WeightChart from "../components/bovines/WeightChart";
 import WeightHistory from "../components/bovines/WeightHistory";
@@ -8,12 +8,23 @@ import MilkProductionList from "../components/bovines/MilkProductionList";
 import FoodList from "../components/bovines/FoodList";
 import TreatmentList from "../components/bovines/TreatmentList";
 import ReproductiveTimeline from "../components/bovines/ReproductiveTimeline";
+import GrowthChart from "../components/calves/GrowthChart";
 
-type Tab = "general" | "productivo" | "reproductivo" | "sanitario";
+type Tab = "general" | "productivo" | "crecimiento" | "reproductivo" | "sanitario";
 
+/*
+  HU007 - Desarrollo y seguimiento de terneros (Sprint 6 - Camilo)
+
+  COMO: Veterinario o Capataz responsable del hato
+  QUIERO: una pestana "Crecimiento" dentro de la ficha individual del animal
+          que muestre la curva de peso real contra el peso esperado
+  PARA:   evaluar el desarrollo de cada ternero a lo largo del tiempo sin salir
+          de su ficha y comparar su evolucion con la referencia de su raza.
+*/
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "general", label: "General", icon: <FileText size={16} /> },
   { id: "productivo", label: "Productivo", icon: <BarChart3 size={16} /> },
+  { id: "crecimiento", label: "Crecimiento", icon: <TrendingUp size={16} /> },
   { id: "reproductivo", label: "Reproductivo", icon: <Dna size={16} /> },
   { id: "sanitario", label: "Sanitario", icon: <Syringe size={16} /> },
 ];
@@ -180,6 +191,16 @@ export default function BovineDetailPage() {
           <MilkProductionList farmId={farmId} bovineId={bovineId} />
           <FoodList farmId={farmId} bovineId={bovineId} />
         </>
+      )}
+
+      {/* Pestaña Crecimiento (HU007) */}
+      {activeTab === "crecimiento" && farmId && bovineId && (
+        <GrowthChart
+          farmId={farmId}
+          bovineId={bovineId}
+          calfName={bovine.name ?? bovine.identification_number}
+          calfBreed={bovine.breed ?? null}
+        />
       )}
 
       {/* Pestaña Reproductivo */}
