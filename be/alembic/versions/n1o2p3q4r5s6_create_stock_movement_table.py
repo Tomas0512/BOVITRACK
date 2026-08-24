@@ -18,6 +18,12 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Guarda idempotente: c9ff44fd3509 (create_all) ya crea `stock_movement`
+    # porque el modelo StockMovement está registrado en app.models.
+    conn = op.get_bind()
+    if sa.inspect(conn).has_table("stock_movement"):
+        return
+
     op.create_table(
         "stock_movement",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -44,6 +50,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    conn = op.get_bind()
+    if not sa.inspect(conn).has_table("stock_movement"):
+        return
+
     op.drop_index(op.f("ix_stock_movement_date"), table_name="stock_movement")
     op.drop_index(op.f("ix_stock_movement_type"), table_name="stock_movement")
     op.drop_index(op.f("ix_stock_movement_food_id"), table_name="stock_movement")

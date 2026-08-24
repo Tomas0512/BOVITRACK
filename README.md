@@ -31,7 +31,7 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 | **Backend** | Python 3.12+, FastAPI, SQLAlchemy 2.0, Alembic |
 | **Frontend** | React 18+, Vite, TypeScript, TailwindCSS 4 |
 | **Base de datos** | PostgreSQL 17 (Docker) |
-| **Testing** | pytest + pytest-cov (BE), Vitest + Testing Library (FE) |
+| **Testing** | pytest + pytest-cov (BE), Vitest + Testing Library (FE), Selenium E2E (`qa_e2e/`) |
 | **Linting** | Ruff (BE), ESLint + Prettier (FE) |
 
 ## Módulos del sistema
@@ -46,8 +46,8 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 - **Economía** — ingresos, egresos e indicadores de rentabilidad
 - **Reportes** — exportables en PDF y Excel con paneles interactivos
 - **Documentos** — adjuntar archivos a fincas
-- **Alertas** — alertas de stock bajo de alimentos (correo vía SMTP/Resend)
-- **Auditoría** — registro básico de acciones de usuarios (pendiente exportación avanzada)
+- **Alertas** — alertas de stock bajo de alimentos y notificaciones configurables por usuario (canal correo/in-app, eventos y frecuencia) con historial de envíos
+- **Auditoría** — consulta filtrable por usuario, acción, entidad, finca y rango de fechas, con paginación y exportación en CSV/Excel
 
 ## Requisitos previos
 
@@ -187,6 +187,12 @@ bovitrack/
 │   │   ├── context/                      # Context providers
 │   │   └── types/                        # Tipos TypeScript
 │   └── package.json
+├── qa_e2e/                                 # Pruebas E2E — Selenium WebDriver + Python
+│   ├── base_test.py                        # Clase base: driver, login y screenshots
+│   ├── config.py                           # URL, credenciales e IDs de prueba
+│   ├── test_01..15_*.py                    # 15 vistas x 2 casos de uso
+│   ├── run_all_tests.py                    # Ejecuta toda la suite
+│   └── screenshots/                        # Evidencia gráfica generada
 └── mobile/                               # App móvil — React Native + Expo
     └── src/
         ├── navigation/                   # Navegación (React Navigation)

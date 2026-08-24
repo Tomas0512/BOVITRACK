@@ -67,6 +67,9 @@ services:
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
+      # Rate limiting: desactivable solo para QA/demo local (suite E2E hace
+      # ~15 logins por corrida). El default del backend es activado.
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
     volumes:
       # What?    Monta el código fuente local dentro del contenedor.
       # ¿Para?   Los cambios en archivos Python se reflejan al instante

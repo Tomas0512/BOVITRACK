@@ -51,6 +51,13 @@ class Settings(BaseSettings):
     # 🌍 Entorno (development / production)
     ENVIRONMENT: str = "development"
 
+    # 🚦 Rate limiting (slowapi)
+    # True (default) aplica los límites de auth (5/min login, 3/min recuperación).
+    # Se puede desactivar SOLO en desarrollo/QA local para que la suite E2E
+    # pueda ejecutar los ~15 inicios de sesión de la corrida completa sin
+    # recibir 429. Nunca desactivar en producción.
+    RATE_LIMIT_ENABLED: bool = True
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

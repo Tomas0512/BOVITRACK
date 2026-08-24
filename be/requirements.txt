@@ -33,3 +33,6 @@ slowapi==0.1.9
 # Reports
 reportlab==4.2.5
 openpyxl==3.1.5
+
+# Email (Resend API)
+resend==2.39.0

@@ -101,6 +101,23 @@ export default function CreateFarmPage() {
   };
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
+  /**
+   * ¿El paso actual tiene sus campos obligatorios completos?
+   * El botón "Siguiente" se deshabilita mientras no lo estén, de modo
+   * que no sea posible avanzar con datos de ubicación incompletos
+   * (evita fincas sin departamento/ciudad que romperían reportes y
+   * filtros geográficos posteriores).
+   */
+  const isStepComplete = (): boolean => {
+    if (step === 0) {
+      return Boolean(form.name.trim()) && Boolean(form.address.trim()) && Boolean(form.department_id);
+    }
+    if (step === 1) {
+      return form.total_area > 0 && Boolean(form.purpose_id);
+    }
+    return Boolean(form.farm_identifier.trim());
+  };
+
   // Cargar catálogos iniciales
   useEffect(() => {
     const loadCatalogs = async () => {
@@ -316,7 +333,16 @@ export default function CreateFarmPage() {
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary-light transition-colors">
+              <button
+                type="button"
+                onClick={nextStep}
+                disabled={!isStepComplete()}
+                className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-colors ${
+                  !isStepComplete()
+                    ? "cursor-not-allowed bg-gray-400 opacity-70"
+                    : "bg-primary hover:bg-primary-light"
+                }`}
+              >
                 Siguiente →
               </button>
             ) : (

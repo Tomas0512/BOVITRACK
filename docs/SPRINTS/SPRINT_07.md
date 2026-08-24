@@ -130,9 +130,9 @@ Antes de iniciar las HU en este sprint se verifica:
 | Reportes con filtros por fecha/categoria | ✅ Entregado | HU013 — Tomas |
 | Exportacion PDF/Excel funcional | ✅ Entregado | HU013 — Tomas |
 | Indicadores productivos/sanitarios/economicos | ✅ Entregado | HU013 — Tomas |
-| Stock actualizado por compras/consumos | ✅ Entregado | HU011 — Edwin |
-| Alertas de stock minimo funcionales | ✅ Entregado | HU011 — Edwin |
-| UI de inventario y compras | ✅ Entregado | HU011 — Edwin |
+| Stock actualizado por compras/consumos | 🔲 Pendiente | HU011 — Edwin |
+| Alertas de stock minimo funcionales | 🔲 Pendiente | HU011 — Edwin |
+| UI de inventario y compras | 🔲 Pendiente | HU011 — Edwin |
 | Upload/download/delete de documentos | ✅ Entregado | HU012 — Camilo |
 | Asociacion documental a finca/bovino/evento | ✅ Entregado | HU012 — Camilo |
 

@@ -117,15 +117,15 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 
 | # | Tarea | Responsable | Estado | Estimacion |
 |---|---|---|---|---|
-| 16.1 | QA de regresion modulo auth (HU001) y fincas/potreros (HU002-HU003) | Edwin | 🔲 Por hacer | 4h |
-| 16.2 | QA de regresion bovinos y productivo (HU004-HU005) | Edwin | 🔲 Por hacer | 4h |
-| 16.3 | QA de regresion reproductivo, terneros y sanitario (HU006-HU008) | Edwin | 🔲 Por hacer | 4h |
-| 16.4 | QA de regresion movimientos, economia e inventario (HU009-HU011) | Edwin | 🔲 Por hacer | 4h |
-| 16.5 | QA de regresion documentos, reportes y mobile auth (HU012-HU013 + app movil) | Edwin | 🔲 Por hacer | 3h |
-| 16.6 | Correccion de bugs en modulos estables (los bugs de HU014/HU015 los corrigen sus duenos) | Edwin | 🔲 Por hacer | 6h |
-| 16.7 | Seed de datos demo representativos + prueba de flujo completo end-to-end | Edwin | 🔲 Por hacer | 3h |
-| 16.8 | Actualizar Postman collection + documentacion (README / API) | Edwin | 🔲 Por hacer | 3h |
-| 16.9 | Preparar evidencias de cierre por modulo | Edwin | 🔲 Por hacer | 2h |
+| 16.1 | QA de regresion modulo auth (HU001) y fincas/potreros (HU002-HU003) | Edwin | ✅ Hecho | 4h |
+| 16.2 | QA de regresion bovinos y productivo (HU004-HU005) | Edwin | ✅ Hecho | 4h |
+| 16.3 | QA de regresion reproductivo, terneros y sanitario (HU006-HU008) | Edwin | ✅ Hecho | 4h |
+| 16.4 | QA de regresion movimientos, economia e inventario (HU009-HU011) | Edwin | ✅ Hecho | 4h |
+| 16.5 | QA de regresion documentos, reportes y mobile auth (HU012-HU013 + app movil) | Edwin | ✅ Hecho | 3h |
+| 16.6 | Correccion de bugs en modulos estables (los bugs de HU014/HU015 los corrigen sus duenos) | Edwin | ✅ Hecho | 6h |
+| 16.7 | Seed de datos demo representativos + prueba de flujo completo end-to-end | Edwin | ✅ Hecho | 3h |
+| 16.8 | Actualizar Postman collection + documentacion (README / API) | Edwin | ✅ Hecho | 3h |
+| 16.9 | Preparar evidencias de cierre por modulo | Edwin | ✅ Hecho | 2h |
 
 ---
 
@@ -134,9 +134,9 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 - [ ] Web 100% funcional (HU001–HU015), sin bugs criticos ni altos conocidos
 - [ ] HU014: alertas configurables, notificaciones enviadas y registradas en historial
 - [ ] HU015: auditoria filtrable por usuario/accion/fecha y exportable
-- [ ] QA de regresion HU001–HU013 completado sin bloqueantes
+- [x] QA de regresion HU001–HU013 completado sin bloqueantes *(Edwin: 39/39 tests backend, 30/30 E2E — ver `QA_CIERRE_SPRINT_08.md`)*
 - [ ] Demo final preparada y ejecutada con el cliente (Luis Barbosa) antes del 23 de agosto
-- [ ] Documentacion y Postman collection actualizadas
+- [x] Documentacion y Postman collection actualizadas *(Edwin: README + coleccion con HU014/HU015)*
 - [ ] Repositorio con tag de version `v1.0.0`
 - [ ] HU016 documentada como fuera de alcance
 
@@ -162,10 +162,10 @@ Cada persona es dueña completa de su HU o área y **no depende de los demás**.
 
 | Modulo | Entregado | Observaciones |
 |---|---|---|
-| HU014 — Alertas y notificaciones | 🔲 Pendiente | |
-| HU015 — Auditoria filtrable y exportable | 🔲 Pendiente | |
-| QA de regresion HU001–HU013 | 🔲 Pendiente | |
-| Demo final | 🔲 Pendiente | |
+| HU014 — Alertas y notificaciones | 🔲 Pendiente | Self-QA pendiente (dueno: Tomas) |
+| HU015 — Auditoria filtrable y exportable | 🔲 Pendiente | Self-QA pendiente (dueno: Camilo) |
+| QA de regresion HU001–HU013 | ✅ Completado | Edwin: 39/39 backend, 30/30 E2E con evidencia; 7 bugs corregidos. Detalle en `QA_CIERRE_SPRINT_08.md` |
+| Demo final | 🔲 Pendiente | Requiere integrar HU014/HU015 en main; datos demo ya sembrados |
 
 ### Story Points completados
 
