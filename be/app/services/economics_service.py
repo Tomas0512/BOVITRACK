@@ -109,6 +109,10 @@ def get_indicators(db: Session, farm_id: uuid.UUID, date_from: date | None = Non
 
     if date_from and date_to:
         days = (date_to - date_from).days or 1
+    elif records:
+        dates = [r.record_date for r in records]
+        span = (max(dates) - min(dates)).days + 1
+        days = span if span > 0 else 1
     else:
         days = 1
 

@@ -123,7 +123,7 @@ def update_prefs(
     if notify_birth is not None:
         pref.notify_birth = notify_birth
 
-    db.flush()
+    db.commit()
     return pref
 
 
