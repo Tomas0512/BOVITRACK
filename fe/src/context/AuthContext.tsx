@@ -64,9 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: RegisterRequest) => {
     await registerUser(data);
-    // Auto-login después de registro
-    await login(data.email, data.password);
-  }, [login]);
+  }, []);
 
   const logout = useCallback(() => {
     clearSession();
@@ -77,8 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.message;
   }, []);
 
-  const resetPassword = useCallback(async (token: string, newPassword: string) => {
-    const res = await apiResetPassword(token, newPassword);
+  const resetPassword = useCallback(async (token: string, newPassword: string, confirmPassword: string) => {
+    const res = await apiResetPassword(token, newPassword, confirmPassword);
     return res.message;
   }, []);
 

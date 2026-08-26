@@ -182,6 +182,7 @@ export function InvitedRegisterPage() {
         document_number: formData.documentNumber,
         phone: formData.phone,
         password: formData.password,
+        confirm_password: formData.confirmPassword,
         accept_terms: formData.acceptTerms,
         accept_data_policy: formData.acceptDataPolicy,
       });

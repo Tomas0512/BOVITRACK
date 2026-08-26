@@ -114,7 +114,7 @@ export function ResetPasswordPage() {
     setServerError("");
 
     try {
-      await resetPasswordApi(token!, formData.password);
+      await resetPasswordApi(token!, formData.password, formData.confirmPassword);
       setSubmitted(true);
     } catch (err: unknown) {
       if (err && typeof err === "object" && "response" in err) {
