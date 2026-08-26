@@ -6,6 +6,7 @@ export interface RegisterRequest {
   document_number: string;
   phone: string;
   password: string;
+  confirm_password: string;
   accept_terms: boolean;
   accept_data_policy: boolean;
 }

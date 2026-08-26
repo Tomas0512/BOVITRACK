@@ -6,9 +6,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
-import { registerUser, getMe } from '../../services/auth';
-import { setAuthToken } from '../../services/api';
-import { useAuthStore } from '../../store/authStore';
+import { registerUser } from '../../services/auth';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -19,7 +17,6 @@ const TEXT_ONLY = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
 
 export default function RegisterScreen() {
   const navigation = useNavigation<Nav>();
-  const login = useAuthStore((s) => s.login);
   const { colors, toggleTheme, isDark } = useTheme();
 
   const [form, setForm] = useState({
@@ -29,6 +26,7 @@ export default function RegisterScreen() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState('');
+  const [done, setDone] = useState(false);
 
   const set = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -60,12 +58,21 @@ export default function RegisterScreen() {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!validate()) return Promise.reject(null);
-      const tokens = await registerUser({ ...form, accept_terms: true, accept_data_policy: true });
-      setAuthToken(tokens.access_token);
-      const user = await getMe();
-      return { tokens, user };
+      const user = await registerUser({
+        email: form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        document_type: form.document_type,
+        document_number: form.document_number,
+        phone: form.phone,
+        password: form.password,
+        confirm_password: form.confirmPassword,
+        accept_terms: true,
+        accept_data_policy: true,
+      });
+      return user;
     },
-    onSuccess: ({ tokens, user }) => login(tokens, user),
+    onSuccess: () => setDone(true),
     onError: (e: Error) => {
       if (e) setServerError(e.message || 'No se pudo registrar');
     },
@@ -80,6 +87,21 @@ export default function RegisterScreen() {
     { label: 'Numero de documento', key: 'document_number', placeholder: '1234567890', keyboard: 'numeric' as const },
     { label: 'Telefono', key: 'phone', placeholder: '3001234567', keyboard: 'phone-pad' as const },
   ];
+
+  if (done) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 56, marginBottom: 16 }}>📧</Text>
+        <Text style={styles.title}>Cuenta creada</Text>
+        <Text style={styles.subtitle}>
+          Revisa tu correo para verificar tu cuenta y poder iniciar sesión.
+        </Text>
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.btnPrimaryText}>Ir al login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

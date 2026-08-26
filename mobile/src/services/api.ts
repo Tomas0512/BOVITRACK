@@ -29,6 +29,11 @@ apiClient.interceptors.response.use(
     const data = error.response?.data;
     if (data?.detail && typeof data.detail === 'string') {
       error.message = data.detail;
+    } else if (Array.isArray(data?.detail)) {
+      error.message = data.detail
+        .map((d: { msg?: string }) => d?.msg)
+        .filter(Boolean)
+        .join('. ');
     } else if (data?.message) {
       error.message = data.message;
     }
