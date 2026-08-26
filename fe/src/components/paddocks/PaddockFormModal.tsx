@@ -46,11 +46,14 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   const isFormComplete =
     form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
 
-  const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) =>
+  const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     try {
@@ -61,11 +64,7 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
       }
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo guardar el potrero");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo guardar el potrero");
     } finally {
       setLoading(false);
     }
@@ -110,12 +109,12 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Área (ha)</label>
-                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value))}
+                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Cap. máx. animales</label>
-                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value))}
+                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>

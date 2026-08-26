@@ -25,6 +25,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     if (!email.trim() || !roleId) {
       setError("Correo y rol son obligatorios");
       return;
@@ -37,11 +38,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
       setSuccessMsg(`Se envió una invitación a ${email.trim()}`);
       setTimeout(() => onSuccess(), 2000);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo enviar la invitación");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo enviar la invitación");
     } finally {
       setLoading(false);
     }
@@ -81,7 +78,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
             <input
               type="email" required maxLength={255}
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setError(""); }}
               placeholder="correo@ejemplo.com"
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
             />
@@ -94,7 +91,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
             <label className="mb-1 block text-sm font-medium text-text-secondary">Rol</label>
             <select
               value={roleId}
-              onChange={(e) => setRoleId(e.target.value)}
+              onChange={(e) => { setRoleId(e.target.value); setError(""); }}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             >

@@ -43,11 +43,14 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
   const isFormComplete =
     form.name.trim() !== "" && form.area > 0 && form.max_capacity >= 1;
 
-  const set = (key: keyof LandPlotRequest, value: string | number) =>
+  const set = (key: keyof LandPlotRequest, value: string | number) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     try {
@@ -58,11 +61,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
       }
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo guardar el lote");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo guardar el lote");
     } finally {
       setLoading(false);
     }
@@ -111,7 +110,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Área</label>
-                  <input type="number" min={0.01} step={0.01} value={form.area} onChange={(e) => set("area", parseFloat(e.target.value))}
+                  <input type="number" min={0.01} step={0.01} value={form.area} onChange={(e) => set("area", parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
@@ -137,7 +136,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Capacidad máxima (animales)</label>
-                <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value))}
+                <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
               </div>
               <div>

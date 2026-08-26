@@ -29,8 +29,6 @@ export default function FoodFormModal({
   onSuccess,
   onClose,
 }: Props) {
-  if (!isOpen) return null;
-
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FoodCreate>({
     name: existing?.name ?? "",
@@ -74,11 +72,14 @@ export default function FoodFormModal({
     setError("");
   }, [existing, isOpen]);
 
-  const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) =>
+  const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
 
@@ -90,16 +91,13 @@ export default function FoodFormModal({
       }
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response
-              ?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo guardar el alimento");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo guardar el alimento");
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">

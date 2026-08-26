@@ -137,12 +137,16 @@ export function RegisterPage() {
 
     if (!formData.firstName.trim()) {
       newErrors.firstName = "Los nombres son obligatorios";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "Mínimo 2 caracteres";
     } else if (!TEXT_ONLY.test(formData.firstName)) {
       newErrors.firstName = "Solo se permiten letras";
     }
 
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Los apellidos son obligatorios";
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = "Mínimo 2 caracteres";
     } else if (!TEXT_ONLY.test(formData.lastName)) {
       newErrors.lastName = "Solo se permiten letras";
     }

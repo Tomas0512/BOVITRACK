@@ -117,14 +117,11 @@ export function ResetPasswordPage() {
       await resetPasswordApi(token!, formData.password, formData.confirmPassword);
       setSubmitted(true);
     } catch (err: unknown) {
-      if (err && typeof err === "object" && "response" in err) {
-        const axiosErr = err as { response?: { data?: { detail?: string } } };
-        setServerError(
-          axiosErr.response?.data?.detail || "Error al restablecer la contraseña."
-        );
-      } else {
-        setServerError("Error de conexión. Verifique que el servidor esté activo.");
-      }
+      setServerError(
+        err instanceof Error && err.message
+          ? err.message
+          : "Error al restablecer la contraseña. Intente de nuevo."
+      );
     } finally {
       setLoading(false);
     }

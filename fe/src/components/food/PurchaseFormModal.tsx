@@ -16,8 +16,6 @@ export default function PurchaseFormModal({
   onSuccess,
   onClose,
 }: Props) {
-  if (!isOpen) return null;
-
   const [form, setForm] = useState<PurchaseCreate>({
     food_id: foods.length > 0 ? foods[0].id : "",
     quantity: 0,
@@ -51,6 +49,7 @@ export default function PurchaseFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
 
@@ -58,21 +57,19 @@ export default function PurchaseFormModal({
       await recordPurchase(farmId, form);
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "Could not record purchase");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo registrar la compra");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
       <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-text-primary">Register Purchase</h2>
+          <h2 className="text-lg font-bold text-text-primary">Registrar compra</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">&times;</button>
         </div>
 
@@ -82,17 +79,17 @@ export default function PurchaseFormModal({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Food Item *</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Alimento *</label>
             <select
               value={form.food_id}
               onChange={(e) => setForm((f) => ({ ...f, food_id: e.target.value }))}
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               required
             >
-              <option value="">Select food...</option>
+              <option value="">Seleccione alimento...</option>
               {foods.map((f) => (
                 <option key={f.id} value={f.id}>
-                  {f.name} ({f.current_stock} {f.unit_of_measure} in stock)
+                  {f.name} ({f.current_stock} {f.unit_of_measure} en stock)
                 </option>
               ))}
             </select>
@@ -100,23 +97,23 @@ export default function PurchaseFormModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Quantity *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Cantidad *</label>
               <input
                 type="number" step="0.01" min="0.01"
                 value={form.quantity || ""}
                 onChange={(e) => setForm((f) => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))}
-                placeholder="e.g. 100"
+                placeholder="Ej: 100"
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-text-secondary">Unit Cost ($) *</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Costo unitario ($) *</label>
               <input
                 type="number" step="1" min="0"
                 value={form.unit_cost || ""}
                 onChange={(e) => setForm((f) => ({ ...f, unit_cost: parseFloat(e.target.value) || 0 }))}
-                placeholder="e.g. 5000"
+                placeholder="Ej: 5000"
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
               />
@@ -125,15 +122,15 @@ export default function PurchaseFormModal({
 
           {totalCost > 0 && (
             <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
-              Total cost: <strong>${totalCost.toLocaleString("es-CO")}</strong>
+              Costo total: <strong>${totalCost.toLocaleString("es-CO")}</strong>
               {selectedFood && (
-                <> &middot; Stock after: <strong>{selectedFood.current_stock + form.quantity} {selectedFood.unit_of_measure}</strong></>
+                <> &middot; Stock después: <strong>{selectedFood.current_stock + form.quantity} {selectedFood.unit_of_measure}</strong></>
               )}
             </div>
           )}
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Date & Time</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha y hora</label>
             <input
               type="datetime-local"
               value={form.movement_date ?? ""}
@@ -143,11 +140,11 @@ export default function PurchaseFormModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-text-secondary">Notes (optional)</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Notas (opcional)</label>
             <textarea
               value={form.notes ?? ""}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value || null }))}
-              placeholder="e.g. Purchase from Distribuidora XYZ, invoice #123"
+              placeholder="Ej: Compra a Distribuidora XYZ, factura #123"
               className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
               rows={2}
             />
@@ -155,12 +152,12 @@ export default function PurchaseFormModal({
 
           <div className="mt-4 flex gap-2 justify-end">
             <button type="button" onClick={onClose} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
-              Cancel
+              Cancelar
             </button>
             <button type="submit" disabled={!isFormValid || loading}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
               {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
-              {loading ? "Saving..." : "Register Purchase"}
+              {loading ? "Guardando..." : "Registrar compra"}
             </button>
           </div>
         </form>

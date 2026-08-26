@@ -13,17 +13,14 @@ export default function RequestReactivationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     try {
       await requestReactivation({ email, reason: reason || undefined });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo enviar la solicitud");
+      setError(err instanceof Error && err.message ? err.message : "No se pudo enviar la solicitud");
     } finally {
       setLoading(false);
     }
