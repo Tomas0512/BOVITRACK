@@ -126,6 +126,12 @@ def login_user(db: Session, login_data: UserLogin) -> TokenResponse:
             detail="Cuenta desactivada. Contacte al administrador.",
         )
 
+    if not user.email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Debes verificar tu correo electrónico antes de iniciar sesión",
+        )
+
     token_payload = {"sub": str(user.id), "ver": user.token_version}
     access_token = create_access_token(data=token_payload)
     refresh_token = create_refresh_token(data=token_payload)
@@ -161,6 +167,14 @@ def refresh_access_token(db: Session, refresh_token: str) -> TokenResponse:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado o cuenta desactivada",
+        )
+
+    token_version = payload.get("ver")
+    if token_version is None or int(token_version) != int(user.token_version):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     token_payload = {"sub": str(user.id), "ver": user.token_version}

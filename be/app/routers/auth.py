@@ -71,7 +71,9 @@ def login(
     response_model=TokenResponse,
     summary="Renovar tokens",
 )
+@limiter.limit("10/minute")
 def refresh(
+    request: Request,
     data: RefreshTokenRequest,
     db: Session = Depends(get_db),
 ) -> TokenResponse:
@@ -102,7 +104,9 @@ async def forgot_password(
     response_model=MessageResponse,
     summary="Restablecer contraseña",
 )
+@limiter.limit("5/minute")
 def reset_password_endpoint(
+    request: Request,
     data: ResetPasswordRequest,
     db: Session = Depends(get_db),
 ) -> MessageResponse:
@@ -116,7 +120,9 @@ def reset_password_endpoint(
     response_model=MessageResponse,
     summary="Verificar correo electrónico",
 )
+@limiter.limit("5/minute")
 def verify_email(
+    request: Request,
     token: str,
     db: Session = Depends(get_db),
 ) -> MessageResponse:
@@ -143,7 +149,9 @@ def get_invitation(
     status_code=status.HTTP_201_CREATED,
     summary="Registrar usuario por invitación",
 )
+@limiter.limit("5/minute")
 def register_invited(
+    request: Request,
     data: InvitedRegister,
     db: Session = Depends(get_db),
 ) -> UserResponse:

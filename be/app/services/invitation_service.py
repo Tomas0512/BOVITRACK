@@ -142,7 +142,7 @@ def register_invited_user(db: Session, data: InvitedRegister) -> User:
         email=invitation.email,
         first_name=data.first_name.strip(),
         last_name=data.last_name.strip(),
-        document_type=data.document_type,
+        document_type=data.document_type.value,
         document_number=data.document_number.strip(),
         phone=data.phone.strip(),
         hashed_password=hash_password(data.password),
