@@ -52,7 +52,6 @@ from app.utils.limiter import limiter
 router = APIRouter(
     prefix="/api/v1/farms/{farm_id}/calves",
     tags=["Terneros (HU007)"],
-    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -79,6 +78,7 @@ router = APIRouter(
     ¿Correspondencia HU?
       HU007 Task 7.1: Endpoint/vista de terneros por edad/estado
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("10/minute")
 def list_calves(
@@ -148,6 +148,7 @@ def list_calves(
     ¿Correspondencia HU?
       HU007 Task 7.5: Integración con ficha general del bovino
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def get_calf_details(
@@ -189,6 +190,7 @@ def get_calf_details(
     ¿Correspondencia HU?
       HU007 Task 7.4: Curva de crecimiento del ternero (datos para gráfica)
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def get_calf_weight_history(
@@ -232,6 +234,7 @@ def get_calf_weight_history(
     ¿Correspondencia HU?
       HU007 Task 7.3: Componente CalfList con indicadores de crecimiento
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def get_calf_summary(
@@ -285,6 +288,7 @@ def get_calf_summary(
     ¿Correspondencia HU?
       HU007 Task 7.2: Registro de crecimiento (peso)
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_create"))],
 )
 @limiter.limit("5/minute")
 def record_calf_weight(
@@ -356,6 +360,7 @@ def record_calf_weight(
       HU007 Task 7.2: Registro de alimentación
       HU010: Registrar información económica
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_create"))],
 )
 @limiter.limit("5/minute")
 def update_calf_feeding_plan(
