@@ -55,6 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verify();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Escuchar fallo de refresh (lanza el interceptor) para cerrar sesión
+  useEffect(() => {
+    const onLogout = () => clearSession();
+    window.addEventListener("auth:logout", onLogout);
+    return () => window.removeEventListener("auth:logout", onLogout);
+  }, [clearSession]);
+
   const login = useCallback(async (email: string, password: string) => {
     const tokens = await loginUser({ email, password });
     saveTokens(tokens.access_token, tokens.refresh_token);
