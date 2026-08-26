@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.bovine import Bovine
+from app.models.farm import LandPlot
 from app.schemas.bovine import BovineCreate, BovineUpdate
 from app.services.audit_service import add_audit_log
 
@@ -24,6 +25,45 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
     ¿Impacto? registered_by se asigna automáticamente al usuario autenticado
               para mantener la trazabilidad.
     """
+    # ¿Qué? Validar unicidad del número de identificación dentro de la finca.
+    dup = db.execute(
+        select(Bovine).where(
+            Bovine.farm_id == farm_id,
+            Bovine.identification_number == data.identification_number,
+        )
+    ).scalar_one_or_none()
+    if dup:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un bovino con esa identificación en la finca",
+        )
+
+    # ¿Qué? Validar que padre/madre pertenezcan a la finca.
+    for ref in (data.father_id, data.mother_id):
+        if ref:
+            ref_bovine = db.execute(
+                select(Bovine).where(Bovine.id == ref, Bovine.farm_id == farm_id)
+            ).scalar_one_or_none()
+            if not ref_bovine:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El bovino padre/madre indicado no existe en esta finca",
+                )
+
+    # ¿Qué? Validar que el lote indicado pertenezca a la finca.
+    if data.land_plot_id:
+        land_plot = db.execute(
+            select(LandPlot).where(
+                LandPlot.id == data.land_plot_id,
+                LandPlot.farm_id == farm_id,
+            )
+        ).scalar_one_or_none()
+        if not land_plot:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El lote indicado no existe en esta finca",
+            )
+
     bovine = Bovine(
         farm_id=farm_id,
         registered_by=user_id,

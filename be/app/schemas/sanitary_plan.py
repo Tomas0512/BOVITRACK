@@ -9,7 +9,7 @@ Módulo: schemas/sanitary_plan.py
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 class SanitaryPlanCreate(BaseModel):
@@ -43,17 +43,14 @@ class SanitaryPlanCreate(BaseModel):
             raise ValueError("La frecuencia debe ser mayor a 0 días")
         return v
 
-    @field_validator("bovine_id", "land_plot_id", mode="before")
-    @classmethod
-    def at_least_one_target(cls, v, info):
+    @model_validator(mode="after")
+    def at_least_one_target(self) -> "SanitaryPlanCreate":
         """¿Qué? Valida que al menos uno de bovine_id o land_plot_id esté presente.
         ¿Para qué? Asegurar que el plan sanitario tiene un objetivo (bovino o lote).
         """
-        if info.field_name == "bovine_id" and v is None:
-            land_plot_id = info.data.get("land_plot_id")
-            if land_plot_id is None:
-                raise ValueError("Debe especificar bovine_id o land_plot_id")
-        return v
+        if self.bovine_id is None and self.land_plot_id is None:
+            raise ValueError("Debe especificar bovine_id o land_plot_id")
+        return self
 
 
 class SanitaryPlanUpdate(BaseModel):

@@ -41,6 +41,27 @@ class FoodCreate(BaseModel):
             raise ValueError("El nombre debe tener al menos 2 caracteres")
         return v
 
+    @field_validator("current_stock")
+    @classmethod
+    def validate_stock(cls, v: Decimal) -> Decimal:
+        if v < 0:
+            raise ValueError("El stock actual no puede ser negativo")
+        return v
+
+    @field_validator("min_stock_alert")
+    @classmethod
+    def validate_min_alert(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("El stock mínimo no puede ser negativo")
+        return v
+
+    @field_validator("cost_per_unit")
+    @classmethod
+    def validate_cost(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("El costo unitario no puede ser negativo")
+        return v
+
 
 class FoodUpdate(BaseModel):
     """¿Qué? Schema para actualización parcial de un alimento.
@@ -56,6 +77,27 @@ class FoodUpdate(BaseModel):
     cost_per_unit: Decimal | None = None
     expiration_date: date | None = None
     supplier: str | None = None
+
+    @field_validator("current_stock")
+    @classmethod
+    def validate_stock(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("El stock actual no puede ser negativo")
+        return v
+
+    @field_validator("min_stock_alert")
+    @classmethod
+    def validate_min_alert(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("El stock mínimo no puede ser negativo")
+        return v
+
+    @field_validator("cost_per_unit")
+    @classmethod
+    def validate_cost(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v < 0:
+            raise ValueError("El costo unitario no puede ser negativo")
+        return v
 
 
 class FoodResponse(BaseModel):

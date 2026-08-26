@@ -15,6 +15,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.models.bovine import Bovine
+from app.models.farm import LandPlot
+from app.models.food import Food
 from app.models.treatment import Treatment
 from app.schemas.treatment import TreatmentCreate
 from app.services.audit_service import add_audit_log
@@ -25,6 +28,35 @@ def create_treatment(db: Session, farm_id: uuid.UUID, data: TreatmentCreate, use
     ¿Para qué? Vincular un tratamiento a la finca y al usuario que lo aplicó.
     ¿Impacto? applied_by permite auditar quién realizó cada tratamiento.
     """
+    # ¿Qué? Validar que las referencias existan y pertenezcan a la finca.
+    if data.bovine_id:
+        bovine = db.execute(
+            select(Bovine).where(Bovine.id == data.bovine_id, Bovine.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not bovine:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El bovino indicado no existe en esta finca",
+            )
+    if data.land_plot_id:
+        land_plot = db.execute(
+            select(LandPlot).where(LandPlot.id == data.land_plot_id, LandPlot.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not land_plot:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El lote indicado no existe en esta finca",
+            )
+    if data.food_id:
+        food = db.execute(
+            select(Food).where(Food.id == data.food_id, Food.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not food:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El alimento indicado no existe en esta finca",
+            )
+
     treatment = Treatment(
         farm_id=farm_id,
         applied_by=user_id,
