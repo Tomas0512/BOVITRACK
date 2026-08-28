@@ -47,12 +47,12 @@ export default function FarmDetailScreen() {
         <Text style={styles.subtitle}>{farm.address}</Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.label}>Departamento</Text>
-        <Text style={styles.value}>{farm.department}</Text>
-        <Text style={styles.label}>Ciudad</Text>
-        <Text style={styles.value}>{farm.city}</Text>
-        <Text style={styles.label}>Hectareas</Text>
-        <Text style={styles.value}>{farm.hectares}</Text>
+        <Text style={styles.label}>Identificador</Text>
+        <Text style={styles.value}>{farm.farm_identifier}</Text>
+        <Text style={styles.label}>Ciudad / municipio</Text>
+        <Text style={styles.value}>{farm.city_municipality}</Text>
+        <Text style={styles.label}>Área</Text>
+        <Text style={styles.value}>{farm.total_area} {farm.area_unit}</Text>
       </View>
     </View>
   );

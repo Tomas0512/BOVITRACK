@@ -78,7 +78,7 @@ export default function DashboardScreen() {
               onPress={() => navigation.navigate('FarmDetail', { farmId: item.id })}
             >
               <Text style={styles.farmName}>{item.name}</Text>
-              <Text style={styles.farmDetail}>📍 {item.city}, {item.department}</Text>
+              <Text style={styles.farmDetail}>📍 {item.city_municipality}</Text>
               <Text style={styles.farmArrow}>Ver detalle →</Text>
             </TouchableOpacity>
           )}

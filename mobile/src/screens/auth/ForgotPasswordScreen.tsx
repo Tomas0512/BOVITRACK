@@ -26,7 +26,7 @@ export default function ForgotPasswordScreen() {
         return Promise.reject(new Error('Correo invalido'));
       return forgotPassword(email);
     },
-    onSettled: () => setSent(true),
+    onSuccess: () => setSent(true),
     onError: (e: Error) => setError(e.message),
   });
 
