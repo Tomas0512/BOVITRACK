@@ -79,6 +79,19 @@ export default function CreateFarmPage() {
         setError("Nombre, dirección y departamento son obligatorios");
         return false;
       }
+      if (form.name.trim().length < 2) {
+        setError("El nombre debe tener al menos 2 caracteres");
+        return false;
+      }
+      if (form.address.trim().length < 5) {
+        setError("La dirección debe tener al menos 5 caracteres");
+        return false;
+      }
+      const city = showCustomCity ? customCity.trim() : form.city_municipality;
+      if (city.length < 2) {
+        setError("La ciudad o municipio debe tener al menos 2 caracteres");
+        return false;
+      }
     }
     if (s === 1) {
       if (form.total_area <= 0 || !form.purpose_id) {
@@ -89,6 +102,10 @@ export default function CreateFarmPage() {
     if (s === 2) {
       if (!form.farm_identifier.trim()) {
         setError("El identificador de la finca es obligatorio");
+        return false;
+      }
+      if (form.farm_identifier.trim().length < 3) {
+        setError("El identificador debe tener al menos 3 caracteres");
         return false;
       }
     }
