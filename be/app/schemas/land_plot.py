@@ -42,6 +42,14 @@ class LandPlotCreate(BaseModel):
             raise ValueError("La capacidad debe ser mayor a 0")
         return v
 
+    @field_validator("usage_type")
+    @classmethod
+    def validate_usage(cls, v: str) -> str:
+        allowed = {"pastoreo", "cultivo", "reserva", "infraestructura", "otro"}
+        if v not in allowed:
+            raise ValueError("Tipo de uso inválido")
+        return v
+
 
 class LandPlotUpdate(BaseModel):
     name: str | None = None
@@ -51,6 +59,28 @@ class LandPlotUpdate(BaseModel):
     max_capacity: int | None = None
     location: str | None = None
     is_active: bool | None = None
+
+    @field_validator("area")
+    @classmethod
+    def validate_area(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v <= 0:
+            raise ValueError("El área debe ser mayor a 0")
+        return v
+
+    @field_validator("max_capacity")
+    @classmethod
+    def validate_capacity(cls, v: int | None) -> int | None:
+        if v is not None and v <= 0:
+            raise ValueError("La capacidad debe ser mayor a 0")
+        return v
+
+    @field_validator("usage_type")
+    @classmethod
+    def validate_usage(cls, v: str | None) -> str | None:
+        allowed = {"pastoreo", "cultivo", "reserva", "infraestructura", "otro"}
+        if v is not None and v not in allowed:
+            raise ValueError("Tipo de uso inválido")
+        return v
 
 
 class LandPlotResponse(BaseModel):

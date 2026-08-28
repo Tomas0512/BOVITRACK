@@ -118,24 +118,18 @@ def get_farm_by_id(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> Farm:
 def update_farm(db: Session, farm_id: uuid.UUID, owner_id: uuid.UUID, data: FarmUpdate) -> Farm:
     farm = get_farm_by_id(db, farm_id, owner_id)
 
-    dup = db.execute(
-        select(Farm).where(Farm.farm_identifier == data.farm_identifier, Farm.id != farm_id)
-    ).scalar_one_or_none()
-    if dup:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una finca con ese identificador",
-        )
+    if data.farm_identifier:
+        dup = db.execute(
+            select(Farm).where(Farm.farm_identifier == data.farm_identifier, Farm.id != farm_id)
+        ).scalar_one_or_none()
+        if dup:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ya existe una finca con ese identificador",
+            )
 
-    farm.name = data.name
-    farm.address = data.address
-    farm.department_id = data.department_id
-    farm.city_municipality = data.city_municipality
-    farm.total_area = data.total_area
-    farm.area_unit = data.area_unit
-    farm.purpose_id = data.purpose_id
-    farm.farm_identifier = data.farm_identifier
-    farm.phone = data.phone
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(farm, field, value)
     db.commit()
     db.refresh(farm)
     add_audit_log(

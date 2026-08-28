@@ -11,7 +11,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 class PaddockCreate(BaseModel):
@@ -63,6 +63,28 @@ class PaddockCreate(BaseModel):
             raise ValueError("La capacidad debe ser mayor a 0")
         return v
 
+    @field_validator("coverage_status")
+    @classmethod
+    def validate_coverage(cls, v: str) -> str:
+        allowed = {"bueno", "regular", "malo"}
+        if v not in allowed:
+            raise ValueError("Cobertura inválida")
+        return v
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        allowed = {"libre", "ocupado", "en_descanso"}
+        if v not in allowed:
+            raise ValueError("Estado inválido")
+        return v
+
+    @model_validator(mode="after")
+    def validate_rest_dates(self) -> "PaddockCreate":
+        if self.rest_start_date and self.rest_end_date and self.rest_start_date > self.rest_end_date:
+            raise ValueError("La fecha de inicio de descanso no puede ser posterior a la de fin")
+        return self
+
 
 class PaddockUpdate(BaseModel):
     """¿Qué? Schema para actualización parcial de un potrero.
@@ -78,6 +100,40 @@ class PaddockUpdate(BaseModel):
     status: str | None = None
     rest_start_date: date | None = None
     rest_end_date: date | None = None
+
+    @field_validator("area_hectares")
+    @classmethod
+    def validate_area(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v <= 0:
+            raise ValueError("El área debe ser mayor a 0")
+        return v
+
+    @field_validator("max_capacity")
+    @classmethod
+    def validate_capacity(cls, v: int | None) -> int | None:
+        if v is not None and v <= 0:
+            raise ValueError("La capacidad debe ser mayor a 0")
+        return v
+
+    @field_validator("coverage_status")
+    @classmethod
+    def validate_coverage(cls, v: str | None) -> str | None:
+        if v is not None and v not in {"bueno", "regular", "malo"}:
+            raise ValueError("Cobertura inválida")
+        return v
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str | None) -> str | None:
+        if v is not None and v not in {"libre", "ocupado", "en_descanso"}:
+            raise ValueError("Estado inválido")
+        return v
+
+    @model_validator(mode="after")
+    def validate_rest_dates(self) -> "PaddockUpdate":
+        if self.rest_start_date and self.rest_end_date and self.rest_start_date > self.rest_end_date:
+            raise ValueError("La fecha de inicio de descanso no puede ser posterior a la de fin")
+        return self
 
 
 class PaddockResponse(BaseModel):
