@@ -80,6 +80,19 @@ def create_movement(db: Session, farm_id: uuid.UUID, data: MovementCreate, user_
         bovine = db.execute(stmt).scalar_one_or_none()
         if not bovine:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bovino no encontrado en esta finca")
+        # ¿Qué? Evitar registrar un movimiento duplicado del mismo tipo/fecha.
+        duplicate = db.execute(
+            select(AnimalMovement.id).where(
+                AnimalMovement.bovine_id == data.bovine_id,
+                AnimalMovement.movement_type == data.movement_type,
+                AnimalMovement.movement_date == data.movement_date,
+            )
+        ).scalar_one_or_none()
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ya existe un movimiento de este tipo para el bovino en esa fecha",
+            )
 
     movement = AnimalMovement(
         farm_id=farm_id,

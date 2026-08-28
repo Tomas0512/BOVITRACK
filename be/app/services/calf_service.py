@@ -298,6 +298,24 @@ def record_calf_weight(
             detail="Ternero no encontrado",
         )
 
+    # ¿Qué? Validar que la fecha de medición no sea anterior al nacimiento.
+    if measured_date < bovine.birth_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La fecha de medición no puede ser anterior al nacimiento",
+        )
+
+    # ¿Qué? Evitar registrar dos pesajes el mismo día para el mismo ternero.
+    existing = db.query(Weight).filter(
+        Weight.bovine_id == bovine_id,
+        Weight.measured_at == measured_date,
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ya existe un pesaje registrado para esta fecha",
+        )
+
     # 2. Obtener el pesaje anterior más reciente (si existe)
     previous_weight = db.query(Weight).filter(
         Weight.bovine_id == bovine_id,
@@ -332,9 +350,13 @@ def record_calf_weight(
     db.add(new_weight)
     db.flush()  # Guardar para obtener el ID
 
-    # 5. Actualizar el peso actual del bovino
-    bovine.current_weight = weight_kg
-    db.flush()
+    # 5. Actualizar el peso actual del bovino solo si es el pesaje más reciente
+    latest = db.query(func.max(Weight.measured_at)).filter(
+        Weight.bovine_id == bovine_id,
+    ).scalar()
+    if latest is None or measured_date >= latest:
+        bovine.current_weight = weight_kg
+        db.flush()
 
     # 6. Registrar en auditoría
     if user_id:
@@ -627,9 +649,14 @@ def get_calf_summary_by_farm(
     ).scalar()
     avg_weight = float(avg_weight_result) if avg_weight_result else 0
 
-    # Ganancia diaria promedio (de la tabla Weight)
-    avg_gain_result = db.query(func.avg(Weight.daily_gain)).filter(
+    # Ganancia diaria promedio (solo de terneros, para no mezclar adultos)
+    avg_gain_result = db.query(func.avg(Weight.daily_gain)).join(
+        Bovine, Weight.bovine_id == Bovine.id,
+    ).filter(
         Weight.farm_id == farm_id,
+        Bovine.farm_id == farm_id,
+        Bovine.is_active.is_(True),
+        Bovine.birth_date > cutoff_365,
         Weight.measured_at >= date.today() - timedelta(days=30),
     ).scalar()
     avg_gain = float(avg_gain_result) if avg_gain_result else 0

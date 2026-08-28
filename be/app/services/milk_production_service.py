@@ -10,7 +10,7 @@ import uuid
 from typing import Sequence
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.bovine import Bovine
@@ -50,6 +50,21 @@ def create_record(db: Session, farm_id: uuid.UUID, data: MilkProductionCreate, u
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="El lote indicado no existe en esta finca",
+            )
+
+    # ¿Qué? Evitar registrar dos ordeños del mismo bovino/día/sesión.
+    if data.bovine_id:
+        duplicate = db.execute(
+            select(MilkProduction.id).where(
+                MilkProduction.bovine_id == data.bovine_id,
+                MilkProduction.milking_date == data.milking_date,
+                func.coalesce(MilkProduction.milking_session, "") == func.coalesce(data.milking_session, ""),
+            )
+        ).scalar_one_or_none()
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ya existe un ordeño registrado para este bovino en esa fecha/sesión",
             )
 
     record = MilkProduction(

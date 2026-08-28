@@ -73,6 +73,21 @@ def build_productive_report(
 
     total_milk = db.execute(text(milk_query), milk_params).scalar() or 0
 
+    # ¿Qué? Calcular el promedio de leche por día usando los días reales con producción.
+    avg_milk_per_day = 0.0
+    if total_milk:
+        if start_date and end_date:
+            days = (end_date - start_date).days + 1
+        else:
+            days = int(
+                db.execute(
+                    text("SELECT COUNT(DISTINCT DATE(milking_date)) FROM milk_production WHERE farm_id = :farm_id"),
+                    {"farm_id": str(farm_id)},
+                ).scalar() or 1
+            )
+        if days > 0:
+            avg_milk_per_day = round(float(total_milk) / days, 2)
+
     calves = db.execute(
         text("""
             SELECT
@@ -103,7 +118,7 @@ def build_productive_report(
         females=females,
         avg_weight=avg_weight,
         total_milk_liters=float(total_milk),
-        avg_milk_per_day=0.0,
+        avg_milk_per_day=avg_milk_per_day,
         total_calves=total_calves,
         calves_by_age_group=calves_by_age,
     )

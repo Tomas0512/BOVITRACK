@@ -7,6 +7,7 @@ Módulo: services/bovine_service.py
 """
 
 import uuid
+from datetime import date
 from typing import Sequence
 
 from fastapi import HTTPException, status
@@ -138,5 +139,7 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id
     bovine = get_bovine(db, farm_id, bovine_id)
     bovine.is_active = False
     bovine.status = "retirado"
+    bovine.exit_date = date.today()
+    bovine.exit_reason = "retirado"
     add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
     db.commit()
