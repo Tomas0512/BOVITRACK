@@ -27,7 +27,12 @@ export interface EmployeeResponse {
   farm_id: string;
   role_id: string;
   role_name: string;
+  /** Vinculación a ESTA finca (user_farm.is_active). */
   is_active: boolean;
+  /** Estado de la cuenta del usuario (users.is_active). Si es false no puede iniciar sesión. */
+  account_active: boolean;
+  /** Nº de OTRAS fincas activas donde trabaja. Cerrar la cuenta le quita el acceso a todas. */
+  other_farms_count: number;
   assigned_at: string;
   first_name: string;
   last_name: string;
@@ -89,4 +94,22 @@ export async function updateEmployee(
 
 export async function removeEmployee(farmId: string, userId: string): Promise<void> {
   await api.delete(`${base(farmId)}/employees/${userId}`);
+}
+
+/**
+ * Cierra o restablece la CUENTA de un usuario (users.is_active).
+ * Ojo: no confundir con updateEmployee({ is_active }), que solo afecta al
+ * vínculo con esta finca. Cerrar la cuenta bloquea el login en todas sus
+ * fincas y anula sus sesiones abiertas. Solo lo permite un Administrador.
+ */
+export async function setAccountStatus(
+  farmId: string,
+  userId: string,
+  data: { is_active: boolean; reason?: string }
+): Promise<EmployeeResponse> {
+  const response = await api.put<EmployeeResponse>(
+    `${base(farmId)}/employees/${userId}/account`,
+    data
+  );
+  return response.data;
 }

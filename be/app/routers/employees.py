@@ -10,15 +10,47 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
+from fastapi import HTTPException
+from sqlalchemy import select
+
 from app.dependencies import get_current_user, get_db
+from app.models.farm import UserFarm
+from app.models.role import Role
 from app.models.user import User
 from app.permissions import require_permission
-from app.schemas.employee import EmployeeResponse, EmployeeUpdate, RoleOption
+from app.schemas.employee import (
+    AccountStatusUpdate,
+    EmployeeResponse,
+    EmployeeUpdate,
+    RoleOption,
+)
 from app.schemas.invitation import InvitationCreate, InvitationResponse
 from app.services import employee_service
 from app.services import invitation_service
 
 router = APIRouter(prefix="/api/v1/farms/{farm_id}", tags=["Empleados"])
+
+
+def _require_farm_admin(db: Session, farm_id: uuid.UUID, user: User) -> None:
+    """¿Qué? Exige que el usuario sea Administrador de ESTA finca.
+    ¿Para qué? Reservar las acciones con alcance fuera de la finca (cerrar una
+               cuenta afecta a todas las fincas de esa persona).
+    ¿Impacto? 403 si el rol del usuario en la finca no es Administrador.
+    """
+    row = db.execute(
+        select(Role.name)
+        .join(UserFarm, UserFarm.role_id == Role.id)
+        .where(
+            UserFarm.user_id == user.id,
+            UserFarm.farm_id == farm_id,
+            UserFarm.is_active.is_(True),
+        )
+    ).scalar_one_or_none()
+    if row != "Administrador":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo un administrador de la finca puede cambiar el estado de una cuenta.",
+        )
 
 
 @router.get(
@@ -96,6 +128,40 @@ def update(
     """
     _ = current_user
     return employee_service.update_employee(db, farm_id, user_id, data, current_user.id)
+
+
+@router.put(
+    "/employees/{user_id}/account",
+    response_model=EmployeeResponse,
+    summary="Activar o desactivar la cuenta de un usuario",
+    dependencies=[Depends(require_permission("usuarios", "can_delete"))],
+)
+def set_account_status(
+    farm_id: uuid.UUID,
+    user_id: uuid.UUID,
+    data: AccountStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> EmployeeResponse:
+    """¿Qué? Cierra o restablece el acceso al sistema de un usuario.
+
+    COMO: administrador de la finca
+    QUIERO: impedir que una persona vuelva a iniciar sesión
+    PARA:   dar de baja a alguien que ya no trabaja en la organización.
+
+    ¿Impacto? Esto NO es lo mismo que desactivar al empleado en la finca
+              (`PUT /employees/{user_id}`), que solo le quita el acceso a esta
+              finca. Cerrar la cuenta bloquea el login en TODAS sus fincas y
+              anula sus sesiones abiertas. Por eso se reserva al rol
+              Administrador, aunque el permiso RBAC ya lo restrinja hoy.
+    """
+    _require_farm_admin(db, farm_id, current_user)
+    return employee_service.set_account_status(
+        db, farm_id, user_id,
+        is_active=data.is_active,
+        reason=data.reason,
+        actor=current_user,
+    )
 
 
 @router.delete(
