@@ -125,6 +125,46 @@ def list_calves(
 
 
 @router.get(
+    "/summary",
+    response_model=CalfSummaryResponse,
+    summary="Resumen global de terneros en la finca",
+    description="""
+    ¿Qué? Obtiene métricas resumidas de todos los terneros de una finca.
+
+    ¿Retorna?
+      {
+        total_calves: int,
+        calves_0_30_days: int,
+        calves_31_90_days: int,
+        calves_91_365_days: int,
+        average_weight_kg: float,
+        average_daily_gain: float
+      }
+
+    ¿Correspondencia HU?
+      HU007 Task 7.3: Componente CalfList con indicadores de crecimiento
+    """,
+)
+@limiter.limit("20/minute")
+def get_calf_summary(
+    request: Request,
+    farm_id: uuid.UUID = Path(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> CalfSummaryResponse:
+    """
+    ¿QUÉ PASA AQUÍ?
+
+    1. Se obtiene el resumen del servicio
+    2. Se retorna directamente como JSON
+    """
+
+    summary = calf_service.get_calf_summary_by_farm(db, farm_id)
+
+    return CalfSummaryResponse(**summary)
+
+
+@router.get(
     "/{bovine_id}",
     response_model=CalfGrowthMetricsResponse,
     summary="Detalle de un ternero con métricas de crecimiento",
@@ -168,7 +208,7 @@ def get_calf_details(
     bovine, metrics = calf_service.get_calf_details(db, farm_id, bovine_id)
 
     return CalfGrowthMetricsResponse(
-        bovine=BovineResponse.model_validate(bovine),
+        bovine=BovineResponse.model_validate(bovine).model_dump(),
         metrics=metrics.to_dict(),
     )
 
@@ -212,44 +252,6 @@ def get_calf_weight_history(
     return [WeightRecordResponse(**record) for record in history]
 
 
-@router.get(
-    "/summary",
-    response_model=CalfSummaryResponse,
-    summary="Resumen global de terneros en la finca",
-    description="""
-    ¿Qué? Obtiene métricas resumidas de todos los terneros de una finca.
-
-    ¿Retorna?
-      {
-        total_calves: int,
-        calves_0_30_days: int,
-        calves_31_90_days: int,
-        calves_91_365_days: int,
-        average_weight_kg: float,
-        average_daily_gain: float
-      }
-
-    ¿Correspondencia HU?
-      HU007 Task 7.3: Componente CalfList con indicadores de crecimiento
-    """,
-)
-@limiter.limit("20/minute")
-def get_calf_summary(
-    request: Request,
-    farm_id: uuid.UUID = Path(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> CalfSummaryResponse:
-    """
-    ¿QUÉ PASA AQUÍ?
-
-    1. Se obtiene el resumen del servicio
-    2. Se retorna directamente como JSON
-    """
-
-    summary = calf_service.get_calf_summary_by_farm(db, farm_id)
-
-    return CalfSummaryResponse(**summary)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
