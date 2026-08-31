@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { requestReactivation } from "../api/auth";
+import { getApiErrorMessage } from "../api/errors";
 
 export default function RequestReactivationPage() {
   const [email, setEmail] = useState("");
@@ -19,11 +20,7 @@ export default function RequestReactivationPage() {
       await requestReactivation({ email, reason: reason || undefined });
       setSuccess(true);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo enviar la solicitud");
+      setError(getApiErrorMessage(err, "No se pudo enviar la solicitud"));
     } finally {
       setLoading(false);
     }

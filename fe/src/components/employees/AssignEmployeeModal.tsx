@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { inviteEmployee, listRoles, type RoleOption } from "../../api/employees";
+import { getApiErrorMessage } from "../../api/errors";
 
 interface Props {
   farmId: string;
@@ -37,11 +38,7 @@ export default function AssignEmployeeModal({ farmId, onSuccess, onClose }: Prop
       setSuccessMsg(`Se envió una invitación a ${email.trim()}`);
       setTimeout(() => onSuccess(), 2000);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo enviar la invitación");
+      setError(getApiErrorMessage(err, "No se pudo enviar la invitación"));
     } finally {
       setLoading(false);
     }
