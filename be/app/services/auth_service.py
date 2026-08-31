@@ -105,20 +105,50 @@ def register_user(db: Session, user_data: UserCreate) -> User:
     return new_user
 
 
+# Bloqueo temporal por intentos fallidos de login (en memoria).
+# Nota: se pierde al reiniciar el servidor; suficiente para demo. No requiere migración.
+_LOCKOUTS: dict[str, dict] = {}
+_MAX_LOGIN_ATTEMPTS = 5
+_LOCKOUT_MINUTES = 15
+
+
 def login_user(db: Session, login_data: UserLogin) -> TokenResponse:
     """Autentica un usuario y retorna tokens JWT.
 
     Flujo: buscar por email → verificar password → generar tokens.
     """
-    stmt = select(User).where(User.email == login_data.email.lower().strip())
+    email = login_data.email.lower().strip()
+    now = datetime.now(timezone.utc)
+
+    # ¿Qué? Si la cuenta está bloqueada temporalmente, rechazar antes de validar.
+    lock = _LOCKOUTS.get(email)
+    if lock and lock.get("locked_until") and lock["locked_until"] > now:
+        remaining = int((lock["locked_until"] - now).total_seconds() // 60) + 1
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Demasiados intentos fallidos. Intente de nuevo en {remaining} minuto(s).",
+        )
+
+    stmt = select(User).where(User.email == email)
     user = db.execute(stmt).scalar_one_or_none()
 
     if not user or not verify_password(login_data.password, user.hashed_password):
+        attempts = _LOCKOUTS.get(email, {"failed": 0, "locked_until": None})
+        attempts["failed"] = attempts.get("failed", 0) + 1
+        if attempts["failed"] >= _MAX_LOGIN_ATTEMPTS:
+            attempts["locked_until"] = now + timedelta(minutes=_LOCKOUT_MINUTES)
+            attempts["failed"] = 0
+        else:
+            attempts["locked_until"] = None
+        _LOCKOUTS[email] = attempts
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales inválidas",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # ¿Qué? Login correcto: limpiar los intentos fallidos.
+    _LOCKOUTS.pop(email, None)
 
     if not user.is_active:
         raise HTTPException(
