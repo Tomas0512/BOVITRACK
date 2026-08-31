@@ -280,7 +280,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-surface rounded-lg shadow p-6">
         <div className="flex justify-center items-center h-96">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
@@ -290,7 +290,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-surface rounded-lg shadow p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
           <p className="font-semibold">⚠️ Error</p>
           <p>{error}</p>
@@ -301,8 +301,8 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
 
   if (weightHistory.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center text-gray-500">
+      <div className="bg-surface rounded-lg shadow p-6">
+        <div className="text-center text-text-muted">
           <p className="text-lg mb-2">📊 No hay datos de pesajes disponibles</p>
           <p className="text-sm">
             Registra al menos 2 pesajes para ver la curva de crecimiento
@@ -313,10 +313,10 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-surface rounded-lg shadow p-6">
       {/* CONTROLES DE RANGO */}
       <div className="mb-6 flex gap-2 flex-wrap">
-        <p className="w-full text-sm font-semibold text-gray-700">
+        <p className="w-full text-sm font-semibold text-text-secondary">
           Mostrar últimos:
         </p>
         {([30, 90, 180, 365] as const).map((days) => (
@@ -326,7 +326,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
             className={`px-4 py-2 rounded font-semibold transition ${
               daysRange === days
                 ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             {days === 30 && "30 días"}
@@ -388,13 +388,13 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
         <div className="flex items-center gap-2">
           <div className="w-6 h-1 bg-blue-600 rounded"></div>
-          <span className="text-gray-700">
+          <span className="text-text-secondary">
             <strong>Azul:</strong> Peso real del ternero
           </span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-6 h-1 bg-green-600 rounded"></div>
-          <span className="text-gray-700">
+          <span className="text-text-secondary">
             <strong>Verde:</strong> Ganancia diaria (kg/día)
           </span>
         </div>
@@ -403,7 +403,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
             className="w-6 h-1 border-b-2 border-orange-600"
             style={{ borderStyle: "dashed" }}
           ></div>
-          <span className="text-gray-700">
+          <span className="text-text-secondary">
             <strong>Naranja punteada:</strong> Referencia esperada
           </span>
         </div>

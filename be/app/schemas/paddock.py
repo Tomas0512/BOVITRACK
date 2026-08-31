@@ -20,6 +20,7 @@ class PaddockCreate(BaseModel):
     ¿Impacto? name, area_hectares y max_capacity son obligatorios y validados.
     """
 
+    land_plot_id: uuid.UUID
     name: str
     area_hectares: Decimal
     max_capacity: int
@@ -92,6 +93,7 @@ class PaddockUpdate(BaseModel):
     ¿Impacto? Permite gestionar la rotación sin recrear el potrero.
     """
 
+    land_plot_id: uuid.UUID | None = None
     name: str | None = None
     area_hectares: Decimal | None = None
     max_capacity: int | None = None
@@ -146,6 +148,8 @@ class PaddockResponse(BaseModel):
 
     id: uuid.UUID
     farm_id: uuid.UUID
+    land_plot_id: uuid.UUID
+    land_plot_name: str | None = None
     name: str
     area_hectares: Decimal
     max_capacity: int

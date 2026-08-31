@@ -239,11 +239,11 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   return (
     <div className="space-y-6">
       {/* ENCABEZADO */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+      <div className="bg-surface rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold text-text-primary mb-2">
           🐄 Gestión de Terneros
         </h2>
-        <p className="text-gray-600">
+        <p className="text-text-secondary">
           Seguimiento del crecimiento y desarrollo de crías bovinas
         </p>
       </div>
@@ -290,15 +290,15 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
       )}
 
       {/* FILTROS */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="font-semibold text-gray-700 mb-3">Filtrar por edad:</h3>
+      <div className="bg-surface rounded-lg shadow p-4">
+        <h3 className="font-semibold text-text-secondary mb-3">Filtrar por edad:</h3>
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setAgeFilter("all")}
             className={`px-4 py-2 rounded font-semibold transition ${
               ageFilter === "all"
                 ? "bg-green-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             Todos
@@ -308,7 +308,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
             className={`px-4 py-2 rounded font-semibold transition ${
               ageFilter === "0_30"
                 ? "bg-red-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             0-30 días
@@ -318,7 +318,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
             className={`px-4 py-2 rounded font-semibold transition ${
               ageFilter === "31_90"
                 ? "bg-orange-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             31-90 días
@@ -328,7 +328,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
             className={`px-4 py-2 rounded font-semibold transition ${
               ageFilter === "91_365"
                 ? "bg-yellow-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             91-365 días
@@ -346,79 +346,77 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
 
       {/* LISTA DE TERNEROS */}
       {calves.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 text-lg">
+        <div className="bg-surface rounded-lg shadow p-8 text-center">
+          <p className="text-text-muted text-lg">
             No hay terneros en este rango de edad
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+        <div className="overflow-x-auto rounded-2xl bg-surface p-6 shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                <th className="pb-2 pr-4">
                   Identificación
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                <th className="pb-2 pr-4">
                   Nombre
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                <th className="pb-2 pr-4">
                   Edad
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                <th className="pb-2 pr-4">
                   Peso Actual
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
+                <th className="pb-2 pr-4">
                   Crecimiento
                 </th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">
+                <th className="px-6 py-3 text-center text-sm font-semibold text-text-secondary">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {calves.map((calf, idx) => {
+            <tbody className="divide-y divide-border">
+              {calves.map((calf) => {
                 const growthPercentage = calculateGrowthPercentage(calf);
                 const growthColor = getGrowthColor(growthPercentage);
 
                 return (
                   <tr
                     key={calf.id}
-                    className={`border-b hover:bg-gray-50 ${
-                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
+                    className="hover:bg-surface-alt"
                   >
                     {/* Identificación */}
-                    <td className="px-6 py-4 font-semibold text-gray-800">
+                    <td className="py-3 pr-4 font-semibold text-text-primary">
                       {calf.identification_number}
                     </td>
 
                     {/* Nombre */}
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {calf.name || "Sin nombre"}
                     </td>
 
                     {/* Edad */}
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="py-3 pr-4 text-text-secondary">
                       {calf.age_days} días
                       <br />
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-text-muted">
                         ({Math.round(calf.age_days / 30)} meses)
                       </span>
                     </td>
 
                     {/* Peso */}
-                    <td className="px-6 py-4 text-gray-700">
+                    <td className="py-3 pr-4 text-text-secondary">
                       <span className="font-semibold">
                         {calf.current_weight_kg.toFixed(1)} kg
                       </span>
                     </td>
 
                     {/* Indicador de crecimiento */}
-                    <td className="px-6 py-4">
+                    <td className="py-3 pr-4">
                       <div className="flex items-center gap-2">
                         {/* Barra de progreso */}
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
+                        <div className="w-32 bg-surface-alt rounded-full h-2">
                           <div
                             className={`h-2 rounded-full transition-all ${
                               growthPercentage >= 90
@@ -438,7 +436,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
                     </td>
 
                     {/* Acciones */}
-                    <td className="px-6 py-4 text-center">
+                    <td className="py-3 pr-4 text-center">
                       <button
                         onClick={() => handleOpenWeightModal(calf)}
                         className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
@@ -457,14 +455,14 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
       {/* MODAL: REGISTRAR PESAJE */}
       {showWeightModal && selectedCalf && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
+          <div className="bg-surface rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-text-primary mb-4">
               Registrar pesaje - {selectedCalf.identification_number}
             </h3>
 
             {/* Peso */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-text-secondary mb-1">
                 Peso (kg) *
               </label>
               <input
@@ -484,7 +482,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
 
             {/* Fecha */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-text-secondary mb-1">
                 Fecha *
               </label>
               <input
@@ -502,7 +500,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
 
             {/* Condición corporal */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-text-secondary mb-1">
                 Condición corporal (1-5)
               </label>
               <select
@@ -525,7 +523,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
 
             {/* Observaciones */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
+              <label className="block text-sm font-semibold text-text-secondary mb-1">
                 Observaciones
               </label>
               <textarea
@@ -547,7 +545,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
               <button
                 onClick={handleCloseWeightModal}
                 disabled={savingWeight}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded font-semibold text-gray-700 hover:bg-gray-100 transition disabled:opacity-50"
+                className="flex-1 px-4 py-2 border border-border rounded font-semibold text-text-secondary hover:bg-surface-alt transition disabled:opacity-50"
               >
                 Cancelar
               </button>

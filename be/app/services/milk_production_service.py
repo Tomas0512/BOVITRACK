@@ -75,7 +75,7 @@ def create_record(db: Session, farm_id: uuid.UUID, data: MilkProductionCreate, u
     db.add(record)
     db.commit()
     db.refresh(record)
-    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="milk_production", entity_id=str(record.id), details={"liters": str(record.liters_produced)})
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="milk_production", entity_id=str(record.id), details={"liters": str(record.quantity_liters)})
     db.commit()
     return record
 

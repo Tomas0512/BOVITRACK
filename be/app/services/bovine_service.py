@@ -73,7 +73,7 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
     db.add(bovine)
     db.commit()
     db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()
     return bovine
 
@@ -125,7 +125,7 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
         setattr(bovine, field, value)
     db.commit()
     db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()
     return bovine
 
@@ -141,5 +141,5 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id
     bovine.status = "retirado"
     bovine.exit_date = date.today()
     bovine.exit_reason = "retirado"
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()

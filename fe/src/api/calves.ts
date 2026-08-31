@@ -132,7 +132,7 @@ export const listCalves = async (
   };
 
   const response = await apiClient.get<ICalf[]>(
-    `/api/v1/farms/${farmId}/calves`,
+    `/farms/${farmId}/calves`,
     { params }
   );
 
@@ -154,7 +154,7 @@ export const getCalfDetails = async (
   bovineId: string
 ): Promise<ICalfDetail> => {
   const response = await apiClient.get<ICalfDetail>(
-    `/api/v1/farms/${farmId}/calves/${bovineId}`
+    `/farms/${farmId}/calves/${bovineId}`
   );
 
   return response.data;
@@ -180,7 +180,7 @@ export const getCalfWeightHistory = async (
   daysBack: number = 365
 ): Promise<IWeightRecord[]> => {
   const response = await apiClient.get<IWeightRecord[]>(
-    `/api/v1/farms/${farmId}/calves/${bovineId}/weights`,
+    `/farms/${farmId}/calves/${bovineId}/weights`,
     { params: { days_back: daysBack } }
   );
 
@@ -201,7 +201,7 @@ export const getCalfSummary = async (
   farmId: string
 ): Promise<ICalfSummary> => {
   const response = await apiClient.get<ICalfSummary>(
-    `/api/v1/farms/${farmId}/calves/summary`
+    `/farms/${farmId}/calves/summary`
   );
 
   return response.data;
@@ -256,7 +256,7 @@ export const recordCalfWeight = async (
   }
 ): Promise<IWeightRecord> => {
   const response = await apiClient.post<IWeightRecord>(
-    `/api/v1/farms/${farmId}/calves/${bovineId}/weights`,
+    `/farms/${farmId}/calves/${bovineId}/weights`,
     weightData
   );
 
@@ -295,7 +295,7 @@ export const updateCalfFeedingPlan = async (
   }
 ): Promise<any> => {
   const response = await apiClient.post(
-    `/api/v1/farms/${farmId}/calves/${bovineId}/feeding-plan`,
+    `/farms/${farmId}/calves/${bovineId}/feeding-plan`,
     feedingData
   );
 

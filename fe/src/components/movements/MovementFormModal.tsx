@@ -97,7 +97,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
         <div className="mb-4 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
             >
               {i < step ? "✓ " : ""}{s.label}
             </button>
@@ -205,12 +205,12 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep}
+              <button key="paso-siguiente" type="button" onClick={nextStep}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
                 Siguiente →
               </button>
             ) : (
-              <button type="submit" disabled={loading}
+              <button key="paso-enviar" type="submit" disabled={loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
                 {loading ? "Guardando..." : isEdit ? "Actualizar" : "Registrar"}
               </button>

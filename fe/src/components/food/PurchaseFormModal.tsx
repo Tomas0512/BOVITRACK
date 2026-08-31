@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { recordPurchase, type FoodResponse, type PurchaseCreate } from "../../api/food";
+import { getApiErrorMessage } from "../../api/errors";
 
 interface Props {
   farmId: string;
@@ -57,7 +58,7 @@ export default function PurchaseFormModal({
       await recordPurchase(farmId, form);
       onSuccess();
     } catch (err: unknown) {
-      setError(err instanceof Error && err.message ? err.message : "No se pudo registrar la compra");
+      setError(getApiErrorMessage(err, "No se pudo registrar la compra"));
     } finally {
       setLoading(false);
     }

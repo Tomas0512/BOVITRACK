@@ -257,7 +257,7 @@ export default function FoodList({ farmId }: Props) {
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             categoryFilter === ""
               ? "bg-primary text-white"
-              : "bg-surface-alt text-text-secondary hover:bg-gray-200"
+              : "bg-surface-alt text-text-secondary hover:bg-border"
           }`}
         >
           Todos
@@ -271,7 +271,7 @@ export default function FoodList({ farmId }: Props) {
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               categoryFilter === category
                 ? "bg-primary text-white"
-                : "bg-surface-alt text-text-secondary hover:bg-gray-200"
+                : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}
           >
             {category} ({count})
@@ -316,7 +316,7 @@ export default function FoodList({ farmId }: Props) {
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {foods.map((food) => {
                 /**
                  * Detectar si el stock está bajo
@@ -329,7 +329,7 @@ export default function FoodList({ farmId }: Props) {
                 return (
                   <tr
                     key={food.id}
-                    className={`hover:bg-surface-alt ${isLowStock ? "bg-amber-50" : ""}`}
+                    className={`hover:bg-surface-alt ${isLowStock ? "bg-amber-500/10" : ""}`}
                   >
                     <td className="py-3 pr-4 font-medium text-text-primary">
                       {food.name}

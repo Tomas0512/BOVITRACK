@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ── Enums ───────────────────────────────────────────────
@@ -193,8 +193,7 @@ class DocumentResponse(BaseModel):
 
     is_active: bool = Field(..., description="Is active?")
 
-    class ConfigDict:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DocumentListResponse(BaseModel):

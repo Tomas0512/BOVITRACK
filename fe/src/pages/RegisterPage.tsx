@@ -265,7 +265,7 @@ export function RegisterPage() {
                     ? "bg-primary text-white"
                     : i < step
                     ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-text-muted cursor-default"
+                    : "bg-surface-alt text-text-muted cursor-default"
                 }`}
               >
                 {i < step ? "✓ " : ""}{s.label}
@@ -376,11 +376,11 @@ export function RegisterPage() {
                 </button>
               )}
               {step < STEPS.length - 1 ? (
-                <button type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">
+                <button key="paso-siguiente" type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">
                   Siguiente →
                 </button>
               ) : (
-                <button type="submit" disabled={!isFormComplete || loading}
+                <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                   className={`flex-1 rounded-lg py-2 text-sm font-bold text-white transition-all active:scale-[0.98] ${
                     !isFormComplete || loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"
                   }`}

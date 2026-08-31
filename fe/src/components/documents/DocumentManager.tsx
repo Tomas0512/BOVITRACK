@@ -18,12 +18,14 @@ const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   text: "Texto",
 };
 
+// Misma escala que los badges de la lista de empleados (50/700): chips claros
+// que se leen bien tanto sobre el fondo claro como sobre el oscuro.
 const TYPE_BADGE: Record<string, string> = {
-  pdf: "bg-red-100 text-red-800",
-  image: "bg-purple-100 text-purple-800",
-  word: "bg-blue-100 text-blue-800",
-  excel: "bg-green-100 text-green-800",
-  text: "bg-gray-100 text-gray-600",
+  pdf: "bg-red-50 text-red-700",
+  image: "bg-purple-50 text-purple-700",
+  word: "bg-blue-50 text-blue-700",
+  excel: "bg-green-50 text-green-700",
+  text: "bg-surface-alt text-text-secondary",
 };
 
 const ASSOCIATION_LABELS: Record<AssociationType, string> = {
@@ -151,24 +153,29 @@ export default function DocumentManager({ farmId }: Props) {
   };
 
   return (
-    <div className="mt-6">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-gray-900">Documentos</h2>
-        <div className="flex items-center gap-2">
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold text-text-primary">Documentos</h2>
+          <p className="text-xs text-text-muted">
+            {total} documento{total !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Buscar documentos..."
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-              className="rounded-lg border border-gray-200 py-1.5 pl-8 pr-3 text-sm focus:border-primary focus:outline-none"
+              className="rounded-lg border border-border bg-surface-alt py-2 pl-8 pr-3 text-sm text-text-primary placeholder:text-text-muted focus:border-primary focus:outline-none"
             />
           </div>
           <select
             value={filterType}
             onChange={(e) => { setFilterType(e.target.value as AssociationType | ""); setPage(0); }}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
+            className="rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
           >
             <option value="">Todos</option>
             {(Object.keys(ASSOCIATION_LABELS) as AssociationType[]).map((type) => (
@@ -177,7 +184,7 @@ export default function DocumentManager({ farmId }: Props) {
           </select>
           <button
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-sm font-bold text-white hover:bg-primary-light"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light"
           >
             <Plus size={16} />
             Subir
@@ -186,80 +193,82 @@ export default function DocumentManager({ farmId }: Props) {
       </div>
 
       {error && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
           <AlertTriangle size={16} /> {error}
           <button onClick={() => setError("")} className="ml-auto font-bold">X</button>
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-            <tr>
-              <th className="px-4 py-3">Nombre</th>
-              <th className="px-4 py-3">Tipo</th>
-              <th className="px-4 py-3">Tamanio</th>
-              <th className="px-4 py-3">Fecha</th>
-              <th className="px-4 py-3">Asociado a</th>
-              <th className="px-4 py-3 text-right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {loading ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  <div className="flex justify-center py-8">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                  </div>
-                </td>
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : documents.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border py-10 text-center">
+          <p className="text-sm text-text-muted">No hay documentos en esta categoría</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                <th className="pb-2 pr-4">Nombre</th>
+                <th className="pb-2 pr-4">Tipo</th>
+                <th className="pb-2 pr-4">Tamaño</th>
+                <th className="pb-2 pr-4">Fecha</th>
+                <th className="pb-2 pr-4">Asociado a</th>
+                <th className="pb-2">Acciones</th>
               </tr>
-            ) : documents.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-400">
-                  No hay documentos
-                </td>
-              </tr>
-            ) : (
-              documents.map((doc) => (
-                <tr key={doc.id} className="hover:bg-gray-50">
-                  <td className="max-w-xs truncate px-4 py-3 text-gray-900">{doc.original_filename}</td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_BADGE[doc.document_type] || "bg-gray-100 text-gray-600"}`}>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {documents.map((doc) => (
+                <tr key={doc.id} className="hover:bg-surface-alt">
+                  <td className="max-w-xs truncate py-3 pr-4 font-medium text-text-primary">
+                    {doc.original_filename}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <span
+                      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                        TYPE_BADGE[doc.document_type] || TYPE_BADGE.text
+                      }`}
+                    >
                       {DOCUMENT_TYPE_LABELS[doc.document_type as DocumentType] || doc.document_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{formatFileSize(doc.file_size)}</td>
-                  <td className="px-4 py-3 text-gray-700">{formatDate(doc.uploaded_at)}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
+                  <td className="py-3 pr-4 text-text-secondary">{formatFileSize(doc.file_size)}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{formatDate(doc.uploaded_at)}</td>
+                  <td className="py-3 pr-4">
+                    <span className="inline-block rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
                       {ASSOCIATION_LABELS[doc.association_type as AssociationType] || doc.association_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleDownload(doc)}
-                      className="mr-1 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                      title="Descargar"
-                    >
-                      <Download size={15} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(doc.id)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                  <td className="py-3">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleDownload(doc)}
+                        className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt"
+                        title="Descargar"
+                      >
+                        <Download size={15} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
+                        title="Eliminar"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {total > pageSize && (
-        <div className="mt-3 flex items-center justify-between text-sm text-gray-600">
+        <div className="mt-3 flex items-center justify-between text-sm text-text-secondary">
           <span>
             {page * pageSize + 1}-{Math.min((page + 1) * pageSize, total)} de {total}
           </span>
@@ -267,14 +276,14 @@ export default function DocumentManager({ farmId }: Props) {
             <button
               onClick={() => setPage(Math.max(0, page - 1))}
               disabled={page === 0}
-              className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 hover:bg-surface-alt disabled:opacity-50"
             >
               Anterior
             </button>
             <button
               onClick={() => setPage(page + 1)}
               disabled={(page + 1) * pageSize >= total}
-              className="rounded-lg border border-gray-200 px-3 py-1 disabled:opacity-50"
+              className="rounded-lg border border-border px-3 py-1 hover:bg-surface-alt disabled:opacity-50"
             >
               Siguiente
             </button>
@@ -284,28 +293,28 @@ export default function DocumentManager({ farmId }: Props) {
 
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg space-y-4 rounded-xl bg-white p-6 shadow-lg">
-            <h3 className="text-lg font-bold text-gray-900">Subir Documento</h3>
+          <div className="w-full max-w-lg space-y-4 rounded-xl bg-surface p-6 shadow-lg">
+            <h3 className="text-lg font-bold text-text-primary">Subir Documento</h3>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Archivo (max 50MB)</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Archivo (max 50MB)</label>
               <input
                 type="file"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) setUploadFile(f); }}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary"
               />
               {uploadFile && (
-                <p className="mt-1 text-xs text-gray-500">{uploadFile.name} ({formatFileSize(uploadFile.size)})</p>
+                <p className="mt-1 text-xs text-text-muted">{uploadFile.name} ({formatFileSize(uploadFile.size)})</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Tipo</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo</label>
                 <select
                   value={uploadDocType}
                   onChange={(e) => setUploadDocType(e.target.value as DocumentType)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
                 >
                   {(Object.entries(DOCUMENT_TYPE_LABELS) as [DocumentType, string][]).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -313,11 +322,11 @@ export default function DocumentManager({ farmId }: Props) {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Asociado a</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Asociado a</label>
                 <select
                   value={uploadAssocType}
                   onChange={(e) => setUploadAssocType(e.target.value as AssociationType)}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
                 >
                   {(Object.entries(ASSOCIATION_LABELS) as [AssociationType, string][]).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
@@ -327,24 +336,24 @@ export default function DocumentManager({ farmId }: Props) {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">ID de la Entidad</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">ID de la Entidad</label>
               <input
                 type="text"
                 value={uploadEntityId}
                 onChange={(e) => setUploadEntityId(e.target.value)}
                 placeholder="UUID de la entidad"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">Descripcion (opcional)</label>
+              <label className="mb-1 block text-sm font-medium text-text-secondary">Descripcion (opcional)</label>
               <textarea
                 value={uploadDesc}
                 onChange={(e) => setUploadDesc(e.target.value)}
                 maxLength={500}
                 rows={2}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -358,7 +367,7 @@ export default function DocumentManager({ farmId }: Props) {
               <button
                 onClick={() => setShowUploadModal(false)}
                 disabled={uploading}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm text-text-secondary hover:bg-surface-alt disabled:opacity-50"
               >
                 Cancelar
               </button>

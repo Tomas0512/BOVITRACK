@@ -18,6 +18,10 @@ class Paddock(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="CASCADE"), nullable=False)
+    # Jerarquía: finca > lote > potrero. Se conserva farm_id además de
+    # land_plot_id para no romper las consultas por finca ni la unicidad
+    # del nombre dentro de la finca.
+    land_plot_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("land_plot.id", ondelete="CASCADE"), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     area_hectares: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     max_capacity: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -31,7 +35,13 @@ class Paddock(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     farm: Mapped["Farm"] = relationship(back_populates="paddocks")
+    land_plot: Mapped["LandPlot"] = relationship(foreign_keys=[land_plot_id])
     herd_assignments: Mapped[list["PaddockHerd"]] = relationship(back_populates="paddock", cascade="all, delete-orphan")
+
+    @property
+    def land_plot_name(self) -> str | None:
+        """Nombre del lote al que pertenece, para mostrarlo sin consultas extra."""
+        return self.land_plot.name if self.land_plot else None
 
     def __repr__(self) -> str:
         return f"Paddock(id={self.id}, name={self.name})"

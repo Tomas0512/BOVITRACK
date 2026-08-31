@@ -11,7 +11,7 @@ import uuid
 from typing import Sequence
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.farm import UserFarm
@@ -29,7 +29,23 @@ def list_roles(db: Session) -> Sequence[Role]:
     return db.execute(stmt).scalars().all()
 
 
-def _build_response(uf: UserFarm) -> EmployeeResponse:
+def _count_other_farms(db: Session, user_id: uuid.UUID, farm_id: uuid.UUID) -> int:
+    """¿Qué? Cuenta en cuántas OTRAS fincas activas trabaja el usuario.
+    ¿Para qué? Advertir antes de cerrar una cuenta: el cierre le quita el acceso
+               a todas sus fincas, no solo a esta.
+    """
+    return db.execute(
+        select(func.count())
+        .select_from(UserFarm)
+        .where(
+            UserFarm.user_id == user_id,
+            UserFarm.farm_id != farm_id,
+            UserFarm.is_active.is_(True),
+        )
+    ).scalar_one()
+
+
+def _build_response(uf: UserFarm, other_farms_count: int = 0) -> EmployeeResponse:
     """¿Qué? Construye un EmployeeResponse combinando UserFarm + User + Role.
     ¿Para qué? El schema de respuesta requiere datos de tres modelos distintos.
     """
@@ -40,6 +56,8 @@ def _build_response(uf: UserFarm) -> EmployeeResponse:
         role_id=uf.role_id,
         role_name=uf.role.name,
         is_active=uf.is_active,
+        account_active=uf.user.is_active,
+        other_farms_count=other_farms_count,
         assigned_at=uf.assigned_at,
         first_name=uf.user.first_name,
         last_name=uf.user.last_name,
@@ -90,7 +108,7 @@ def assign_employee(
         .options(joinedload(UserFarm.user), joinedload(UserFarm.role))
         .where(UserFarm.id == uf.id)
     ).scalar_one()
-    return _build_response(uf)
+    return _build_response(uf, _count_other_farms(db, uf.user_id, farm_id))
 
 
 def list_employees(
@@ -112,7 +130,7 @@ def list_employees(
         stmt = stmt.where(UserFarm.is_active.is_(is_active))
     stmt = stmt.order_by(UserFarm.assigned_at.desc())
     user_farms = db.execute(stmt).scalars().all()
-    return [_build_response(uf) for uf in user_farms]
+    return [_build_response(uf, _count_other_farms(db, uf.user_id, farm_id)) for uf in user_farms]
 
 
 def get_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID) -> UserFarm:
@@ -191,7 +209,60 @@ def update_employee(
     ).scalar_one()
     add_audit_log(db, user_id=str(updated_by) if updated_by else None, farm_id=str(farm_id), action="update", entity="employee", entity_id=str(user_id), details={"is_active": uf.is_active})
     db.commit()
-    return _build_response(uf)
+    return _build_response(uf, _count_other_farms(db, user_id, farm_id))
+
+
+def set_account_status(
+    db: Session,
+    farm_id: uuid.UUID,
+    user_id: uuid.UUID,
+    *,
+    is_active: bool,
+    reason: str | None,
+    actor: User,
+) -> EmployeeResponse:
+    """¿Qué? Activa o desactiva la CUENTA de un usuario (users.is_active).
+    ¿Para qué? Impedir o restablecer el inicio de sesión de una persona.
+    ¿Impacto? MUY distinto de update_employee(is_active=...), que solo afecta al
+              vínculo con esta finca. Cerrar la cuenta deja a la persona sin
+              acceso a TODAS sus fincas y anula sus sesiones abiertas.
+
+    Restricciones:
+      - Solo un Administrador de la finca puede hacerlo (se valida en el router).
+      - Nadie puede cerrar su propia cuenta por aquí (existe DELETE /users/me).
+      - No se puede cerrar la cuenta del último administrador activo de la finca.
+    """
+    uf = get_employee(db, farm_id, user_id)
+
+    if not is_active:
+        if uf.user_id == actor.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No puede desactivar su propia cuenta desde aquí. Use la opción de su perfil.",
+            )
+        _last_admin_check(db, farm_id, user_id)
+
+    user = uf.user
+    if user.is_active == is_active:
+        return _build_response(uf, _count_other_farms(db, user_id, farm_id))
+
+    user.is_active = is_active
+    if not is_active:
+        # Invalida los tokens vigentes para que la sesión abierta muera al instante.
+        user.token_version += 1
+
+    add_audit_log(
+        db,
+        user_id=str(actor.id),
+        farm_id=str(farm_id),
+        action="deactivate_account" if not is_active else "activate_account",
+        entity="user",
+        entity_id=str(user_id),
+        details={"reason": reason} if reason else None,
+    )
+    db.commit()
+    db.refresh(uf)
+    return _build_response(uf, _count_other_farms(db, user_id, farm_id))
 
 
 def remove_employee(db: Session, farm_id: uuid.UUID, user_id: uuid.UUID, removed_by: uuid.UUID | None = None) -> None:

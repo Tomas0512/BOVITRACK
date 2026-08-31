@@ -95,26 +95,26 @@ export default function EconomicDashboard() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to={`/farms/${farmId}`} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+          <Link to={`/farms/${farmId}`} className="rounded-lg p-2 text-text-muted hover:bg-surface-alt hover:text-text-primary">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard Económico</h1>
-            <p className="text-sm text-gray-500">Indicadores financieros de la finca</p>
+            <h1 className="text-2xl font-bold text-text-primary">Dashboard Económico</h1>
+            <p className="text-sm text-text-muted">Indicadores financieros de la finca</p>
           </div>
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-end gap-4 rounded-2xl bg-white p-4 shadow-sm">
+      <div className="mb-6 flex flex-wrap items-end gap-4 rounded-2xl bg-surface p-4 shadow-sm">
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Desde</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Desde</label>
           <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+            className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-500">Hasta</label>
+          <label className="mb-1 block text-xs font-medium text-text-muted">Hasta</label>
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-            className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+            className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
         </div>
         <button onClick={load}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
@@ -123,7 +123,7 @@ export default function EconomicDashboard() {
         </button>
         {dateFrom || dateTo ? (
           <button onClick={() => { setDateFrom(""); setDateTo(""); }}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
             Limpiar
           </button>
         ) : null}
@@ -134,7 +134,7 @@ export default function EconomicDashboard() {
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
+        <div className="rounded-2xl bg-surface p-8 text-center shadow-sm">
           <p className="text-sm text-red-500">{error}</p>
         </div>
       ) : indicators ? (
@@ -143,12 +143,12 @@ export default function EconomicDashboard() {
             <SummaryCard icon={TrendingUp} label="Total Ingresos" value={fmt(indicators.total_income)} color="text-green-600" />
             <SummaryCard icon={TrendingDown} label="Total Egresos" value={fmt(indicators.total_expense)} color="text-red-600" />
             <SummaryCard icon={Wallet} label="Balance" value={fmt(indicators.balance)} color={indicators.balance >= 0 ? "text-green-600" : "text-red-600"} />
-            <SummaryCard icon={DollarSign} label="Promedio diario" value={`${fmt(indicators.avg_income_per_day)} / ${fmt(indicators.avg_expense_per_day)}`} color="text-gray-700" />
+            <SummaryCard icon={DollarSign} label="Promedio diario" value={`${fmt(indicators.avg_income_per_day)} / ${fmt(indicators.avg_expense_per_day)}`} color="text-text-secondary" />
           </div>
 
           <div className="mb-6 grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Ingresos por categoría</h2>
+            <div className="rounded-2xl bg-surface p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Ingresos por categoría</h2>
               {incomeCategories.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={incomeCategories} layout="vertical" margin={{ left: 0, right: 16 }}>
@@ -160,12 +160,12 @@ export default function EconomicDashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="py-8 text-center text-sm text-gray-400">Sin ingresos registrados</p>
+                <p className="py-8 text-center text-sm text-text-muted">Sin ingresos registrados</p>
               )}
             </div>
 
-            <div className="rounded-2xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-gray-900">Egresos por categoría</h2>
+            <div className="rounded-2xl bg-surface p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-text-primary">Egresos por categoría</h2>
               {expenseCategories.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={expenseCategories} layout="vertical" margin={{ left: 0, right: 16 }}>
@@ -177,13 +177,13 @@ export default function EconomicDashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="py-8 text-center text-sm text-gray-400">Sin egresos registrados</p>
+                <p className="py-8 text-center text-sm text-text-muted">Sin egresos registrados</p>
               )}
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-gray-900">Balance mensual</h2>
+          <div className="rounded-2xl bg-surface p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-text-primary">Balance mensual</h2>
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
@@ -197,7 +197,7 @@ export default function EconomicDashboard() {
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <p className="py-8 text-center text-sm text-gray-400">Sin datos mensuales para mostrar</p>
+              <p className="py-8 text-center text-sm text-text-muted">Sin datos mensuales para mostrar</p>
             )}
           </div>
         </>
@@ -208,10 +208,10 @@ export default function EconomicDashboard() {
 
 function SummaryCard({ icon: Icon, label, value, color }: { icon: LucideIcon; label: string; value: string; color: string }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-2 flex items-center gap-2">
         <Icon size={20} className={color} />
-        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</p>
       </div>
       <p className={`text-xl font-bold ${color}`}>{value}</p>
     </div>

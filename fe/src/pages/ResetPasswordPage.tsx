@@ -8,6 +8,7 @@
  */
 
 import { useState } from "react";
+import { getApiErrorMessage } from "../api/errors";
 import { Link, useSearchParams } from "react-router-dom";
 import { AlertTriangle, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
@@ -117,11 +118,7 @@ export function ResetPasswordPage() {
       await resetPasswordApi(token!, formData.password, formData.confirmPassword);
       setSubmitted(true);
     } catch (err: unknown) {
-      setServerError(
-        err instanceof Error && err.message
-          ? err.message
-          : "Error al restablecer la contraseña. Intente de nuevo."
-      );
+      setServerError(getApiErrorMessage(err, "Error al restablecer la contraseña. Intente de nuevo."));
     } finally {
       setLoading(false);
     }

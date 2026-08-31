@@ -11,8 +11,8 @@ import uuid
 from typing import Sequence
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.farm import LandPlot
 from app.models.paddock import Paddock
@@ -20,23 +20,32 @@ from app.schemas.paddock import PaddockCreate, PaddockUpdate
 from app.services.audit_service import add_audit_log
 
 
+def _validate_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID) -> None:
+    """¿Qué? Comprueba que el lote existe, está activo y pertenece a la finca.
+    ¿Para qué? Evitar potreros colgados de un lote de otra finca o inexistente.
+    ¿Impacto? 422 si el lote no sirve; es la validación que antes faltaba.
+    """
+    plot = db.execute(
+        select(LandPlot.id).where(
+            LandPlot.id == land_plot_id,
+            LandPlot.farm_id == farm_id,
+            LandPlot.is_active.is_(True),
+        )
+    ).scalar_one_or_none()
+    if plot is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="El lote indicado no existe o no pertenece a esta finca.",
+        )
+
+
 def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate, user_id: uuid.UUID | None = None) -> Paddock:
     """¿Qué? Crea un nuevo potrero asociado a una finca.
     ¿Para qué? Registrar un área de pastoreo con capacidad y estado.
     ¿Impacto? El potrero estará disponible para asignar bovinos.
     """
-    # Require at least one active land plot before allowing paddock creation
-    has_plot = db.execute(
-        select(LandPlot.id)
-        .where(LandPlot.farm_id == farm_id, LandPlot.is_active.is_(True))
-        .limit(1)
-    ).scalar_one_or_none()
-
-    if has_plot is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Debe registrar al menos un lote antes de crear un potrero.",
-        )
+    # El potrero pertenece a un lote concreto de ESTA finca (finca > lote > potrero).
+    _validate_land_plot(db, farm_id, data.land_plot_id)
 
     paddock = Paddock(farm_id=farm_id, **data.model_dump())
     db.add(paddock)
@@ -47,15 +56,27 @@ def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate, user_id
     return paddock
 
 
-def list_paddocks(db: Session, farm_id: uuid.UUID, status_filter: str | None = None) -> Sequence[Paddock]:
-    """Lista los potreros activos de una finca con filtro opcional por estado."""
+def list_paddocks(
+    db: Session,
+    farm_id: uuid.UUID,
+    status_filter: str | None = None,
+    land_plot_id: uuid.UUID | None = None,
+) -> Sequence[Paddock]:
+    """Lista los potreros activos de una finca, opcionalmente los de un solo lote.
+
+    Se ordena por lote y luego por nombre para que la UI pueda agruparlos.
+    """
     stmt = (
         select(Paddock)
+        .options(joinedload(Paddock.land_plot))
+        .join(LandPlot, LandPlot.id == Paddock.land_plot_id)
         .where(Paddock.farm_id == farm_id, Paddock.is_active.is_(True))
-        .order_by(Paddock.name.asc())
+        .order_by(LandPlot.name.asc(), Paddock.name.asc())
     )
     if status_filter:
         stmt = stmt.where(Paddock.status == status_filter)
+    if land_plot_id:
+        stmt = stmt.where(Paddock.land_plot_id == land_plot_id)
     return db.execute(stmt).scalars().all()
 
 
@@ -77,7 +98,11 @@ def update_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, data:
     ¿Impacto? Clave para la gestión de rotación de potreros.
     """
     paddock = get_paddock(db, farm_id, paddock_id)
-    for field, value in data.model_dump(exclude_unset=True).items():
+    cambios = data.model_dump(exclude_unset=True)
+    # Mover un potrero de lote es válido, pero el lote destino debe ser de la finca.
+    if cambios.get("land_plot_id") is not None:
+        _validate_land_plot(db, farm_id, cambios["land_plot_id"])
+    for field, value in cambios.items():
         setattr(paddock, field, value)
     db.commit()
     db.refresh(paddock)
@@ -92,6 +117,24 @@ def delete_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, user_
     ¿Impacto? Los bovinos en rotaciones pasadas mantienen la referencia al potrero.
     """
     paddock = get_paddock(db, farm_id, paddock_id)
+
+    # Un lote no puede quedarse sin potreros: es la misma regla que se aplica
+    # al crearlo, sostenida en el tiempo.
+    hermanos = db.execute(
+        select(func.count())
+        .select_from(Paddock)
+        .where(
+            Paddock.land_plot_id == paddock.land_plot_id,
+            Paddock.is_active.is_(True),
+            Paddock.id != paddock_id,
+        )
+    ).scalar_one()
+    if hermanos == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se puede eliminar el único potrero del lote. Cree otro potrero primero o elimine el lote completo.",
+        )
+
     paddock.is_active = False
     add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="paddock", entity_id=str(paddock.id), details={"name": paddock.name})
     db.commit()
