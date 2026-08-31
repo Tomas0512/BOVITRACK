@@ -99,7 +99,7 @@ export default function PaddockList({ farmId }: Props) {
         {[{ key: "", label: "Todos" }, { key: "libre", label: "Libres" }, { key: "ocupado", label: "Ocupados" }, { key: "en_descanso", label: "En descanso" }].map((f) => (
           <button key={f.key} onClick={() => setStatusFilter(f.key)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              statusFilter === f.key ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-gray-200"
+              statusFilter === f.key ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-border"
             }`}>
             {f.label}
           </button>
@@ -117,8 +117,24 @@ export default function PaddockList({ farmId }: Props) {
           <p className="text-sm text-text-muted">No hay potreros registrados en esta finca</p>
         </div>
       ) : (
+        // Agrupados por lote: la jerarquía es finca > lote > potrero.
+        Object.entries(
+          paddocks.reduce<Record<string, typeof paddocks>>((acc, p) => {
+            const lote = p.land_plot_name ?? "Sin lote";
+            (acc[lote] ??= []).push(p);
+            return acc;
+          }, {})
+        ).map(([lote, dellote]) => (
+        <div key={lote} className="mb-5 last:mb-0">
+          <div className="mb-2 flex items-baseline gap-2 border-b border-border pb-1">
+            <h3 className="text-sm font-bold text-text-primary">{lote}</h3>
+            <span className="text-xs text-text-muted">
+              {dellote.length} potrero{dellote.length !== 1 ? "s" : ""} ·{" "}
+              {dellote.reduce((s, p) => s + Number(p.area_hectares), 0).toFixed(1)} ha
+            </span>
+          </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {paddocks.map((p) => (
+          {dellote.map((p) => (
             <div key={p.id} className="rounded-xl border border-border bg-surface p-4">
               <div className="mb-2 flex items-start justify-between">
                 <span className="font-semibold text-text-primary">{p.name}</span>
@@ -151,6 +167,8 @@ export default function PaddockList({ farmId }: Props) {
             </div>
           ))}
         </div>
+        </div>
+        ))
       )}
 
       {showModal && (

@@ -1,5 +1,15 @@
 import api from "./axios";
 
+/** Potrero que se crea junto con su lote. Hereda el land_plot_id del lote. */
+export interface PaddockNested {
+  name: string;
+  area_hectares: number;
+  max_capacity: number;
+  coverage_status: string;
+  pasture_type?: string | null;
+  status: string;
+}
+
 export interface LandPlotRequest {
   name: string;
   area: number;
@@ -7,6 +17,8 @@ export interface LandPlotRequest {
   usage_type: string;
   max_capacity: number;
   location?: string | null;
+  /** Obligatorio al crear: un lote no puede quedar sin al menos un potrero. */
+  paddocks: PaddockNested[];
 }
 
 export interface LandPlotUpdateRequest {

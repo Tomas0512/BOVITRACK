@@ -14,6 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.farm import LandPlot
+from app.models.paddock import Paddock
 from app.schemas.land_plot import LandPlotCreate, LandPlotUpdate
 from app.services.audit_service import add_audit_log
 
@@ -25,12 +26,37 @@ def create_land_plot(db: Session, farm_id: uuid.UUID, data: LandPlotCreate, user
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un lote con ese nombre en esta finca")
 
-    lp = LandPlot(farm_id=farm_id, **data.model_dump())
+    payload = data.model_dump()
+    potreros = payload.pop("paddocks", [])
+
+    # Los nombres de potrero son únicos por finca: se valida antes de escribir
+    # nada, para no dejar el lote a medias.
+    nombres = [p["name"] for p in potreros]
+    choque = db.execute(
+        select(Paddock.name).where(Paddock.farm_id == farm_id, Paddock.name.in_(nombres))
+    ).scalars().first()
+    if choque:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ya existe un potrero llamado '{choque}' en esta finca",
+        )
+
+    # Lote y potreros entran en la MISMA transacción: si algo falla, no queda
+    # un lote huérfano sin potreros.
+    lp = LandPlot(farm_id=farm_id, **payload)
     db.add(lp)
+    db.flush()  # asigna lp.id sin confirmar todavía
+
+    for p in potreros:
+        db.add(Paddock(farm_id=farm_id, land_plot_id=lp.id, **p))
+
+    add_audit_log(
+        db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id),
+        action="create", entity="land_plot", entity_id=str(lp.id),
+        details={"name": lp.name, "paddocks": nombres},
+    )
     db.commit()
     db.refresh(lp)
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="create", entity="land_plot", entity_id=str(lp.id), details={"name": lp.name})
-    db.commit()
     return lp
 
 
