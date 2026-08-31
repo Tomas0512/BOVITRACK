@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Plus, AlertTriangle, Pencil, Trash2, ArrowUpDown } from "lucide-react";
 import { listMovements, deleteMovement, type MovementResponse } from "../../api/movements";
+import { getApiErrorMessage } from "../../api/errors";
+import Pagination from "../Pagination";
 import MovementFormModal from "./MovementFormModal";
 
 const TYPE_BADGE: Record<string, string> = {
@@ -30,18 +32,61 @@ export default function MovementList({ farmId }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<MovementResponse | null>(null);
   const [filterType, setFilterType] = useState("");
+  const [sortKey, setSortKey] = useState<string>("movement_date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(1);
+  const perPage = 8;
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+    setPage(1);
+  };
+
+  const getValue = (m: MovementResponse, key: string): string | number => {
+    const v = (m as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { total, pageCount, safePage, paginated, start, end } = useMemo(() => {
+    const arr = [...movements];
+    arr.sort((a, b) => {
+      const av = getValue(a, sortKey);
+      const bv = getValue(b, sortKey);
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    const count = arr.length;
+    const pages = Math.max(1, Math.ceil(count / perPage));
+    const p = Math.min(page, pages);
+    return {
+      total: count,
+      pageCount: pages,
+      safePage: p,
+      paginated: arr.slice((p - 1) * perPage, p * perPage),
+      start: count === 0 ? 0 : (p - 1) * perPage + 1,
+      end: Math.min(p * perPage, count),
+    };
+  }, [movements, sortKey, sortDir, page]);
 
   const fetchData = async () => {
     try {
       const data = await listMovements(farmId, filterType ? { movement_type: filterType } : undefined);
       setMovements(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar movimientos");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Error al cargar movimientos"));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { setPage(1); }, [farmId, filterType]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, [farmId, filterType]);
 
   const handleDelete = async (id: string) => {
@@ -49,8 +94,8 @@ export default function MovementList({ farmId }: Props) {
     try {
       await deleteMovement(farmId, id);
       fetchData();
-    } catch {
-      setError("No se pudo eliminar el movimiento");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo eliminar el movimiento"));
     }
   };
 
@@ -98,17 +143,29 @@ export default function MovementList({ farmId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">Tipo</th>
-                <th className="pb-2 pr-4">Fecha</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("movement_type")} className="flex items-center gap-1 uppercase">
+                    Tipo {sortKey === "movement_type" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("movement_date")} className="flex items-center gap-1 uppercase">
+                    Fecha {sortKey === "movement_date" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
                 <th className="pb-2 pr-4">Bovino</th>
-                <th className="pb-2 pr-4">Valor</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("price")} className="flex items-center gap-1 uppercase">
+                    Valor {sortKey === "price" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
                 <th className="pb-2 pr-4">Contraparte</th>
                 <th className="pb-2 pr-4">Motivo</th>
                 <th className="pb-2 pr-4 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {movements.map((m) => (
+              {paginated.map((m) => (
                 <tr key={m.id} className="hover:bg-surface-alt">
                   <td className="py-3 pr-4">
                     <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_BADGE[m.movement_type] || "bg-surface-alt text-text-secondary"}`}>
@@ -140,6 +197,14 @@ export default function MovementList({ farmId }: Props) {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={safePage}
+            pageCount={pageCount}
+            start={start}
+            end={end}
+            total={total}
+            onChange={(p) => setPage(p)}
+          />
         </div>
       )}
 

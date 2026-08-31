@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { listBovines, deleteBovine, type BovineResponse } from "../../api/bovines";
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
+import { getApiErrorMessage } from "../../api/errors";
+import Pagination from "../Pagination";
 import BovineFormModal from "./BovineFormModal";
 import { Link } from "react-router-dom";
 
@@ -29,6 +31,47 @@ export default function BovineList({ farmId }: Props) {
   const [editing, setEditing] = useState<BovineResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [filterSex, setFilterSex] = useState("");
+  const [sortKey, setSortKey] = useState<string>("identification_number");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [page, setPage] = useState(1);
+  const perPage = 8;
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+    setPage(1);
+  };
+
+  const getValue = (b: BovineResponse, key: string): string | number => {
+    const v = (b as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { total, pageCount, safePage, paginated, start, end } = useMemo(() => {
+    const arr = [...bovines];
+    arr.sort((a, b) => {
+      const av = getValue(a, sortKey);
+      const bv = getValue(b, sortKey);
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    const count = arr.length;
+    const pages = Math.max(1, Math.ceil(count / perPage));
+    const p = Math.min(page, pages);
+    return {
+      total: count,
+      pageCount: pages,
+      safePage: p,
+      paginated: arr.slice((p - 1) * perPage, p * perPage),
+      start: count === 0 ? 0 : (p - 1) * perPage + 1,
+      end: Math.min(p * perPage, count),
+    };
+  }, [bovines, sortKey, sortDir, page]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -40,13 +83,15 @@ export default function BovineList({ farmId }: Props) {
       ]);
       setBovines(b);
       setLandPlots(lp);
-    } catch {
-      setError("No se pudieron cargar los bovinos");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron cargar los bovinos"));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { setPage(1); }, [farmId, filterSex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, [farmId, filterSex]);
 
   const handleDelete = async (b: BovineResponse) => {
@@ -55,8 +100,8 @@ export default function BovineList({ farmId }: Props) {
     try {
       await deleteBovine(farmId, b.id);
       await fetchData();
-    } catch {
-      setError("No se pudo eliminar el bovino");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo eliminar el bovino"));
     } finally {
       setActionLoading(null);
     }
@@ -106,17 +151,41 @@ export default function BovineList({ farmId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">ID</th>
-                <th className="pb-2 pr-4">Nombre</th>
-                <th className="pb-2 pr-4">Sexo</th>
-                <th className="pb-2 pr-4">Raza</th>
-                <th className="pb-2 pr-4">Estado</th>
-                <th className="pb-2 pr-4">Peso actual</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("identification_number")} className="flex items-center gap-1 uppercase">
+                    ID {sortKey === "identification_number" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("name")} className="flex items-center gap-1 uppercase">
+                    Nombre {sortKey === "name" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("sex")} className="flex items-center gap-1 uppercase">
+                    Sexo {sortKey === "sex" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("breed")} className="flex items-center gap-1 uppercase">
+                    Raza {sortKey === "breed" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("status")} className="flex items-center gap-1 uppercase">
+                    Estado {sortKey === "status" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("current_weight")} className="flex items-center gap-1 uppercase">
+                    Peso actual {sortKey === "current_weight" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {bovines.map((b) => (
+              {paginated.map((b) => (
                 <tr key={b.id} className="hover:bg-surface-alt">
                   <td className="py-3 pr-4 font-mono text-xs text-text-secondary">{b.identification_number}</td>
                   <td className="py-3 pr-4 font-medium text-text-primary">{b.name ?? "—"}</td>
@@ -152,6 +221,14 @@ export default function BovineList({ farmId }: Props) {
               ))}
             </tbody>
           </table>
+          <Pagination
+            page={safePage}
+            pageCount={pageCount}
+            start={start}
+            end={end}
+            total={total}
+            onChange={(p) => setPage(p)}
+          />
         </div>
       )}
 
