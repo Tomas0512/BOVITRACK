@@ -123,8 +123,21 @@ def register_invited_user(db: Session, data: InvitedRegister) -> User:
     # Validar que no exista ya un usuario con ese email
     existing = db.execute(select(User).where(User.email == invitation.email)).scalar_one_or_none()
     if existing:
-        # Si ya existe, solo asignarlo a la finca
+        # Si ya existe, solo asignarlo a la finca.
         _assign_to_farm(db, existing, invitation)
+        add_audit_log(
+            db,
+            user_id=str(existing.id),
+            farm_id=str(invitation.farm_id),
+            action="join_farm_by_invitation",
+            entity="user",
+            entity_id=str(existing.id),
+            details={"email": existing.email, "farm_id": str(invitation.farm_id)},
+        )
+        # Sin este commit la asignación se pierde al cerrar la sesión: el
+        # endpoint respondía 201 y el usuario nunca quedaba vinculado.
+        db.commit()
+        db.refresh(existing)
         return existing
 
     # Validar datos
