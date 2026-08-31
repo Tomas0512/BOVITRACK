@@ -132,16 +132,16 @@ export default function AlertasPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link to={`/farms/${farmId}`} className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+        <Link to={`/farms/${farmId}`} className="rounded-lg p-2 text-text-muted hover:bg-surface-alt hover:text-text-primary">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Alertas y notificaciones</h1>
+        <h1 className="text-2xl font-bold text-text-primary">Alertas y notificaciones</h1>
       </div>
 
       {farmId && <AlertBanner farmId={farmId} />}
 
       {pref && (
-        <form onSubmit={handleSave} className="rounded-xl border border-gray-200 bg-surface p-6 shadow-sm">
+        <form onSubmit={handleSave} className="rounded-xl border border-border bg-surface p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
             <Bell size={20} className="text-primary" /> Preferencias
           </h2>
@@ -204,7 +204,7 @@ export default function AlertasPage() {
         </form>
       )}
 
-      <div className="rounded-xl border border-gray-200 bg-surface p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-text-primary">
           <BellRing size={20} className="text-primary" /> Historial de notificaciones
         </h2>
@@ -230,11 +230,11 @@ export default function AlertasPage() {
           <ul className="divide-y divide-border">
             {history.map((n) => (
               <li key={n.id} className={`flex items-start gap-3 py-3 ${n.read_at ? "opacity-60" : ""}`}>
-                <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.read_at ? "bg-gray-300" : "bg-primary"}`} />
+                <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.read_at ? "bg-border" : "bg-primary"}`} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-semibold text-text-primary">{n.title}</p>
-                    <span className="shrink-0 rounded bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-text-secondary">
+                    <span className="shrink-0 rounded bg-surface-alt px-2 py-0.5 text-[11px] font-medium text-text-secondary">
                       {TYPE_LABELS[n.type] ?? n.type}
                     </span>
                   </div>

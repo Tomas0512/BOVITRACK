@@ -120,7 +120,7 @@ export default function InventoryDashboard({ farmId }: Props) {
                   <th className="pb-2">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-border">
                 {recentMovements.map((m) => (
                   <tr key={m.id} className="hover:bg-surface-alt">
                     <td className="py-2 pr-3 text-text-secondary text-xs">
@@ -131,7 +131,7 @@ export default function InventoryDashboard({ farmId }: Props) {
                         m.movement_type === "purchase" ? "bg-green-50 text-green-700" :
                         m.movement_type === "adjustment" ? "bg-blue-50 text-blue-700" :
                         m.movement_type === "consumption" ? "bg-orange-50 text-orange-700" :
-                        "bg-gray-50 text-gray-700"
+                        "bg-surface-alt text-text-secondary"
                       }`}>
                         {m.movement_type}
                       </span>

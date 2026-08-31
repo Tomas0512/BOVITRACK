@@ -85,7 +85,7 @@ export default function BovineList({ farmId }: Props) {
       <div className="mb-4 flex gap-2">
         {[{ val: "", label: "Todos" }, { val: "macho", label: "Machos" }, { val: "hembra", label: "Hembras" }].map((f) => (
           <button key={f.val} onClick={() => setFilterSex(f.val)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterSex === f.val ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-gray-200"}`}>
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${filterSex === f.val ? "bg-primary text-white" : "bg-surface-alt text-text-secondary hover:bg-border"}`}>
             {f.label}
           </button>
         ))}
@@ -115,7 +115,7 @@ export default function BovineList({ farmId }: Props) {
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {bovines.map((b) => (
                 <tr key={b.id} className="hover:bg-surface-alt">
                   <td className="py-3 pr-4 font-mono text-xs text-text-secondary">{b.identification_number}</td>

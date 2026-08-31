@@ -126,17 +126,17 @@ export default function FarmDetailPage() {
           </div>
           <div className="ml-auto flex gap-2">
             <Link to={`/farms/${farmId}/economics`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary no-underline hover:bg-surface-alt">
               <BarChart3 size={16} />
               Económico
             </Link>
             <Link to={`/farms/${farmId}/reports`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary no-underline hover:bg-surface-alt">
               <FileText size={16} />
               Reportes
             </Link>
             <Link to={`/farms/${farmId}/alerts`}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 no-underline hover:bg-gray-50">
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary no-underline hover:bg-surface-alt">
               <Bell size={16} />
               Alertas
             </Link>
@@ -159,7 +159,7 @@ export default function FarmDetailPage() {
             <div className="mb-4 flex items-center gap-1.5">
               {["Ubicación", "Área y ID"].map((label, i) => (
                 <button key={i} type="button" onClick={() => { if (i < editStep) setEditStep(i); }} disabled={i > editStep}
-                  className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === editStep ? "bg-primary text-white" : i < editStep ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+                  className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === editStep ? "bg-primary text-white" : i < editStep ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
                 >
                   {i < editStep ? "✓ " : ""}{label}
                 </button>
