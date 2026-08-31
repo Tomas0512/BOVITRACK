@@ -163,6 +163,14 @@ def refresh_access_token(db: Session, refresh_token: str) -> TokenResponse:
             detail="Usuario no encontrado o cuenta desactivada",
         )
 
+    token_version = payload.get("ver")
+    if token_version is None or int(token_version) != int(user.token_version):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token inválido o expirado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     token_payload = {"sub": str(user.id), "ver": user.token_version}
     new_access = create_access_token(data=token_payload)
     new_refresh = create_refresh_token(data=token_payload)

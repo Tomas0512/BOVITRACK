@@ -129,7 +129,7 @@ export default function SanitaryPlanList({ farmId }: Props) {
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border">
               {plans.map((plan) => {
                 const overdue = isOverdue(plan.next_scheduled_date);
                 const freqLabel =
@@ -139,7 +139,7 @@ export default function SanitaryPlanList({ farmId }: Props) {
                 return (
                   <tr
                     key={plan.id}
-                    className={`hover:bg-surface-alt ${overdue ? "bg-red-50" : ""}`}
+                    className={`hover:bg-surface-alt ${overdue ? "bg-red-500/10" : ""}`}
                   >
                     <td className="py-3 pr-4 font-medium text-text-primary">
                       {plan.vaccine_or_treatment_name}

@@ -97,16 +97,16 @@ class FarmResponse(BaseModel):
 
 
 class FarmUpdate(BaseModel):
-    """Schema para actualizar una finca."""
+    """Schema para actualizar parcialmente una finca (solo los campos enviados)."""
 
-    name: str
-    address: str
-    department_id: uuid.UUID
-    city_municipality: str
-    total_area: Decimal
-    area_unit: str = "hectareas"
-    purpose_id: uuid.UUID
-    farm_identifier: str
+    name: str | None = None
+    address: str | None = None
+    department_id: uuid.UUID | None = None
+    city_municipality: str | None = None
+    total_area: Decimal | None = None
+    area_unit: str | None = None
+    purpose_id: uuid.UUID | None = None
+    farm_identifier: str | None = None
     phone: str | None = None
 
 

@@ -43,6 +43,18 @@ class EmployeeUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class AccountStatusUpdate(BaseModel):
+    """¿Qué? Datos para activar o desactivar la CUENTA de un usuario.
+    ¿Para qué? Impedir (o restablecer) el inicio de sesión de una persona.
+    ¿Impacto? Es distinto de EmployeeUpdate.is_active, que solo afecta al vínculo
+              con esta finca. Desactivar la cuenta cierra el acceso al sistema
+              completo, incluidas las demás fincas donde la persona trabaje.
+    """
+
+    is_active: bool
+    reason: str | None = None
+
+
 class EmployeeResponse(BaseModel):
     """¿Qué? Schema de respuesta con datos combinados de UserFarm + User + Role.
     ¿Para qué? Mostrar en la UI el nombre, email, rol y estado del empleado.
@@ -55,6 +67,13 @@ class EmployeeResponse(BaseModel):
     role_id: uuid.UUID
     role_name: str
     is_active: bool
+    # Estado de la CUENTA del usuario (users.is_active), distinto de is_active,
+    # que solo indica si sigue vinculado a esta finca (user_farm.is_active).
+    # Una cuenta desactivada no puede iniciar sesión en ninguna finca.
+    account_active: bool = True
+    # Nº de OTRAS fincas activas donde trabaja esta persona. Sirve para advertir
+    # al administrador antes de desactivar una cuenta: el cierre afecta a todas.
+    other_farms_count: int = 0
     assigned_at: datetime
     first_name: str
     last_name: str

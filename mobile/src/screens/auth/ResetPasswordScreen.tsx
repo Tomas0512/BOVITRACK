@@ -38,7 +38,7 @@ export default function ResetPasswordScreen() {
       const pwdErr = validatePassword(password);
       if (pwdErr) return Promise.reject(new Error(pwdErr));
       if (password !== confirm) return Promise.reject(new Error('Las contrasenas no coinciden'));
-      return resetPassword(token, password);
+      return resetPassword(token, password, confirm);
     },
     onSuccess: () => setDone(true),
     onError: (e: Error) => setError(e.message),

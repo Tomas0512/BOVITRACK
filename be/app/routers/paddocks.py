@@ -42,12 +42,15 @@ def create(
 def list_all(
     farm_id: uuid.UUID,
     paddock_status: str | None = Query(None, alias="status", description="Filtrar por estado: libre, ocupado, en_descanso"),
+    land_plot_id: uuid.UUID | None = Query(None, description="Filtrar por lote al que pertenece"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[PaddockResponse]:
-    """Lista los potreros activos de la finca con filtro opcional por estado."""
+    """Lista los potreros activos de la finca, con filtro por estado y por lote."""
     _ = current_user
-    paddocks = paddock_service.list_paddocks(db, farm_id, status_filter=paddock_status)
+    paddocks = paddock_service.list_paddocks(
+        db, farm_id, status_filter=paddock_status, land_plot_id=land_plot_id
+    )
     return [PaddockResponse.model_validate(p) for p in paddocks]
 
 

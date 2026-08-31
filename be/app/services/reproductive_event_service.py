@@ -22,6 +22,39 @@ _CALF_SEX_MAP: dict[str, list[str]] = {
 
 
 def create_event(db: Session, farm_id: uuid.UUID, data: ReproductiveEventCreate, user_id: uuid.UUID) -> ReproductiveEvent:
+    if data.bovine_id:
+        maternal = db.execute(
+            select(Bovine).where(Bovine.id == data.bovine_id, Bovine.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not maternal:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El bovino indicado no existe en esta finca",
+            )
+        if data.event_type == "parto" and maternal.sex != "hembra":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Solo una hembra puede registrar un parto",
+            )
+    if data.bull_id:
+        bull = db.execute(
+            select(Bovine).where(Bovine.id == data.bull_id, Bovine.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not bull:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El toro indicado no existe en esta finca",
+            )
+    if data.calf_id:
+        calf = db.execute(
+            select(Bovine).where(Bovine.id == data.calf_id, Bovine.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not calf:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La cría indicada no existe en esta finca",
+            )
+
     event = ReproductiveEvent(
         farm_id=farm_id,
         registered_by=user_id,
@@ -99,6 +132,17 @@ def update_event(db: Session, farm_id: uuid.UUID, event_id: uuid.UUID, data: Rep
     event = get_event(db, farm_id, event_id)
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(event, field, value)
+
+    # ¿Qué? Recalcular la fecha probable de parto si pasó a "servicio".
+    if event.event_type == "servicio" and event.due_date is None:
+        event.due_date = event.event_date + timedelta(days=GESTATION_DAYS)
+
+    # ¿Qué? Si se registra como parto y aún no hay cría, crear las crías.
+    if event.event_type == "parto" and not event.calf_id:
+        calves = _create_calves_from_birth(db, farm_id, event, user_id)
+        if calves:
+            event.calf_id = calves[0].id
+
     db.commit()
     db.refresh(event)
     add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="update", entity="reproductive_event", entity_id=str(event.id), details={"type": event.event_type})

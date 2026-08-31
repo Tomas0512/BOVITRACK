@@ -29,6 +29,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
+from app.models.bovine import Bovine
 from app.schemas.document import DocumentUploadRequest
 from app.services.audit_service import add_audit_log
 
@@ -194,6 +195,25 @@ def create_document(
       If file save fails, DB stays consistent
       because save happens FIRST, register AFTER
     """
+
+    # ¿Qué? Validar que la entidad asociada pertenezca a la finca.
+    association_type = request_data.association_type.value
+    entity_id = request_data.associated_entity_id
+    if association_type == "farm":
+        if entity_id != farm_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La finca asociada no coincide",
+            )
+    elif association_type == "bovine":
+        bovine = db.execute(
+            select(Bovine.id).where(Bovine.id == entity_id, Bovine.farm_id == farm_id)
+        ).scalar_one_or_none()
+        if not bovine:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El bovino asociado no existe en esta finca",
+            )
 
     # 1. Save file to filesystem
     stored_filename = save_document_file(file_content, request_data.mime_type)

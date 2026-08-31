@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, model_validator
 
 
 # ════════════════════════════════════════
@@ -49,8 +49,15 @@ class UserCreate(BaseModel):
     document_number: str
     phone: str
     password: str
+    confirm_password: str
     accept_terms: bool
     accept_data_policy: bool
+
+    @model_validator(mode="after")
+    def validate_passwords_match(self) -> "UserCreate":
+        if self.password != self.confirm_password:
+            raise ValueError("Las contraseñas no coinciden")
+        return self
 
     @field_validator("first_name")
     @classmethod
@@ -145,6 +152,13 @@ class ResetPasswordRequest(BaseModel):
 
     token: str
     new_password: str
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def validate_passwords_match(self) -> "ResetPasswordRequest":
+        if self.new_password != self.confirm_password:
+            raise ValueError("Las contraseñas no coinciden")
+        return self
 
     @field_validator("new_password")
     @classmethod

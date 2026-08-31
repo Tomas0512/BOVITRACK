@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPaddock, updatePaddock, type PaddockRequest, type PaddockResponse } from "../../api/paddocks";
+import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
+import { getApiErrorMessage } from "../../api/errors";
 
 interface Props {
   farmId: string;
@@ -19,7 +21,10 @@ const STEPS = [
 
 export default function PaddockFormModal({ farmId, existing, onSuccess, onClose }: Props) {
   const [step, setStep] = useState(0);
+  // Un potrero pertenece siempre a un lote de la finca (finca > lote > potrero).
+  const [landPlots, setLandPlots] = useState<LandPlotResponse[]>([]);
   const [form, setForm] = useState<PaddockRequest>({
+    land_plot_id: existing?.land_plot_id ?? "",
     name: existing?.name ?? "",
     area_hectares: existing?.area_hectares ?? 0,
     max_capacity: existing?.max_capacity ?? 1,
@@ -32,7 +37,21 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    listLandPlots(farmId, true)
+      .then((data) => {
+        setLandPlots(data);
+        // Si solo hay un lote, se preselecciona para ahorrar un clic.
+        setForm((f) => (f.land_plot_id === "" && data.length === 1 ? { ...f, land_plot_id: data[0].id } : f));
+      })
+      .catch(() => setError("No se pudieron cargar los lotes de la finca"));
+  }, [farmId]);
+
   const validateStep = (s: number): boolean => {
+    if (s === 0 && !form.land_plot_id) {
+      setError("Seleccione el lote al que pertenece el potrero");
+      return false;
+    }
     if (s === 0 && (!form.name.trim() || form.area_hectares <= 0 || form.max_capacity < 1)) {
       setError("Nombre, área y capacidad máxima son obligatorios");
       return false;
@@ -44,13 +63,16 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   const isFormComplete =
-    form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
+    form.land_plot_id !== "" && form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
 
-  const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) =>
+  const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     try {
@@ -61,11 +83,7 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
       }
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo guardar el potrero");
+      setError(getApiErrorMessage(err, "No se pudo guardar el potrero"));
     } finally {
       setLoading(false);
     }
@@ -85,7 +103,7 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
         <div className="mb-4 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
             >
               {i < step ? "✓ " : ""}{s.label}
             </button>
@@ -102,6 +120,25 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
           {step === 0 && (
             <>
               <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote al que pertenece</label>
+                <select
+                  value={form.land_plot_id}
+                  onChange={(e) => set("land_plot_id", e.target.value)}
+                  className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
+                  required
+                >
+                  <option value="">Seleccione un lote…</option>
+                  {landPlots.map((lp) => (
+                    <option key={lp.id} value={lp.id}>{lp.name}</option>
+                  ))}
+                </select>
+                {landPlots.length === 0 && (
+                  <span className="mt-0.5 block text-xs text-amber-600">
+                    Esta finca no tiene lotes. Cree un lote antes de registrar potreros.
+                  </span>
+                )}
+              </div>
+              <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del potrero</label>
                 <input type="text" value={form.name} maxLength={100} onChange={(e) => set("name", e.target.value)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
@@ -110,12 +147,12 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Área (ha)</label>
-                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value))}
+                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Cap. máx. animales</label>
-                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value))}
+                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>
@@ -173,12 +210,12 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep}
+              <button key="paso-siguiente" type="button" onClick={nextStep}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
                 Siguiente →
               </button>
             ) : (
-              <button type="submit" disabled={!isFormComplete || loading}
+              <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed">
                 {loading ? "Guardando..." : existing ? "Guardar cambios" : "Crear potrero"}
               </button>

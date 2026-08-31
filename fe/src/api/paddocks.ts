@@ -1,6 +1,7 @@
 import api from "./axios";
 
 export interface PaddockRequest {
+  land_plot_id: string;
   name: string;
   area_hectares: number;
   max_capacity: number;
@@ -14,6 +15,8 @@ export interface PaddockRequest {
 export interface PaddockResponse {
   id: string;
   farm_id: string;
+  land_plot_id: string;
+  land_plot_name: string | null;
   name: string;
   area_hectares: number;
   max_capacity: number;

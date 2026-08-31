@@ -178,6 +178,7 @@ def main():
                 phone="+57 300 123 4567",
                 hashed_password=pwd.hash("Demo1234!"),
                 is_active=True,
+                email_verified=True,
                 accepted_terms=True,
                 accepted_data_policy=True,
             )

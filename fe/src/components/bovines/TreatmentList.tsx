@@ -83,9 +83,9 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
                 key={t.id}
                 className={`rounded-xl border p-4 ${
                   isOverdue
-                    ? "border-red-200 bg-red-50"
+                    ? "border-red-500/30 bg-red-500/10"
                     : isUpcoming
-                    ? "border-amber-200 bg-amber-50"
+                    ? "border-amber-500/30 bg-amber-500/10"
                     : "border-border bg-surface-alt"
                 }`}
               >

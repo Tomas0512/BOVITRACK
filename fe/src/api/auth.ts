@@ -40,10 +40,11 @@ export async function forgotPassword(email: string): Promise<MessageResponse> {
 }
 
 /** Restablecer contraseña con token */
-export async function resetPassword(token: string, newPassword: string): Promise<MessageResponse> {
+export async function resetPassword(token: string, newPassword: string, confirmPassword: string): Promise<MessageResponse> {
   const response = await api.post<MessageResponse>(`${AUTH}/reset-password`, {
     token,
     new_password: newPassword,
+    confirm_password: confirmPassword,
   });
   return response.data;
 }
@@ -71,6 +72,7 @@ export interface InvitedRegisterRequest {
   document_number: string;
   phone: string;
   password: string;
+  confirm_password: string;
   accept_terms: boolean;
   accept_data_policy: boolean;
 }

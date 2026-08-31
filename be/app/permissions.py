@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
 from app.models.farm import UserFarm
-from app.models.role import Permission
+from app.models.role import Permission, Role
 from app.models.user import User
 
 
@@ -61,6 +61,14 @@ def require_permission(module: str, action: str):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="No tienes acceso a esta finca",
+            )
+
+        # ¿Qué? Verificar que el rol al que pertenece el usuario siga activo.
+        role = db.get(Role, user_farm.role_id)
+        if role is None or not role.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tu rol está desactivado",
             )
 
         # ¿Qué? Buscar el permiso del rol para el módulo solicitado.

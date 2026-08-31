@@ -7,6 +7,7 @@ Módulo: services/bovine_service.py
 """
 
 import uuid
+from datetime import date
 from typing import Sequence
 
 from fastapi import HTTPException, status
@@ -14,6 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.bovine import Bovine
+from app.models.farm import LandPlot
 from app.schemas.bovine import BovineCreate, BovineUpdate
 from app.services.audit_service import add_audit_log
 
@@ -24,6 +26,45 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
     ¿Impacto? registered_by se asigna automáticamente al usuario autenticado
               para mantener la trazabilidad.
     """
+    # ¿Qué? Validar unicidad del número de identificación dentro de la finca.
+    dup = db.execute(
+        select(Bovine).where(
+            Bovine.farm_id == farm_id,
+            Bovine.identification_number == data.identification_number,
+        )
+    ).scalar_one_or_none()
+    if dup:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un bovino con esa identificación en la finca",
+        )
+
+    # ¿Qué? Validar que padre/madre pertenezcan a la finca.
+    for ref in (data.father_id, data.mother_id):
+        if ref:
+            ref_bovine = db.execute(
+                select(Bovine).where(Bovine.id == ref, Bovine.farm_id == farm_id)
+            ).scalar_one_or_none()
+            if not ref_bovine:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El bovino padre/madre indicado no existe en esta finca",
+                )
+
+    # ¿Qué? Validar que el lote indicado pertenezca a la finca.
+    if data.land_plot_id:
+        land_plot = db.execute(
+            select(LandPlot).where(
+                LandPlot.id == data.land_plot_id,
+                LandPlot.farm_id == farm_id,
+            )
+        ).scalar_one_or_none()
+        if not land_plot:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El lote indicado no existe en esta finca",
+            )
+
     bovine = Bovine(
         farm_id=farm_id,
         registered_by=user_id,
@@ -32,7 +73,7 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
     db.add(bovine)
     db.commit()
     db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()
     return bovine
 
@@ -84,7 +125,7 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
         setattr(bovine, field, value)
     db.commit()
     db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()
     return bovine
 
@@ -98,5 +139,7 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id
     bovine = get_bovine(db, farm_id, bovine_id)
     bovine.is_active = False
     bovine.status = "retirado"
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.tag_number})
+    bovine.exit_date = date.today()
+    bovine.exit_reason = "retirado"
+    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()

@@ -55,6 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verify();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Escuchar fallo de refresh (lanza el interceptor) para cerrar sesión
+  useEffect(() => {
+    const onLogout = () => clearSession();
+    window.addEventListener("auth:logout", onLogout);
+    return () => window.removeEventListener("auth:logout", onLogout);
+  }, [clearSession]);
+
   const login = useCallback(async (email: string, password: string) => {
     const tokens = await loginUser({ email, password });
     saveTokens(tokens.access_token, tokens.refresh_token);
@@ -64,9 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(async (data: RegisterRequest) => {
     await registerUser(data);
-    // Auto-login después de registro
-    await login(data.email, data.password);
-  }, [login]);
+  }, []);
 
   const logout = useCallback(() => {
     clearSession();
@@ -77,8 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return res.message;
   }, []);
 
-  const resetPassword = useCallback(async (token: string, newPassword: string) => {
-    const res = await apiResetPassword(token, newPassword);
+  const resetPassword = useCallback(async (token: string, newPassword: string, confirmPassword: string) => {
+    const res = await apiResetPassword(token, newPassword, confirmPassword);
     return res.message;
   }, []);
 

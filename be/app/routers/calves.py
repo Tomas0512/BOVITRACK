@@ -52,7 +52,6 @@ from app.utils.limiter import limiter
 router = APIRouter(
     prefix="/api/v1/farms/{farm_id}/calves",
     tags=["Terneros (HU007)"],
-    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -79,6 +78,7 @@ router = APIRouter(
     ¿Correspondencia HU?
       HU007 Task 7.1: Endpoint/vista de terneros por edad/estado
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("10/minute")
 def list_calves(
@@ -125,6 +125,47 @@ def list_calves(
 
 
 @router.get(
+    "/summary",
+    response_model=CalfSummaryResponse,
+    summary="Resumen global de terneros en la finca",
+    description="""
+    ¿Qué? Obtiene métricas resumidas de todos los terneros de una finca.
+
+    ¿Retorna?
+      {
+        total_calves: int,
+        calves_0_30_days: int,
+        calves_31_90_days: int,
+        calves_91_365_days: int,
+        average_weight_kg: float,
+        average_daily_gain: float
+      }
+
+    ¿Correspondencia HU?
+      HU007 Task 7.3: Componente CalfList con indicadores de crecimiento
+    """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
+)
+@limiter.limit("20/minute")
+def get_calf_summary(
+    request: Request,
+    farm_id: uuid.UUID = Path(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> CalfSummaryResponse:
+    """
+    ¿QUÉ PASA AQUÍ?
+
+    1. Se obtiene el resumen del servicio
+    2. Se retorna directamente como JSON
+    """
+
+    summary = calf_service.get_calf_summary_by_farm(db, farm_id)
+
+    return CalfSummaryResponse(**summary)
+
+
+@router.get(
     "/{bovine_id}",
     response_model=CalfGrowthMetricsResponse,
     summary="Detalle de un ternero con métricas de crecimiento",
@@ -148,6 +189,7 @@ def list_calves(
     ¿Correspondencia HU?
       HU007 Task 7.5: Integración con ficha general del bovino
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def get_calf_details(
@@ -168,7 +210,7 @@ def get_calf_details(
     bovine, metrics = calf_service.get_calf_details(db, farm_id, bovine_id)
 
     return CalfGrowthMetricsResponse(
-        bovine=BovineResponse.model_validate(bovine),
+        bovine=BovineResponse.model_validate(bovine).model_dump(),
         metrics=metrics.to_dict(),
     )
 
@@ -189,6 +231,7 @@ def get_calf_details(
     ¿Correspondencia HU?
       HU007 Task 7.4: Curva de crecimiento del ternero (datos para gráfica)
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def get_calf_weight_history(
@@ -212,44 +255,6 @@ def get_calf_weight_history(
     return [WeightRecordResponse(**record) for record in history]
 
 
-@router.get(
-    "/summary",
-    response_model=CalfSummaryResponse,
-    summary="Resumen global de terneros en la finca",
-    description="""
-    ¿Qué? Obtiene métricas resumidas de todos los terneros de una finca.
-
-    ¿Retorna?
-      {
-        total_calves: int,
-        calves_0_30_days: int,
-        calves_31_90_days: int,
-        calves_91_365_days: int,
-        average_weight_kg: float,
-        average_daily_gain: float
-      }
-
-    ¿Correspondencia HU?
-      HU007 Task 7.3: Componente CalfList con indicadores de crecimiento
-    """,
-)
-@limiter.limit("20/minute")
-def get_calf_summary(
-    request: Request,
-    farm_id: uuid.UUID = Path(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> CalfSummaryResponse:
-    """
-    ¿QUÉ PASA AQUÍ?
-
-    1. Se obtiene el resumen del servicio
-    2. Se retorna directamente como JSON
-    """
-
-    summary = calf_service.get_calf_summary_by_farm(db, farm_id)
-
-    return CalfSummaryResponse(**summary)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -285,6 +290,7 @@ def get_calf_summary(
     ¿Correspondencia HU?
       HU007 Task 7.2: Registro de crecimiento (peso)
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_create"))],
 )
 @limiter.limit("5/minute")
 def record_calf_weight(
@@ -356,6 +362,7 @@ def record_calf_weight(
       HU007 Task 7.2: Registro de alimentación
       HU010: Registrar información económica
     """,
+    dependencies=[Depends(require_permission("bovinos", "can_create"))],
 )
 @limiter.limit("5/minute")
 def update_calf_feeding_plan(

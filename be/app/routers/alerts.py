@@ -30,7 +30,8 @@ from app.services import notification_service
 router = APIRouter(prefix="/api/v1/farms/{farm_id}/alerts", tags=["Alertas"])
 
 
-@router.get("", summary="Obtener alertas activas de la finca")
+@router.get("", summary="Obtener alertas activas de la finca",
+            dependencies=[Depends(require_permission("fincas", "can_read"))])
 def list_alerts(
     farm_id: uuid.UUID,
     days: int = Query(7, ge=1, le=90, description="Días hacia adelante para alertas próximas"),

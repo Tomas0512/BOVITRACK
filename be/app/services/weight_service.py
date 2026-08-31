@@ -92,8 +92,17 @@ def create_weight(
     )
     db.add(record)
 
-    # Actualizar current_weight del bovino con el último peso registrado
-    bovine.current_weight = data.weight_kg
+    # ¿Qué? Actualizar current_weight solo si este pesaje es el más reciente.
+    # ¿Para qué? Evitar sobrescribir el peso con un valor atrasado.
+    latest_stmt = (
+        select(Weight.measured_at)
+        .where(Weight.bovine_id == bovine_id)
+        .order_by(Weight.measured_at.desc())
+        .limit(1)
+    )
+    latest = db.execute(latest_stmt).scalar_one_or_none()
+    if latest is None or data.measured_at >= latest:
+        bovine.current_weight = data.weight_kg
 
     db.commit()
     db.refresh(record)

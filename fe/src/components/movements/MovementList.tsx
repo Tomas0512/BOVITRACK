@@ -8,7 +8,7 @@ const TYPE_BADGE: Record<string, string> = {
   venta: "bg-red-100 text-red-800",
   traslado: "bg-blue-100 text-blue-800",
   nacimiento: "bg-purple-100 text-purple-800",
-  muerte: "bg-gray-200 text-gray-700",
+  muerte: "bg-surface-alt text-text-secondary",
 };
 
 const TYPE_LABEL: Record<string, string> = {
@@ -55,14 +55,14 @@ export default function MovementList({ farmId }: Props) {
   };
 
   return (
-    <div className="mt-6">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-gray-900">Movimientos del hato</h2>
+    <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-bold text-text-primary">Movimientos del hato</h2>
         <div className="flex items-center gap-2">
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
           >
             <option value="">Todos los tipos</option>
             {Object.entries(TYPE_LABEL).map(([k, v]) => (
@@ -89,48 +89,48 @@ export default function MovementList({ farmId }: Props) {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : movements.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 py-8 text-center text-sm text-gray-400">
-          <ArrowUpDown size={32} className="mx-auto mb-2 text-gray-300" />
+        <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-text-muted">
+          <ArrowUpDown size={32} className="mx-auto mb-2 text-text-muted" />
           No hay movimientos registrados aún
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs font-semibold uppercase text-gray-500">
-              <tr>
-                <th className="px-4 py-3">Tipo</th>
-                <th className="px-4 py-3">Fecha</th>
-                <th className="px-4 py-3">Bovino</th>
-                <th className="px-4 py-3">Valor</th>
-                <th className="px-4 py-3">Contraparte</th>
-                <th className="px-4 py-3">Motivo</th>
-                <th className="px-4 py-3 text-right">Acciones</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                <th className="pb-2 pr-4">Tipo</th>
+                <th className="pb-2 pr-4">Fecha</th>
+                <th className="pb-2 pr-4">Bovino</th>
+                <th className="pb-2 pr-4">Valor</th>
+                <th className="pb-2 pr-4">Contraparte</th>
+                <th className="pb-2 pr-4">Motivo</th>
+                <th className="pb-2 pr-4 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-border">
               {movements.map((m) => (
-                <tr key={m.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_BADGE[m.movement_type] || "bg-gray-100 text-gray-600"}`}>
+                <tr key={m.id} className="hover:bg-surface-alt">
+                  <td className="py-3 pr-4">
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${TYPE_BADGE[m.movement_type] || "bg-surface-alt text-text-secondary"}`}>
                       {TYPE_LABEL[m.movement_type] || m.movement_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{new Date(m.movement_date).toLocaleDateString("es-CO")}</td>
-                  <td className="px-4 py-3 text-gray-700">{m.bovine_id ? m.bovine_id.slice(0, 8) + "..." : "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{m.price != null ? `$${Number(m.price).toLocaleString("es-CO")}` : "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{m.counterparty_name || "—"}</td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-gray-500">{m.reason || "—"}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="py-3 pr-4 text-text-secondary">{new Date(m.movement_date).toLocaleDateString("es-CO")}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{m.bovine_id ? m.bovine_id.slice(0, 8) + "..." : "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{m.price != null ? `$${Number(m.price).toLocaleString("es-CO")}` : "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{m.counterparty_name || "—"}</td>
+                  <td className="max-w-[200px] truncate py-3 pr-4 text-text-muted">{m.reason || "—"}</td>
+                  <td className="py-3 pr-4 text-right">
                     <button
                       onClick={() => { setEditing(m); setShowModal(true); }}
-                      className="mr-1 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                      className="mr-1 rounded-lg p-1.5 text-text-muted hover:bg-surface-alt hover:text-text-primary"
                       title="Editar"
                     >
                       <Pencil size={15} />
                     </button>
                     <button
                       onClick={() => handleDelete(m.id)}
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                      className="rounded-lg p-1.5 text-text-muted hover:bg-red-50 hover:text-red-600"
                       title="Eliminar"
                     >
                       <Trash2 size={15} />

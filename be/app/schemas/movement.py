@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from app.models.movement import MOVEMENT_TYPES
 
@@ -34,6 +34,12 @@ class MovementCreate(BaseModel):
         if v is not None and v < 0:
             raise ValueError("El precio no puede ser negativo")
         return v
+
+    @model_validator(mode="after")
+    def validate_date(self) -> "MovementCreate":
+        if self.movement_date > date.today():
+            raise ValueError("La fecha del movimiento no puede ser futura")
+        return self
 
 
 class MovementUpdate(BaseModel):

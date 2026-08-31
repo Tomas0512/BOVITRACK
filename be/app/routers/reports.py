@@ -9,10 +9,11 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import Response
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
+from app.models.farm import Farm, UserFarm
 from app.models.user import User
 from app.permissions import require_permission
 from app.schemas.report import (
@@ -25,6 +26,41 @@ from app.services import report_service
 from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/v1", tags=["Reportes"])
+
+
+def _accessible_farm_ids(db: Session, user_id: uuid.UUID) -> list[str]:
+    """¿Qué? Devuelve los ids (como str) de las fincas activas del usuario.
+
+    Considera tanto las fincas donde el usuario es propietario como aquellas
+    donde está registrado como miembro activo (UserFarm). Se usa para acotar
+    las consultas globales a las fincas del usuario y evitar fugas entre fincas.
+    """
+    owner_stmt = select(Farm.id).where(
+        Farm.owner_id == user_id,
+        Farm.is_active.is_(True),
+    )
+    member_stmt = select(UserFarm.farm_id).where(
+        UserFarm.user_id == user_id,
+        UserFarm.is_active.is_(True),
+    )
+    ids: set[str] = set()
+    ids.update(str(x) for x in db.execute(owner_stmt).scalars().all())
+    ids.update(str(x) for x in db.execute(member_stmt).scalars().all())
+    return sorted(ids)
+
+
+def _query_view_filtered(db: Session, user_id: uuid.UUID, view: str) -> list[dict]:
+    """¿Qué? Consulta una vista de reporte acotada a las fincas del usuario."""
+    farm_ids = _accessible_farm_ids(db, user_id)
+    if not farm_ids:
+        return []
+    placeholders = ",".join(f":f{i}" for i in range(len(farm_ids)))
+    params = {f"f{i}": fid for i, fid in enumerate(farm_ids)}
+    result = db.execute(
+        text(f"SELECT * FROM {view} WHERE farm_id IN ({placeholders})"),
+        params,
+    )
+    return [dict(row._mapping) for row in result]
 
 
 @router.get("/farms/{farm_id}/statistics", summary="Estadisticas completas de finca", dependencies=[Depends(require_permission("fincas", "can_read"))])
@@ -61,8 +97,7 @@ def farm_summary(
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
     _ = current_user
-    result = db.execute(text("SELECT * FROM v_farm_summary"))
-    return [dict(row._mapping) for row in result]
+    return _query_view_filtered(db, current_user.id, "v_farm_summary")
 
 
 @router.get("/reports/low-stock-alerts", summary="Alertas de stock bajo")
@@ -71,8 +106,7 @@ def low_stock_alerts(
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
     _ = current_user
-    result = db.execute(text("SELECT * FROM v_low_stock_alerts"))
-    return [dict(row._mapping) for row in result]
+    return _query_view_filtered(db, current_user.id, "v_low_stock_alerts")
 
 
 @router.get("/reports/pending-tasks", summary="Tareas pendientes")
@@ -81,8 +115,7 @@ def pending_tasks(
     current_user: User = Depends(get_current_user),
 ) -> list[dict]:
     _ = current_user
-    result = db.execute(text("SELECT * FROM v_pending_tasks"))
-    return [dict(row._mapping) for row in result]
+    return _query_view_filtered(db, current_user.id, "v_pending_tasks")
 
 
 @router.get("/farms/{farm_id}/reports", summary="Generar reporte con filtros")
@@ -95,7 +128,7 @@ def generate_farm_report(
     end_date: str | None = Query(None, description="YYYY-MM-DD"),
     export: ExportFormat = Query(ExportFormat.JSON, description="Formato: json, pdf, excel"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission("fincas", "can_read")),
 ):
     from datetime import date
 

@@ -40,6 +40,25 @@ async def create_invitation(
     if not role:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rol no encontrado")
 
+    # ¿Qué? Evitar que un no-administrador otorgue el rol Administrador.
+    if role.name == "Administrador":
+        inviter_uf = db.execute(
+            select(UserFarm).where(
+                UserFarm.user_id == invited_by,
+                UserFarm.farm_id == farm_id,
+                UserFarm.is_active.is_(True),
+            )
+        ).scalar_one_or_none()
+        inviter_role = (
+            db.execute(select(Role).where(Role.id == inviter_uf.role_id)).scalar_one_or_none()
+            if inviter_uf else None
+        )
+        if not inviter_uf or not inviter_role or inviter_role.name != "Administrador":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Solo un administrador puede otorgar el rol Administrador",
+            )
+
     email = data.email.lower().strip()
 
     # Si el usuario ya está registrado y ya está asignado a la finca → error
@@ -123,8 +142,21 @@ def register_invited_user(db: Session, data: InvitedRegister) -> User:
     # Validar que no exista ya un usuario con ese email
     existing = db.execute(select(User).where(User.email == invitation.email)).scalar_one_or_none()
     if existing:
-        # Si ya existe, solo asignarlo a la finca
+        # Si ya existe, solo asignarlo a la finca.
         _assign_to_farm(db, existing, invitation)
+        add_audit_log(
+            db,
+            user_id=str(existing.id),
+            farm_id=str(invitation.farm_id),
+            action="join_farm_by_invitation",
+            entity="user",
+            entity_id=str(existing.id),
+            details={"email": existing.email, "farm_id": str(invitation.farm_id)},
+        )
+        # Sin este commit la asignación se pierde al cerrar la sesión: el
+        # endpoint respondía 201 y el usuario nunca quedaba vinculado.
+        db.commit()
+        db.refresh(existing)
         return existing
 
     # Validar datos
@@ -142,7 +174,7 @@ def register_invited_user(db: Session, data: InvitedRegister) -> User:
         email=invitation.email,
         first_name=data.first_name.strip(),
         last_name=data.last_name.strip(),
-        document_type=data.document_type,
+        document_type=data.document_type.value,
         document_number=data.document_number.strip(),
         phone=data.phone.strip(),
         hashed_password=hash_password(data.password),

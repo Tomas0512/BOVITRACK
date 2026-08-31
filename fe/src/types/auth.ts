@@ -8,6 +8,7 @@ export interface RegisterRequest {
   document_number: string;
   phone: string;
   password: string;
+  confirm_password: string;
   accept_terms: boolean;
   accept_data_policy: boolean;
 }
@@ -24,6 +25,7 @@ export interface ForgotPasswordRequest {
 export interface ResetPasswordRequest {
   token: string;
   new_password: string;
+  confirm_password: string;
 }
 
 export interface RefreshTokenRequest {
@@ -67,7 +69,7 @@ export interface AuthContextType extends AuthState {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<string>;
-  resetPassword: (token: string, newPassword: string) => Promise<string>;
+  resetPassword: (token: string, newPassword: string, confirmPassword: string) => Promise<string>;
 }
 
 export interface ApiError {

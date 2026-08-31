@@ -23,6 +23,8 @@ const STEPS = [
   { label: "Origen y notas" },
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function MovementFormModal({ farmId, existing, onSuccess, onClose }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<MovementRequest>({
@@ -45,6 +47,10 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
 
   const validateStep = (s: number): boolean => {
     if (s === 0 && !form.movement_date) { setError("La fecha del movimiento es obligatoria"); return false; }
+    if (s === 0 && form.bovine_id && !UUID_RE.test(form.bovine_id)) {
+      setError("El ID del bovino no tiene un formato UUID válido");
+      return false;
+    }
     setError("");
     return true;
   };
@@ -56,6 +62,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     try {
@@ -90,7 +97,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
         <div className="mb-4 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
             >
               {i < step ? "✓ " : ""}{s.label}
             </button>
@@ -115,12 +122,12 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-text-secondary">Fecha del movimiento *</label>
-                <input type="date" value={form.movement_date} onChange={(e) => setForm({ ...form, movement_date: e.target.value })}
+                <input type="date" value={form.movement_date} onChange={(e) => { setForm({ ...form, movement_date: e.target.value }); setError(""); }}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-text-secondary">ID del bovino</label>
-                <input type="text" value={form.bovine_id ?? ""} onChange={(e) => setForm({ ...form, bovine_id: e.target.value || null })}
+                <input type="text" value={form.bovine_id ?? ""} onChange={(e) => { setForm({ ...form, bovine_id: e.target.value || null }); setError(""); }}
                   placeholder="UUID del bovino (opcional)"
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
               </div>
@@ -198,12 +205,12 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep}
+              <button key="paso-siguiente" type="button" onClick={nextStep}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
                 Siguiente →
               </button>
             ) : (
-              <button type="submit" disabled={loading}
+              <button key="paso-enviar" type="submit" disabled={loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
                 {loading ? "Guardando..." : isEdit ? "Actualizar" : "Registrar"}
               </button>

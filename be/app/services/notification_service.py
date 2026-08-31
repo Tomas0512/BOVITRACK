@@ -80,7 +80,8 @@ def get_or_create_prefs(
             frequency="real_time",
         )
         db.add(pref)
-        db.flush()
+        db.commit()
+        db.refresh(pref)
     return pref
 
 
@@ -123,7 +124,8 @@ def update_prefs(
     if notify_birth is not None:
         pref.notify_birth = notify_birth
 
-    db.flush()
+    db.commit()
+    db.refresh(pref)
     return pref
 
 

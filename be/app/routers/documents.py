@@ -18,7 +18,7 @@ Impact?
 
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, Path, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -43,7 +43,6 @@ from app.utils.limiter import limiter
 router = APIRouter(
     prefix="/api/v1/farms/{farm_id}/documents",
     tags=["Documentos (HU012)"],
-    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 
 
@@ -56,6 +55,7 @@ router = APIRouter(
     response_model=DocumentResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Subir documento",
+    dependencies=[Depends(require_permission("bovinos", "can_create"))],
 )
 @limiter.limit("5/minute")
 async def upload_document(
@@ -88,7 +88,10 @@ async def upload_document(
 
     # 2. Validate size
     if len(file_content) > 52428800:  # 50MB
-        raise Exception("Archivo demasiado grande")
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="El archivo supera el máximo de 50MB",
+        )
 
     # 3. Create request data
     request_data = DocumentUploadRequest(
@@ -121,6 +124,7 @@ async def upload_document(
     "",
     response_model=DocumentListResponse,
     summary="Listar documentos",
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def list_documents(
@@ -171,6 +175,7 @@ def list_documents(
 @router.get(
     "/{document_id}/download",
     summary="Descargar documento",
+    dependencies=[Depends(require_permission("bovinos", "can_read"))],
 )
 @limiter.limit("20/minute")
 def download_document(
@@ -211,6 +216,7 @@ def download_document(
     "/{document_id}",
     summary="Eliminar documento",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_permission("bovinos", "can_delete"))],
 )
 @limiter.limit("5/minute")
 def delete_document(

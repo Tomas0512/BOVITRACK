@@ -130,9 +130,11 @@ export function InvitedRegisterPage() {
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.firstName.trim()) newErrors.firstName = "Los nombres son obligatorios";
+    else if (formData.firstName.trim().length < 2) newErrors.firstName = "Mínimo 2 caracteres";
     else if (!TEXT_ONLY.test(formData.firstName)) newErrors.firstName = "Solo se permiten letras";
 
     if (!formData.lastName.trim()) newErrors.lastName = "Los apellidos son obligatorios";
+    else if (formData.lastName.trim().length < 2) newErrors.lastName = "Mínimo 2 caracteres";
     else if (!TEXT_ONLY.test(formData.lastName)) newErrors.lastName = "Solo se permiten letras";
 
     if (!formData.documentType) newErrors.documentType = "Seleccione un tipo de documento";
@@ -182,6 +184,7 @@ export function InvitedRegisterPage() {
         document_number: formData.documentNumber,
         phone: formData.phone,
         password: formData.password,
+        confirm_password: formData.confirmPassword,
         accept_terms: formData.acceptTerms,
         accept_data_policy: formData.acceptDataPolicy,
       });
@@ -264,7 +267,7 @@ export function InvitedRegisterPage() {
           <div className="mb-4 flex items-center gap-1.5">
             {STEPS.map((s, i) => (
               <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-                className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+                className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
               >
                 {i < step ? "✓ " : ""}{s.label}
               </button>
@@ -365,9 +368,9 @@ export function InvitedRegisterPage() {
                 <button type="button" onClick={prevStep} className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt transition-colors">← Anterior</button>
               )}
               {step < STEPS.length - 1 ? (
-                <button type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">Siguiente →</button>
+                <button key="paso-siguiente" type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">Siguiente →</button>
               ) : (
-                <button type="submit" disabled={!isFormComplete || loading}
+                <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                   className={`flex-1 rounded-lg py-2 text-sm font-bold text-white transition-all active:scale-[0.98] ${!isFormComplete || loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"}`}
                 >
                   {loading ? "Registrando..." : "Completar registro"}

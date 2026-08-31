@@ -1,12 +1,12 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class ReactivationRequestCreate(BaseModel):
-    email: str
-    reason: str | None = None
+    email: EmailStr
+    reason: str | None = Field(default=None, max_length=500)
 
 
 class ReactivationRequestResponse(BaseModel):

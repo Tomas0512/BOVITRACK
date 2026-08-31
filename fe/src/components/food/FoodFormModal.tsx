@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiErrorMessage } from "../../api/errors";
 import {
   createFood,
   updateFood,
@@ -29,8 +30,6 @@ export default function FoodFormModal({
   onSuccess,
   onClose,
 }: Props) {
-  if (!isOpen) return null;
-
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FoodCreate>({
     name: existing?.name ?? "",
@@ -74,11 +73,14 @@ export default function FoodFormModal({
     setError("");
   }, [existing, isOpen]);
 
-  const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) =>
+  const set = <K extends keyof FoodCreate>(key: K, value: FoodCreate[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (error) setError("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
 
@@ -90,16 +92,13 @@ export default function FoodFormModal({
       }
       onSuccess();
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response
-              ?.data?.detail
-          : undefined;
-      setError(msg ?? "No se pudo guardar el alimento");
+      setError(getApiErrorMessage(err, "No se pudo guardar el alimento"));
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
@@ -126,7 +125,7 @@ export default function FoodFormModal({
         <div className="mb-4 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
             >
               {i < step ? "✓ " : ""}{s.label}
             </button>
@@ -215,12 +214,12 @@ export default function FoodFormModal({
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button type="button" onClick={nextStep}
+              <button key="paso-siguiente" type="button" onClick={nextStep}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
                 Siguiente →
               </button>
             ) : (
-              <button type="submit" disabled={!isFormComplete || loading}
+              <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
                 {loading ? "Guardando..." : existing ? "Actualizar" : "Crear alimento"}

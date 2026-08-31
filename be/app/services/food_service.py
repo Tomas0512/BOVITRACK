@@ -12,7 +12,7 @@ from decimal import Decimal
 from typing import Sequence
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from datetime import datetime, timezone
@@ -311,6 +311,6 @@ def get_low_stock_foods(db: Session, farm_id: uuid.UUID) -> Sequence[Food]:
         Food.min_stock_alert.isnot(None),
         Food.current_stock <= Food.min_stock_alert,
     ).order_by(
-        (Food.current_stock / Food.min_stock_alert).asc()
+        (Food.current_stock / func.nullif(Food.min_stock_alert, 0)).asc()
     )
     return db.execute(stmt).scalars().all()

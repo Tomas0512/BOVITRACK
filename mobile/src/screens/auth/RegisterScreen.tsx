@@ -6,9 +6,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMutation } from '@tanstack/react-query';
-import { registerUser, getMe } from '../../services/auth';
-import { setAuthToken } from '../../services/api';
-import { useAuthStore } from '../../store/authStore';
+import { registerUser } from '../../services/auth';
 import { AuthStackParamList } from '../../navigation/AuthNavigator';
 import { useTheme } from '../../theme/ThemeContext';
 
@@ -19,7 +17,6 @@ const TEXT_ONLY = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
 
 export default function RegisterScreen() {
   const navigation = useNavigation<Nav>();
-  const login = useAuthStore((s) => s.login);
   const { colors, toggleTheme, isDark } = useTheme();
 
   const [form, setForm] = useState({
@@ -29,6 +26,9 @@ export default function RegisterScreen() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState('');
+  const [done, setDone] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptDataPolicy, setAcceptDataPolicy] = useState(false);
 
   const set = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -53,6 +53,8 @@ export default function RegisterScreen() {
     else if (!/[^A-Za-z0-9]/.test(form.password)) e.password = 'Debe tener un caracter especial';
     if (!form.confirmPassword) e.confirmPassword = 'Debe verificar la contrasena';
     else if (form.password !== form.confirmPassword) e.confirmPassword = 'Las contrasenas no coinciden';
+    if (!acceptTerms) e.acceptTerms = 'Debes aceptar los terminos y condiciones';
+    if (!acceptDataPolicy) e.acceptDataPolicy = 'Debes autorizar el tratamiento de datos';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -60,12 +62,21 @@ export default function RegisterScreen() {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!validate()) return Promise.reject(null);
-      const tokens = await registerUser({ ...form, accept_terms: true, accept_data_policy: true });
-      setAuthToken(tokens.access_token);
-      const user = await getMe();
-      return { tokens, user };
+      const user = await registerUser({
+        email: form.email,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        document_type: form.document_type,
+        document_number: form.document_number,
+        phone: form.phone,
+        password: form.password,
+        confirm_password: form.confirmPassword,
+        accept_terms: acceptTerms,
+        accept_data_policy: acceptDataPolicy,
+      });
+      return user;
     },
-    onSuccess: ({ tokens, user }) => login(tokens, user),
+    onSuccess: () => setDone(true),
     onError: (e: Error) => {
       if (e) setServerError(e.message || 'No se pudo registrar');
     },
@@ -80,6 +91,21 @@ export default function RegisterScreen() {
     { label: 'Numero de documento', key: 'document_number', placeholder: '1234567890', keyboard: 'numeric' as const },
     { label: 'Telefono', key: 'phone', placeholder: '3001234567', keyboard: 'phone-pad' as const },
   ];
+
+  if (done) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32, backgroundColor: colors.background }}>
+        <Text style={{ fontSize: 56, marginBottom: 16 }}>📧</Text>
+        <Text style={styles.title}>Cuenta creada</Text>
+        <Text style={styles.subtitle}>
+          Revisa tu correo para verificar tu cuenta y poder iniciar sesión.
+        </Text>
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.btnPrimaryText}>Ir al login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -149,6 +175,23 @@ export default function RegisterScreen() {
         />
         {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
 
+        <Text style={styles.label}>Aceptacion</Text>
+        <TouchableOpacity style={styles.checkRow} onPress={() => setAcceptTerms(!acceptTerms)}>
+          <View style={[styles.checkbox, acceptTerms && styles.checkboxChecked]}>
+            {acceptTerms ? <Text style={styles.checkMark}>✓</Text> : null}
+          </View>
+          <Text style={styles.checkLabel}>Acepto los terminos y condiciones</Text>
+        </TouchableOpacity>
+        {errors.acceptTerms ? <Text style={styles.errorText}>{errors.acceptTerms}</Text> : null}
+
+        <TouchableOpacity style={styles.checkRow} onPress={() => setAcceptDataPolicy(!acceptDataPolicy)}>
+          <View style={[styles.checkbox, acceptDataPolicy && styles.checkboxChecked]}>
+            {acceptDataPolicy ? <Text style={styles.checkMark}>✓</Text> : null}
+          </View>
+          <Text style={styles.checkLabel}>Autorizo el tratamiento de mis datos personales</Text>
+        </TouchableOpacity>
+        {errors.acceptDataPolicy ? <Text style={styles.errorText}>{errors.acceptDataPolicy}</Text> : null}
+
         <TouchableOpacity
           style={[styles.btnPrimary, mutation.isPending && styles.btnDisabled]}
           onPress={() => mutation.mutate()}
@@ -185,6 +228,18 @@ const makeStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet
   },
   inputError: { borderColor: colors.error },
   errorText: { color: colors.error, fontSize: 12, marginBottom: 12, marginLeft: 4 },
+  checkRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginBottom: 8, paddingVertical: 4,
+  },
+  checkbox: {
+    width: 22, height: 22, borderRadius: 5, borderWidth: 2,
+    borderColor: colors.border, justifyContent: 'center', alignItems: 'center',
+    backgroundColor: colors.surface,
+  },
+  checkboxChecked: { backgroundColor: colors.primary, borderColor: colors.primary },
+  checkMark: { color: colors.textOnPrimary, fontSize: 14, fontWeight: 'bold' },
+  checkLabel: { flex: 1, color: colors.textPrimary, fontSize: 13 },
   errorBanner: {
     backgroundColor: colors.errorLight, borderRadius: 8,
     padding: 12, marginBottom: 16,

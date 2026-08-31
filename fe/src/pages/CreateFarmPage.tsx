@@ -79,6 +79,19 @@ export default function CreateFarmPage() {
         setError("Nombre, dirección y departamento son obligatorios");
         return false;
       }
+      if (form.name.trim().length < 2) {
+        setError("El nombre debe tener al menos 2 caracteres");
+        return false;
+      }
+      if (form.address.trim().length < 5) {
+        setError("La dirección debe tener al menos 5 caracteres");
+        return false;
+      }
+      const city = showCustomCity ? customCity.trim() : form.city_municipality;
+      if (city.length < 2) {
+        setError("La ciudad o municipio debe tener al menos 2 caracteres");
+        return false;
+      }
     }
     if (s === 1) {
       if (form.total_area <= 0 || !form.purpose_id) {
@@ -89,6 +102,10 @@ export default function CreateFarmPage() {
     if (s === 2) {
       if (!form.farm_identifier.trim()) {
         setError("El identificador de la finca es obligatorio");
+        return false;
+      }
+      if (form.farm_identifier.trim().length < 3) {
+        setError("El identificador debe tener al menos 3 caracteres");
         return false;
       }
     }
@@ -228,7 +245,7 @@ export default function CreateFarmPage() {
         <div className="mb-4 flex items-center gap-1.5">
           {STEPS.map((s, i) => (
             <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-gray-100 text-text-muted cursor-default"}`}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
             >
               {i < step ? "✓ " : ""}{s.label}
             </button>
@@ -333,7 +350,7 @@ export default function CreateFarmPage() {
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button
+              <button key="paso-siguiente"
                 type="button"
                 onClick={nextStep}
                 disabled={!isStepComplete()}
@@ -346,7 +363,7 @@ export default function CreateFarmPage() {
                 Siguiente →
               </button>
             ) : (
-              <button type="submit" disabled={!isFormComplete || loading}
+              <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                 className={`flex-1 rounded-lg py-2.5 text-base font-bold text-white transition-all active:scale-[0.98] ${!isFormComplete || loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"}`}
               >
                 {loading ? "Registrando..." : "Registrar finca"}

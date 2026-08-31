@@ -7,7 +7,8 @@
  */
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { CheckCircle2 } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { useAuth } from "../hooks/useAuth";
 
@@ -45,7 +46,7 @@ export function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
-  const navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
   const { register } = useAuth();
 
   /** Regex: solo letras, espacios y tildes */
@@ -136,12 +137,16 @@ export function RegisterPage() {
 
     if (!formData.firstName.trim()) {
       newErrors.firstName = "Los nombres son obligatorios";
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = "Mínimo 2 caracteres";
     } else if (!TEXT_ONLY.test(formData.firstName)) {
       newErrors.firstName = "Solo se permiten letras";
     }
 
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Los apellidos son obligatorios";
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = "Mínimo 2 caracteres";
     } else if (!TEXT_ONLY.test(formData.lastName)) {
       newErrors.lastName = "Solo se permiten letras";
     }
@@ -201,11 +206,12 @@ export function RegisterPage() {
         document_number: formData.documentNumber,
         phone: formData.phone,
         password: formData.password,
+        confirm_password: formData.confirmPassword,
         accept_terms: formData.acceptTerms,
         accept_data_policy: formData.acceptDataPolicy,
       });
-      // Registro + auto-login exitoso — ir al dashboard
-      navigate("/dashboard");
+      // Cuenta creada: solicitar verificación de correo antes de iniciar sesión
+      setRegistered(true);
     } catch (err: unknown) {
       setServerError(
         err instanceof Error ? err.message : "Error al registrarse. Intente de nuevo."
@@ -214,6 +220,23 @@ export function RegisterPage() {
       setLoading(false);
     }
   };
+
+  if (registered) {
+    return (
+      <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
+        <div className="flex w-full max-w-md flex-col items-center rounded-2xl bg-surface p-8 shadow-lg">
+          <CheckCircle2 size={48} className="text-green-500 mx-auto mb-4" />
+          <h2 className="mb-2 text-lg font-bold text-text-primary">¡Cuenta creada!</h2>
+          <p className="mb-4 text-center text-sm text-text-secondary">
+            Revisa tu correo electrónico para verificar tu cuenta y poder iniciar sesión.
+          </p>
+          <Link to="/login" className="rounded-lg bg-primary px-6 py-2 text-sm font-bold text-white hover:bg-primary-light">
+            Ir a iniciar sesión
+          </Link>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
@@ -242,7 +265,7 @@ export function RegisterPage() {
                     ? "bg-primary text-white"
                     : i < step
                     ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-text-muted cursor-default"
+                    : "bg-surface-alt text-text-muted cursor-default"
                 }`}
               >
                 {i < step ? "✓ " : ""}{s.label}
@@ -353,11 +376,11 @@ export function RegisterPage() {
                 </button>
               )}
               {step < STEPS.length - 1 ? (
-                <button type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">
+                <button key="paso-siguiente" type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">
                   Siguiente →
                 </button>
               ) : (
-                <button type="submit" disabled={!isFormComplete || loading}
+                <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                   className={`flex-1 rounded-lg py-2 text-sm font-bold text-white transition-all active:scale-[0.98] ${
                     !isFormComplete || loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"
                   }`}

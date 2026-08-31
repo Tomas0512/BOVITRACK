@@ -35,3 +35,6 @@ desktop.ini
 # ─── Docker ───────────────────────────────────────
 *.log
 
+
+# Archivos subidos por los usuarios en desarrollo
+be/storage/

@@ -11,7 +11,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 class BovineCreate(BaseModel):
@@ -76,6 +76,19 @@ class BovineCreate(BaseModel):
             raise ValueError(f"Tipo de entrada inválido. Opciones: {', '.join(allowed)}")
         return v.lower()
 
+    @field_validator("birth_weight", "current_weight")
+    @classmethod
+    def validate_weight(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v <= 0:
+            raise ValueError("El peso debe ser mayor a 0")
+        return v
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "BovineCreate":
+        if self.entry_date < self.birth_date:
+            raise ValueError("La fecha de ingreso no puede ser anterior al nacimiento")
+        return self
+
 
 class BovineUpdate(BaseModel):
     """Schema para actualización parcial de un bovino.
@@ -102,6 +115,13 @@ class BovineUpdate(BaseModel):
     exit_date: date | None = None
     exit_reason: str | None = None
     observations: str | None = None
+
+    @field_validator("birth_weight", "current_weight")
+    @classmethod
+    def validate_weight(cls, v: Decimal | None) -> Decimal | None:
+        if v is not None and v <= 0:
+            raise ValueError("El peso debe ser mayor a 0")
+        return v
 
 
 class BovineResponse(BaseModel):
