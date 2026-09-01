@@ -15,7 +15,7 @@ BoviTrack es una aplicación full stack para la gestión ganadera que cubre admi
 - **Orquestación:** Docker Compose con healthchecks + volúmenes para desarrollo
 - **Correo desarrollo:** Mailpit (SMTP dummy + UI web en :8025)
 
-**Cobertura actual:** 13 Historias de Usuario (HU001–HU013) distribuidas en 7 Sprints, con ~91 endpoints, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos, RBAC completo con 4 roles y 32 permisos, autenticación JWT con access/refresh tokens, y **flujo de invitación de empleados funcional**.
+**Cobertura actual:** 16 Historias de Usuario (HU001–HU016) distribuidas en 8 Sprints, con ~121 endpoints de la API, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos (23 modelos ORM), RBAC completo con 4 roles y 32 permisos, autenticación JWT con access/refresh tokens, validación de fechas y rango en reportes, y **carga masiva de bovinos por CSV**.
 
 ---
 
@@ -124,7 +124,7 @@ Se implementaron **9 flujos multi-step** (CreateFarmPage, bovines, movements, fo
 
 ### 4.1 Routers y endpoints
 
-[`be/app/routers/`](../be/app/routers) contiene **23 routers** con aproximadamente **91 endpoints**:
+[`be/app/routers/`](../be/app/routers) contiene los routers que exponen **~121 endpoints** de la API REST documentados en `/docs` (Swagger):
 
 | Router | Endpoints clave |
 |---|---|
@@ -345,7 +345,7 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 
 - **Space:** BOVITRACK
 - **8 listas** (una por Sprint: 1 al 7 + **Sprint 8 – Cierre Web**)
-- **15 Historias de Usuario** (HU001–HU015) con checklists desglosados por tarea técnica
+- **16 Historias de Usuario** (HU001–HU016) con checklists desglosados por tarea técnica
 - Cada HU incluye criterios de aceptación, subtareas y asignación
 - Guía paso a paso para armar/terminar el tablero: `CLICKUP_BOARD.md` (en el escritorio)
 - HU016 (modo offline): **fuera de alcance** (pospuesta por fecha límite 23/08/2026)
@@ -354,13 +354,13 @@ Volumen: `bovitrack_data` (persistencia PostgreSQL)
 
 ## 10. Resumen Ejecutivo
 
-**Estado actual:** El proyecto cubre completamente los Sprints 1 al 7 con las 13 HUs planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra. El flujo de invitación de empleados a fincas funciona correctamente. Los Sprints 8 (HU014 Alertas + HU015 Auditorías) y el QA/cierre web están **en curso (Sprint 8 Final, 08–23 agosto 2026)**.
+**Estado actual:** El proyecto cubre los Sprints 1 al 8 con las **16 HUs** planificadas. Todas las funcionalidades core de gestión ganadera están implementadas: autenticación, fincas, bovinos, alimentación, sanidad, reproducción, producción de leche, economía, documentos, empleados, tareas, potreros y lotes de tierra, alertas/notificaciones, auditoría y **reportes exportables PDF/Excel**. Funcionan el flujo de invitación de empleados, la **recuperación/verificación de cuenta por correo**, la **validación de fechas en reportes**, la **relación animal↔potrero** y la **carga masiva de bovinos por CSV**. La rama de cierre (`fix/auditoria-seguridad`) integra correcciones de seguridad (control de acceso por finca), validaciones de formularios y mejoras de UI/UX.
 
 **Métrica general:**
-- ~91 endpoints en 23 routers
+- ~121 endpoints de la API en 23 routers (documentados en Swagger `/docs`)
 - 15+ páginas web con TailwindCSS 4 y modo oscuro
 - 7 pantallas móviles (4 auth + 3 internas)
-- 30 tablas en PostgreSQL con migraciones lineales
+- 30 tablas en PostgreSQL con migraciones lineales (23 modelos ORM)
 - 22 servicios backend desacoplados
 - 20 API clients en el frontend
 - RBAC con 4 roles y 32 permisos
