@@ -170,6 +170,21 @@ export default function PaddockList({ farmId }: Props) {
                   Descanso: {p.rest_start_date} → {p.rest_end_date ?? "..."}
                 </p>
               )}
+              <div className="mt-2 rounded-lg bg-surface-alt p-2">
+                <p className="text-xs font-semibold text-text-secondary">
+                  Animales: {p.animal_count ?? 0}
+                  {p.max_capacity ? ` / ${p.max_capacity}` : ""} en potrero
+                </p>
+                {p.animals && p.animals.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {p.animals.map((a) => (
+                      <span key={a.id} className="rounded bg-surface px-1.5 py-0.5 text-[11px] text-text-secondary">
+                        #{a.identification_number}{a.name ? ` · ${a.name}` : ""}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="mt-3 flex gap-2">
                 <button onClick={() => { setEditing(p); setShowModal(true); }}
                   className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">

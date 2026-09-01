@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { listBovines, deleteBovine, type BovineResponse } from "../../api/bovines";
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
+import { listPaddocks, type PaddockResponse } from "../../api/paddocks";
 import { getApiErrorMessage } from "../../api/errors";
 import Pagination from "../Pagination";
 import ConfirmDialog from "../ConfirmDialog";
@@ -26,6 +27,7 @@ const STATUS_BADGE: Record<string, string> = {
 export default function BovineList({ farmId }: Props) {
   const [bovines, setBovines] = useState<BovineResponse[]>([]);
   const [landPlots, setLandPlots] = useState<LandPlotResponse[]>([]);
+  const [paddocks, setPaddocks] = useState<PaddockResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -78,12 +80,14 @@ export default function BovineList({ farmId }: Props) {
     setLoading(true);
     setError("");
     try {
-      const [b, lp] = await Promise.all([
+      const [b, lp, p] = await Promise.all([
         listBovines(farmId, filterSex ? { sex: filterSex } : {}),
         listLandPlots(farmId, true),
+        listPaddocks(farmId),
       ]);
       setBovines(b);
       setLandPlots(lp);
+      setPaddocks(p);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudieron cargar los bovinos"));
     } finally {
@@ -240,6 +244,7 @@ export default function BovineList({ farmId }: Props) {
         <BovineFormModal
           farmId={farmId}
           landPlots={landPlots}
+          paddocks={paddocks}
           existing={editing}
           onSuccess={handleSuccess}
           onClose={() => { setShowModal(false); setEditing(undefined); }}
