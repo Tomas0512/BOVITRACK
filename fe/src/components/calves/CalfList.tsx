@@ -32,6 +32,8 @@ import {
   ICalf,
   ICalfSummary,
 } from "../../api/calves";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface ICalfListProps {
   farmId: string;
@@ -79,6 +81,14 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
   const [ageFilter, setAgeFilter] = useState<"all" | "0_30" | "31_90" | "91_365">(
     "all"
   );
+
+  const getValue = (calf: ICalf, key: string): string | number => {
+    const v = (calf as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<ICalf>(calves, { getValue });
 
   // ═══════════════════════════════════════════════════════════════════════
   // 🔄 EFECTOS
@@ -357,16 +367,24 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
                 <th className="pb-2 pr-4">
-                  Identificación
+                  <button onClick={() => handleSort("identification_number")} className="uppercase">
+                    Identificación {sortKey === "identification_number" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
                 </th>
                 <th className="pb-2 pr-4">
-                  Nombre
+                  <button onClick={() => handleSort("name")} className="uppercase">
+                    Nombre {sortKey === "name" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
                 </th>
                 <th className="pb-2 pr-4">
-                  Edad
+                  <button onClick={() => handleSort("age_days")} className="uppercase">
+                    Edad {sortKey === "age_days" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
                 </th>
                 <th className="pb-2 pr-4">
-                  Peso Actual
+                  <button onClick={() => handleSort("current_weight_kg")} className="uppercase">
+                    Peso Actual {sortKey === "current_weight_kg" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
                 </th>
                 <th className="pb-2 pr-4">
                   Crecimiento
@@ -377,7 +395,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {calves.map((calf) => {
+              {paginated.map((calf) => {
                 const growthPercentage = calculateGrowthPercentage(calf);
                 const growthColor = getGrowthColor(growthPercentage);
 
@@ -449,6 +467,14 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
               })}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            start={start}
+            end={end}
+            total={total}
+            onChange={(p) => setPage(p)}
+          />
         </div>
       )}
 

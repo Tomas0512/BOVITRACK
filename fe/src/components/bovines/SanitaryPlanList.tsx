@@ -6,6 +6,9 @@ import {
   markSanitaryPlanAsApplied,
   type SanitaryPlanResponse,
 } from "../../api/sanitary_plans";
+import { getApiErrorMessage } from "../../api/errors";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -35,21 +38,31 @@ export default function SanitaryPlanList({ farmId }: Props) {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const getValue = (plan: SanitaryPlanResponse, key: string): string | number => {
+    const v = (plan as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<SanitaryPlanResponse>(plans, { getValue });
+
   const fetchPlans = async () => {
     setLoading(true);
     setError("");
     try {
       const data = await listSanitaryPlans(farmId);
       setPlans(data);
-    } catch {
-      setError("No se pudieron cargar los planes sanitarios");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron cargar los planes sanitarios"));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { setPage(1); }, [farmId, setPage]);
   useEffect(() => {
     fetchPlans();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmId]);
 
   const handleMarkApplied = async (plan: SanitaryPlanResponse) => {
@@ -59,8 +72,8 @@ export default function SanitaryPlanList({ farmId }: Props) {
     try {
       await markSanitaryPlanAsApplied(farmId, plan.id);
       await fetchPlans();
-    } catch {
-      setError("No se pudo marcar como aplicado");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo marcar como aplicado"));
     } finally {
       setActionLoading(null);
     }
@@ -75,8 +88,8 @@ export default function SanitaryPlanList({ farmId }: Props) {
     try {
       await deleteSanitaryPlan(farmId, plan.id);
       await fetchPlans();
-    } catch {
-      setError("No se pudo desactivar el plan");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo desactivar el plan"));
     } finally {
       setActionLoading(null);
     }
@@ -121,16 +134,28 @@ export default function SanitaryPlanList({ farmId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">Tratamiento</th>
-                <th className="pb-2 pr-4">Tipo</th>
-                <th className="pb-2 pr-4">Frecuencia</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("vaccine_or_treatment_name")} className="uppercase">
+                    Tratamiento {sortKey === "vaccine_or_treatment_name" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("treatment_type")} className="uppercase">
+                    Tipo {sortKey === "treatment_type" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("frequency_days")} className="uppercase">
+                    Frecuencia {sortKey === "frequency_days" && (sortDir === "asc" ? "▲" : "▼")}
+                  </button>
+                </th>
                 <th className="pb-2 pr-4">Última aplicación</th>
                 <th className="pb-2 pr-4">Próxima fecha</th>
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {plans.map((plan) => {
+              {paginated.map((plan) => {
                 const overdue = isOverdue(plan.next_scheduled_date);
                 const freqLabel =
                   FREQUENCY_LABEL[plan.frequency_days] ??
@@ -203,6 +228,14 @@ export default function SanitaryPlanList({ farmId }: Props) {
               })}
             </tbody>
           </table>
+          <Pagination
+            page={page}
+            pageCount={pageCount}
+            start={start}
+            end={end}
+            total={total}
+            onChange={(p) => setPage(p)}
+          />
         </div>
       )}
     </div>
