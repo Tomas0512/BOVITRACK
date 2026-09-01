@@ -111,28 +111,28 @@ export default function WeightChart({ farmId, bovineId }: Props) {
       <h3 className="mb-4 font-bold text-text-primary"><TrendingUp size={18} className="inline mr-1.5 align-text-bottom" />Evolución de peso</h3>
       <ResponsiveContainer width="100%" height={260}>
         <LineChart data={data} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#eae5d9" />
           <XAxis
             dataKey="fecha"
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            tick={{ fontSize: 11, fill: "#9c8e7b" }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            tick={{ fontSize: 11, fill: "#9ca3af" }}
+            tick={{ fontSize: 11, fill: "#9c8e7b" }}
             tickLine={false}
             axisLine={false}
             unit=" kg"
             width={60}
           />
           <Tooltip content={<CustomTooltip />} />
-          <ReferenceLine y={0} stroke="#e5e7eb" />
+          <ReferenceLine y={0} stroke="#e3dcd1" />
           <Line
             type="monotone"
             dataKey="peso"
-            stroke="#16a34a"
+            stroke="#b3541e"
             strokeWidth={2.5}
-            dot={{ r: 4, fill: "#16a34a", strokeWidth: 0 }}
+            dot={{ r: 4, fill: "#b3541e", strokeWidth: 0 }}
             activeDot={{ r: 6 }}
             name="Peso"
           />

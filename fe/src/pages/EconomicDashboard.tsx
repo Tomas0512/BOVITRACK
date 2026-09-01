@@ -152,11 +152,11 @@ export default function EconomicDashboard() {
               {incomeCategories.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={incomeCategories} layout="vertical" margin={{ left: 0, right: 16 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b7280" }} tickLine={false} axisLine={false} width={120} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eae5d9" />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: "#9c8e7b" }} tickLine={false} axisLine={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b5a45" }} tickLine={false} axisLine={false} width={120} />
                     <Tooltip formatter={(v) => fmt(Number(v))} />
-                    <Bar dataKey="value" fill="#16a34a" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="value" fill="#b3541e" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -169,9 +169,9 @@ export default function EconomicDashboard() {
               {expenseCategories.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={expenseCategories} layout="vertical" margin={{ left: 0, right: 16 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis type="number" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b7280" }} tickLine={false} axisLine={false} width={120} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eae5d9" />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: "#9c8e7b" }} tickLine={false} axisLine={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#6b5a45" }} tickLine={false} axisLine={false} width={120} />
                     <Tooltip formatter={(v) => fmt(Number(v))} />
                     <Bar dataKey="value" fill="#dc2626" radius={[0, 4, 4, 0]} />
                   </BarChart>
@@ -187,12 +187,12 @@ export default function EconomicDashboard() {
             {monthlyData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={monthlyData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} tickLine={false} axisLine={false} width={80} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eae5d9" />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9c8e7b" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: "#9c8e7b" }} tickLine={false} axisLine={false} width={80} />
                   <Tooltip formatter={(v) => fmt(Number(v))} />
                   <Legend />
-                  <Line type="monotone" dataKey="income" stroke="#16a34a" strokeWidth={2} name="Ingresos" dot={{ r: 3 }} />
+                  <Line type="monotone" dataKey="income" stroke="#b3541e" strokeWidth={2} name="Ingresos" dot={{ r: 3 }} />
                   <Line type="monotone" dataKey="expense" stroke="#dc2626" strokeWidth={2} name="Egresos" dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>

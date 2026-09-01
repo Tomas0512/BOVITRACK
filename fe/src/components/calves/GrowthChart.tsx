@@ -140,13 +140,13 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
         // LÍNEA 1: Peso actual del ternero
         label: "Peso Actual (kg)",
         data: weightHistory.map((w) => w.weight_kg),
-        borderColor: "#3b82f6", // Azul
-        backgroundColor: "rgba(59, 130, 246, 0.1)", // Azul claro semi-transparente
+        borderColor: "#b3541e", // Cuero / terracota
+        backgroundColor: "rgba(179, 84, 30, 0.1)", // Cuero claro semi-transparente
         fill: true,
         tension: 0.4, // Suavizar línea
         pointRadius: 5,
         pointHoverRadius: 7,
-        pointBackgroundColor: "#3b82f6",
+        pointBackgroundColor: "#b3541e",
         pointBorderColor: "#fff",
         pointBorderWidth: 2,
       },
@@ -155,13 +155,13 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
         // LÍNEA 2: Ganancia diaria (si está disponible)
         label: "Ganancia Diaria (kg/día)",
         data: weightHistory.map((w) => (w.daily_gain_kg ? w.daily_gain_kg * 10 : null)), // Multiplicar por 10 para escala
-        borderColor: "#10b981", // Verde
-        backgroundColor: "rgba(16, 185, 129, 0.1)", // Verde claro
+        borderColor: "#d4a373", // Trigo / pastura seca
+        backgroundColor: "rgba(212, 163, 115, 0.1)", // Trigo claro
         fill: true,
         tension: 0.4,
         pointRadius: 4,
         pointHoverRadius: 6,
-        pointBackgroundColor: "#10b981",
+        pointBackgroundColor: "#d4a373",
         pointBorderColor: "#fff",
         pointBorderWidth: 2,
         yAxisID: "y1", // Usar eje Y secundario
@@ -171,7 +171,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
         // LÍNEA 3: Peso esperado (referencia)
         label: "Peso Esperado (referencia)",
         data: calculateExpectedWeights(),
-        borderColor: "#f59e0b", // Naranja
+        borderColor: "#8a5a2b", // Marrón / humo
         backgroundColor: "transparent",
         fill: false,
         borderDash: [5, 5], // Línea punteada
