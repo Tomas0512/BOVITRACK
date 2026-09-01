@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.models.task import Task
 from app.schemas.task import TaskCreate, TaskUpdate
 from app.services.audit_service import add_audit_log
+from app.utils.validators import ensure_farm_scope
 
 
 def create_task(db: Session, farm_id: uuid.UUID, data: TaskCreate, assigned_by: uuid.UUID) -> Task:
@@ -24,6 +25,13 @@ def create_task(db: Session, farm_id: uuid.UUID, data: TaskCreate, assigned_by: 
     ¿Para qué? Registrar quién asigna (assigned_by) y quién ejecuta (assigned_to).
     ¿Impacto? assigned_by se toma automáticamente del usuario autenticado.
     """
+    ensure_farm_scope(
+        db,
+        farm_id,
+        bovine_id=data.bovine_id,
+        land_plot_id=data.land_plot_id,
+        member_user_id=data.assigned_to,
+    )
     task = Task(
         farm_id=farm_id,
         assigned_by=assigned_by,

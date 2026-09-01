@@ -19,6 +19,7 @@ from app.schemas.sanitary_plan import (
     SanitaryPlanUpdate,
 )
 from app.services.audit_service import add_audit_log
+from app.utils.validators import ensure_farm_scope
 
 
 def create_sanitary_plan(
@@ -31,6 +32,7 @@ def create_sanitary_plan(
     ¿Para qué? Programar vacunas y tratamientos periódicos.
     ¿Impacto? El plan queda activo y genera alertas según frecuencia.
     """
+    ensure_farm_scope(db, farm_id, bovine_id=data.bovine_id, land_plot_id=data.land_plot_id)
     plan = SanitaryPlan(
         farm_id=farm_id,
         created_by=user_id or uuid.uuid4(),
@@ -111,7 +113,15 @@ def update_sanitary_plan(
     ¿Impacto? exclude_unset=True asegura actualización parcial segura.
     """
     plan = get_sanitary_plan(db, farm_id, plan_id)
-    for field, value in data.model_dump(exclude_unset=True).items():
+    cambios = data.model_dump(exclude_unset=True)
+    # Revalidamos el alcance de los sub-recursos si se cambiaron.
+    ensure_farm_scope(
+        db,
+        farm_id,
+        bovine_id=cambios.get("bovine_id", plan.bovine_id),
+        land_plot_id=cambios.get("land_plot_id", plan.land_plot_id),
+    )
+    for field, value in cambios.items():
         setattr(plan, field, value)
     db.commit()
     db.refresh(plan)
