@@ -55,6 +55,22 @@ export async function getMe(): Promise<UserResponse> {
   return response.data;
 }
 
+/** Verificar el correo de una cuenta con el token recibido por email */
+export async function verifyEmail(token: string): Promise<MessageResponse> {
+  const response = await api.post<MessageResponse>(`${AUTH}/verify-email`, null, {
+    params: { token },
+  });
+  return response.data;
+}
+
+/** Eliminar la propia cuenta (requiere confirmación con el texto ELIMINAR) */
+export async function deleteAccount(): Promise<MessageResponse> {
+  const response = await api.delete<MessageResponse>(`${USERS}/me`, {
+    data: { confirmation_text: "ELIMINAR" },
+  });
+  return response.data;
+}
+
 /* ── Invitaciones ── */
 
 export interface InvitationInfo {

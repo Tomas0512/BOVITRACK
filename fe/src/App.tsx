@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequireRole from "./components/RequireRole";
 import AppLayout from "./components/layout/AppLayout";
 
 import HomePage from "./pages/HomePage";
@@ -26,6 +27,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import { InvitedRegisterPage } from "./pages/InvitedRegisterPage";
 import RequestReactivationPage from "./pages/RequestReactivationPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 function App() {
   return (
@@ -40,6 +42,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/request-reactivation" element={<RequestReactivationPage />} />
@@ -70,7 +73,7 @@ function App() {
               PARA:   poder revisar en una sola pantalla la actividad de todas
                       mis fincas y llegar directo con un enlace.
             */}
-            <Route path="/audit" element={<AuditPage />} />
+            <Route path="/audit" element={<RequireRole role="Administrador"><AuditPage /></RequireRole>} />
           </Route>
 
           {/* Catch-all */}
