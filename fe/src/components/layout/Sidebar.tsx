@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Home,
   Beef,
@@ -8,6 +8,13 @@ import {
   ShieldCheck,
   LogOut,
   UserRound,
+  Sprout,
+  Pill,
+  Wheat,
+  ArrowLeftRight,
+  Map,
+  FileText,
+  Users,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useAuth } from "../../hooks/useAuth";
@@ -18,6 +25,7 @@ interface NavItem {
   label: string;
   icon: JSX.Element;
   adminOnly?: boolean;
+  tab?: string;
 }
 
 interface Props {
@@ -30,6 +38,8 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
   const { user, logout } = useAuth();
   const { farms, activeFarmId, activeFarm, setActiveFarmId } = useFarm();
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const currentTab = searchParams.get("tab");
   const navigate = useNavigate();
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
@@ -39,16 +49,34 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
     onClose();
   };
 
+  const farm = (path: string) => (activeFarmId ? `/farms/${activeFarmId}${path}` : "#");
+  const onFarmDetail = activeFarmId !== null && pathname === `/farms/${activeFarmId}`;
+
   const items: NavItem[] = [
     { to: "/dashboard", label: "Inicio", icon: <Home size={20} /> },
-    { to: activeFarmId ? `/farms/${activeFarmId}` : "#", label: "Ganado", icon: <Beef size={20} /> },
-    { to: activeFarmId ? `/farms/${activeFarmId}/reports` : "#", label: "Reportes", icon: <BarChart3 size={20} /> },
-    { to: activeFarmId ? `/farms/${activeFarmId}/economics` : "#", label: "Economía", icon: <Wallet size={20} /> },
-    { to: activeFarmId ? `/farms/${activeFarmId}/alerts` : "#", label: "Alertas", icon: <Bell size={20} /> },
-    { to: "/audit", label: "Auditoría", icon: <ShieldCheck size={20} />, adminOnly: true },
+    { to: farm("?tab=bovinos"), label: "Ganado", icon: <Beef size={20} />, tab: "bovinos" },
+    { to: farm("?tab=terneros"), label: "Terneros", icon: <Sprout size={20} />, tab: "terneros" },
+    { to: farm("?tab=sanidad"), label: "Sanidad", icon: <Pill size={20} />, tab: "sanidad" },
+    { to: farm("?tab=alimentacion"), label: "Alimentación", icon: <Wheat size={20} />, tab: "alimentacion" },
+    { to: farm("?tab=movimientos"), label: "Movimientos", icon: <ArrowLeftRight size={20} />, tab: "movimientos" },
+    { to: farm("?tab=lotes"), label: "Lotes y Potreros", icon: <Map size={20} />, tab: "lotes" },
+    { to: farm("?tab=documentos"), label: "Documentos", icon: <FileText size={20} />, tab: "documentos" },
+    { to: farm("?tab=empleados"), label: "Empleados", icon: <Users size={20} />, tab: "empleados" },
+    { to: farm("?tab=auditoria"), label: "Auditoría", icon: <ShieldCheck size={20} />, tab: "auditoria" },
+    { to: farm("/reports"), label: "Reportes", icon: <BarChart3 size={20} /> },
+    { to: farm("/economics"), label: "Economía", icon: <Wallet size={20} /> },
+    { to: farm("/alerts"), label: "Alertas", icon: <Bell size={20} /> },
+    { to: "/audit", label: "Auditoría Global", icon: <ShieldCheck size={20} />, adminOnly: true },
   ];
 
   const visible = user?.role_name === "Administrador";
+
+  const isItemActive = (item: NavItem) => {
+    if (item.tab) return onFarmDetail && currentTab === item.tab;
+    if (item.to === "/dashboard") return pathname === "/dashboard";
+    if (item.to === "/audit") return pathname === "/audit";
+    return isActive(item.to);
+  };
 
   const initials = (user?.first_name?.[0] ?? "") + (user?.last_name?.[0] ?? "");
 
@@ -107,7 +135,7 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
           {items
             .filter((i) => !i.adminOnly || visible)
             .map((item) => {
-              const active = item.to !== "#" && (isActive(item.to) || (item.label === "Ganado" && isActive(`/farms/${activeFarmId}`)));
+              const active = item.to !== "#" && isItemActive(item);
               return (
                 <button
                   key={item.label}

@@ -1,30 +1,27 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Beef, Building2, Droplets, Plus, Clock } from "lucide-react";
+import {
+  Beef,
+  Building2,
+  Droplets,
+  Plus,
+  LayoutDashboard,
+  Sprout,
+  Pill,
+  Wheat,
+  ArrowLeftRight,
+  Map,
+  FileText,
+  Users,
+  BarChart3,
+  Wallet,
+  Bell,
+} from "lucide-react";
 import { useFarm } from "../context/FarmContext";
 import { listBovines } from "../api/bovines";
 import { listLandPlots } from "../api/land_plots";
 import { listMilkProduction } from "../api/milk_production";
-import { listAuditLogs, type AuditLogEntry } from "../api/audit_logs";
 import { useAuth } from "../hooks/useAuth";
-
-const ACTIVITY_LABEL: Record<string, string> = {
-  "create:bovine": "Bovino registrado",
-  "update:bovine": "Bovino actualizado",
-  "create:milk_production": "Ordeño registrado",
-  "create:weight": "Pesaje registrado",
-  "create:treatment": "Tratamiento aplicado",
-  "create:sanitary_plan": "Plan sanitario creado",
-  "create:reproductive_event": "Evento reproductivo registrado",
-  "create:economic_record": "Movimiento económico registrado",
-  "create:movement": "Movimiento de animal registrado",
-  "create:food": "Insumo registrado",
-  "create:consumption": "Consumo de insumo registrado",
-  "create:farm_invitation": "Invitación enviada",
-  "register": "Cuenta creada",
-  "login": "Inicio de sesión",
-  "logout": "Cierre de sesión",
-};
 
 // Fotografía de ganado (si falla, el banner muestra el degradado).
 const BANNER_IMG =
@@ -37,15 +34,35 @@ const kpi = (value: string | number, label: string, icon: ReactNode, tint: strin
   tint,
 });
 
+interface ModuleCard {
+  id: string;
+  label: string;
+  icon: ReactNode;
+  tab?: string;
+  route?: string;
+}
+
+const MODULES: ModuleCard[] = [
+  { id: "bovinos", label: "Ganado", icon: <Beef size={22} />, tab: "bovinos" },
+  { id: "terneros", label: "Terneros", icon: <Sprout size={22} />, tab: "terneros" },
+  { id: "sanidad", label: "Sanidad", icon: <Pill size={22} />, tab: "sanidad" },
+  { id: "alimentacion", label: "Alimentación", icon: <Wheat size={22} />, tab: "alimentacion" },
+  { id: "movimientos", label: "Movimientos", icon: <ArrowLeftRight size={22} />, tab: "movimientos" },
+  { id: "lotes", label: "Lotes y Potreros", icon: <Map size={22} />, tab: "lotes" },
+  { id: "documentos", label: "Documentos", icon: <FileText size={22} />, tab: "documentos" },
+  { id: "empleados", label: "Empleados", icon: <Users size={22} />, tab: "empleados" },
+  { id: "auditoria", label: "Auditoría", icon: <FileText size={22} />, tab: "auditoria" },
+  { id: "reports", label: "Reportes", icon: <BarChart3 size={22} />, route: "/reports" },
+  { id: "economics", label: "Economía", icon: <Wallet size={22} />, route: "/economics" },
+  { id: "alerts", label: "Alertas", icon: <Bell size={22} />, route: "/alerts" },
+];
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const { farms, activeFarm, activeFarmId, loading } = useFarm();
   const [animals, setAnimals] = useState(0);
   const [lots, setLots] = useState(0);
   const [milk, setMilk] = useState(0);
-  const [activities, setActivities] = useState<AuditLogEntry[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [error, setError] = useState("");
   const [bannerOk, setBannerOk] = useState(true);
 
   useEffect(() => {
@@ -55,22 +72,14 @@ export default function DashboardPage() {
       listBovines(activeFarmId),
       listLandPlots(activeFarmId, true),
       listMilkProduction(activeFarmId),
-      listAuditLogs(activeFarmId),
     ])
-      .then(([bov, lands, milks, logs]) => {
+      .then(([bov, lands, milks]) => {
         if (cancelled) return;
         setAnimals(bov.length);
         setLots(lands.length);
         setMilk(milks.reduce((sum, m) => sum + Number(m.quantity_liters || 0), 0));
-        setActivities(logs.slice(0, 5));
-        setError("");
       })
-      .catch(() => {
-        setError("No se pudo cargar el resumen de la finca");
-      })
-      .finally(() => {
-        if (!cancelled) setDataLoading(false);
-      });
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -84,7 +93,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Sin fincas
   if (farms.length === 0) {
     const canCreate = !user?.role_name || user.role_name === "Administrador";
     return (
@@ -108,7 +116,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Sin finca activa seleccionable (por seguridad)
   if (!activeFarm) {
     return (
       <div className="rounded-2xl bg-surface p-12 text-center shadow-sm">
@@ -122,6 +129,11 @@ export default function DashboardPage() {
     kpi(lots, "Lotes activos", <Building2 size={24} />, "from-accent/30 to-cream"),
     kpi(milk.toLocaleString("es-CO") + " L", "Producción de leche", <Droplets size={24} />, "from-cream to-accent/20"),
   ];
+
+  const moduleTo = (m: ModuleCard) => {
+    const suffix = m.tab ? `?tab=${m.tab}` : m.route ?? "";
+    return `/farms/${activeFarmId}${suffix}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -176,45 +188,27 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Últimas actividades */}
+      {/* Módulos */}
       <div className="rounded-2xl bg-surface p-5 shadow-sm">
-        <div className="mb-3 flex items-center gap-2">
-          <Clock size={18} className="text-primary" />
-          <h2 className="text-base font-bold text-text-primary">Últimas actividades</h2>
+        <div className="mb-4 flex items-center gap-2">
+          <LayoutDashboard size={18} className="text-primary" />
+          <h2 className="text-base font-bold text-text-primary">Módulos</h2>
         </div>
-        {dataLoading ? (
-          <div className="flex justify-center py-6">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        ) : activities.length === 0 ? (
-          <p className="py-6 text-center text-sm text-text-muted">Sin actividad reciente.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {activities.map((a) => {
-              const label = ACTIVITY_LABEL[`${a.action}:${a.entity}`] ?? `${a.action} · ${a.entity}`;
-              return (
-                <li key={a.id} className="flex items-center justify-between gap-2 py-2.5">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm text-text-primary">{label}</p>
-                    <p className="truncate text-xs text-text-muted">
-                      {a.user_full_name ?? a.user_email ?? "Sistema"}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-xs text-text-muted">
-                    {new Date(a.created_at).toLocaleDateString("es-CO")}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {MODULES.map((m) => (
+            <Link
+              key={m.id}
+              to={moduleTo(m)}
+              className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 no-underline transition-colors hover:border-primary/40 hover:bg-surface-alt"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                {m.icon}
+              </span>
+              <span className="text-sm font-medium text-text-primary">{m.label}</span>
+            </Link>
+          ))}
+        </div>
       </div>
-
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">
-          {error}
-        </div>
-      )}
     </div>
   );
 }
