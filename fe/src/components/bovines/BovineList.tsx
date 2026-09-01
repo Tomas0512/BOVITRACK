@@ -3,6 +3,7 @@ import { listBovines, deleteBovine, type BovineResponse } from "../../api/bovine
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
 import { getApiErrorMessage } from "../../api/errors";
 import Pagination from "../Pagination";
+import ConfirmDialog from "../ConfirmDialog";
 import BovineFormModal from "./BovineFormModal";
 import { Link } from "react-router-dom";
 
@@ -94,11 +95,14 @@ export default function BovineList({ farmId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, [farmId, filterSex]);
 
-  const handleDelete = async (b: BovineResponse) => {
-    if (!confirm(`¿Eliminar el bovino "${b.identification_number}"?`)) return;
-    setActionLoading(b.id);
+  const [toDelete, setToDelete] = useState<BovineResponse | null>(null);
+
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setActionLoading(toDelete.id);
     try {
-      await deleteBovine(farmId, b.id);
+      await deleteBovine(farmId, toDelete.id);
+      setToDelete(null);
       await fetchData();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudo eliminar el bovino"));
@@ -211,7 +215,7 @@ export default function BovineList({ farmId }: Props) {
                         className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                         Editar
                       </button>
-                      <button onClick={() => handleDelete(b)} disabled={actionLoading === b.id}
+                      <button onClick={() => setToDelete(b)} disabled={actionLoading === b.id}
                         className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50">
                         Eliminar
                       </button>
@@ -241,6 +245,16 @@ export default function BovineList({ farmId }: Props) {
           onClose={() => { setShowModal(false); setEditing(undefined); }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Eliminar bovino"
+        message={`¿Eliminar el bovino "${toDelete?.identification_number}"? Se marcará como retirado y dejará de aparecer en el hato.`}
+        confirmLabel="Eliminar"
+        loading={actionLoading !== null}
+        onConfirm={handleDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   );
 }

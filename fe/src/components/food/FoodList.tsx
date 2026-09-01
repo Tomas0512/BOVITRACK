@@ -25,6 +25,7 @@ import { getApiErrorMessage } from "../../api/errors";
 import { useTable } from "../../hooks/useTable";
 import Pagination from "../Pagination";
 import FoodFormModal from "./FoodFormModal";
+import ConfirmDialog from "../ConfirmDialog";
 import PurchaseFormModal from "./PurchaseFormModal";
 import InventoryDashboard from "./InventoryDashboard";
 
@@ -66,6 +67,7 @@ export default function FoodList({ farmId }: Props) {
   const [showDashboard, setShowDashboard] = useState(false);
   const [editing, setEditing] = useState<FoodResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<FoodResponse | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
 
   const getValue = (food: FoodResponse, key: string): string | number => {
@@ -120,35 +122,17 @@ export default function FoodList({ farmId }: Props) {
   // 🗑️ Eliminar un alimento
   // ════════════════════════════════════════════════════════════════════════════════
 
-  const handleDelete = async (food: FoodResponse) => {
-    /**
-     * Paso 1: Pedir confirmación
-     * Si el usuario no confirma, no hacer nada
-     */
-    if (!confirm(`¿Eliminar el alimento "${food.name}"?`)) return;
-
-    /**
-     * Paso 2: Mostrar que se está eliminando (spinner en el botón)
-     */
-    setActionLoading(food.id);
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setActionLoading(toDelete.id);
 
     try {
-      /**
-       * Paso 3: Llamar al backend para eliminar
-       * Esto hace un DELETE a /api/v1/farms/{farm_id}/food/{food_id}
-       */
-      await deleteFood(farmId, food.id);
-
-      /**
-       * Paso 4: Recargar la lista (sin el alimento eliminado)
-       */
+      await deleteFood(farmId, toDelete.id);
+      setToDelete(null);
       await fetchFoods();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudo eliminar el alimento"));
     } finally {
-      /**
-       * Paso 5: Dejar de mostrar el spinner
-       */
       setActionLoading(null);
     }
   };
@@ -399,7 +383,7 @@ export default function FoodList({ farmId }: Props) {
                           Editar
                         </button>
                         <button
-                          onClick={() => handleDelete(food)}
+                          onClick={() => setToDelete(food)}
                           disabled={actionLoading === food.id}
                           className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50"
                         >
@@ -428,6 +412,16 @@ export default function FoodList({ farmId }: Props) {
         }}
         onSuccess={handleSuccess}
         existing={editing}
+      />
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Eliminar alimento"
+        message={`¿Eliminar el alimento "${toDelete?.name}"? Se desactivará del inventario.`}
+        confirmLabel="Eliminar"
+        loading={actionLoading !== null}
+        onConfirm={handleDelete}
+        onCancel={() => setToDelete(null)}
       />
 
       {/* ─── MODAL (Purchase) ─── */}
