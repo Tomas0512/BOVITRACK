@@ -16,7 +16,7 @@ export function Footer() {
           &copy; {currentYear} BoviTrack. Todos los derechos reservados.
         </p>
         <p className="text-xs leading-snug text-text-primary/80">
-          <a href="/contacto" className="text-text-primary/80 no-underline hover:text-white">Contáctanos</a>
+          <a href="mailto:bovitrack08@gmail.com" className="text-text-primary/80 no-underline hover:text-white">Contáctanos</a>
           &nbsp;|&nbsp; +573158874910
         </p>
         <p className="text-xs leading-snug text-text-primary/80">

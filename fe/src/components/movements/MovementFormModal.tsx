@@ -98,7 +98,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
       <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">{isEdit ? "Editar movimiento" : "Registrar movimiento"}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}

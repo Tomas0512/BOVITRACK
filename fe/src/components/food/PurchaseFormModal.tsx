@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { recordPurchase, type FoodResponse, type PurchaseCreate } from "../../api/food";
 import { getApiErrorMessage } from "../../api/errors";
 
@@ -71,7 +72,7 @@ export default function PurchaseFormModal({
       <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">Registrar compra</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">&times;</button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && (
