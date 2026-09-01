@@ -4,17 +4,6 @@
 #           los servicios pueden arrancar en orden incorrecto o con secretos expuestos.
 
 services:
-  # ── Mailpit — SMTP local para desarrollo (http://localhost:8025) ──
-  mailpit:
-    image: axllent/mailpit:latest
-    container_name: bovitrack_mailpit
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:8025:8025"
-      - "127.0.0.1:1025:1025"
-    networks:
-      - backend_net
-
   # ── Base de datos (PostgreSQL) ──────────────────────
   db:
     build: ./db
@@ -61,12 +50,12 @@ services:
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS}
       FRONTEND_URL: ${FRONTEND_URL}
       # Backend de correo seleccionable desde el .env raíz.
-      #   Dev:    EMAIL_BACKEND=mailpit (SMTP local, sin entrega real)
-      #   Real:   EMAIL_BACKEND=resend (con RESEND_API_KEY) o EMAIL_BACKEND=smtp (con SMTP_HOST real)
-      EMAIL_BACKEND: ${EMAIL_BACKEND:-mailpit}
-      SMTP_HOST: ${SMTP_HOST:-mailpit}
-      SMTP_PORT: ${SMTP_PORT:-1025}
-      SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+      #   Real:   EMAIL_BACKEND=smtp (con SMTP_HOST / SMTP_USERNAME / SMTP_PASSWORD)
+      #   Alternativa: EMAIL_BACKEND=resend (con RESEND_API_KEY)
+      EMAIL_BACKEND: ${EMAIL_BACKEND:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-noreply@bovitrack.com}

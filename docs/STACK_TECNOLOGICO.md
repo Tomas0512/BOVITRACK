@@ -20,7 +20,7 @@ La estructura de BOVITRACK se eligió siguiendo la que nos enseñaron durante la
 | **App Móvil** | React Native + Expo SDK 54 | Interfaz de usuario en celulares (cliente) |
 | **Backend** | FastAPI + Python 3.12 + SQLAlchemy 2.0 + Alembic | API REST (servidor) |
 | **Base de datos** | PostgreSQL 17 (Docker) | Almacenamiento persistente |
-| **Infraestructura** | Docker Compose (db, be, fe, mailpit) + nginx | Despliegue y proxy |
+| **Infraestructura** | Docker Compose (db, be, fe) + nginx | Despliegue y proxy |
 | **Pruebas** | pytest (BE) · Vitest + Testing Library (FE) | Calidad |
 | **Linting/Formato** | Ruff (BE) · ESLint + Prettier (FE) | Estilo de código |
 
@@ -46,7 +46,7 @@ BOVITRACK/
 ├── .env.example              # Plantilla de variables de entorno (los secretos no se suben)
 ├── .gitignore
 ├── .python-version
-├── docker-compose.yml        # Orquesta los servicios: mailpit, db, be, fe
+├── docker-compose.yml        # Orquesta los servicios: db, be, fe
 ├── README.md                 # Documentación de uso del proyecto
 ├── be/                       # Backend — FastAPI (Python 3.12)
 ├── db/                       # Base de datos — PostgreSQL 17 (Docker)
