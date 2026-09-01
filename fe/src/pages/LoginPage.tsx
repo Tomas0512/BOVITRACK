@@ -6,7 +6,7 @@
  * Enlaces: "¿Olvidaste tu contraseña?" y "¿No estás registrado?"
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
@@ -22,10 +22,18 @@ export function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [sessionExpired, setSessionExpired] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
   const justRegistered = (location.state as { registered?: boolean })?.registered;
+
+  useEffect(() => {
+    if (sessionStorage.getItem("session_expired")) {
+      sessionStorage.removeItem("session_expired");
+      setSessionExpired(true);
+    }
+  }, []);
 
   /** ¿Están todos los campos llenos? */
   const isFormComplete =
@@ -97,6 +105,11 @@ export function LoginPage() {
           )}
           {serverError && (
             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
+          )}
+          {sessionExpired && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-700">
+              Tu sesión se cerró por inactividad. Inicia sesión nuevamente.
+            </div>
           )}
 
           <form onSubmit={handleSubmit} noValidate>

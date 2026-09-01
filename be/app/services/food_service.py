@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timezone
 
 from app.models.food import Consumption, Food, StockMovement
+from app.models.paddock import Paddock
 from app.schemas.food import ConsumptionCreate, FoodCreate, FoodUpdate
 from app.services.audit_service import add_audit_log
 from app.utils.validators import ensure_farm_scope
@@ -98,6 +99,28 @@ def create_consumption(db: Session, farm_id: uuid.UUID, data: ConsumptionCreate,
     # ¿Para qué? No se puede consumir más de lo disponible.
     food = get_food(db, farm_id, data.food_id)
     ensure_farm_scope(db, farm_id, bovine_id=data.bovine_id, land_plot_id=data.land_plot_id)
+
+    # ¿Qué? Validar el potrero (pertenece a la finca y es coherente con el lote).
+    if data.paddock_id:
+        paddock = db.execute(
+            select(Paddock).where(
+                Paddock.id == data.paddock_id,
+                Paddock.farm_id == farm_id,
+                Paddock.is_active.is_(True),
+            )
+        ).scalar_one_or_none()
+        if not paddock:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El potrero indicado no existe en esta finca.",
+            )
+        if data.land_plot_id is not None and paddock.land_plot_id != data.land_plot_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El potrero indicado pertenece a otro lote.",
+            )
+        if data.land_plot_id is None:
+            data.land_plot_id = paddock.land_plot_id
     if food.current_stock < data.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

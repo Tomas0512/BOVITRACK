@@ -110,6 +110,12 @@ export default function EconomicDashboard() {
   const expenseCategories = indicators ? toCategoryData(indicators.expense_by_category) : [];
   const monthlyData = toMonthlyData(records);
 
+  const fmtDate = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString("es-CO");
+  const recMin = records.length ? records.reduce((a, b) => (b.record_date < a.record_date ? b : a)).record_date : null;
+  const recMax = records.length ? records.reduce((a, b) => (b.record_date > a.record_date ? b : a)).record_date : null;
+  const recordRange = recMin && recMax ? `${fmtDate(recMin)} – ${fmtDate(recMax)}` : null;
+  const filterRange = dateFrom && dateTo ? `${fmtDate(dateFrom)} – ${fmtDate(dateTo)}` : null;
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -120,6 +126,11 @@ export default function EconomicDashboard() {
           <div>
             <h1 className="text-2xl font-bold text-text-primary">Dashboard Económico</h1>
             <p className="text-sm text-text-muted">Indicadores financieros de la finca</p>
+            {recordRange && (
+              <p className="text-xs text-text-muted">
+                {filterRange ? `Mostrando: ${filterRange} · ` : ""}Registros disponibles: {recordRange}
+              </p>
+            )}
           </div>
         </div>
       </div>

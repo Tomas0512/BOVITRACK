@@ -27,7 +27,9 @@ export interface ConsumptionCreate {
   feeding_date: string;
   land_plot_id?: string | null;
   bovine_id?: string | null;
+  paddock_id?: string | null;
   observations?: string | null;
+  source_bag?: string | null;
 }
 
 export interface ConsumptionResponse extends ConsumptionCreate {

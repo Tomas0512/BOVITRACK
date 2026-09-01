@@ -133,10 +133,12 @@ class ConsumptionCreate(BaseModel):
 
     land_plot_id: uuid.UUID | None = None
     bovine_id: uuid.UUID | None = None
+    paddock_id: uuid.UUID | None = None
     food_id: uuid.UUID
     quantity: Decimal
     feeding_date: datetime
     observations: str | None = None
+    source_bag: str | None = None
 
     @field_validator("quantity")
     @classmethod
@@ -162,10 +164,12 @@ class ConsumptionResponse(BaseModel):
     farm_id: uuid.UUID
     land_plot_id: uuid.UUID | None
     bovine_id: uuid.UUID | None
+    paddock_id: uuid.UUID | None
     food_id: uuid.UUID
     quantity: Decimal
     feeding_date: datetime
     observations: str | None
+    source_bag: str | None
     registered_by: uuid.UUID
     created_at: datetime
 
