@@ -118,9 +118,9 @@ export default function DashboardPage() {
   }
 
   const cards = [
-    kpi(animals, "Animales", <Beef size={24} />, "from-orange-200 to-amber-100"),
-    kpi(lots, "Lotes activos", <Building2 size={24} />, "from-amber-200 to-yellow-100"),
-    kpi(milk.toLocaleString("es-CO") + " L", "Producción de leche", <Droplets size={24} />, "from-sky-200 to-blue-100"),
+    kpi(animals, "Animales", <Beef size={24} />, "from-primary/15 to-accent/30"),
+    kpi(lots, "Lotes activos", <Building2 size={24} />, "from-accent/30 to-cream"),
+    kpi(milk.toLocaleString("es-CO") + " L", "Producción de leche", <Droplets size={24} />, "from-cream to-accent/20"),
   ];
 
   return (
