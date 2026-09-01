@@ -104,7 +104,7 @@ export default function EconomicDashboard() {
     run("", "");
   };
 
-  useEffect(() => { load(); }, [farmId]);
+  useEffect(() => { load(); }, [farmId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const incomeCategories = indicators ? toCategoryData(indicators.income_by_category) : [];
   const expenseCategories = indicators ? toCategoryData(indicators.expense_by_category) : [];
