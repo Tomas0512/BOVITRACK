@@ -54,20 +54,20 @@ def _build_html(body_html: str, cta_url: str, cta_text: str) -> str:
     return f"""
     <html>
     <body style="font-family: system-ui, -apple-system, sans-serif;
-                 max-width: 600px; margin: 0 auto; padding: 24px; color: #111827;">
+                 max-width: 600px; margin: 0 auto; padding: 24px; color: #2c1e17;">
         {body_html}
         <p style="margin: 32px 0;">
             <a href="{cta_url}"
-               style="background-color: #2D6A4F; color: white; padding: 12px 28px;
+               style="background-color: #b3541e; color: white; padding: 12px 28px;
                       text-decoration: none; border-radius: 6px; font-weight: 500;
                       font-size: 15px;">
                 {cta_text}
             </a>
         </p>
-        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
-        <p style="color: #6b7280; font-size: 13px;">
+        <hr style="border: none; border-top: 1px solid #e3dcd1; margin: 24px 0;">
+        <p style="color: #6b5a45; font-size: 13px;">
             Si el botón no funciona, copia este enlace en tu navegador:<br>
-            <a href="{cta_url}" style="color: #2D6A4F;">{cta_url}</a>
+            <a href="{cta_url}" style="color: #b3541e;">{cta_url}</a>
         </p>
     </body>
     </html>
@@ -79,14 +79,14 @@ async def send_password_reset_email(email: str, token: str) -> None:
     subject = "BoviTrack — Recuperación de contraseña"
     html_content = _build_html(
         body_html="""
-        <h2 style="color: #2D6A4F; margin-bottom: 8px;">
+        <h2 style="color: #b3541e; margin-bottom: 8px;">
             Recuperación de contraseña — BoviTrack
         </h2>
-        <p style="color: #374151;">
+        <p style="color: #2c1e17;">
             Recibimos una solicitud para restablecer la contraseña de tu cuenta.
         </p>
-        <p style="color: #6b7280; font-size: 14px;">
-            El enlace es válido por <strong>1 hora</strong>.
+        <p style="color: #6b5a45; font-size: 14px;">
+            El enlace es válido por <strong>20 minutos</strong>.
             Si no lo solicitaste, ignora este email.
         </p>
         """,
@@ -101,14 +101,14 @@ async def send_email_verification(email: str, token: str) -> None:
     subject = "BoviTrack — Verifica tu cuenta"
     html_content = _build_html(
         body_html="""
-        <h2 style="color: #2D6A4F; margin-bottom: 8px;">
+        <h2 style="color: #b3541e; margin-bottom: 8px;">
             Verifica tu cuenta — BoviTrack
         </h2>
-        <p style="color: #374151;">
+        <p style="color: #2c1e17;">
             ¡Bienvenido! Para activar tu cuenta y poder iniciar sesión,
             haz clic en el botón de abajo.
         </p>
-        <p style="color: #6b7280; font-size: 14px;">
+        <p style="color: #6b5a45; font-size: 14px;">
             El enlace es válido por <strong>24 horas</strong>.
         </p>
         """,
@@ -123,13 +123,13 @@ async def send_farm_invitation_email(email: str, token: str, farm_name: str) -> 
     subject = f"BoviTrack — Has sido invitado a {farm_name}"
     html_content = _build_html(
         body_html=f"""
-        <h2 style="color: #2D6A4F; margin-bottom: 8px;">
+        <h2 style="color: #b3541e; margin-bottom: 8px;">
             Invitación a finca — BoviTrack
         </h2>
-        <p style="color: #374151;">
+        <p style="color: #2c1e17;">
             Has sido invitado a unirte a la finca <strong>{farm_name}</strong>.
         </p>
-        <p style="color: #6b7280; font-size: 14px;">
+        <p style="color: #6b5a45; font-size: 14px;">
             El enlace es válido por <strong>72 horas</strong>.
         </p>
         """,
