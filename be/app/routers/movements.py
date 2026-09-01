@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.permissions import require_permission
@@ -60,8 +60,10 @@ def update(
     current_user: User = Depends(get_current_user),
 ) -> MovementResponse:
     _ = current_user
-    movement = movement_service.update_movement(db, farm_id, movement_id, data, current_user.id)
-    return MovementResponse.model_validate(movement)
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Los movimientos del hato son registros inmutables y no se pueden editar",
+    )
 
 
 @router.delete("/{movement_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Eliminar movimiento", dependencies=[Depends(require_permission("bovinos", "can_delete"))])
@@ -72,4 +74,7 @@ def delete(
     current_user: User = Depends(get_current_user),
 ) -> None:
     _ = current_user
-    movement_service.delete_movement(db, farm_id, movement_id, current_user.id)
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Los movimientos del hato son registros inmutables y no se pueden eliminar",
+    )

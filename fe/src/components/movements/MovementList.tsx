@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, AlertTriangle, Pencil, Trash2, ArrowUpDown } from "lucide-react";
-import { listMovements, deleteMovement, type MovementResponse } from "../../api/movements";
+import { Plus, AlertTriangle, ArrowUpDown } from "lucide-react";
+import { listMovements, type MovementResponse } from "../../api/movements";
 import { getApiErrorMessage } from "../../api/errors";
 import Pagination from "../Pagination";
 import MovementFormModal from "./MovementFormModal";
@@ -30,7 +30,6 @@ export default function MovementList({ farmId }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<MovementResponse | null>(null);
   const [filterType, setFilterType] = useState("");
   const [sortKey, setSortKey] = useState<string>("movement_date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
@@ -89,16 +88,6 @@ export default function MovementList({ farmId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, [farmId, filterType]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Estás seguro de eliminar este movimiento?")) return;
-    try {
-      await deleteMovement(farmId, id);
-      fetchData();
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, "No se pudo eliminar el movimiento"));
-    }
-  };
-
   return (
     <div className="mt-6 rounded-2xl bg-surface p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -114,7 +103,7 @@ export default function MovementList({ farmId }: Props) {
               <option key={k} value={k}>{v}</option>
             ))}
           </select>
-          <button onClick={() => { setEditing(null); setShowModal(true); }}
+          <button onClick={() => setShowModal(true)}
             className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-sm font-bold text-white hover:bg-primary-light">
             <Plus size={16} />
             Registrar
@@ -161,7 +150,7 @@ export default function MovementList({ farmId }: Props) {
                 </th>
                 <th className="pb-2 pr-4">Contraparte</th>
                 <th className="pb-2 pr-4">Motivo</th>
-                <th className="pb-2 pr-4 text-right">Acciones</th>
+                <th className="pb-2 pr-4 text-right">Registro</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -177,22 +166,7 @@ export default function MovementList({ farmId }: Props) {
                   <td className="py-3 pr-4 text-text-secondary">{m.price != null ? `$${Number(m.price).toLocaleString("es-CO")}` : "—"}</td>
                   <td className="py-3 pr-4 text-text-secondary">{m.counterparty_name || "—"}</td>
                   <td className="max-w-[200px] truncate py-3 pr-4 text-text-muted">{m.reason || "—"}</td>
-                  <td className="py-3 pr-4 text-right">
-                    <button
-                      onClick={() => { setEditing(m); setShowModal(true); }}
-                      className="mr-1 rounded-lg p-1.5 text-text-muted hover:bg-surface-alt hover:text-text-primary"
-                      title="Editar"
-                    >
-                      <Pencil size={15} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(m.id)}
-                      className="rounded-lg p-1.5 text-text-muted hover:bg-red-50 hover:text-red-600"
-                      title="Eliminar"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </td>
+                  <td className="py-3 pr-4 text-right text-xs text-text-muted">Inmutable</td>
                 </tr>
               ))}
             </tbody>
@@ -211,9 +185,8 @@ export default function MovementList({ farmId }: Props) {
       {showModal && (
         <MovementFormModal
           farmId={farmId}
-          existing={editing}
-          onSuccess={() => { setShowModal(false); setEditing(null); fetchData(); }}
-          onClose={() => { setShowModal(false); setEditing(null); }}
+          onSuccess={() => { setShowModal(false); fetchData(); }}
+          onClose={() => setShowModal(false)}
         />
       )}
     </div>
