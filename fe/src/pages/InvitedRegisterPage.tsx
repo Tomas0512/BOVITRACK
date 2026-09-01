@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "../components/layout/AuthLayout";
 import { getInvitationInfo, registerInvited, type InvitationInfo } from "../api/auth";
 
@@ -50,6 +50,7 @@ export function InvitedRegisterPage() {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const TEXT_ONLY = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
 
@@ -324,7 +325,12 @@ export function InvitedRegisterPage() {
                 <div className="mb-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <div className="flex flex-col">
                     <label htmlFor="password" className="mb-0.5 text-xs font-semibold text-text-primary">Contraseña <span className="font-bold text-red-600">*</span></label>
-                    <input id="password" name="password" type="password" placeholder="Mínimo 8 caracteres" value={formData.password} onChange={handleChange} className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                    <div className="relative">
+                      <input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres" value={formData.password} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                      <button type="button" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                     {errors.password && <span className="mt-0.5 text-xs text-red-600">{errors.password}</span>}
                     {formData.password && (
                       <ul className="mt-1.5 list-none space-y-0.5 p-0 text-xs">
@@ -338,7 +344,12 @@ export function InvitedRegisterPage() {
                   </div>
                   <div className="flex flex-col">
                     <label htmlFor="confirmPassword" className="mb-0.5 text-xs font-semibold text-text-primary">Verificar contraseña <span className="font-bold text-red-600">*</span></label>
-                    <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Repita la contraseña" value={formData.confirmPassword} onChange={handleChange} className="rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                    <div className="relative">
+                      <input id="confirmPassword" name="confirmPassword" type={showPassword ? "text" : "password"} placeholder="Repita la contraseña" value={formData.confirmPassword} onChange={handleChange} className="w-full rounded-lg border-[1.5px] border-border bg-surface px-2.5 py-1.5 pr-10 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/10" />
+                      <button type="button" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                     {errors.confirmPassword && <span className="mt-0.5 text-xs text-red-600">{errors.confirmPassword}</span>}
                   </div>
                 </div>
