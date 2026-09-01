@@ -4,6 +4,8 @@ import {
   listMilkProduction,
   type MilkProductionResponse,
 } from "../../api/milk_production";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -34,8 +36,15 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const getValue = (r: MilkProductionResponse, key: string): string | number => {
+    const v = (r as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage } =
+    useTable<MilkProductionResponse>(records, { getValue });
+
   useEffect(() => {
-    setLoading(true);
     listMilkProduction(farmId, bovineId)
       .then(setRecords)
       .catch(() => setError("No se pudo cargar el historial de ordeño."))
@@ -81,7 +90,7 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
               </tr>
             </thead>
             <tbody>
-              {records.map((r) => (
+              {paginated.map((r) => (
                 <tr
                   key={r.id}
                   className="border-b border-border last:border-0 hover:bg-surface-alt"
@@ -111,6 +120,9 @@ export default function MilkProductionList({ farmId, bovineId }: Props) {
               ))}
             </tbody>
           </table>
+          <div className="mt-4">
+            <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+          </div>
         </div>
       )}
     </div>

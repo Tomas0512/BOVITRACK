@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Syringe } from "lucide-react";
 import { listTreatments, type TreatmentResponse } from "../../api/treatments";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -46,8 +48,15 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const getValue = (t: TreatmentResponse, key: string): string | number => {
+    const v = (t as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage } =
+    useTable<TreatmentResponse>(treatments, { getValue });
+
   useEffect(() => {
-    setLoading(true);
     listTreatments(farmId, bovineId)
       .then(setTreatments)
       .catch(() => setError("No se pudo cargar los tratamientos sanitarios."))
@@ -73,7 +82,7 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
       )}
       {!loading && !error && treatments.length > 0 && (
         <div className="space-y-3">
-          {treatments.map((t) => {
+          {paginated.map((t) => {
             const days = t.next_application_date ? daysUntil(t.next_application_date) : null;
             const isUpcoming = days !== null && days >= 0 && days <= 7;
             const isOverdue = days !== null && days < 0;
@@ -160,6 +169,10 @@ export default function TreatmentList({ farmId, bovineId }: Props) {
           })}
         </div>
       )}
+
+      <div className="mt-4">
+        <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+      </div>
     </div>
   );
 }

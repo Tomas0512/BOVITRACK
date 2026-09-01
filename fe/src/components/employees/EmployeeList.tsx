@@ -10,6 +10,8 @@ import {
 } from "../../api/employees";
 import { getApiErrorMessage } from "../../api/errors";
 import { useAuth } from "../../hooks/useAuth";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 import AssignEmployeeModal from "./AssignEmployeeModal";
 
 interface Props {
@@ -18,8 +20,6 @@ interface Props {
 
 export default function EmployeeList({ farmId }: Props) {
   const { user } = useAuth();
-  // Cerrar una cuenta afecta a TODAS las fincas de esa persona, así que la
-  // acción se reserva a administradores. El backend lo valida igualmente (403).
   const isAdmin = user?.role_name === "Administrador";
   const [employees, setEmployees] = useState<EmployeeResponse[]>([]);
   const [roles, setRoles] = useState<RoleOption[]>([]);
@@ -29,6 +29,14 @@ export default function EmployeeList({ farmId }: Props) {
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [changingRole, setChangingRole] = useState<string | null>(null);
+
+  const getValue = (emp: EmployeeResponse, key: string): string | number => {
+    const v = (emp as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<EmployeeResponse>(employees, { getValue });
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -41,15 +49,17 @@ export default function EmployeeList({ farmId }: Props) {
       ]);
       setEmployees(data);
       setRoles(rolesData);
-    } catch {
-      setError("No se pudieron cargar los empleados");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron cargar los empleados"));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { setPage(1); }, [farmId, filter, setPage]);
   useEffect(() => {
     fetchEmployees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmId, filter]);
 
   const getApiError = (err: unknown): string => getApiErrorMessage(err, "");
@@ -115,8 +125,8 @@ export default function EmployeeList({ farmId }: Props) {
     try {
       await updateEmployee(farmId, emp.user_id, { role_id: newRoleId });
       await fetchEmployees();
-    } catch {
-      setError("No se pudo cambiar el rol");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo cambiar el rol"));
     } finally {
       setActionLoading(null);
       setChangingRole(null);
@@ -193,16 +203,22 @@ export default function EmployeeList({ farmId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">Nombre</th>
-                <th className="pb-2 pr-4">Correo</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("first_name")} className="uppercase">Nombre {sortKey === "first_name" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("email")} className="uppercase">Correo {sortKey === "email" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
                 <th className="pb-2 pr-4">Documento</th>
-                <th className="pb-2 pr-4">Rol</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("role_name")} className="uppercase">Rol {sortKey === "role_name" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
                 <th className="pb-2 pr-4">Estado</th>
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {employees.map((emp) => (
+              {paginated.map((emp) => (
                 <tr key={emp.id} className="hover:bg-surface-alt">
                   <td className="py-3 pr-4 font-medium text-text-primary">
                     {emp.first_name} {emp.last_name}
@@ -305,6 +321,9 @@ export default function EmployeeList({ farmId }: Props) {
               ))}
             </tbody>
           </table>
+          <div className="mt-4">
+            <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+          </div>
         </div>
       )}
 
