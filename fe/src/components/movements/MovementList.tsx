@@ -174,7 +174,7 @@ export default function MovementList({ farmId }: Props) {
                     </span>
                   </td>
                   <td className="py-3 pr-4 text-text-secondary">{new Date(m.movement_date).toLocaleDateString("es-CO")}</td>
-                  <td className="py-3 pr-4 text-text-secondary">{bovineLabel(m.bovine_id)}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{m.bovine_id ? bovineLabel(m.bovine_id) : (m.animal_identifier ?? "—")}</td>
                   <td className="py-3 pr-4 text-text-secondary">{m.price != null ? `$${Number(m.price).toLocaleString("es-CO")}` : "—"}</td>
                   <td className="py-3 pr-4 text-text-secondary">{m.counterparty_name || "—"}</td>
                   <td className="max-w-[200px] truncate py-3 pr-4 text-text-muted">{m.reason || "—"}</td>

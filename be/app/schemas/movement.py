@@ -9,6 +9,7 @@ from app.models.movement import MOVEMENT_TYPES
 
 class MovementCreate(BaseModel):
     bovine_id: uuid.UUID | None = None
+    animal_identifier: str | None = None
     movement_type: str
     movement_date: date
     price: Decimal | None = None
@@ -44,6 +45,7 @@ class MovementCreate(BaseModel):
 
 class MovementUpdate(BaseModel):
     bovine_id: uuid.UUID | None = None
+    animal_identifier: str | None = None
     movement_type: str | None = None
     movement_date: date | None = None
     price: Decimal | None = None
@@ -62,6 +64,7 @@ class MovementResponse(BaseModel):
     id: uuid.UUID
     farm_id: uuid.UUID
     bovine_id: uuid.UUID | None
+    animal_identifier: str | None
     movement_type: str
     movement_date: date
     price: Decimal | None

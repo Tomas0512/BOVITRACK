@@ -28,6 +28,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<MovementRequest>({
     bovine_id: existing?.bovine_id ?? null,
+    animal_identifier: existing?.animal_identifier ?? null,
     movement_type: existing?.movement_type ?? "compra",
     movement_date: existing?.movement_date ?? new Date().toISOString().slice(0, 10),
     price: existing?.price ?? null,
@@ -53,19 +54,27 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
 
   const isEdit = !!existing;
 
-  const NEEDS_BOVINE = ["venta", "traslado", "muerte"];
+  const EXISTING_TYPES = ["venta", "traslado", "muerte"];
+  const NEW_ANIMAL_TYPES = ["compra", "nacimiento"];
+  const needsExistingBovine = EXISTING_TYPES.includes(form.movement_type);
+  const needsNewIdentifier = NEW_ANIMAL_TYPES.includes(form.movement_type);
 
   const isFormComplete =
     form.movement_date !== "" &&
     (form.movement_type === "traslado"
       ? (form.origin_farm_name ?? "").trim() !== "" && (form.destination_farm_name ?? "").trim() !== ""
       : (form.counterparty_name ?? "").trim() !== "") &&
-    (NEEDS_BOVINE.includes(form.movement_type) ? Boolean(form.bovine_id) : true);
+    (needsExistingBovine ? Boolean(form.bovine_id) : true) &&
+    (needsNewIdentifier ? (form.animal_identifier ?? "").trim() !== "" : true);
 
   const validateStep = (s: number): boolean => {
     if (s === 0 && !form.movement_date) { setError("La fecha del movimiento es obligatoria"); return false; }
-    if (s === 0 && NEEDS_BOVINE.includes(form.movement_type) && !form.bovine_id) {
+    if (s === 0 && needsExistingBovine && !form.bovine_id) {
       setError("Seleccione el bovino (por su número de identificación)");
+      return false;
+    }
+    if (s === 0 && needsNewIdentifier && (form.animal_identifier ?? "").trim() === "") {
+      setError("Ingrese el identificador del animal nuevo");
       return false;
     }
     setError("");
@@ -148,16 +157,22 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Bovino (identificación) {NEEDS_BOVINE.includes(form.movement_type) ? <span className="text-red-600">*</span> : ""}
+                  Bovino (identificación) <span className="text-red-600">*</span>
                 </label>
-                <select value={form.bovine_id ?? ""} onChange={(e) => { setForm({ ...form, bovine_id: e.target.value || null }); setError(""); }}
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
-                  disabled={bovines.length === 0}>
-                  <option value="">{form.movement_type === "compra" ? "— Sin bovino (animal nuevo) —" : "Seleccione un bovino…"}</option>
-                  {bovines.map((b) => (
-                    <option key={b.id} value={b.id}>{b.identification_number}{b.name ? ` · ${b.name}` : ""}</option>
-                  ))}
-                </select>
+                {needsNewIdentifier ? (
+                  <input type="text" maxLength={50} value={form.animal_identifier ?? ""}
+                    onChange={(e) => { setForm({ ...form, animal_identifier: e.target.value || null }); setError(""); }}
+                    placeholder="Identificador del animal nuevo" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                ) : (
+                  <select value={form.bovine_id ?? ""} onChange={(e) => { setForm({ ...form, bovine_id: e.target.value || null }); setError(""); }}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                    disabled={bovines.length === 0}>
+                    <option value="">Seleccione un bovino…</option>
+                    {bovines.map((b) => (
+                      <option key={b.id} value={b.id}>{b.identification_number}{b.name ? ` · ${b.name}` : ""}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </>
           )}
