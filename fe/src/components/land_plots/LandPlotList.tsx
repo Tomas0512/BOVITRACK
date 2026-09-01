@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapPin, Ruler, Users } from "lucide-react";
 import { listLandPlots, deleteLandPlot, type LandPlotResponse } from "../../api/land_plots";
 import { getApiErrorMessage } from "../../api/errors";
 import { useTable } from "../../hooks/useTable";
@@ -9,6 +10,22 @@ import LandPlotFormModal from "./LandPlotFormModal";
 interface Props {
   farmId: string;
 }
+
+const USAGE_LABEL: Record<string, string> = {
+  pastoreo: "Pastoreo",
+  cultivo: "Cultivo",
+  reserva: "Reserva",
+  infraestructura: "Infraestructura",
+  otro: "Otro",
+};
+
+const USAGE_BADGE: Record<string, string> = {
+  pastoreo: "bg-green-50 text-green-700",
+  cultivo: "bg-amber-50 text-amber-700",
+  reserva: "bg-blue-50 text-blue-700",
+  infraestructura: "bg-purple-50 text-purple-700",
+  otro: "bg-surface-alt text-text-secondary",
+};
 
 export default function LandPlotList({ farmId }: Props) {
   const [plots, setPlots] = useState<LandPlotResponse[]>([]);
@@ -102,8 +119,11 @@ export default function LandPlotList({ farmId }: Props) {
                     {lp.is_active ? "Activo" : "Inactivo"}
                   </span>
                 </div>
-                <p className="text-xs text-text-secondary">{lp.area} {lp.area_unit} · {lp.usage_type}</p>
-                <p className="text-xs text-text-secondary">Cap. máx: {lp.max_capacity} animales</p>
+                <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${USAGE_BADGE[lp.usage_type] ?? USAGE_BADGE.otro}`}>
+                  <MapPin size={11} /> {USAGE_LABEL[lp.usage_type] ?? lp.usage_type}
+                </span>
+                <p className="mt-2 flex items-center gap-1 text-xs text-text-secondary"><Ruler size={12} /> {lp.area} {lp.area_unit}</p>
+                <p className="flex items-center gap-1 text-xs text-text-secondary"><Users size={12} /> Cap. máx: {lp.max_capacity} animales</p>
                 <div className="mt-3 flex gap-2">
                   <button onClick={() => { setEditing(lp); setShowModal(true); }}
                     className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
