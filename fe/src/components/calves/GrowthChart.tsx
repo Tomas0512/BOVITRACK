@@ -21,6 +21,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -191,7 +192,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
 
     // Asumimos que el ternero nació hace X días
     // Usamos una fórmula simple: peso esperado = 30 + (0.2 * días_edad)
-    return weightHistory.map((w, _idx) => {
+    return weightHistory.map((w) => {
       // Calcular edad aproximada en ese momento
       const lastDate = new Date(weightHistory[weightHistory.length - 1].date);
       const currentDate = new Date(w.date);
@@ -217,7 +218,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
     plugins: {
       title: {
         display: true,
-        text: `📊 Curva de Crecimiento - ${calfName || "Ternero"} (${calfBreed || "Raza desconocida"})`,
+        text: `Curva de Crecimiento - ${calfName || "Ternero"} (${calfBreed || "Raza desconocida"})`,
         font: { size: 16, weight: "bold" as const },
       },
       legend: {
@@ -228,7 +229,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
       tooltip: {
         callbacks: {
           // Mostrar valores con formato personalizado
-          label: function (context: any) {
+          label: function (context: { dataset: { label?: unknown } }) {
             let label = context.dataset.label || "";
             if (label) {
               label += ": ";
@@ -292,7 +293,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
     return (
       <div className="bg-surface rounded-lg shadow p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p className="font-semibold">⚠️ Error</p>
+          <p className="flex items-center gap-1.5 font-semibold"><AlertTriangle size={16} /> Error</p>
           <p>{error}</p>
         </div>
       </div>
@@ -303,7 +304,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
     return (
       <div className="bg-surface rounded-lg shadow p-6">
         <div className="text-center text-text-muted">
-          <p className="text-lg mb-2">📊 No hay datos de pesajes disponibles</p>
+          <p className="text-lg mb-2">No hay datos de pesajes disponibles</p>
           <p className="text-sm">
             Registra al menos 2 pesajes para ver la curva de crecimiento
           </p>

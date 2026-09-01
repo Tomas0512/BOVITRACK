@@ -24,6 +24,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { AlertTriangle, TrendingUp } from "lucide-react";
 import {
   listCalves,
   getCalfSummary,
@@ -250,8 +251,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
     <div className="space-y-6">
       {/* ENCABEZADO */}
       <div className="bg-surface rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-text-primary mb-2">
-          🐄 Gestión de Terneros
+        <h2 className="flex items-center gap-2 text-2xl font-bold text-text-primary mb-2">
+          Gestión de Terneros
         </h2>
         <p className="text-text-secondary">
           Seguimiento del crecimiento y desarrollo de crías bovinas
@@ -349,7 +350,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
       {/* MENSAJES DE ERROR */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-          <p className="font-semibold">⚠️ Error</p>
+          <p className="flex items-center gap-1.5 font-semibold"><AlertTriangle size={16} /> Error</p>
           <p>{error}</p>
         </div>
       )}
@@ -457,9 +458,9 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
                     <td className="py-3 pr-4 text-center">
                       <button
                         onClick={() => handleOpenWeightModal(calf)}
-                        className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition"
                       >
-                        📊 Pesar
+                        <TrendingUp size={14} /> Pesar
                       </button>
                     </td>
                   </tr>

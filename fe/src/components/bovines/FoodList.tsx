@@ -6,6 +6,8 @@ import {
   type ConsumptionResponse,
   type FoodResponse,
 } from "../../api/food";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -29,20 +31,31 @@ export default function FoodList({ farmId, bovineId }: Props) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
+    let cancelled = false;
     Promise.all([
       listConsumptions(farmId, { bovine_id: bovineId }),
       listFoods(farmId),
     ])
       .then(([consumptions, foods]) => {
+        if (cancelled) return;
         setConsumptions(consumptions);
         const map: Record<string, FoodResponse> = {};
         for (const f of foods) map[f.id] = f;
         setFoodMap(map);
       })
-      .catch(() => setError("No se pudo cargar el historial de alimentación."))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setError("No se pudo cargar el historial de alimentación.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [farmId, bovineId]);
+
+  const getValue = (c: ConsumptionResponse, key: string): string | number => String((c as unknown as Record<string, unknown>)[key] ?? "");
+  const { page, pageCount, start, end, total, paginated, setPage } = useTable<ConsumptionResponse>(consumptions, { getValue });
 
   return (
     <div className="rounded-2xl bg-surface p-6 shadow-sm">
@@ -74,7 +87,7 @@ export default function FoodList({ farmId, bovineId }: Props) {
               </tr>
             </thead>
             <tbody>
-              {consumptions.map((c) => {
+              {paginated.map((c) => {
                 const food = foodMap[c.food_id];
                 return (
                   <tr
@@ -114,6 +127,12 @@ export default function FoodList({ farmId, bovineId }: Props) {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {total > 0 && (
+        <div className="mt-4">
+          <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
         </div>
       )}
     </div>
