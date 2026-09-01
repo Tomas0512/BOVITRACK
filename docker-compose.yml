@@ -66,6 +66,10 @@ services:
       SMTP_HOST: ${SMTP_HOST:-mailpit}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@bovitrack.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BoviTrack}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       # Rate limiting: desactivable solo para QA/demo local (suite E2E hace
       # ~15 logins por corrida). El default del backend es activado.
