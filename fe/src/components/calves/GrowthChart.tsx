@@ -32,6 +32,7 @@ import {
   Tooltip,
   Legend,
   Filler,
+  type TooltipItem,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { getCalfWeightHistory, IWeightRecord } from "../../api/calves";
@@ -229,7 +230,7 @@ export const GrowthChart: React.FC<IGrowthChartProps> = ({
       tooltip: {
         callbacks: {
           // Mostrar valores con formato personalizado
-          label: function (context: { dataset: { label?: unknown } }) {
+          label: function (context: TooltipItem<"line">) {
             let label = context.dataset.label || "";
             if (label) {
               label += ": ";
