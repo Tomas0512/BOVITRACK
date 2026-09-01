@@ -101,6 +101,8 @@ class UserCreate(BaseModel):
             raise ValueError("El teléfono es obligatorio")
         if len(v) > 20:
             raise ValueError("El teléfono no puede exceder 20 caracteres")
+        if not re.match(r"^[0-9+\s()-]+$", v):
+            raise ValueError("El teléfono solo puede contener números, '+', espacios, guiones y paréntesis")
         return v
 
     @field_validator("password")

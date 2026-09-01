@@ -10,8 +10,8 @@ services:
     container_name: bovitrack_mailpit
     restart: unless-stopped
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
     networks:
       - backend_net
 
@@ -49,9 +49,10 @@ services:
     container_name: bovitrack_be
     restart: unless-stopped
     ports:
-      # Puerto 8000 expuesto al host para acceso a Swagger (/docs) en desarrollo.
+      # Puerto 8000 expuesto al host para acceso a Swagger (/docs) en desarrollo,
+      # víncolado a 127.0.0.1 (no accesible desde la red).
       # En producción se puede eliminar y acceder solo a través del proxy de nginx.
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
@@ -66,6 +67,10 @@ services:
       SMTP_HOST: ${SMTP_HOST:-mailpit}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@bovitrack.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BoviTrack}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       # Rate limiting: desactivable solo para QA/demo local (suite E2E hace
       # ~15 logins por corrida). El default del backend es activado.
@@ -98,7 +103,7 @@ services:
     container_name: bovitrack_fe
     restart: unless-stopped
     ports:
-      - "5173:80"
+      - "127.0.0.1:5173:80"
     depends_on:
       - be
     networks:

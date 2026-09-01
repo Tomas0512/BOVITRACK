@@ -45,8 +45,10 @@ engine = create_engine(DATABASE_URL)
 def get_or_create_role(db: Session, name: str) -> Role:
     role = db.query(Role).where(Role.name == name).first()
     if not role:
-        print(f"  ! Role '{name}' not found — run seed_roles.py first")
-        return None
+        role = Role(id=uuid.uuid4(), name=name, description=name, is_active=True)
+        db.add(role)
+        db.flush()
+        print(f"  + Role '{name}' created")
     return role
 
 
@@ -184,6 +186,8 @@ def main():
             )
             db.add(user)
             db.flush()
+            db.commit()
+            db.refresh(user)
             print("✓ Demo user created: admin@bovitrack.com / Demo1234!")
         else:
             print("→ Demo user already exists")
@@ -210,6 +214,8 @@ def main():
             )
             db.add(inactive_user)
             db.flush()
+            db.commit()
+            db.refresh(inactive_user)
             print("✓ Inactive user created: exempleado@bovitrack.com (para QA de reactivación)")
         else:
             print("→ Inactive user already exists")
@@ -218,7 +224,13 @@ def main():
         farm = db.query(Farm).where(Farm.farm_identifier == "FIN-DEMO-001").first()
         if not farm:
             first_dept = db.query(Department).order_by(Department.name.asc()).first()
-            dept_id = first_dept.id if first_dept else uuid.uuid4()
+            if first_dept:
+                dept_id = first_dept.id
+            else:
+                dept = Department(id=uuid.uuid4(), name="Antioquia", code="05")
+                db.add(dept)
+                db.flush()
+                dept_id = dept.id
             farm = Farm(
                 id=uuid.uuid4(),
                 owner_id=user.id,
@@ -247,6 +259,7 @@ def main():
             db.add(uf)
             db.flush()
             add_audit_log(db, user_id=str(user.id), farm_id=str(farm.id), action="create", entity="farm", entity_id=str(farm.id))
+            db.commit()
             print("✓ Farm created: Hacienda El Porvenir")
         else:
             print("→ Farm already exists")
@@ -300,9 +313,11 @@ def main():
                 ("Potrero El Mirador", Decimal("4.00"), 10, "bueno", "estrella", "libre", None, None),
             ]
             paddocks = []
-            for name, area, cap, cover, pasture, status, rest_start, rest_end in paddocks_data:
+            src_plots = plot_ids or [p.id for p in plots]
+            for i, (name, area, cap, cover, pasture, status, rest_start, rest_end) in enumerate(paddocks_data):
                 p = Paddock(
                     id=uuid.uuid4(), farm_id=farm_id, name=name,
+                    land_plot_id=src_plots[i % len(src_plots)] if src_plots else None,
                     area_hectares=area, max_capacity=cap, coverage_status=cover,
                     pasture_type=pasture, status=status,
                     rest_start_date=rest_start, rest_end_date=rest_end,

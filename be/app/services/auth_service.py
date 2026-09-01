@@ -228,7 +228,7 @@ async def request_password_reset(db: Session, email: str) -> None:
     token_record = PasswordResetToken(
         user_id=user.id,
         token=reset_token,
-        expires_at=datetime.now(timezone.utc) + timedelta(hours=1),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=20),
     )
 
     db.add(token_record)

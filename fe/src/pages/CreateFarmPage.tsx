@@ -4,10 +4,10 @@ import { CheckCircle2 } from "lucide-react";
 import {
   createFarm,
   listDepartments,
-  listCities,
   listPurposes,
-  type CityOption,
+  listCities,
   type DepartmentOption,
+  type CityOption,
   type FarmRequest,
   type PurposeOption,
 } from "../api/farms";
@@ -59,6 +59,7 @@ export default function CreateFarmPage() {
       };
       if (name === "department_id") {
         updated.city_municipality = "";
+        setCities([]);
         setShowCustomCity(false);
         setCustomCity("");
       }
@@ -87,7 +88,7 @@ export default function CreateFarmPage() {
         setError("La dirección debe tener al menos 5 caracteres");
         return false;
       }
-      const city = showCustomCity ? customCity.trim() : form.city_municipality;
+      const city = form.city_municipality;
       if (city.length < 2) {
         setError("La ciudad o municipio debe tener al menos 2 caracteres");
         return false;
@@ -127,7 +128,7 @@ export default function CreateFarmPage() {
    */
   const isStepComplete = (): boolean => {
     if (step === 0) {
-      return Boolean(form.name.trim()) && Boolean(form.address.trim()) && Boolean(form.department_id);
+      return Boolean(form.name.trim()) && Boolean(form.address.trim()) && Boolean(form.department_id) && Boolean(cityValue);
     }
     if (step === 1) {
       return form.total_area > 0 && Boolean(form.purpose_id);
@@ -153,24 +154,29 @@ export default function CreateFarmPage() {
     loadCatalogs();
   }, []);
 
-  // Cargar ciudades cuando cambia el departamento
+  // Cargar municipios (tabla DANE) según el departamento elegido
   useEffect(() => {
     if (!form.department_id) {
       setCities([]);
+      setShowCustomCity(false);
       return;
     }
-    const load = async () => {
-      setLoadingCities(true);
-      try {
-        const cits = await listCities(form.department_id);
-        setCities(cits);
-      } catch {
-        setCities([]);
-      } finally {
-        setLoadingCities(false);
-      }
+    let cancelled = false;
+    setLoadingCities(true);
+    setError("");
+    listCities(form.department_id)
+      .then((data) => {
+        if (!cancelled) setCities(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "No fue posible cargar los municipios");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingCities(false);
+      });
+    return () => {
+      cancelled = true;
     };
-    load();
   }, [form.department_id]);
 
   const cityValue = showCustomCity ? customCity.trim() : form.city_municipality;
@@ -188,7 +194,7 @@ export default function CreateFarmPage() {
     if (!isFormComplete) return;
     setError("");
     setLoading(true);
-    const payload = { ...form, city_municipality: showCustomCity ? customCity.trim() : form.city_municipality };
+    const payload = { ...form, city_municipality: cityValue };
     try {
       const farm = await createFarm(payload);
       setSuccess({ id: farm.id, name: farm.name });
@@ -287,17 +293,26 @@ export default function CreateFarmPage() {
                 </div>
                 <div>
                   <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-text-primary">Ciudad o municipio <span className="text-red-600">*</span></label>
-                  {showCustomCity ? (
-                    <input id="customCity" name="customCity" required value={customCity} onChange={(e) => setCustomCity(e.target.value)} placeholder="Escriba el nombre de la ciudad" className={inputClass} />
-                  ) : (
-                    <select id="city_municipality" name="city_municipality" required value={form.city_municipality} onChange={handleChange} className={inputClass} disabled={!form.department_id || loadingCities}>
-                      <option value="">{loadingCities ? "Cargando..." : form.department_id ? "Seleccione una ciudad" : "Primero seleccione departamento"}</option>
-                      {cities.map((city) => (<option key={city.id} value={city.name}>{city.name}</option>))}
-                      <option value="__otro__">Otro...</option>
-                    </select>
-                  )}
+                  <select id="city_municipality" name="city_municipality" required value={showCustomCity ? "__otro__" : form.city_municipality} onChange={handleChange} className={inputClass} disabled={loadingCatalogs || loadingCities || !form.department_id}>
+                    <option value="">Seleccione el municipio</option>
+                    {cities.map((city) => (<option key={city.id} value={city.name}>{city.name}{city.code ? ` (${city.code})` : ""}</option>))}
+                    <option value="__otro__">Otro / escribir manualmente</option>
+                  </select>
                   {showCustomCity && (
-                    <button type="button" onClick={() => { setShowCustomCity(false); setCustomCity(""); }} className="mt-1 text-xs font-medium text-primary hover:text-primary-light">← Volver a la lista</button>
+                    <input
+                      id="custom_city"
+                      name="city_municipality"
+                      type="text"
+                      required
+                      maxLength={120}
+                      value={customCity}
+                      onChange={(e) => setCustomCity(e.target.value)}
+                      placeholder="Escriba el municipio"
+                      className={inputClass}
+                    />
+                  )}
+                  {(!form.department_id || loadingCities) && (
+                    <p className="mt-1 text-xs text-text-muted">Seleccione primero un departamento para ver sus municipios.</p>
                   )}
                 </div>
               </div>

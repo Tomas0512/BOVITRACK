@@ -12,6 +12,7 @@ import { getApiErrorMessage } from "../../api/errors";
 import { useAuth } from "../../hooks/useAuth";
 import { useTable } from "../../hooks/useTable";
 import Pagination from "../Pagination";
+import ConfirmDialog from "../ConfirmDialog";
 import AssignEmployeeModal from "./AssignEmployeeModal";
 
 interface Props {
@@ -29,6 +30,7 @@ export default function EmployeeList({ farmId }: Props) {
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [changingRole, setChangingRole] = useState<string | null>(null);
+  const [toRemove, setToRemove] = useState<EmployeeResponse | null>(null);
 
   const getValue = (emp: EmployeeResponse, key: string): string | number => {
     const v = (emp as unknown as Record<string, unknown>)[key];
@@ -106,11 +108,12 @@ export default function EmployeeList({ farmId }: Props) {
     }
   };
 
-  const handleRemove = async (emp: EmployeeResponse) => {
-    if (!confirm(`¿Desvincular a ${emp.first_name} ${emp.last_name} de la finca?`)) return;
-    setActionLoading(emp.user_id);
+  const handleRemove = async () => {
+    if (!toRemove) return;
+    setActionLoading(toRemove.user_id);
     try {
-      await removeEmployee(farmId, emp.user_id);
+      await removeEmployee(farmId, toRemove.user_id);
+      setToRemove(null);
       await fetchEmployees();
     } catch (err) {
       setError(getApiError(err) || "No se pudo desvincular al empleado");
@@ -309,7 +312,7 @@ export default function EmployeeList({ farmId }: Props) {
                         </button>
                       )}
                       <button
-                        onClick={() => handleRemove(emp)}
+                        onClick={() => setToRemove(emp)}
                         disabled={actionLoading === emp.user_id}
                         className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50"
                       >
@@ -334,6 +337,16 @@ export default function EmployeeList({ farmId }: Props) {
           onClose={() => setShowModal(false)}
         />
       )}
+
+      <ConfirmDialog
+        open={!!toRemove}
+        title="Desvincular empleado"
+        message={`¿Desvincular a ${toRemove?.first_name} ${toRemove?.last_name} de la finca?`}
+        confirmLabel="Desvincular"
+        loading={actionLoading !== null}
+        onConfirm={handleRemove}
+        onCancel={() => setToRemove(null)}
+      />
     </div>
   );
 }

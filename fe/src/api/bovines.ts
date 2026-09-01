@@ -17,6 +17,7 @@ export interface BovineRequest {
   entry_type: string;
   entry_date: string;
   land_plot_id?: string | null;
+  paddock_id?: string | null;
   observations?: string | null;
 }
 
@@ -24,6 +25,7 @@ export interface BovineResponse {
   id: string;
   farm_id: string;
   land_plot_id: string | null;
+  paddock_id: string | null;
   name: string | null;
   identification_number: string;
   sex: string;

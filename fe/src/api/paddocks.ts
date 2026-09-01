@@ -12,6 +12,12 @@ export interface PaddockRequest {
   rest_end_date?: string | null;
 }
 
+export interface PaddockAnimal {
+  id: string;
+  identification_number: string;
+  name: string | null;
+}
+
 export interface PaddockResponse {
   id: string;
   farm_id: string;
@@ -28,6 +34,8 @@ export interface PaddockResponse {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  animal_count?: number;
+  animals?: PaddockAnimal[];
 }
 
 const base = (farmId: string) => `/farms/${farmId}/paddocks`;

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { createBovine, updateBovine, type BovineRequest, type BovineResponse } from "../../api/bovines";
 import type { LandPlotResponse } from "../../api/land_plots";
+import type { PaddockResponse } from "../../api/paddocks";
 import { getApiErrorMessage } from "../../api/errors";
 
 interface Props {
   farmId: string;
   landPlots: LandPlotResponse[];
+  paddocks: PaddockResponse[];
   existing?: BovineResponse;
   onSuccess: () => void;
   onClose: () => void;
@@ -21,7 +23,7 @@ const STEPS = [
   { label: "Clasificación" },
 ];
 
-export default function BovineFormModal({ farmId, landPlots, existing, onSuccess, onClose }: Props) {
+export default function BovineFormModal({ farmId, landPlots, paddocks, existing, onSuccess, onClose }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<BovineRequest>({
     identification_number: existing?.identification_number ?? "",
@@ -37,6 +39,7 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
     entry_type: existing?.entry_type ?? "nacimiento",
     entry_date: existing?.entry_date ?? "",
     land_plot_id: existing?.land_plot_id ?? null,
+    paddock_id: existing?.paddock_id ?? null,
     observations: existing?.observations ?? "",
   });
   const [loading, setLoading] = useState(false);
@@ -83,6 +86,7 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
       purpose: form.purpose || null,
       observations: form.observations || null,
       land_plot_id: form.land_plot_id || null,
+      paddock_id: form.paddock_id || null,
     };
     try {
       if (existing) {
@@ -233,6 +237,16 @@ export default function BovineFormModal({ farmId, landPlots, existing, onSuccess
                   <option value="">Sin lote</option>
                   {landPlots.filter((lp) => lp.is_active).map((lp) => (
                     <option key={lp.id} value={lp.id}>{lp.name} ({lp.usage_type})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado</label>
+                <select value={form.paddock_id ?? ""} onChange={(e) => set("paddock_id", e.target.value || null)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                  <option value="">Sin potrero</option>
+                  {paddocks.filter((pd) => pd.is_active).map((pd) => (
+                    <option key={pd.id} value={pd.id}>{pd.name} ({pd.status})</option>
                   ))}
                 </select>
               </div>

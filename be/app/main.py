@@ -7,6 +7,7 @@ Descripción: Punto de entrada de la aplicación FastAPI — BoviTrack.
 """
 
 from contextlib import asynccontextmanager
+import logging
 from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
@@ -38,6 +39,12 @@ from app.routers.movements import router as movements_router
 from app.routers.documents import router as documents_router
 from app.routers.audit import router as audit_router  # HU015: Auditoria del sistema
 from app.utils.limiter import limiter
+
+
+# ── Logging ────────────────────────────────────────
+# ¿Para qué? Mostrar en consola/logs los mensajes INFO del backend (incluidos
+# los del envío de email), para depurar si un correo se envió o falló.
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 # ── Lifespan (arranque y apagado) ─────────────────

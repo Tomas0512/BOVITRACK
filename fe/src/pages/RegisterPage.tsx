@@ -161,6 +161,7 @@ export function RegisterPage() {
     }
 
     if (!formData.phone.trim()) newErrors.phone = "El teléfono es obligatorio";
+    else if (!/^[0-9+\s()-]+$/.test(formData.phone)) newErrors.phone = "Solo números, '+', espacios y guiones";
 
     if (!formData.password) {
       newErrors.password = "La contraseña es obligatoria";
@@ -242,18 +243,18 @@ export function RegisterPage() {
     <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
       <div className="flex w-full max-w-[620px] flex-col overflow-hidden rounded-2xl bg-surface shadow-lg">
         {/* ── Tarjeta del formulario ── */}
-        <div className="px-7 py-5">
+        <div className="px-6 py-4">
           <h2 className="mb-0.5 text-xl font-bold text-primary">Crear cuenta</h2>
-          <p className="mb-3 text-sm text-text-secondary">
+          <p className="mb-2 text-sm text-text-secondary">
             Completa los datos para registrarte en BoviTrack
           </p>
 
           {serverError && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
+            <div className="mb-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-600">{serverError}</div>
           )}
 
           {/* Step indicator */}
-          <div className="mb-4 flex items-center gap-1.5">
+          <div className="mb-3 flex items-center gap-1.5">
             {STEPS.map((s, i) => (
               <button
                 key={i}

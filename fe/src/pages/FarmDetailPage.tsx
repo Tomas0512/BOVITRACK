@@ -22,12 +22,14 @@ import LandPlotList from "../components/land_plots/LandPlotList";
 import PaddockList from "../components/paddocks/PaddockList";
 import BovineList from "../components/bovines/BovineList";
 import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
+import FarmTreatments from "../components/bovines/FarmTreatments";
 import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
 import AlertBanner from "../components/layout/AlertBanner";
 import MovementList from "../components/movements/MovementList";
 import DocumentManager from "../components/documents/DocumentManager";
 import CalfList from "../components/calves/CalfList";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 interface TabDef {
   id: string;
@@ -62,6 +64,8 @@ export default function FarmDetailPage() {
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
   const [editForm, setEditForm] = useState<FarmRequest | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const setTab = (id: string) => setSearchParams({ tab: id });
 
@@ -119,12 +123,14 @@ export default function FarmDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!farmId || !confirm("¿Estás seguro de eliminar esta finca? Esta acción la desactivará.")) return;
+    if (!farmId) return;
+    setDeleting(true);
     try {
       await deleteFarm(farmId);
       navigate("/dashboard");
-    } catch {
-      setError("No se pudo eliminar la finca");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "No se pudo eliminar la finca");
+      setDeleting(false);
     }
   };
 
@@ -158,7 +164,12 @@ export default function FarmDetailPage() {
     switch (activeTab) {
       case "bovinos": return <BovineList farmId={farm.id} />;
       case "terneros": return <CalfList farmId={farm.id} />;
-      case "sanidad": return <SanitaryPlanList farmId={farm.id} />;
+      case "sanidad": return (
+        <div className="space-y-6">
+          <SanitaryPlanList farmId={farm.id} />
+          <FarmTreatments farmId={farm.id} />
+        </div>
+      );
       case "alimentacion": return <FoodList farmId={farm.id} />;
       case "movimientos": return <MovementList farmId={farm.id} />;
       case "lotes": return (
@@ -217,7 +228,7 @@ export default function FarmDetailPage() {
               className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
               Editar
             </button>
-            <button onClick={handleDelete}
+            <button onClick={() => setShowDelete(true)}
               className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
               Eliminar
             </button>
@@ -339,6 +350,16 @@ export default function FarmDetailPage() {
 
       {/* Active tab content */}
       {renderTab()}
+
+      <ConfirmDialog
+        open={showDelete}
+        title="Eliminar finca"
+        message={`¿Eliminar la finca "${farm.name}"? Esta acción la desactivará.`}
+        confirmLabel="Eliminar"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDelete(false)}
+      />
     </div>
   );
 }

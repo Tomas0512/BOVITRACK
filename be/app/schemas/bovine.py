@@ -38,6 +38,7 @@ class BovineCreate(BaseModel):
     entry_type: str
     entry_date: date
     land_plot_id: uuid.UUID | None = None
+    paddock_id: uuid.UUID | None = None
     observations: str | None = None
 
     @field_validator("identification_number")
@@ -112,6 +113,7 @@ class BovineUpdate(BaseModel):
     purpose: str | None = None
     status: str | None = None
     land_plot_id: uuid.UUID | None = None
+    paddock_id: uuid.UUID | None = None
     exit_date: date | None = None
     exit_reason: str | None = None
     observations: str | None = None
@@ -137,6 +139,7 @@ class BovineResponse(BaseModel):
     id: uuid.UUID
     farm_id: uuid.UUID
     land_plot_id: uuid.UUID | None
+    paddock_id: uuid.UUID | None
     name: str | None
     identification_number: str
     sex: str

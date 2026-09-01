@@ -20,13 +20,13 @@ from app.schemas.paddock import PaddockCreate, PaddockUpdate
 from app.services.audit_service import add_audit_log
 
 
-def _validate_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID) -> None:
+def _validate_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID) -> LandPlot:
     """¿Qué? Comprueba que el lote existe, está activo y pertenece a la finca.
     ¿Para qué? Evitar potreros colgados de un lote de otra finca o inexistente.
-    ¿Impacto? 422 si el lote no sirve; es la validación que antes faltaba.
+    ¿Impacto? 422 si el lote no sirve; retorna el objeto para validar límites.
     """
     plot = db.execute(
-        select(LandPlot.id).where(
+        select(LandPlot).where(
             LandPlot.id == land_plot_id,
             LandPlot.farm_id == farm_id,
             LandPlot.is_active.is_(True),
@@ -37,6 +37,24 @@ def _validate_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="El lote indicado no existe o no pertenece a esta finca.",
         )
+    return plot
+
+
+def _check_limits(plot: LandPlot, max_capacity: int, area_hectares) -> None:
+    """¿Qué? Verifica que el potrero no supere la capacidad ni el área del lote.
+    ¿Para qué? Evitar sobrepastoreo (más animales/área que el terreno soporta).
+    ¿Impacto? 422 si el potrero excede el límite del lote.
+    """
+    if max_capacity is not None and max_capacity > plot.max_capacity:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"La capacidad del potrero no puede superar la del lote ({plot.max_capacity}).",
+        )
+    if area_hectares is not None and area_hectares > plot.area:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"El área del potrero no puede superar la del lote ({plot.area} {plot.area_unit}).",
+        )
 
 
 def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate, user_id: uuid.UUID | None = None) -> Paddock:
@@ -45,7 +63,8 @@ def create_paddock(db: Session, farm_id: uuid.UUID, data: PaddockCreate, user_id
     ¿Impacto? El potrero estará disponible para asignar bovinos.
     """
     # El potrero pertenece a un lote concreto de ESTA finca (finca > lote > potrero).
-    _validate_land_plot(db, farm_id, data.land_plot_id)
+    plot = _validate_land_plot(db, farm_id, data.land_plot_id)
+    _check_limits(plot, data.max_capacity, data.area_hectares)
 
     paddock = Paddock(farm_id=farm_id, **data.model_dump())
     db.add(paddock)
@@ -100,8 +119,14 @@ def update_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID, data:
     paddock = get_paddock(db, farm_id, paddock_id)
     cambios = data.model_dump(exclude_unset=True)
     # Mover un potrero de lote es válido, pero el lote destino debe ser de la finca.
-    if cambios.get("land_plot_id") is not None:
-        _validate_land_plot(db, farm_id, cambios["land_plot_id"])
+    plot_id = cambios.get("land_plot_id", paddock.land_plot_id)
+    plot = _validate_land_plot(db, farm_id, plot_id)
+    if "max_capacity" in cambios or "area_hectares" in cambios:
+        _check_limits(
+            plot,
+            cambios.get("max_capacity", paddock.max_capacity),
+            cambios.get("area_hectares", paddock.area_hectares),
+        )
     for field, value in cambios.items():
         setattr(paddock, field, value)
     db.commit()

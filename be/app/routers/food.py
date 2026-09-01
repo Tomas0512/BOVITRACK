@@ -67,22 +67,6 @@ def list_foods(
     return [FoodResponse.model_validate(f) for f in foods]
 
 
-@router.get("/{food_id}", response_model=FoodResponse, summary="Obtener alimento por ID", dependencies=[Depends(require_permission("alimentos", "can_read"))])
-def get_food(
-    farm_id: uuid.UUID,
-    food_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-) -> FoodResponse:
-    """¿Qué? Retorna el detalle de un alimento del inventario.
-    ¿Para qué? Ver stock actual, precio, proveedor y fecha de vencimiento.
-    ¿Impacto? Retorna 404 si no existe o no pertenece a la finca.
-    """
-    _ = current_user
-    food = food_service.get_food(db, farm_id, food_id)
-    return FoodResponse.model_validate(food)
-
-
 @router.put("/{food_id}", response_model=FoodResponse, summary="Actualizar alimento", dependencies=[Depends(require_permission("alimentos", "can_update"))])
 def update_food(
     farm_id: uuid.UUID,
@@ -226,3 +210,21 @@ def low_stock_alerts(
     _ = current_user
     foods = food_service.get_low_stock_foods(db, farm_id)
     return [FoodResponse.model_validate(f) for f in foods]
+
+
+# ⚠️ Ruta paramétrica se registra AL FINAL para no tapar a las estáticas
+# (GET /movements, /consumptions, /low-stock). FastAPI empareja en orden.
+@router.get("/{food_id}", response_model=FoodResponse, summary="Obtener alimento por ID", dependencies=[Depends(require_permission("alimentos", "can_read"))])
+def get_food(
+    farm_id: uuid.UUID,
+    food_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> FoodResponse:
+    """¿Qué? Retorna el detalle de un alimento del inventario.
+    ¿Para qué? Ver stock actual, precio, proveedor y fecha de vencimiento.
+    ¿Impacto? Retorna 404 si no existe o no pertenece a la finca.
+    """
+    _ = current_user
+    food = food_service.get_food(db, farm_id, food_id)
+    return FoodResponse.model_validate(food)
