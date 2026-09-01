@@ -125,7 +125,7 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
           {step === 0 && (
             <>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote al que pertenece</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote al que pertenece <span className="text-red-600">*</span></label>
                 <select
                   value={form.land_plot_id}
                   onChange={(e) => set("land_plot_id", e.target.value)}
@@ -144,21 +144,24 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
                 )}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del potrero</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del potrero <span className="text-red-600">*</span></label>
                 <input type="text" value={form.name} maxLength={100} onChange={(e) => set("name", e.target.value)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Área (ha)</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Área (ha) <span className="text-red-600">*</span></label>
                   <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Cap. máx. animales</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Cap. máx. animales <span className="text-red-600">*</span></label>
                   <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                  <p className="mt-1 text-xs text-text-muted">
+                    {form.area_hectares > 0 && `Sugerido: ~${Math.max(1, Math.floor(form.area_hectares * 2.5))} animales (≈2,5/ha)`}
+                  </p>
                 </div>
               </div>
             </>

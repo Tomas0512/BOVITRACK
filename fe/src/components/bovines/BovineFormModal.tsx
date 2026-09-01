@@ -50,6 +50,8 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
     const newErrors: Record<string, string> = {};
     if (s === 0) {
       if (!form.identification_number.trim()) newErrors.id = "Obligatorio";
+      if (!form.name?.trim()) newErrors.name = "Obligatorio";
+      if (!form.breed?.trim()) newErrors.breed = "Obligatorio";
     }
     if (s === 1) {
       if (!form.birth_date) newErrors.birth = "Obligatorio";
@@ -57,8 +59,14 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
       if (form.birth_date && form.entry_date && form.entry_date < form.birth_date) {
         newErrors.entry = "La fecha de ingreso no puede ser anterior al nacimiento";
       }
+      if (!existing && (form.birth_weight ?? 0) <= 0) newErrors.weights = "El peso de nacimiento es obligatorio y mayor a 0";
+      if (!existing && (form.current_weight ?? 0) <= 0) newErrors.weights = "El peso actual es obligatorio y mayor a 0";
       if ((form.birth_weight ?? 0) < 0) newErrors.weights = "El peso de nacimiento no puede ser negativo";
       if ((form.current_weight ?? 0) < 0) newErrors.weights = "El peso actual no puede ser negativo";
+    }
+    if (s === 2) {
+      if (!form.purpose?.trim()) newErrors.purpose = "Obligatorio";
+      if (!form.land_plot_id && !form.paddock_id) newErrors.location = "Debe asignar un lote o un potrero";
     }
     setError(Object.values(newErrors).join(". "));
     return Object.keys(newErrors).length === 0;
@@ -71,8 +79,13 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
 
   const isFormComplete =
     form.identification_number.trim() !== "" &&
+    (form.name ?? "").trim() !== "" &&
+    (form.breed ?? "").trim() !== "" &&
     form.birth_date !== "" &&
-    form.entry_date !== "";
+    form.entry_date !== "" &&
+    (form.purpose ?? "").trim() !== "" &&
+    (existing || ((form.birth_weight ?? 0) > 0 && (form.current_weight ?? 0) > 0)) &&
+    Boolean(form.land_plot_id || form.paddock_id);
 
   const set = <K extends keyof BovineRequest>(key: K, value: BovineRequest[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -147,10 +160,10 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                   <span className="mt-0.5 block text-right text-xs text-text-muted">{form.identification_number.length}/50</span>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre <span className="text-red-600">*</span></label>
                   <input type="text" value={form.name ?? ""} maxLength={100}
                     onChange={(e) => set("name", e.target.value)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                   <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.name ?? "").length}/100</span>
                 </div>
               </div>
@@ -164,10 +177,10 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Raza</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Raza <span className="text-red-600">*</span></label>
                   <input type="text" value={form.breed ?? ""} maxLength={50}
                     onChange={(e) => set("breed", e.target.value)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>
               <div>
@@ -188,18 +201,18 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso nacimiento (kg)</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso nacimiento (kg) <span className="text-red-600">*</span></label>
                   <input type="number" min={0} step={0.1} value={form.birth_weight ?? ""}
                     onChange={(e) => set("birth_weight", e.target.value ? parseFloat(e.target.value) : null)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso actual (kg)</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso actual (kg) <span className="text-red-600">*</span></label>
                   <input type="number" min={0} step={0.1} value={form.current_weight ?? ""}
                     onChange={(e) => set("current_weight", e.target.value ? parseFloat(e.target.value) : null)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo de ingreso *</label>
@@ -221,15 +234,15 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Propósito</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Propósito <span className="text-red-600">*</span></label>
                   <select value={form.purpose ?? ""} onChange={(e) => set("purpose", e.target.value || null)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required>
                     <option value="">Sin especificar</option>
                     {PURPOSES.map((p) => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Estado</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Estado <span className="text-red-600">*</span></label>
                   <select value={form.status} onChange={(e) => set("status", e.target.value)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                     {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -237,7 +250,7 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote asignado</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote asignado <span className="text-red-600">*</span></label>
                 <select value={form.land_plot_id ?? ""} onChange={(e) => set("land_plot_id", e.target.value || null)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                   <option value="">Sin lote</option>
@@ -247,7 +260,7 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado <span className="text-red-600">*</span></label>
                 <select value={form.paddock_id ?? ""} onChange={(e) => set("paddock_id", e.target.value || null)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                   <option value="">Sin potrero</option>

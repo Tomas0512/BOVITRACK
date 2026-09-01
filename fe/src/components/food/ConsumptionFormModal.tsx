@@ -58,7 +58,12 @@ export default function ConsumptionFormModal({ farmId, foods, onSuccess, onClose
     };
   }, [farmId]);
 
-  const isFormComplete = form.food_id !== "" && form.quantity > 0 && form.feeding_date !== "";
+  const isFormComplete =
+    form.food_id !== "" &&
+    form.quantity > 0 &&
+    form.feeding_date !== "" &&
+    Boolean(form.land_plot_id || form.paddock_id || form.bovine_id) &&
+    (form.source_bag ?? "").trim() !== "";
 
   const set = <K extends keyof ConsumptionCreate>(key: K, value: ConsumptionCreate[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -125,7 +130,7 @@ export default function ConsumptionFormModal({ farmId, foods, onSuccess, onClose
             <input type="date" value={form.feeding_date} onChange={(e) => set("feeding_date", e.target.value)} className={inputClass} required />
           </div>
 
-          <label className="mb-1 block text-xs font-medium text-text-secondary">Destino (lote / potrero / bovino)</label>
+          <label className="mb-1 block text-xs font-medium text-text-secondary">Destino (lote / potrero / bovino) <span className="text-red-600">*</span></label>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <select value={form.land_plot_id ?? ""} onChange={(e) => set("land_plot_id", e.target.value || null)} className={inputClass} disabled={loading}>
@@ -154,8 +159,8 @@ export default function ConsumptionFormModal({ farmId, foods, onSuccess, onClose
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary">Origen / Bulto</label>
-            <input type="text" maxLength={120} value={form.source_bag ?? ""} placeholder="Ej: Bulto #5, Lote de compra 2026-A" onChange={(e) => set("source_bag", e.target.value)} className={inputClass} />
+            <label className="mb-1 block text-xs font-medium text-text-secondary">Origen / Bulto <span className="text-red-600">*</span></label>
+            <input type="text" maxLength={120} value={form.source_bag ?? ""} placeholder="Ej: Bulto #5, Lote de compra 2026-A" onChange={(e) => set("source_bag", e.target.value)} className={inputClass} required />
           </div>
 
           <div>

@@ -88,7 +88,7 @@ export default function CreateFarmPage() {
         setError("La dirección debe tener al menos 5 caracteres");
         return false;
       }
-      const city = form.city_municipality;
+      const city = cityValue;
       if (city.length < 2) {
         setError("La ciudad o municipio debe tener al menos 2 caracteres");
         return false;

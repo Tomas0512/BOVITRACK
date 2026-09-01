@@ -193,14 +193,14 @@ export default function FarmTreatments({ farmId }: Props) {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">Tipo</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Tipo <span className="text-red-600">*</span></label>
                   <select value={form.treatment_type} onChange={(e) => setForm({ ...form, treatment_type: e.target.value })}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                     {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">Vía</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Vía <span className="text-red-600">*</span></label>
                   <select value={form.administration_route} onChange={(e) => setForm({ ...form, administration_route: e.target.value })}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                     {Object.entries(ROUTE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -219,9 +219,9 @@ export default function FarmTreatments({ farmId }: Props) {
                     placeholder="Ej: 10 mL" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-text-secondary">Fecha aplicación</label>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">Fecha aplicación <span className="text-red-600">*</span></label>
                   <input type="date" value={form.application_date} onChange={(e) => setForm({ ...form, application_date: e.target.value })}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>
               <div>
