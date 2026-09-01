@@ -31,7 +31,7 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 | **Backend** | Python 3.12+, FastAPI, SQLAlchemy 2.0, Alembic |
 | **Frontend** | React 18+, Vite, TypeScript, TailwindCSS 4 |
 | **Base de datos** | PostgreSQL 17 (Docker) |
-| **Testing** | pytest + pytest-cov (BE), Vitest + Testing Library (FE), Selenium E2E (`qa_e2e/`) |
+| **Testing** | Selenium E2E activo (`qa_e2e/`) + verificación manual de API; pytest (BE) y Vitest (FE) configurados para suites de unidad/cobertura |
 | **Linting** | Ruff (BE), ESLint + Prettier (FE) |
 
 ## Módulos del sistema

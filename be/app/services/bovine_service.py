@@ -216,3 +216,24 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id
     bovine.exit_reason = "retirado"
     add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
     db.commit()
+
+
+def import_bovines(db: Session, farm_id: uuid.UUID, rows: list[BovineCreate], user_id: uuid.UUID) -> dict:
+    """¿Qué? Importa en lote varios bovinos reutilizando create_bovine.
+    ¿Para qué? Cubrir el requisito de "cargas masivas" (checklist) sin duplicar
+               la lógica de validación/auditoría.
+    ¿Impacto? Los registros válidos se guardan; los inválidos se reportan con
+              su número de fila para que el usuario corrija el CSV. El proceso
+              no se aborta por una fila errónea (registro parcial con reporte).
+    """
+    imported = 0
+    errors: list[dict] = []
+    for idx, data in enumerate(rows, start=2):
+        try:
+            create_bovine(db, farm_id, data, user_id)
+            imported += 1
+        except HTTPException as exc:
+            errors.append({"row": idx, "error": str(exc.detail)})
+        except Exception as exc:  # noqa: BLE001 - reporte por fila, no abortar
+            errors.append({"row": idx, "error": f"Error inesperado: {exc}"})
+    return {"imported": imported, "failed": len(errors), "errors": errors}
