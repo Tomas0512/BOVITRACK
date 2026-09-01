@@ -7,7 +7,7 @@ Impact? Reports are a grading rubric requirement.
 
 import uuid
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -138,6 +138,24 @@ def generate_farm_report(
         end_date=date.fromisoformat(end_date) if end_date else None,
         export=export,
     )
+
+    # ¿Qué? Validar coherencia de fechas (no lógicas) antes de generar.
+    if params.start_date and params.end_date and params.start_date > params.end_date:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="La fecha inicial no puede ser posterior a la final",
+        )
+    today = date.today()
+    if params.start_date and params.start_date > today:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="La fecha inicial no puede ser futura",
+        )
+    if params.end_date and params.end_date > today:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="La fecha final no puede ser futura",
+        )
 
     report = report_service.generate_report(db, farm_id, current_user, params)
 
