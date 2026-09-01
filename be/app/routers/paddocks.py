@@ -27,22 +27,37 @@ router = APIRouter(prefix="/api/v1/farms/{farm_id}/paddocks", tags=["Potreros"])
 
 def _to_response(db: Session, paddock: Paddock) -> PaddockResponse:
     """Serialize a paddock including the active animals currently assigned to it."""
-    response = PaddockResponse.model_validate(paddock)
-    bovines = db.execute(
-        select(Bovine.id, Bovine.identification_number, Bovine.name)
-        .where(Bovine.paddock_id == paddock.id, Bovine.is_active.is_(True))
-        .order_by(Bovine.identification_number.asc())
-    ).all()
-    response.animals = [
-        {
-            "id": row.id,
-            "identification_number": row.identification_number,
-            "name": row.name,
-        }
-        for row in bovines
-    ]
-    response.animal_count = len(response.animals)
-    return response
+    return _to_responses(db, [paddock])[0]
+
+
+def _to_responses(db: Session, paddocks: list[Paddock]) -> list[PaddockResponse]:
+    """Serialize paddocks with their animals using a single batched query (no N+1)."""
+    paddock_ids = [p.id for p in paddocks]
+    rows = (
+        db.execute(
+            select(Bovine.paddock_id, Bovine.id, Bovine.identification_number, Bovine.name)
+            .where(Bovine.paddock_id.in_(paddock_ids), Bovine.is_active.is_(True))
+            .order_by(Bovine.identification_number.asc())
+        ).all()
+        if paddock_ids
+        else []
+    )
+    animals_by_paddock: dict[uuid.UUID, list[dict]] = {}
+    for row in rows:
+        animals_by_paddock.setdefault(row.paddock_id, []).append(
+            {
+                "id": row.id,
+                "identification_number": row.identification_number,
+                "name": row.name,
+            }
+        )
+    responses = []
+    for paddock in paddocks:
+        response = PaddockResponse.model_validate(paddock)
+        response.animals = animals_by_paddock.get(paddock.id, [])
+        response.animal_count = len(response.animals)
+        responses.append(response)
+    return responses
 
 
 @router.post("", response_model=PaddockResponse, status_code=status.HTTP_201_CREATED, summary="Crear potrero", dependencies=[Depends(require_permission("potreros", "can_create"))])
@@ -74,7 +89,7 @@ def list_all(
     paddocks = paddock_service.list_paddocks(
         db, farm_id, status_filter=paddock_status, land_plot_id=land_plot_id
     )
-    return [_to_response(db, p) for p in paddocks]
+    return _to_responses(db, list(paddocks))
 
 
 @router.get("/{paddock_id}", response_model=PaddockResponse, summary="Obtener potrero por ID", dependencies=[Depends(require_permission("potreros", "can_read"))])

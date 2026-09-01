@@ -45,6 +45,12 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
 
   const isEdit = !!existing;
 
+  const isFormComplete =
+    form.movement_date !== "" &&
+    (form.movement_type === "traslado"
+      ? (form.origin_farm_name ?? "").trim() !== "" && (form.destination_farm_name ?? "").trim() !== ""
+      : (form.counterparty_name ?? "").trim() !== "");
+
   const validateStep = (s: number): boolean => {
     if (s === 0 && !form.movement_date) { setError("La fecha del movimiento es obligatoria"); return false; }
     if (s === 0 && form.bovine_id && !UUID_RE.test(form.bovine_id)) {
@@ -63,6 +69,10 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    if ((form.price ?? 0) < 0) {
+      setError("El precio no puede ser negativo");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -88,7 +98,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
       <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">{isEdit ? "Editar movimiento" : "Registrar movimiento"}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
@@ -210,7 +220,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
                 Siguiente →
               </button>
             ) : (
-              <button key="paso-enviar" type="submit" disabled={loading}
+              <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                 className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
                 {loading ? "Guardando..." : isEdit ? "Actualizar" : "Registrar"}
               </button>

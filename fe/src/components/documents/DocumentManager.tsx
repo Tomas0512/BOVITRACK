@@ -247,14 +247,14 @@ export default function DocumentManager({ farmId }: Props) {
                       <button
                         onClick={() => handleDownload(doc)}
                         className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt"
-                        title="Descargar"
+                        title="Descargar" aria-label="Descargar"
                       >
                         <Download size={15} />
                       </button>
                       <button
                         onClick={() => handleDelete(doc.id)}
                         className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
-                        title="Eliminar"
+                        title="Eliminar" aria-label="Eliminar"
                       >
                         <Trash2 size={15} />
                       </button>

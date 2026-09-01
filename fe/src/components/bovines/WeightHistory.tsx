@@ -143,6 +143,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
               <button
                 onClick={() => setShowModal(false)}
                 className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"
+                aria-label="Cerrar"
               >
                 <X size={20} />
               </button>

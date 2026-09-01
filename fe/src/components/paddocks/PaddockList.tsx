@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { listPaddocks, deletePaddock, type PaddockResponse } from "../../api/paddocks";
 import { listLandPlots } from "../../api/land_plots";
@@ -10,6 +10,13 @@ import PaddockFormModal from "./PaddockFormModal";
 
 interface Props {
   farmId: string;
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("es-CO");
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -35,13 +42,22 @@ export default function PaddockList({ farmId }: Props) {
   const [toDelete, setToDelete] = useState<PaddockResponse | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const getValue = (p: PaddockResponse, key: string): string | number => {
-    const v = (p as unknown as Record<string, unknown>)[key];
-    return typeof v === "number" ? v : String(v ?? "");
-  };
+  // Agrupamos por lote ANTES de paginar para no fragmentar un grupo
+  // (la jerarquía es finca > lote > potrero) y que los totales por lote sean reales.
+  const groups = useMemo(
+    () =>
+      Object.entries(
+        paddocks.reduce<Record<string, PaddockResponse[]>>((acc, p) => {
+          const lote = p.land_plot_name ?? "Sin lote";
+          (acc[lote] ??= []).push(p);
+          return acc;
+        }, {})
+      ),
+    [paddocks]
+  );
 
   const { page, pageCount, start, end, total, paginated, setPage } =
-    useTable<PaddockResponse>(paddocks, { getValue });
+    useTable<[string, PaddockResponse[]]>(groups, { getValue: (g) => g[0] });
 
   const fetchPaddocks = async () => {
     setLoading(true);
@@ -133,14 +149,8 @@ export default function PaddockList({ farmId }: Props) {
           <p className="text-sm text-text-muted">No hay potreros registrados en esta finca</p>
         </div>
       ) : (
-        // Agrupados por lote: la jerarquía es finca > lote > potrero.
-        Object.entries(
-          paginated.reduce<Record<string, typeof paddocks>>((acc, p) => {
-            const lote = p.land_plot_name ?? "Sin lote";
-            (acc[lote] ??= []).push(p);
-            return acc;
-          }, {})
-        ).map(([lote, dellote]) => (
+        // Agrupados por lote (ya paginados como grupos): la jerarquía es finca > lote > potrero.
+        paginated.map(([lote, dellote]) => (
         <div key={lote} className="mb-5 last:mb-0">
           <div className="mb-2 flex items-baseline gap-2 border-b border-border pb-1">
             <h3 className="text-sm font-bold text-text-primary">{lote}</h3>
@@ -167,7 +177,7 @@ export default function PaddockList({ farmId }: Props) {
               )}
               {p.rest_start_date && (
                 <p className="mt-1 text-xs text-blue-600">
-                  Descanso: {p.rest_start_date} → {p.rest_end_date ?? "..."}
+                  Descanso: {fmtDate(p.rest_start_date)} → {fmtDate(p.rest_end_date)}
                 </p>
               )}
               <div className="mt-2 rounded-lg bg-surface-alt p-2">

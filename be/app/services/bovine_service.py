@@ -19,9 +19,10 @@ from app.models.farm import LandPlot
 from app.models.paddock import Paddock
 from app.schemas.bovine import BovineCreate, BovineUpdate
 from app.services.audit_service import add_audit_log
+from app.utils.validators import ensure_farm_scope
 
 
-def _validate_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) -> None:
+def _validate_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) -> Paddock:
     """¿Qué? Comprueba que el potrero existe y pertenece a la finca.
     ¿Para qué? Evitar asignar un bovino a un potrero de otra finca.
     ¿Impacto? 400 si el potrero no es válido para esta finca.
@@ -38,6 +39,7 @@ def _validate_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) ->
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="El potrero indicado no existe en esta finca",
         )
+    return paddock
 
 
 def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: uuid.UUID) -> Bovine:
@@ -85,14 +87,22 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
                 detail="El lote indicado no existe en esta finca",
             )
 
-    # ¿Qué? Validar que el potrero indicado pertenezca a la finca.
+    # ¿Qué? Validar que el potrero indicado pertenezca a la finca y sea coherente con el lote.
+    data_dict = data.model_dump()
     if data.paddock_id:
-        _validate_paddock(db, farm_id, data.paddock_id)
+        paddock = _validate_paddock(db, farm_id, data.paddock_id)
+        if data.land_plot_id and paddock.land_plot_id != data.land_plot_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El potrero indicado pertenece a otro lote.",
+            )
+        if not data.land_plot_id:
+            data_dict["land_plot_id"] = paddock.land_plot_id
 
     bovine = Bovine(
         farm_id=farm_id,
         registered_by=user_id,
-        **data.model_dump(),
+        **data_dict,
     )
     db.add(bovine)
     db.commit()
@@ -146,9 +156,44 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
     """
     bovine = get_bovine(db, farm_id, bovine_id)
     cambios = data.model_dump(exclude_unset=True)
-    # ¿Qué? Validar el potrero destino antes de asignarlo al bovino.
-    if cambios.get("paddock_id"):
-        _validate_paddock(db, farm_id, cambios["paddock_id"])
+
+    # ¿Qué? Unicidad del número de identificación dentro de la finca (no 500).
+    new_ident = cambios.get("identification_number")
+    if new_ident:
+        dup = db.execute(
+            select(Bovine).where(
+                Bovine.farm_id == farm_id,
+                Bovine.identification_number == new_ident,
+                Bovine.id != bovine_id,
+            )
+        ).scalar_one_or_none()
+        if dup:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ya existe un bovino con esa identificación en la finca",
+            )
+
+    # ¿Qué? Validar pertenencia a la finca de las referencias nuevas.
+    if cambios.get("land_plot_id") is not None:
+        ensure_farm_scope(db, farm_id, land_plot_id=cambios["land_plot_id"])
+    if cambios.get("father_id") is not None:
+        ensure_farm_scope(db, farm_id, bovine_id=cambios["father_id"])
+    if cambios.get("mother_id") is not None:
+        ensure_farm_scope(db, farm_id, bovine_id=cambios["mother_id"])
+
+    # ¿Qué? Coherencia jerárquica lote ↔ potrero (finca > lote > potrero).
+    final_land = cambios["land_plot_id"] if "land_plot_id" in cambios else bovine.land_plot_id
+    final_pad = cambios["paddock_id"] if "paddock_id" in cambios else bovine.paddock_id
+    if final_pad:
+        paddock = _validate_paddock(db, farm_id, final_pad)
+        if final_land is not None and paddock.land_plot_id != final_land:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El potrero indicado pertenece a otro lote.",
+            )
+        if final_land is None:
+            cambios["land_plot_id"] = paddock.land_plot_id
+
     for field, value in cambios.items():
         setattr(bovine, field, value)
     db.commit()

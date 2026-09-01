@@ -28,7 +28,7 @@
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, Path, Query, Request, status
+from fastapi import APIRouter, Body, Depends, Path, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
@@ -297,7 +297,7 @@ def record_calf_weight(
     request: Request,
     farm_id: uuid.UUID = Path(...),
     bovine_id: uuid.UUID = Path(...),
-    weight_data: WeightRecordCreate = None,
+    weight_data: WeightRecordCreate = Body(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> WeightRecordResponse:
@@ -369,7 +369,7 @@ def update_calf_feeding_plan(
     request: Request,
     farm_id: uuid.UUID = Path(...),
     bovine_id: uuid.UUID = Path(...),
-    feeding_data: dict = None,
+    feeding_data: dict = Body(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> dict:

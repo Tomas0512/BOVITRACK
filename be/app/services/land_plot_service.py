@@ -96,6 +96,10 @@ def update_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID, d
 
 def delete_land_plot(db: Session, farm_id: uuid.UUID, land_plot_id: uuid.UUID, user_id: uuid.UUID | None = None) -> None:
     lp = get_land_plot(db, farm_id, land_plot_id)
+    # Soft delete: el historial se conserva y los potreros asociados se desactivan
+    # (evita la cascada física que rompía la consistencia de las demás entidades).
+    lp.is_active = False
+    for paddock in lp.paddocks:
+        paddock.is_active = False
     add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="land_plot", entity_id=str(lp.id), details={"name": lp.name})
-    db.delete(lp)
     db.commit()

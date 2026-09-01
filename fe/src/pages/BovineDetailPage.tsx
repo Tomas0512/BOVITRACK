@@ -8,6 +8,17 @@ import MilkProductionList from "../components/bovines/MilkProductionList";
 import FoodList from "../components/bovines/FoodList";
 import TreatmentList from "../components/bovines/TreatmentList";
 import ReproductiveTimeline from "../components/bovines/ReproductiveTimeline";
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("es-CO");
+}
+
+function fmtSex(sex: string): string {
+  return sex === "hembra" ? "Hembra" : sex === "macho" ? "Macho" : sex;
+}
 import GrowthChart from "../components/calves/GrowthChart";
 
 type Tab = "general" | "productivo" | "crecimiento" | "reproductivo" | "sanitario";
@@ -126,11 +137,11 @@ export default function BovineDetailPage() {
           <div className="rounded-2xl bg-surface p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-bold text-text-primary">Datos generales</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <InfoCard label="Sexo" value={bovine.sex} />
+              <InfoCard label="Sexo" value={fmtSex(bovine.sex)} />
               <InfoCard label="Raza" value={bovine.breed ?? "No registrada"} />
               <InfoCard label="Color" value={bovine.color ?? "No registrado"} />
               <InfoCard label="Propósito" value={bovine.purpose ?? "No especificado"} />
-              <InfoCard label="Fecha nacimiento" value={bovine.birth_date ?? "—"} />
+              <InfoCard label="Fecha nacimiento" value={fmtDate(bovine.birth_date)} />
               <InfoCard
                 label="Peso nacimiento"
                 value={bovine.birth_weight ? `${bovine.birth_weight} kg` : "No registrado"}
@@ -139,7 +150,7 @@ export default function BovineDetailPage() {
                 label="Peso actual"
                 value={bovine.current_weight ? `${bovine.current_weight} kg` : "No registrado"}
               />
-              <InfoCard label="Fecha ingreso" value={bovine.entry_date ?? "—"} />
+              <InfoCard label="Fecha ingreso" value={fmtDate(bovine.entry_date)} />
             </div>
           </div>
 

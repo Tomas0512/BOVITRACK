@@ -48,6 +48,12 @@ export default function FarmTreatments({ farmId }: Props) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
+  const isFormComplete =
+    form.bovine_id !== "" &&
+    form.product_name.trim() !== "" &&
+    form.dose.trim() !== "" &&
+    form.application_date !== "";
+
   const getValue = (t: TreatmentResponse, key: string): string | number => {
     const v = (t as unknown as Record<string, unknown>)[key];
     return typeof v === "number" ? v : String(v ?? "");
@@ -78,6 +84,10 @@ export default function FarmTreatments({ farmId }: Props) {
     e.preventDefault();
     if (!form.bovine_id || !form.product_name.trim() || !form.dose.trim()) {
       setError("Selecciona un animal y completa producto y dosis");
+      return;
+    }
+    if (form.next_application_date && form.application_date && form.next_application_date < form.application_date) {
+      setError("La próxima aplicación no puede ser anterior a la fecha de aplicación");
       return;
     }
     setSaving(true);
@@ -227,8 +237,8 @@ export default function FarmTreatments({ farmId }: Props) {
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}
                   className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">Cancelar</button>
-                <button type="submit" disabled={saving}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-60">
+                <button type="submit" disabled={!isFormComplete || saving}
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-60">
                   {saving ? "Guardando…" : "Guardar tratamiento"}
                 </button>
               </div>

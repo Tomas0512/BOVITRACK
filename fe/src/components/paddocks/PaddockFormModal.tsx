@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { createPaddock, updatePaddock, type PaddockRequest, type PaddockResponse } from "../../api/paddocks";
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
 import { getApiErrorMessage } from "../../api/errors";
@@ -56,6 +57,10 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
       setError("Nombre, área y capacidad máxima son obligatorios");
       return false;
     }
+    if (s === 0 && form.rest_start_date && form.rest_end_date && form.rest_end_date < form.rest_start_date) {
+      setError("La fecha fin de descanso no puede ser anterior al inicio");
+      return false;
+    }
     setError("");
     return true;
   };
@@ -94,7 +99,7 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
       <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">{existing ? "Editar potrero" : "Nuevo potrero"}</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}

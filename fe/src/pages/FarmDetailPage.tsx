@@ -58,6 +58,7 @@ export default function FarmDetailPage() {
   const [farm, setFarm] = useState<FarmResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [editing, setEditing] = useState(false);
   const [editStep, setEditStep] = useState(0);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
@@ -89,6 +90,7 @@ export default function FarmDetailPage() {
 
   const handleEdit = async () => {
     if (!farm) return;
+    setActionError("");
     const [deps, purps] = await Promise.all([listDepartments(), listPurposes()]);
     setDepartments(deps);
     setPurposes(purps);
@@ -111,12 +113,13 @@ export default function FarmDetailPage() {
     e.preventDefault();
     if (!farmId || !editForm) return;
     setSaving(true);
+    setActionError("");
     try {
       const updated = await updateFarm(farmId, editForm);
       setFarm(updated);
       setEditing(false);
-    } catch {
-      setError("No se pudo actualizar la finca");
+    } catch (err: unknown) {
+      setActionError(err instanceof Error ? err.message : "No se pudo actualizar la finca");
     } finally {
       setSaving(false);
     }
@@ -129,7 +132,7 @@ export default function FarmDetailPage() {
       await deleteFarm(farmId);
       navigate("/dashboard");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "No se pudo eliminar la finca");
+      setActionError(err instanceof Error ? err.message : "No se pudo eliminar la finca");
       setDeleting(false);
     }
   };
@@ -202,6 +205,9 @@ export default function FarmDetailPage() {
     <div>
       {/* Farm header */}
       <div className="mb-6 rounded-2xl bg-surface p-6 shadow-sm">
+        {actionError && (
+          <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{actionError}</div>
+        )}
         <div className="mb-4 flex items-center gap-3">
           <Tractor size={36} className="text-primary shrink-0" />
           <div>

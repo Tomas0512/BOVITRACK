@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from app.models.food import Consumption, Food, StockMovement
 from app.schemas.food import ConsumptionCreate, FoodCreate, FoodUpdate
 from app.services.audit_service import add_audit_log
+from app.utils.validators import ensure_farm_scope
 
 
 def create_food(db: Session, farm_id: uuid.UUID, data: FoodCreate, user_id: uuid.UUID | None = None) -> Food:
@@ -96,6 +97,7 @@ def create_consumption(db: Session, farm_id: uuid.UUID, data: ConsumptionCreate,
     # ¿Qué? Obtener el alimento para verificar stock.
     # ¿Para qué? No se puede consumir más de lo disponible.
     food = get_food(db, farm_id, data.food_id)
+    ensure_farm_scope(db, farm_id, bovine_id=data.bovine_id, land_plot_id=data.land_plot_id)
     if food.current_stock < data.quantity:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

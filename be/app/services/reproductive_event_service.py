@@ -10,6 +10,7 @@ from app.models.bovine import Bovine
 from app.models.reproductive_event import ReproductiveEvent
 from app.schemas.reproductive_event import ReproductiveEventCreate, ReproductiveEventUpdate
 from app.services.audit_service import add_audit_log
+from app.utils.validators import ensure_farm_scope
 
 
 GESTATION_DAYS = 283
@@ -130,7 +131,13 @@ def get_event(db: Session, farm_id: uuid.UUID, event_id: uuid.UUID) -> Reproduct
 
 def update_event(db: Session, farm_id: uuid.UUID, event_id: uuid.UUID, data: ReproductiveEventUpdate, user_id: uuid.UUID) -> ReproductiveEvent:
     event = get_event(db, farm_id, event_id)
-    for field, value in data.model_dump(exclude_unset=True).items():
+    cambios = data.model_dump(exclude_unset=True)
+    # ¿Qué? Validar referencias a bovinos de esta finca (evita IDOR al actualizar).
+    if cambios.get("bull_id") is not None:
+        ensure_farm_scope(db, farm_id, bovine_id=cambios["bull_id"])
+    if cambios.get("calf_id") is not None:
+        ensure_farm_scope(db, farm_id, bovine_id=cambios["calf_id"])
+    for field, value in cambios.items():
         setattr(event, field, value)
 
     # ¿Qué? Recalcular la fecha probable de parto si pasó a "servicio".

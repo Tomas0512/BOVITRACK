@@ -20,6 +20,10 @@ export default function ReportsPage() {
 
   const handleGenerate = async () => {
     if (!farmId) return;
+    if (startDate && endDate && endDate < startDate) {
+      setError("La fecha final no puede ser anterior a la inicial.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -38,6 +42,10 @@ export default function ReportsPage() {
 
   const handleDownload = (format: "pdf" | "excel") => {
     if (!farmId) return;
+    if (startDate && endDate && endDate < startDate) {
+      setError("La fecha final no puede ser anterior a la inicial.");
+      return;
+    }
     downloadReport(farmId, format, {
       category: category || undefined,
       start_date: startDate || undefined,

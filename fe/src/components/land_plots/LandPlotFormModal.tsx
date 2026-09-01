@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { getApiErrorMessage } from "../../api/errors";
 import {
   createLandPlot,
@@ -125,7 +126,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
           <h2 className="text-lg font-bold text-text-primary">
             {existing ? "Editar lote" : "Nuevo lote"}
           </h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && (

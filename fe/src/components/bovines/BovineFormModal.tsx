@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { createBovine, updateBovine, type BovineRequest, type BovineResponse } from "../../api/bovines";
 import type { LandPlotResponse } from "../../api/land_plots";
 import type { PaddockResponse } from "../../api/paddocks";
@@ -53,6 +54,11 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
     if (s === 1) {
       if (!form.birth_date) newErrors.birth = "Obligatorio";
       if (!form.entry_date) newErrors.entry = "Obligatorio";
+      if (form.birth_date && form.entry_date && form.entry_date < form.birth_date) {
+        newErrors.entry = "La fecha de ingreso no puede ser anterior al nacimiento";
+      }
+      if ((form.birth_weight ?? 0) < 0) newErrors.weights = "El peso de nacimiento no puede ser negativo";
+      if ((form.current_weight ?? 0) < 0) newErrors.weights = "El peso actual no puede ser negativo";
     }
     setError(Object.values(newErrors).join(". "));
     return Object.keys(newErrors).length === 0;
@@ -107,7 +113,7 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
       <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-text-primary">{existing ? "Editar bovino" : "Registrar bovino"}</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-secondary text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
         </div>
 
         {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}

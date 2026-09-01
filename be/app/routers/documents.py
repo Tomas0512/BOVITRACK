@@ -19,7 +19,7 @@ Impact?
 import uuid
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, Query, Request, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
@@ -184,7 +184,7 @@ def download_document(
     document_id: uuid.UUID = Path(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> FileResponse:
+) -> Response:
     """
     What happens here?
 
@@ -201,10 +201,10 @@ def download_document(
         document_service.get_document_for_download(db, farm_id, document_id)
     )
 
-    return FileResponse(
+    return Response(
         content=file_content,
         media_type=mime_type,
-        filename=original_filename,
+        headers={"Content-Disposition": f'attachment; filename="{original_filename}"'},
     )
 
 
