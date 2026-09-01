@@ -5,7 +5,9 @@ import {
   createFarm,
   listDepartments,
   listPurposes,
+  listCities,
   type DepartmentOption,
+  type CityOption,
   type FarmRequest,
   type PurposeOption,
 } from "../api/farms";
@@ -27,10 +29,14 @@ export default function CreateFarmPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingCatalogs, setLoadingCatalogs] = useState(true);
+  const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<{ id: string; name: string } | null>(null);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
+  const [cities, setCities] = useState<CityOption[]>([]);
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
+  const [showCustomCity, setShowCustomCity] = useState(false);
+  const [customCity, setCustomCity] = useState("");
 
   const [form, setForm] = useState<FarmRequest>({
     name: "",
@@ -46,10 +52,26 @@ export default function CreateFarmPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: name === "total_area" ? Number(value) : value,
-    }));
+    setForm((prev) => {
+      const updated = {
+        ...prev,
+        [name]: name === "total_area" ? Number(value) : value,
+      };
+      if (name === "department_id") {
+        updated.city_municipality = "";
+        setCities([]);
+        setShowCustomCity(false);
+        setCustomCity("");
+      }
+      if (name === "city_municipality" && value === "__otro__") {
+        setShowCustomCity(true);
+        setCustomCity("");
+        updated.city_municipality = "";
+      } else if (name === "city_municipality") {
+        setShowCustomCity(false);
+      }
+      return updated;
+    });
   };
 
   const validateStep = (s: number): boolean => {
@@ -106,7 +128,7 @@ export default function CreateFarmPage() {
    */
   const isStepComplete = (): boolean => {
     if (step === 0) {
-      return Boolean(form.name.trim()) && Boolean(form.address.trim()) && Boolean(form.department_id);
+      return Boolean(form.name.trim()) && Boolean(form.address.trim()) && Boolean(form.department_id) && Boolean(cityValue);
     }
     if (step === 1) {
       return form.total_area > 0 && Boolean(form.purpose_id);
@@ -132,7 +154,32 @@ export default function CreateFarmPage() {
     loadCatalogs();
   }, []);
 
-  const cityValue = form.city_municipality;
+  // Cargar municipios (tabla DANE) según el departamento elegido
+  useEffect(() => {
+    if (!form.department_id) {
+      setCities([]);
+      setShowCustomCity(false);
+      return;
+    }
+    let cancelled = false;
+    setLoadingCities(true);
+    setError("");
+    listCities(form.department_id)
+      .then((data) => {
+        if (!cancelled) setCities(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "No fue posible cargar los municipios");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingCities(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.department_id]);
+
+  const cityValue = showCustomCity ? customCity.trim() : form.city_municipality;
   const isFormComplete =
     form.name.trim() !== "" &&
     form.address.trim() !== "" &&
@@ -147,7 +194,7 @@ export default function CreateFarmPage() {
     if (!isFormComplete) return;
     setError("");
     setLoading(true);
-    const payload = { ...form, city_municipality: form.city_municipality };
+    const payload = { ...form, city_municipality: cityValue };
     try {
       const farm = await createFarm(payload);
       setSuccess({ id: farm.id, name: farm.name });
@@ -246,7 +293,27 @@ export default function CreateFarmPage() {
                 </div>
                 <div>
                   <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-text-primary">Ciudad o municipio <span className="text-red-600">*</span></label>
-                  <input id="city_municipality" name="city_municipality" type="text" required maxLength={120} value={form.city_municipality} onChange={handleChange} placeholder="Ej: Rionegro" className={inputClass} />
+                  <select id="city_municipality" name="city_municipality" required value={showCustomCity ? "__otro__" : form.city_municipality} onChange={handleChange} className={inputClass} disabled={loadingCatalogs || loadingCities || !form.department_id}>
+                    <option value="">Seleccione el municipio</option>
+                    {cities.map((city) => (<option key={city.id} value={city.name}>{city.name}{city.code ? ` (${city.code})` : ""}</option>))}
+                    <option value="__otro__">Otro / escribir manualmente</option>
+                  </select>
+                  {showCustomCity && (
+                    <input
+                      id="custom_city"
+                      name="city_municipality"
+                      type="text"
+                      required
+                      maxLength={120}
+                      value={customCity}
+                      onChange={(e) => setCustomCity(e.target.value)}
+                      placeholder="Escriba el municipio"
+                      className={inputClass}
+                    />
+                  )}
+                  {(!form.department_id || loadingCities) && (
+                    <p className="mt-1 text-xs text-text-muted">Seleccione primero un departamento para ver sus municipios.</p>
+                  )}
                 </div>
               </div>
             </>
