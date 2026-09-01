@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, ShoppingCart, LayoutDashboard } from "lucide-react";
+import { AlertTriangle, ShoppingCart, LayoutDashboard, Wheat } from "lucide-react";
 import {
   listFoods,
   deleteFood,
@@ -28,6 +28,7 @@ import FoodFormModal from "./FoodFormModal";
 import ConfirmDialog from "../ConfirmDialog";
 import PurchaseFormModal from "./PurchaseFormModal";
 import InventoryDashboard from "./InventoryDashboard";
+import ConsumptionFormModal from "./ConsumptionFormModal";
 
 interface Props {
   farmId: string;
@@ -65,6 +66,7 @@ export default function FoodList({ farmId }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showConsumptionModal, setShowConsumptionModal] = useState(false);
   const [editing, setEditing] = useState<FoodResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toDelete, setToDelete] = useState<FoodResponse | null>(null);
@@ -208,6 +210,13 @@ export default function FoodList({ farmId }: Props) {
           >
             <LayoutDashboard size={16} className="inline-block mr-1 -mt-0.5" />
             {showDashboard ? "Lista" : "Panel"}
+          </button>
+          <button
+            onClick={() => setShowConsumptionModal(true)}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt"
+          >
+            <Wheat size={16} className="inline-block mr-1 -mt-0.5" />
+            Registrar consumo
           </button>
           <button
             onClick={() => {
@@ -435,6 +444,19 @@ export default function FoodList({ farmId }: Props) {
         }}
         onClose={() => setShowPurchaseModal(false)}
       />
+
+      {/* ─── MODAL (Consumo) ─── */}
+      {showConsumptionModal && (
+        <ConsumptionFormModal
+          farmId={farmId}
+          foods={foods}
+          onSuccess={() => {
+            setShowConsumptionModal(false);
+            fetchFoods();
+          }}
+          onClose={() => setShowConsumptionModal(false)}
+        />
+      )}
     </div>
   );
 }

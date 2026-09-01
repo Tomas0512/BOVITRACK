@@ -6,6 +6,7 @@ import { deleteAccount } from "../../api/auth";
 import Breadcrumbs from "./Breadcrumbs";
 import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
+import SessionGuard from "../SessionGuard";
 
 export default function AppLayout() {
   const { logout } = useAuth();
@@ -45,6 +46,7 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <SessionGuard />
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

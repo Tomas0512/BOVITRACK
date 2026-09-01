@@ -32,13 +32,16 @@ class FoodCreate(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, v: str) -> str:
-        """¿Qué? Valida que el nombre del alimento tenga al menos 2 caracteres.
-        ¿Para qué? Evitar registros con nombres vacíos o de un solo carácter.
-        ¿Impacto? Mejora la calidad de datos en el inventario.
+        """¿Qué? Valida que el nombre del alimento tenga entre 2 y 255 caracteres.
+        ¿Para qué? Evitar nombres vacíos, de un solo carácter o que excedan la
+                   longitud de la columna (VARCHAR 255) provocando un error 500.
+        ¿Impacto? Mejora la calidad de datos y previene errores de BD.
         """
         v = v.strip()
         if len(v) < 2:
             raise ValueError("El nombre debe tener al menos 2 caracteres")
+        if len(v) > 255:
+            raise ValueError("El nombre no puede superar los 255 caracteres")
         return v
 
     @field_validator("current_stock")
@@ -133,10 +136,12 @@ class ConsumptionCreate(BaseModel):
 
     land_plot_id: uuid.UUID | None = None
     bovine_id: uuid.UUID | None = None
+    paddock_id: uuid.UUID | None = None
     food_id: uuid.UUID
     quantity: Decimal
     feeding_date: datetime
     observations: str | None = None
+    source_bag: str | None = None
 
     @field_validator("quantity")
     @classmethod
@@ -162,10 +167,12 @@ class ConsumptionResponse(BaseModel):
     farm_id: uuid.UUID
     land_plot_id: uuid.UUID | None
     bovine_id: uuid.UUID | None
+    paddock_id: uuid.UUID | None
     food_id: uuid.UUID
     quantity: Decimal
     feeding_date: datetime
     observations: str | None
+    source_bag: str | None
     registered_by: uuid.UUID
     created_at: datetime
 

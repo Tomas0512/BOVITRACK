@@ -13,7 +13,7 @@ BoviTrack es una aplicación full stack para la gestión ganadera que cubre admi
 - **Frontend web:** React + Vite + TailwindCSS 4 + Nginx
 - **App móvil:** React Native + Expo
 - **Orquestación:** Docker Compose con healthchecks + volúmenes para desarrollo
-- **Correo desarrollo:** Mailpit (SMTP dummy + UI web en :8025)
+- **Correo:** envío real vía SMTP (Gmail) con App Password; alternativas Resend API o log en consola
 
 **Cobertura actual:** 16 Historias de Usuario (HU001–HU016) distribuidas en 8 Sprints, con ~121 endpoints de la API, 15+ páginas web, 4 pantallas móviles, 30 tablas en base de datos (23 modelos ORM), RBAC completo con 4 roles y 32 permisos, autenticación JWT con access/refresh tokens, validación de fechas y rango en reportes, y **carga masiva de bovinos por CSV**.
 
@@ -21,17 +21,16 @@ BoviTrack es una aplicación full stack para la gestión ganadera que cubre admi
 
 ## 2. Arquitectura
 
-El sistema se despliega con **Docker Compose** en 4 servicios:
+El sistema se despliega con **Docker Compose** en 3 servicios:
 
 | Servicio | Puerto | Rol |
 |---|---|---|
 | `db` | 5432 (solo localhost) | PostgreSQL 17 con volumen persistente |
 | `be` | 8000 | FastAPI en contenedor no-root (con hot reload por volumen) |
 | `fe` | 5173 → 80 | Nginx sirviendo React SPA + proxy reverso a `/api` |
-| `mailpit` | 8025 (UI), 1025 (SMTP) | SMTP dummy para desarrollo |
 
 **Redes segmentadas:**
-- `backend_net`: db ↔ be ↔ mailpit
+- `backend_net`: db ↔ be
 - `frontend_net`: fe ↔ be
 
 **Healthchecks:** db usa `pg_isready`, be tiene endpoint `/health`.
@@ -209,8 +208,8 @@ Definidos en [`be/app/models/`](../be/app/models/):
 
 ### 4.5 Email
 
-- **Desarrollo:** SMTP con Mailpit (mailpit:1025), UI en http://localhost:8025
-- **Producción:** API Resend configurada como respaldo
+- **Entrega real:** SMTP (Gmail) vía App Password (`EMAIL_BACKEND=smtp`). Los enlaces de verificación/recuperación son envíos reales.
+- **Alternativas:** API Resend configurada como respaldo, o `log` para imprimir el enlace en consola.
 - **Fallback:** Log a consola si no hay SMTP ni Resend
 - Flujos: bienvenida, verificación de email, recuperación de contraseña, invitación a finca
 
@@ -324,13 +323,12 @@ Carpeta: [`mobile/`](../mobile/)
 
 ```yaml
 services:
-  mailpit:    # SMTP dummy para desarrollo
   db:         # PostgreSQL 17 + healthcheck + volumen persistente
   be:         # FastAPI, multi-stage build, usuario no-root
   fe:         # React + Nginx, multi-stage build
 ```
 
-Redes: `backend_net` (db, be, mailpit) + `frontend_net` (fe, be)
+Redes: `backend_net` (db, be) + `frontend_net` (fe, be)
 Volumen: `bovitrack_data` (persistencia PostgreSQL)
 
 ### Variables de entorno

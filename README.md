@@ -226,6 +226,7 @@ bovitrack/
 |-----------|-------------|
 | [docs/RESUMEN_TECNICO_PROYECTO_ACTUAL.md](docs/RESUMEN_TECNICO_PROYECTO_ACTUAL.md) | Resumen técnico del estado actual del proyecto |
 | [docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md](docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md) | Guía de despliegue en línea (Cloudflare Tunnel) y alternativa Supabase |
+| [docs/PRUEBAS_BD/](docs/PRUEBAS_BD/) | Evidencia de pruebas de base de datos (Guía 6): matriz BD vs. aplicación y script SQL CP01–CP27 |
 | [docs/HUs/](docs/HUs/) | Historias de Usuario (HU001 – HU016) |
 | [docs/RF/](docs/RF/) | Requisitos Funcionales (RF001 – RF035) |
 | [docs/RNF/](docs/RNF/) | Requisitos No Funcionales (RNF001 – RNF012) |

@@ -29,21 +29,21 @@ class TestDashboardPage(BaseTest):
     def test_authenticated_user_sees_personalized_greeting(self):
         """
         CASO DE USO 1: tras iniciar sesion, el Dashboard debe mostrar un
-        saludo con el nombre del usuario autenticado ("¡Hola, {nombre}!").
+        saludo con el nombre del usuario autenticado ("Bienvenido, {nombre}!").
         Impacto: confirma que el token de sesion se uso correctamente
         para obtener los datos del usuario desde el backend (FastAPI).
         """
         self.login()
 
         greeting = self.wait.until(
-            EC.presence_of_element_located((By.XPATH, "//h1[contains(., '¡Hola,')]"))
+            EC.presence_of_element_located((By.XPATH, "//h1[contains(., 'Bienvenido,')]"))
         )
         self.assertTrue(greeting.is_displayed(),
                          "No se muestra el saludo personalizado en el Dashboard")
 
     def test_create_farm_link_navigates_to_farm_form(self):
         """
-        CASO DE USO 2: el enlace "+ Crear finca" (visible para el rol
+        CASO DE USO 2: el enlace "Crear finca" (visible para el rol
         Administrador) debe llevar a la vista CreateFarmPage ("/farms/new").
         Impacto: valida el punto de entrada principal para dar de alta
         una nueva finca, funcionalidad base de todo el sistema BoviTrack.
@@ -51,7 +51,7 @@ class TestDashboardPage(BaseTest):
         self.login()
 
         create_farm_link = self.wait.until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "+ Crear finca"))
+            EC.element_to_be_clickable((By.LINK_TEXT, "Crear finca"))
         )
         create_farm_link.click()
 
