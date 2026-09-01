@@ -93,7 +93,7 @@ export default function MovementList({ farmId }: Props) {
   const bovineLabel = useMemo(() => {
     const map = new Map<string, string>();
     for (const b of bovines) map.set(b.id, b.identification_number + (b.name ? ` · ${b.name}` : ""));
-    return (id: string | null) => (id ? map.get(id) ?? "—" : "—");
+    return (id: string | null | undefined) => (id ? map.get(id) ?? "—" : "—");
   }, [bovines]);
 
   useEffect(() => { setPage(1); }, [farmId, filterType]);
