@@ -74,6 +74,32 @@ def delete_my_account(
             detail="Debe confirmar escribiendo ELIMINAR",
         )
 
+    # ¿Qué? Si el usuario es el último administrador activo de alguna finca,
+    # no se le permite eliminar su cuenta (quedaría la finca sin admin).
+    admin_role = db.execute(select(Role).where(Role.name == "Administrador")).scalar_one_or_none()
+    if admin_role:
+        my_admin_farms = db.execute(
+            select(UserFarm).where(
+                UserFarm.user_id == current_user.id,
+                UserFarm.role_id == admin_role.id,
+                UserFarm.is_active.is_(True),
+            )
+        ).scalars().all()
+        for uf in my_admin_farms:
+            other_admin = db.execute(
+                select(UserFarm.id).where(
+                    UserFarm.farm_id == uf.farm_id,
+                    UserFarm.role_id == admin_role.id,
+                    UserFarm.is_active.is_(True),
+                    UserFarm.user_id != current_user.id,
+                )
+            ).scalars().first()
+            if other_admin is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No puedes eliminar tu cuenta: eres el último administrador activo de una finca. Asigna otro administrador primero.",
+                )
+
     add_audit_log(
         db,
         user_id=str(current_user.id),

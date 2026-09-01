@@ -22,6 +22,7 @@ import LandPlotList from "../components/land_plots/LandPlotList";
 import PaddockList from "../components/paddocks/PaddockList";
 import BovineList from "../components/bovines/BovineList";
 import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
+import FarmTreatments from "../components/bovines/FarmTreatments";
 import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
 import AlertBanner from "../components/layout/AlertBanner";
@@ -158,7 +159,12 @@ export default function FarmDetailPage() {
     switch (activeTab) {
       case "bovinos": return <BovineList farmId={farm.id} />;
       case "terneros": return <CalfList farmId={farm.id} />;
-      case "sanidad": return <SanitaryPlanList farmId={farm.id} />;
+      case "sanidad": return (
+        <div className="space-y-6">
+          <SanitaryPlanList farmId={farm.id} />
+          <FarmTreatments farmId={farm.id} />
+        </div>
+      );
       case "alimentacion": return <FoodList farmId={farm.id} />;
       case "movimientos": return <MovementList farmId={farm.id} />;
       case "lotes": return (

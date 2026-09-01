@@ -23,3 +23,19 @@ export async function listTreatments(farmId: string, bovineId?: string): Promise
   const response = await api.get<TreatmentResponse[]>(`/farms/${farmId}/treatments`, { params });
   return response.data;
 }
+
+export interface TreatmentCreate {
+  bovine_id: string | null;
+  treatment_type: string;
+  product_name: string;
+  dose: string;
+  administration_route: string;
+  application_date: string;
+  next_application_date?: string | null;
+  observations?: string | null;
+}
+
+export async function createTreatment(farmId: string, data: TreatmentCreate): Promise<TreatmentResponse> {
+  const response = await api.post<TreatmentResponse>(`/farms/${farmId}/treatments`, data);
+  return response.data;
+}
