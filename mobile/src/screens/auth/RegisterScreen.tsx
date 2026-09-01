@@ -45,6 +45,7 @@ export default function RegisterScreen() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Correo invalido';
     if (!form.document_number.trim()) e.document_number = 'El numero es obligatorio';
     if (!form.phone.trim()) e.phone = 'El telefono es obligatorio';
+    else if (!/^[0-9+\s()-]+$/.test(form.phone)) e.phone = 'Solo numeros, "+", espacios y guiones';
     if (!form.password) e.password = 'La contrasena es obligatoria';
     else if (form.password.length < 8) e.password = 'Minimo 8 caracteres';
     else if (!/[A-Z]/.test(form.password)) e.password = 'Debe tener una mayuscula';

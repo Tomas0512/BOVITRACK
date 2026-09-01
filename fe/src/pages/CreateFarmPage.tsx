@@ -4,9 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import {
   createFarm,
   listDepartments,
-  listCities,
   listPurposes,
-  type CityOption,
   type DepartmentOption,
   type FarmRequest,
   type PurposeOption,
@@ -29,14 +27,10 @@ export default function CreateFarmPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingCatalogs, setLoadingCatalogs] = useState(true);
-  const [loadingCities, setLoadingCities] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState<{ id: string; name: string } | null>(null);
   const [departments, setDepartments] = useState<DepartmentOption[]>([]);
-  const [cities, setCities] = useState<CityOption[]>([]);
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
-  const [showCustomCity, setShowCustomCity] = useState(false);
-  const [customCity, setCustomCity] = useState("");
 
   const [form, setForm] = useState<FarmRequest>({
     name: "",
@@ -52,25 +46,10 @@ export default function CreateFarmPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => {
-      const updated = {
-        ...prev,
-        [name]: name === "total_area" ? Number(value) : value,
-      };
-      if (name === "department_id") {
-        updated.city_municipality = "";
-        setShowCustomCity(false);
-        setCustomCity("");
-      }
-      if (name === "city_municipality" && value === "__otro__") {
-        setShowCustomCity(true);
-        setCustomCity("");
-        updated.city_municipality = "";
-      } else if (name === "city_municipality") {
-        setShowCustomCity(false);
-      }
-      return updated;
-    });
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "total_area" ? Number(value) : value,
+    }));
   };
 
   const validateStep = (s: number): boolean => {
@@ -87,7 +66,7 @@ export default function CreateFarmPage() {
         setError("La dirección debe tener al menos 5 caracteres");
         return false;
       }
-      const city = showCustomCity ? customCity.trim() : form.city_municipality;
+      const city = form.city_municipality;
       if (city.length < 2) {
         setError("La ciudad o municipio debe tener al menos 2 caracteres");
         return false;
@@ -153,27 +132,7 @@ export default function CreateFarmPage() {
     loadCatalogs();
   }, []);
 
-  // Cargar ciudades cuando cambia el departamento
-  useEffect(() => {
-    if (!form.department_id) {
-      setCities([]);
-      return;
-    }
-    const load = async () => {
-      setLoadingCities(true);
-      try {
-        const cits = await listCities(form.department_id);
-        setCities(cits);
-      } catch {
-        setCities([]);
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-    load();
-  }, [form.department_id]);
-
-  const cityValue = showCustomCity ? customCity.trim() : form.city_municipality;
+  const cityValue = form.city_municipality;
   const isFormComplete =
     form.name.trim() !== "" &&
     form.address.trim() !== "" &&
@@ -188,7 +147,7 @@ export default function CreateFarmPage() {
     if (!isFormComplete) return;
     setError("");
     setLoading(true);
-    const payload = { ...form, city_municipality: showCustomCity ? customCity.trim() : form.city_municipality };
+    const payload = { ...form, city_municipality: form.city_municipality };
     try {
       const farm = await createFarm(payload);
       setSuccess({ id: farm.id, name: farm.name });
@@ -287,18 +246,7 @@ export default function CreateFarmPage() {
                 </div>
                 <div>
                   <label htmlFor="city_municipality" className="mb-1 block text-sm font-semibold text-text-primary">Ciudad o municipio <span className="text-red-600">*</span></label>
-                  {showCustomCity ? (
-                    <input id="customCity" name="customCity" required value={customCity} onChange={(e) => setCustomCity(e.target.value)} placeholder="Escriba el nombre de la ciudad" className={inputClass} />
-                  ) : (
-                    <select id="city_municipality" name="city_municipality" required value={form.city_municipality} onChange={handleChange} className={inputClass} disabled={!form.department_id || loadingCities}>
-                      <option value="">{loadingCities ? "Cargando..." : form.department_id ? "Seleccione una ciudad" : "Primero seleccione departamento"}</option>
-                      {cities.map((city) => (<option key={city.id} value={city.name}>{city.name}</option>))}
-                      <option value="__otro__">Otro...</option>
-                    </select>
-                  )}
-                  {showCustomCity && (
-                    <button type="button" onClick={() => { setShowCustomCity(false); setCustomCity(""); }} className="mt-1 text-xs font-medium text-primary hover:text-primary-light">← Volver a la lista</button>
-                  )}
+                  <input id="city_municipality" name="city_municipality" type="text" required maxLength={120} value={form.city_municipality} onChange={handleChange} placeholder="Ej: Rionegro" className={inputClass} />
                 </div>
               </div>
             </>

@@ -161,6 +161,7 @@ export function RegisterPage() {
     }
 
     if (!formData.phone.trim()) newErrors.phone = "El teléfono es obligatorio";
+    else if (!/^[0-9+\s()-]+$/.test(formData.phone)) newErrors.phone = "Solo números, '+', espacios y guiones";
 
     if (!formData.password) {
       newErrors.password = "La contraseña es obligatoria";
