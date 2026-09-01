@@ -21,6 +21,9 @@ import {
   deleteFood,
   type FoodResponse,
 } from "../../api/food";
+import { getApiErrorMessage } from "../../api/errors";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 import FoodFormModal from "./FoodFormModal";
 import PurchaseFormModal from "./PurchaseFormModal";
 import InventoryDashboard from "./InventoryDashboard";
@@ -65,6 +68,14 @@ export default function FoodList({ farmId }: Props) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState("");
 
+  const getValue = (food: FoodResponse, key: string): string | number => {
+    const v = (food as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<FoodResponse>(foods, { getValue });
+
   // ════════════════════════════════════════════════════════════════════════════════
   // 🔄 Cargar datos del backend
   // ════════════════════════════════════════════════════════════════════════════════
@@ -92,21 +103,17 @@ export default function FoodList({ farmId }: Props) {
         : data;
       
       setFoods(filtered);
-    } catch {
-      setError("No se pudieron cargar los alimentos");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron cargar los alimentos"));
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * useEffect — Se ejecuta cuando:
-   * 1. El componente se monta (se abre la página)
-   * 2. Cambia farmId (cambias de finca)
-   * 3. Cambia categoryFilter (cambias el filtro)
-   */
+  useEffect(() => { setPage(1); }, [farmId, categoryFilter, setPage]);
   useEffect(() => {
     fetchFoods();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmId, categoryFilter]);
 
   // ════════════════════════════════════════════════════════════════════════════════
@@ -136,11 +143,8 @@ export default function FoodList({ farmId }: Props) {
        * Paso 4: Recargar la lista (sin el alimento eliminado)
        */
       await fetchFoods();
-    } catch {
-      /**
-       * Si algo falla, mostrar error
-       */
-      setError("No se pudo eliminar el alimento");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo eliminar el alimento"));
     } finally {
       /**
        * Paso 5: Dejar de mostrar el spinner
@@ -219,7 +223,7 @@ export default function FoodList({ farmId }: Props) {
             }`}
           >
             <LayoutDashboard size={16} className="inline-block mr-1 -mt-0.5" />
-            {showDashboard ? "List" : "Dashboard"}
+            {showDashboard ? "Lista" : "Panel"}
           </button>
           <button
             onClick={() => {
@@ -229,7 +233,7 @@ export default function FoodList({ farmId }: Props) {
             className="rounded-lg border border-border px-4 py-2 text-sm font-bold text-text-secondary hover:bg-surface-alt"
           >
             <ShoppingCart size={16} className="inline-block mr-1 -mt-0.5" />
-            Purchase
+            Compra
           </button>
           <button
             onClick={() => {
@@ -238,7 +242,7 @@ export default function FoodList({ farmId }: Props) {
             }}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light"
           >
-            + New Item
+            + Nuevo alimento
           </button>
         </div>
       </div>
@@ -306,18 +310,30 @@ export default function FoodList({ farmId }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">Nombre</th>
-                <th className="pb-2 pr-4">Categoría</th>
-                <th className="pb-2 pr-4">Unidad</th>
-                <th className="pb-2 pr-4">Stock actual</th>
-                <th className="pb-2 pr-4">Stock mínimo</th>
-                <th className="pb-2 pr-4">Precio unitario</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("name")} className="uppercase">Nombre {sortKey === "name" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("category")} className="uppercase">Categoría {sortKey === "category" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("unit_of_measure")} className="uppercase">Unidad {sortKey === "unit_of_measure" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("current_stock")} className="uppercase">Stock actual {sortKey === "current_stock" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("min_stock_alert")} className="uppercase">Stock mínimo {sortKey === "min_stock_alert" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("cost_per_unit")} className="uppercase">Precio unitario {sortKey === "cost_per_unit" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
                 <th className="pb-2 pr-4">Proveedor</th>
                 <th className="pb-2">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {foods.map((food) => {
+              {paginated.map((food) => {
                 /**
                  * Detectar si el stock está bajo
                  * Si current_stock <= min_stock_alert, mostrar en rojo
@@ -396,6 +412,9 @@ export default function FoodList({ farmId }: Props) {
               })}
             </tbody>
           </table>
+          <div className="mt-4">
+            <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+          </div>
         </div>
       )}
 
