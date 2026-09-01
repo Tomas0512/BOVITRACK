@@ -3,6 +3,7 @@ import { listLandPlots, deleteLandPlot, type LandPlotResponse } from "../../api/
 import { getApiErrorMessage } from "../../api/errors";
 import { useTable } from "../../hooks/useTable";
 import Pagination from "../Pagination";
+import ConfirmDialog from "../ConfirmDialog";
 import LandPlotFormModal from "./LandPlotFormModal";
 
 interface Props {
@@ -16,6 +17,7 @@ export default function LandPlotList({ farmId }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<LandPlotResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<LandPlotResponse | null>(null);
 
   const getValue = (lp: LandPlotResponse, key: string): string | number => {
     const v = (lp as unknown as Record<string, unknown>)[key];
@@ -42,11 +44,12 @@ export default function LandPlotList({ farmId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchPlots(); }, [farmId]);
 
-  const handleDelete = async (lp: LandPlotResponse) => {
-    if (!confirm(`¿Eliminar el lote "${lp.name}"? Esta acción es irreversible.`)) return;
-    setActionLoading(lp.id);
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setActionLoading(toDelete.id);
     try {
-      await deleteLandPlot(farmId, lp.id);
+      await deleteLandPlot(farmId, toDelete.id);
+      setToDelete(null);
       await fetchPlots();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudo eliminar el lote"));
@@ -106,7 +109,7 @@ export default function LandPlotList({ farmId }: Props) {
                     className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                     Editar
                   </button>
-                  <button onClick={() => handleDelete(lp)} disabled={actionLoading === lp.id}
+                  <button onClick={() => setToDelete(lp)} disabled={actionLoading === lp.id}
                     className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50">
                     Eliminar
                   </button>
@@ -128,6 +131,16 @@ export default function LandPlotList({ farmId }: Props) {
           onClose={() => { setShowModal(false); setEditing(undefined); }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Eliminar lote"
+        message={`¿Eliminar el lote "${toDelete?.name}"? Esta acción es irreversible.`}
+        confirmLabel="Eliminar"
+        loading={actionLoading !== null}
+        onConfirm={handleDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   );
 }

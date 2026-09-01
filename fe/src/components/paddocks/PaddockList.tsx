@@ -5,6 +5,7 @@ import { listLandPlots } from "../../api/land_plots";
 import { getApiErrorMessage } from "../../api/errors";
 import { useTable } from "../../hooks/useTable";
 import Pagination from "../Pagination";
+import ConfirmDialog from "../ConfirmDialog";
 import PaddockFormModal from "./PaddockFormModal";
 
 interface Props {
@@ -31,6 +32,7 @@ export default function PaddockList({ farmId }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<PaddockResponse | undefined>();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<PaddockResponse | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   const getValue = (p: PaddockResponse, key: string): string | number => {
@@ -62,11 +64,12 @@ export default function PaddockList({ farmId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchPaddocks(); }, [farmId, statusFilter]);
 
-  const handleDelete = async (p: PaddockResponse) => {
-    if (!confirm(`¿Eliminar el potrero "${p.name}"?`)) return;
-    setActionLoading(p.id);
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setActionLoading(toDelete.id);
     try {
-      await deletePaddock(farmId, p.id);
+      await deletePaddock(farmId, toDelete.id);
+      setToDelete(null);
       await fetchPaddocks();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudo eliminar el potrero"));
@@ -172,7 +175,7 @@ export default function PaddockList({ farmId }: Props) {
                   className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
                   Editar
                 </button>
-                <button onClick={() => handleDelete(p)} disabled={actionLoading === p.id}
+                <button onClick={() => setToDelete(p)} disabled={actionLoading === p.id}
                   className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50">
                   Eliminar
                 </button>
@@ -196,6 +199,16 @@ export default function PaddockList({ farmId }: Props) {
           onClose={() => { setShowModal(false); setEditing(undefined); }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Eliminar potrero"
+        message={`¿Eliminar el potrero "${toDelete?.name}"?`}
+        confirmLabel="Eliminar"
+        loading={actionLoading !== null}
+        onConfirm={handleDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   );
 }
