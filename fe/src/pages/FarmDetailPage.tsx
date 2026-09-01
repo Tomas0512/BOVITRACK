@@ -1,6 +1,21 @@
-import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { AlertTriangle, Tractor, BarChart3, FileText, Bell } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  AlertTriangle,
+  Tractor,
+  BarChart3,
+  FileText,
+  Bell,
+  LayoutDashboard,
+  Beef,
+  Sprout,
+  Pill,
+  Wheat,
+  ArrowLeftRight,
+  Map,
+  Users,
+  ShieldCheck,
+} from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
@@ -14,9 +29,30 @@ import MovementList from "../components/movements/MovementList";
 import DocumentManager from "../components/documents/DocumentManager";
 import CalfList from "../components/calves/CalfList";
 
+interface TabDef {
+  id: string;
+  label: string;
+  icon: ReactNode;
+}
+
+const TABS: TabDef[] = [
+  { id: "resumen", label: "Resumen", icon: <LayoutDashboard size={18} /> },
+  { id: "bovinos", label: "Ganado", icon: <Beef size={18} /> },
+  { id: "terneros", label: "Terneros", icon: <Sprout size={18} /> },
+  { id: "sanidad", label: "Sanidad", icon: <Pill size={18} /> },
+  { id: "alimentacion", label: "Alimentación", icon: <Wheat size={18} /> },
+  { id: "movimientos", label: "Movimientos", icon: <ArrowLeftRight size={18} /> },
+  { id: "lotes", label: "Lotes y Potreros", icon: <Map size={18} /> },
+  { id: "documentos", label: "Documentos", icon: <FileText size={18} /> },
+  { id: "empleados", label: "Empleados", icon: <Users size={18} /> },
+  { id: "auditoria", label: "Auditoría", icon: <ShieldCheck size={18} /> },
+];
+
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "resumen";
   const [farm, setFarm] = useState<FarmResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,6 +62,8 @@ export default function FarmDetailPage() {
   const [purposes, setPurposes] = useState<PurposeOption[]>([]);
   const [editForm, setEditForm] = useState<FarmRequest | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const setTab = (id: string) => setSearchParams({ tab: id });
 
   const nextEditStep = () => setEditStep((s) => Math.min(s + 1, 1));
   const prevEditStep = () => setEditStep((s) => Math.max(s - 1, 0));
@@ -42,6 +80,7 @@ export default function FarmDetailPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadFarm(); }, [farmId]);
 
   const handleEdit = async () => {
@@ -115,16 +154,50 @@ export default function FarmDetailPage() {
     );
   }
 
+  const renderTab = () => {
+    switch (activeTab) {
+      case "bovinos": return <BovineList farmId={farm.id} />;
+      case "terneros": return <CalfList farmId={farm.id} />;
+      case "sanidad": return <SanitaryPlanList farmId={farm.id} />;
+      case "alimentacion": return <FoodList farmId={farm.id} />;
+      case "movimientos": return <MovementList farmId={farm.id} />;
+      case "lotes": return (
+        <div className="space-y-6">
+          <LandPlotList farmId={farm.id} />
+          <PaddockList farmId={farm.id} />
+        </div>
+      );
+      case "documentos": return <DocumentManager farmId={farm.id} />;
+      case "empleados": return <EmployeeList farmId={farm.id} />;
+      case "auditoria": return <AuditLogList farmId={farm.id} />;
+      default: return (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InfoCard label="Dirección" value={farm.address} />
+            <InfoCard label="Ciudad o municipio" value={farm.city_municipality} />
+            <InfoCard label="Área total" value={`${farm.total_area} ${farm.area_unit}`} />
+            <InfoCard label="Teléfono" value={farm.phone ?? "No registrado"} />
+            <InfoCard label="Estado" value={farm.is_active ? "Activa" : "Inactiva"} />
+            <InfoCard label="Fecha de creación" value={new Date(farm.created_at).toLocaleDateString("es-CO")} />
+            <InfoCard label="Última actualización" value={new Date(farm.updated_at).toLocaleDateString("es-CO")} />
+          </div>
+          <AlertBanner farmId={farm.id} />
+        </>
+      );
+    }
+  };
+
   return (
     <div>
-      <div className="rounded-2xl bg-surface p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
+      {/* Farm header */}
+      <div className="mb-6 rounded-2xl bg-surface p-6 shadow-sm">
+        <div className="mb-4 flex items-center gap-3">
           <Tractor size={36} className="text-primary shrink-0" />
           <div>
             <h1 className="text-2xl font-bold text-text-primary">{farm.name}</h1>
             <p className="text-sm text-text-secondary">ID: {farm.farm_identifier}</p>
           </div>
-          <div className="ml-auto flex gap-2">
+          <div className="ml-auto flex flex-wrap gap-2">
             <Link to={`/farms/${farmId}/economics`}
               className="inline-flex items-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary no-underline hover:bg-surface-alt">
               <BarChart3 size={16} />
@@ -151,11 +224,10 @@ export default function FarmDetailPage() {
           </div>
         </div>
 
+        {/* Edit form (collapsible) */}
         {editing && editForm && (
-          <form onSubmit={handleSaveEdit} className="mb-6 rounded-xl border border-border bg-surface p-4">
+          <form onSubmit={handleSaveEdit} className="rounded-xl border border-border bg-surface p-4">
             <h3 className="mb-3 text-sm font-bold text-text-secondary">Editar finca</h3>
-
-            {/* Step indicator */}
             <div className="mb-4 flex items-center gap-1.5">
               {["Ubicación", "Área y ID"].map((label, i) => (
                 <button key={i} type="button" onClick={() => { if (i < editStep) setEditStep(i); }} disabled={i > editStep}
@@ -165,7 +237,6 @@ export default function FarmDetailPage() {
                 </button>
               ))}
             </div>
-
             {editStep === 0 && (
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -192,7 +263,6 @@ export default function FarmDetailPage() {
                 </div>
               </div>
             )}
-
             {editStep === 1 && (
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
@@ -220,7 +290,6 @@ export default function FarmDetailPage() {
                 </div>
               </div>
             )}
-
             <div className="mt-3 flex gap-2">
               {editStep > 0 && (
                 <button type="button" onClick={prevEditStep}
@@ -248,43 +317,28 @@ export default function FarmDetailPage() {
             </div>
           </form>
         )}
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <InfoCard label="Dirección" value={farm.address} />
-          <InfoCard label="Ciudad o municipio" value={farm.city_municipality} />
-          <InfoCard label="Área total" value={`${farm.total_area} ${farm.area_unit}`} />
-          <InfoCard label="Teléfono" value={farm.phone ?? "No registrado"} />
-          <InfoCard label="Estado" value={farm.is_active ? "Activa" : "Inactiva"} />
-          <InfoCard label="Fecha de creación" value={new Date(farm.created_at).toLocaleDateString("es-CO")} />
-          <InfoCard label="Última actualización" value={new Date(farm.updated_at).toLocaleDateString("es-CO")} />
-        </div>
       </div>
 
-      <MovementList farmId={farm.id} />
-      <AlertBanner farmId={farm.id} />
-      <LandPlotList farmId={farm.id} />
-      <PaddockList farmId={farm.id} />
-      <BovineList farmId={farm.id} />
-      {/*
-        HU007 - Desarrollo y seguimiento de terneros (Sprint 6 - Camilo)
+      {/* Tabs */}
+      <div className="mb-6 flex flex-wrap gap-1.5 border-b border-border pb-2">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === t.id
+                ? "bg-primary text-white"
+                : "text-text-secondary hover:bg-surface-alt hover:text-text-primary"
+            }`}
+          >
+            <span className={activeTab === t.id ? "" : "text-primary"}>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-        COMO: Capataz de la finca
-        QUIERO: ver el listado de terneros con sus indicadores de crecimiento
-                y poder registrar pesajes desde la misma pantalla de la finca
-        PARA:   detectar a tiempo terneros por debajo del peso esperado para su
-                edad y raza, y tomar decisiones de alimentacion o manejo.
-
-        Nota de integracion (Sprint 8): el componente CalfList existia desde el
-        Sprint 6 pero nunca se monto en ninguna pagina, por lo que la HU007
-        quedaba inaccesible para el usuario final. Aqui se cierra la tarea 7.5
-        "Integracion con la ficha general".
-      */}
-      <CalfList farmId={farm.id} />
-      <SanitaryPlanList farmId={farm.id} />
-      <FoodList farmId={farm.id} />
-      <DocumentManager farmId={farm.id} />
-      <EmployeeList farmId={farm.id} />
-      <AuditLogList farmId={farm.id} />
+      {/* Active tab content */}
+      {renderTab()}
     </div>
   );
 }

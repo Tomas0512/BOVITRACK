@@ -6,6 +6,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { FarmProvider } from "./context/FarmContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RequireRole from "./components/RequireRole";
 import AppLayout from "./components/layout/AppLayout";
@@ -48,7 +49,7 @@ function App() {
           <Route path="/request-reactivation" element={<RequestReactivationPage />} />
 
           {/* Protegidas */}
-          <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+          <Route element={<ProtectedRoute><FarmProvider><AppLayout /></FarmProvider></ProtectedRoute>}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/farms/new" element={<CreateFarmPage />} />
             <Route path="/farms/:farmId" element={<FarmDetailPage />} />

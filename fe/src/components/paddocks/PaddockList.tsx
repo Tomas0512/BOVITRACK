@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import { listPaddocks, deletePaddock, type PaddockResponse } from "../../api/paddocks";
 import { listLandPlots } from "../../api/land_plots";
+import { getApiErrorMessage } from "../../api/errors";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 import PaddockFormModal from "./PaddockFormModal";
 
 interface Props {
@@ -30,6 +33,14 @@ export default function PaddockList({ farmId }: Props) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
+  const getValue = (p: PaddockResponse, key: string): string | number => {
+    const v = (p as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage } =
+    useTable<PaddockResponse>(paddocks, { getValue });
+
   const fetchPaddocks = async () => {
     setLoading(true);
     setError("");
@@ -40,13 +51,15 @@ export default function PaddockList({ farmId }: Props) {
       ]);
       setPaddocks(data);
       setHasLandPlots(plots.filter((p) => p.is_active).length > 0);
-    } catch {
-      setError("No se pudieron cargar los potreros");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron cargar los potreros"));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => { setPage(1); }, [farmId, statusFilter, setPage]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchPaddocks(); }, [farmId, statusFilter]);
 
   const handleDelete = async (p: PaddockResponse) => {
@@ -55,8 +68,8 @@ export default function PaddockList({ farmId }: Props) {
     try {
       await deletePaddock(farmId, p.id);
       await fetchPaddocks();
-    } catch {
-      setError("No se pudo eliminar el potrero");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo eliminar el potrero"));
     } finally {
       setActionLoading(null);
     }
@@ -119,7 +132,7 @@ export default function PaddockList({ farmId }: Props) {
       ) : (
         // Agrupados por lote: la jerarquía es finca > lote > potrero.
         Object.entries(
-          paddocks.reduce<Record<string, typeof paddocks>>((acc, p) => {
+          paginated.reduce<Record<string, typeof paddocks>>((acc, p) => {
             const lote = p.land_plot_name ?? "Sin lote";
             (acc[lote] ??= []).push(p);
             return acc;
@@ -170,6 +183,10 @@ export default function PaddockList({ farmId }: Props) {
         </div>
         ))
       )}
+
+      <div className="mt-4">
+        <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+      </div>
 
       {showModal && (
         <PaddockFormModal

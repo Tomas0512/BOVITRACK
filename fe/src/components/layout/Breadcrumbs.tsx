@@ -1,18 +1,45 @@
 import { Link, useLocation } from "react-router-dom";
 
+interface Crumb {
+  label: string;
+  to?: string;
+}
+
 export default function Breadcrumbs() {
   const { pathname } = useLocation();
 
+  // En el dashboard no hace falta migas de pan (es la "casa" de la app).
   if (pathname === "/dashboard") return null;
 
-  const crumbs: { label: string; to?: string }[] = [
-    { label: "Inicio", to: "/dashboard" },
-  ];
+  const crumbs: Crumb[] = [{ label: "Inicio", to: "/dashboard" }];
 
+  // /farms/new → Inicio / Nueva Finca
   if (pathname === "/farms/new") {
     crumbs.push({ label: "Nueva Finca" });
-  } else if (/^\/farms\/[^/]+$/.test(pathname)) {
+  }
+  // /audit → Inicio / Auditoría
+  else if (pathname === "/audit") {
+    crumbs.push({ label: "Auditoría" });
+  }
+  // /farms/:farmId → Inicio / Detalle de Finca
+  else if (/^\/farms\/[^/]+$/.test(pathname)) {
     crumbs.push({ label: "Detalle de Finca" });
+  }
+  // /farms/:farmId/<sub> → Inicio / Detalle de Finca / <sub>
+  else if (/^\/farms\/[^/]+\/[^/]+$/.test(pathname)) {
+    const [, farmId, sub] = pathname.split("/").filter(Boolean);
+    crumbs.push({ label: "Detalle de Finca", to: `/farms/${farmId}` });
+
+    if (sub === "bovines") {
+      // /farms/:farmId/bovines/:bovineId → Inicio / Detalle de Finca / Bovino
+      crumbs.push({ label: "Bovino" });
+    } else if (sub === "economics") {
+      crumbs.push({ label: "Economía" });
+    } else if (sub === "reports") {
+      crumbs.push({ label: "Reportes" });
+    } else if (sub === "alerts") {
+      crumbs.push({ label: "Alertas" });
+    }
   }
 
   if (crumbs.length <= 1) return null;
