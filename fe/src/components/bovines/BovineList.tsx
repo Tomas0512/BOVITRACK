@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { listBovines, deleteBovine, type BovineResponse } from "../../api/bovines";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { listBovines, deleteBovine, importBovinesCsv, type BovineResponse, type ImportResult } from "../../api/bovines";
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
 import { listPaddocks, type PaddockResponse } from "../../api/paddocks";
 import { getApiErrorMessage } from "../../api/errors";
@@ -7,6 +7,7 @@ import Pagination from "../Pagination";
 import ConfirmDialog from "../ConfirmDialog";
 import BovineFormModal from "./BovineFormModal";
 import { Link } from "react-router-dom";
+import { FileUp, Check, X } from "lucide-react";
 
 interface Props {
   farmId: string;
@@ -38,6 +39,9 @@ export default function BovineList({ farmId }: Props) {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
   const perPage = 8;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -99,6 +103,24 @@ export default function BovineList({ farmId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchData(); }, [farmId, filterSex]);
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImporting(true);
+    setImportResult(null);
+    setError("");
+    try {
+      const result = await importBovinesCsv(farmId, file);
+      setImportResult(result);
+      await fetchData();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo importar el archivo"));
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const [toDelete, setToDelete] = useState<BovineResponse | null>(null);
 
   const handleDelete = async () => {
@@ -128,11 +150,42 @@ export default function BovineList({ farmId }: Props) {
           <h2 className="text-lg font-bold text-text-primary">Bovinos</h2>
           <p className="text-xs text-text-muted">{bovines.length} registro{bovines.length !== 1 ? "s" : ""}</p>
         </div>
-        <button onClick={() => { setEditing(undefined); setShowModal(true); }}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
-          + Registrar bovino
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => fileRef.current?.click()} disabled={importing}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt disabled:opacity-50">
+            <FileUp size={15} className="mr-1 inline align-text-bottom" />
+            {importing ? "Importando…" : "Importar CSV"}
+          </button>
+          <button onClick={() => { setEditing(undefined); setShowModal(true); }}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+            + Registrar bovino
+          </button>
+        </div>
+        <input ref={fileRef} type="file" accept=".csv,text/csv" onChange={handleImportFile} className="hidden" />
       </div>
+
+      {importResult && (
+        <div className="mb-3 rounded-lg border px-4 py-3 text-sm">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-text-primary">
+              <Check size={15} className="mr-1 inline text-green-600" />
+              {importResult.imported} importado{importResult.imported !== 1 ? "s" : ""} · {importResult.failed} con error{importResult.failed !== 1 ? "es" : ""}
+            </p>
+            <button onClick={() => setImportResult(null)} aria-label="Cerrar" className="text-text-muted hover:text-text-secondary"><X size={16} /></button>
+          </div>
+          {importResult.errors.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-red-600">
+              {importResult.errors.slice(0, 6).map((err, i) => (
+                <li key={i}>Fila {err.row}: {err.error}</li>
+              ))}
+              {importResult.errors.length > 6 && <li>… y {importResult.errors.length - 6} más.</li>}
+            </ul>
+          )}
+          <p className="mt-1 text-xs text-text-muted">
+            Plantilla: <span className="font-mono">identification_number, name, sex, birth_date, entry_type, entry_date, birth_weight, current_weight, breed, purpose, land_plot, paddock</span>
+          </p>
+        </div>
+      )}
 
       {/* Filtros */}
       <div className="mb-4 flex gap-2">

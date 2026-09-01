@@ -78,3 +78,19 @@ export async function updateBovine(farmId: string, bovineId: string, data: Parti
 export async function deleteBovine(farmId: string, bovineId: string): Promise<void> {
   await api.delete(`${base(farmId)}/${bovineId}`);
 }
+
+export interface ImportResult {
+  total: number;
+  imported: number;
+  failed: number;
+  errors: { row: number; error: string }[];
+}
+
+export async function importBovinesCsv(farmId: string, file: File): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await api.post<ImportResult>(`${base(farmId)}/import`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}

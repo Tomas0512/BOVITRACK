@@ -85,7 +85,7 @@ def milk_daily(
 ) -> list[dict]:
     _ = current_user
     result = db.execute(
-        text("SELECT * FROM v_milk_production_daily WHERE farm_id = :farm_id ORDER BY milking_date DESC"),
+        text("SELECT * FROM v_milk_production_daily WHERE farm_id = :farm_id ORDER BY production_date DESC"),
         {"farm_id": str(farm_id)},
     )
     return [dict(row._mapping) for row in result]
