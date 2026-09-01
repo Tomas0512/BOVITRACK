@@ -129,7 +129,21 @@ def create_consumption(db: Session, farm_id: uuid.UUID, data: ConsumptionCreate,
 
     # ¿Qué? Descontar la cantidad consumida del stock.
     # ¿Impacto? Si la transacción falla, el rollback restaura el stock original.
+    stock_before = food.current_stock
     food.current_stock -= data.quantity
+    _record_stock_movement(
+        db,
+        farm_id=farm_id,
+        food_id=food.id,
+        movement_type="consumption",
+        quantity=-data.quantity,
+        stock_before=stock_before,
+        stock_after=food.current_stock,
+        registered_by=user_id,
+        reference_type="consumption",
+        notes=f"Consumo: {data.observations or ''}".strip() or None,
+        movement_date=data.feeding_date,
+    )
 
     consumption = Consumption(
         farm_id=farm_id,
