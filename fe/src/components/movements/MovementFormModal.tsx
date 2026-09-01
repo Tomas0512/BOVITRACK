@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { createMovement, updateMovement, type MovementRequest, type MovementResponse } from "../../api/movements";
+import { listBovines, type BovineResponse } from "../../api/bovines";
 
 const MOVEMENT_TYPES = [
   { value: "compra", label: "Compra" },
@@ -23,8 +24,6 @@ const STEPS = [
   { label: "Origen y notas" },
 ];
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export default function MovementFormModal({ farmId, existing, onSuccess, onClose }: Props) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<MovementRequest>({
@@ -42,19 +41,31 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [bovines, setBovines] = useState<BovineResponse[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    listBovines(farmId)
+      .then((data) => { if (active) setBovines(data); })
+      .catch(() => { if (active) setError("No se pudieron cargar los bovinos."); });
+    return () => { active = false; };
+  }, [farmId]);
 
   const isEdit = !!existing;
+
+  const NEEDS_BOVINE = ["venta", "traslado", "muerte"];
 
   const isFormComplete =
     form.movement_date !== "" &&
     (form.movement_type === "traslado"
       ? (form.origin_farm_name ?? "").trim() !== "" && (form.destination_farm_name ?? "").trim() !== ""
-      : (form.counterparty_name ?? "").trim() !== "");
+      : (form.counterparty_name ?? "").trim() !== "") &&
+    (NEEDS_BOVINE.includes(form.movement_type) ? Boolean(form.bovine_id) : true);
 
   const validateStep = (s: number): boolean => {
     if (s === 0 && !form.movement_date) { setError("La fecha del movimiento es obligatoria"); return false; }
-    if (s === 0 && form.bovine_id && !UUID_RE.test(form.bovine_id)) {
-      setError("El ID del bovino no tiene un formato UUID válido");
+    if (s === 0 && NEEDS_BOVINE.includes(form.movement_type) && !form.bovine_id) {
+      setError("Seleccione el bovino (por su número de identificación)");
       return false;
     }
     setError("");
@@ -136,10 +147,17 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">ID del bovino</label>
-                <input type="text" value={form.bovine_id ?? ""} onChange={(e) => { setForm({ ...form, bovine_id: e.target.value || null }); setError(""); }}
-                  placeholder="UUID del bovino (opcional)"
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                <label className="mb-1 block text-xs font-medium text-text-secondary">
+                  Bovino (identificación) {NEEDS_BOVINE.includes(form.movement_type) ? <span className="text-red-600">*</span> : ""}
+                </label>
+                <select value={form.bovine_id ?? ""} onChange={(e) => { setForm({ ...form, bovine_id: e.target.value || null }); setError(""); }}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  disabled={bovines.length === 0}>
+                  <option value="">{form.movement_type === "compra" ? "— Sin bovino (animal nuevo) —" : "Seleccione un bovino…"}</option>
+                  {bovines.map((b) => (
+                    <option key={b.id} value={b.id}>{b.identification_number}{b.name ? ` · ${b.name}` : ""}</option>
+                  ))}
+                </select>
               </div>
             </>
           )}
