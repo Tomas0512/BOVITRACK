@@ -36,6 +36,7 @@ class Paddock(Base):
 
     farm: Mapped["Farm"] = relationship(back_populates="paddocks")
     land_plot: Mapped["LandPlot"] = relationship(foreign_keys=[land_plot_id])
+    bovines: Mapped[list["Bovine"]] = relationship(back_populates="paddock")
     herd_assignments: Mapped[list["PaddockHerd"]] = relationship(back_populates="paddock", cascade="all, delete-orphan")
 
     @property

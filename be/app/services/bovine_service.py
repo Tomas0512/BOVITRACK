@@ -16,8 +16,28 @@ from sqlalchemy.orm import Session
 
 from app.models.bovine import Bovine
 from app.models.farm import LandPlot
+from app.models.paddock import Paddock
 from app.schemas.bovine import BovineCreate, BovineUpdate
 from app.services.audit_service import add_audit_log
+
+
+def _validate_paddock(db: Session, farm_id: uuid.UUID, paddock_id: uuid.UUID) -> None:
+    """¿Qué? Comprueba que el potrero existe y pertenece a la finca.
+    ¿Para qué? Evitar asignar un bovino a un potrero de otra finca.
+    ¿Impacto? 400 si el potrero no es válido para esta finca.
+    """
+    paddock = db.execute(
+        select(Paddock).where(
+            Paddock.id == paddock_id,
+            Paddock.farm_id == farm_id,
+            Paddock.is_active.is_(True),
+        )
+    ).scalar_one_or_none()
+    if not paddock:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El potrero indicado no existe en esta finca",
+        )
 
 
 def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: uuid.UUID) -> Bovine:
@@ -64,6 +84,10 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="El lote indicado no existe en esta finca",
             )
+
+    # ¿Qué? Validar que el potrero indicado pertenezca a la finca.
+    if data.paddock_id:
+        _validate_paddock(db, farm_id, data.paddock_id)
 
     bovine = Bovine(
         farm_id=farm_id,
@@ -121,7 +145,11 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
               en la petición, sin sobrescribir los demás con None.
     """
     bovine = get_bovine(db, farm_id, bovine_id)
-    for field, value in data.model_dump(exclude_unset=True).items():
+    cambios = data.model_dump(exclude_unset=True)
+    # ¿Qué? Validar el potrero destino antes de asignarlo al bovino.
+    if cambios.get("paddock_id"):
+        _validate_paddock(db, farm_id, cambios["paddock_id"])
+    for field, value in cambios.items():
         setattr(bovine, field, value)
     db.commit()
     db.refresh(bovine)

@@ -19,6 +19,7 @@ class Bovine(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
     land_plot_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("land_plot.id", ondelete="SET NULL"), nullable=True)
+    paddock_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("paddock.id", ondelete="SET NULL"), nullable=True)
     name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     identification_number: Mapped[str] = mapped_column(String(50), nullable=False)
     sex: Mapped[str] = mapped_column(String(10), nullable=False)
@@ -44,6 +45,7 @@ class Bovine(Base):
 
     farm: Mapped["Farm"] = relationship(back_populates="bovines")
     land_plot: Mapped["LandPlot | None"] = relationship()
+    paddock: Mapped["Paddock | None"] = relationship(back_populates="bovines")
     father: Mapped["Bovine | None"] = relationship(foreign_keys=[father_id], remote_side="Bovine.id")
     mother: Mapped["Bovine | None"] = relationship(foreign_keys=[mother_id], remote_side="Bovine.id")
     registrant: Mapped["User"] = relationship(foreign_keys=[registered_by])

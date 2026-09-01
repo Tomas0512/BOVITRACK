@@ -138,6 +138,12 @@ class PaddockUpdate(BaseModel):
         return self
 
 
+class BovineRef(BaseModel):
+    id: uuid.UUID
+    identification_number: str
+    name: str | None
+
+
 class PaddockResponse(BaseModel):
     """¿Qué? Schema de respuesta para un potrero.
     ¿Para qué? Definir la estructura JSON que retorna la API.
@@ -161,3 +167,5 @@ class PaddockResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    animal_count: int = 0
+    animals: list[BovineRef] = []

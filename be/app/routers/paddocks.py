@@ -10,16 +10,39 @@ Módulo: routers/paddocks.py
 import uuid
 
 from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.permissions import require_permission
 
 from app.dependencies import get_current_user, get_db
+from app.models.bovine import Bovine
+from app.models.paddock import Paddock
 from app.models.user import User
 from app.schemas.paddock import PaddockCreate, PaddockResponse, PaddockUpdate
 from app.services import paddock_service
 
 router = APIRouter(prefix="/api/v1/farms/{farm_id}/paddocks", tags=["Potreros"])
+
+
+def _to_response(db: Session, paddock: Paddock) -> PaddockResponse:
+    """Serialize a paddock including the active animals currently assigned to it."""
+    response = PaddockResponse.model_validate(paddock)
+    bovines = db.execute(
+        select(Bovine.id, Bovine.identification_number, Bovine.name)
+        .where(Bovine.paddock_id == paddock.id, Bovine.is_active.is_(True))
+        .order_by(Bovine.identification_number.asc())
+    ).all()
+    response.animals = [
+        {
+            "id": row.id,
+            "identification_number": row.identification_number,
+            "name": row.name,
+        }
+        for row in bovines
+    ]
+    response.animal_count = len(response.animals)
+    return response
 
 
 @router.post("", response_model=PaddockResponse, status_code=status.HTTP_201_CREATED, summary="Crear potrero", dependencies=[Depends(require_permission("potreros", "can_create"))])
@@ -35,7 +58,7 @@ def create(
     """
     _ = current_user
     paddock = paddock_service.create_paddock(db, farm_id, data, current_user.id)
-    return PaddockResponse.model_validate(paddock)
+    return _to_response(db, paddock)
 
 
 @router.get("", response_model=list[PaddockResponse], summary="Listar potreros", dependencies=[Depends(require_permission("potreros", "can_read"))])
@@ -51,7 +74,7 @@ def list_all(
     paddocks = paddock_service.list_paddocks(
         db, farm_id, status_filter=paddock_status, land_plot_id=land_plot_id
     )
-    return [PaddockResponse.model_validate(p) for p in paddocks]
+    return [_to_response(db, p) for p in paddocks]
 
 
 @router.get("/{paddock_id}", response_model=PaddockResponse, summary="Obtener potrero por ID", dependencies=[Depends(require_permission("potreros", "can_read"))])
@@ -67,7 +90,7 @@ def get_one(
     """
     _ = current_user
     paddock = paddock_service.get_paddock(db, farm_id, paddock_id)
-    return PaddockResponse.model_validate(paddock)
+    return _to_response(db, paddock)
 
 
 @router.put("/{paddock_id}", response_model=PaddockResponse, summary="Actualizar potrero", dependencies=[Depends(require_permission("potreros", "can_update"))])
@@ -84,7 +107,7 @@ def update(
     """
     _ = current_user
     paddock = paddock_service.update_paddock(db, farm_id, paddock_id, data, current_user.id)
-    return PaddockResponse.model_validate(paddock)
+    return _to_response(db, paddock)
 
 
 @router.delete("/{paddock_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Eliminar potrero (soft delete)", dependencies=[Depends(require_permission("potreros", "can_delete"))])
