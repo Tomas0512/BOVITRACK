@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 interface UseTableOptions<T> {
   initialKey?: string | null;
+  initialDir?: "asc" | "desc";
   getValue: (item: T, key: string) => string | number;
 }
 
@@ -9,11 +10,11 @@ interface UseTableOptions<T> {
  * Reutilizable para paginar y ordenar una lista de clientes en el frontend.
  * Aplica paginación (página de `perPage`) y orden por columna sobre un array.
  */
-export function useTable<T>(items: T[], { initialKey = null, getValue }: UseTableOptions<T>) {
+export function useTable<T>(items: T[], { initialKey = null, initialDir = "asc", getValue }: UseTableOptions<T>) {
   const [page, setPage] = useState(1);
   const perPage = 8;
   const [sortKey, setSortKey] = useState<string | null>(initialKey);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(initialDir);
 
   const sorted = useMemo(() => {
     if (!sortKey) return items;

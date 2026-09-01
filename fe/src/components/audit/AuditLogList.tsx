@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
 import { listAuditLogs, type AuditLogEntry } from "../../api/audit_logs";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -33,9 +35,16 @@ export default function AuditLogList({ farmId }: Props) {
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
 
+  const getValue = (log: AuditLogEntry, key: string): string | number => {
+    const v = (log as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<AuditLogEntry>(logs, { initialKey: "created_at", initialDir: "desc", getValue });
+
   useEffect(() => {
     if (!open) return;
-    setLoading(true);
     listAuditLogs(farmId)
       .then(setLogs)
       .catch(() => setError("No se pudo cargar el historial de auditoría"))
@@ -70,15 +79,19 @@ export default function AuditLogList({ farmId }: Props) {
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-text-muted">
-                    <th className="pb-2 pr-4">Fecha</th>
+                    <th className="pb-2 pr-4">
+                      <button onClick={() => handleSort("created_at")} className="uppercase">Fecha {sortKey === "created_at" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                    </th>
                     <th className="pb-2 pr-4">Usuario</th>
-                    <th className="pb-2 pr-4">Acción</th>
+                    <th className="pb-2 pr-4">
+                      <button onClick={() => handleSort("action")} className="uppercase">Acción {sortKey === "action" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                    </th>
                     <th className="pb-2 pr-4">Módulo</th>
                     <th className="pb-2">Detalles</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {logs.map((log) => (
+                  {paginated.map((log) => (
                     <tr key={log.id} className="border-b border-border last:border-0">
                       <td className="py-2 pr-4 text-text-secondary whitespace-nowrap">
                         {new Date(log.created_at).toLocaleString("es-CO")}
@@ -102,6 +115,9 @@ export default function AuditLogList({ farmId }: Props) {
                   ))}
                 </tbody>
               </table>
+              <div className="mt-4">
+                <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+              </div>
             </div>
           )}
         </div>

@@ -7,6 +7,8 @@ import {
   type WeightResponse,
   type WeightCreate,
 } from "../../api/weights";
+import { useTable } from "../../hooks/useTable";
+import Pagination from "../Pagination";
 
 interface Props {
   farmId: string;
@@ -43,6 +45,14 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
   const [formError, setFormError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const getValue = (w: WeightResponse, key: string): string | number => {
+    const v = (w as unknown as Record<string, unknown>)[key];
+    return typeof v === "number" ? v : String(v ?? "");
+  };
+
+  const { page, pageCount, start, end, total, paginated, setPage, sortKey, sortDir, handleSort } =
+    useTable<WeightResponse>(weights, { initialKey: "measured_at", initialDir: "desc", getValue });
+
   function load() {
     setLoading(true);
     listWeights(farmId, bovineId)
@@ -53,6 +63,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [farmId, bovineId]);
 
   const isFormComplete = form.weight_kg > 0 && form.measured_at !== "";
@@ -247,8 +258,12 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-semibold uppercase tracking-wide text-text-muted">
-                <th className="pb-2 pr-4">Fecha</th>
-                <th className="pb-2 pr-4">Peso (kg)</th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("measured_at")} className="uppercase">Fecha {sortKey === "measured_at" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
+                <th className="pb-2 pr-4">
+                  <button onClick={() => handleSort("weight_kg")} className="uppercase">Peso (kg) {sortKey === "weight_kg" && (sortDir === "asc" ? "▲" : "▼")}</button>
+                </th>
                 <th className="pb-2 pr-4">Ganancia diaria</th>
                 <th className="pb-2 pr-4">Cond. corporal</th>
                 <th className="pb-2 pr-4">Observaciones</th>
@@ -256,7 +271,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
               </tr>
             </thead>
             <tbody>
-              {[...weights].reverse().map((w) => (
+              {paginated.map((w) => (
                 <tr
                   key={w.id}
                   className="border-b border-border last:border-0 hover:bg-surface-alt"
@@ -302,6 +317,9 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
               ))}
             </tbody>
           </table>
+          <div className="mt-4">
+            <Pagination page={page} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
+          </div>
         </div>
       )}
     </div>
