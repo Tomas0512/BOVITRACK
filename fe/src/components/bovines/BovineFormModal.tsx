@@ -53,6 +53,11 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
     if (s === 1) {
       if (!form.birth_date) newErrors.birth = "Obligatorio";
       if (!form.entry_date) newErrors.entry = "Obligatorio";
+      if (form.birth_date && form.entry_date && form.entry_date < form.birth_date) {
+        newErrors.entry = "La fecha de ingreso no puede ser anterior al nacimiento";
+      }
+      if ((form.birth_weight ?? 0) < 0) newErrors.weights = "El peso de nacimiento no puede ser negativo";
+      if ((form.current_weight ?? 0) < 0) newErrors.weights = "El peso actual no puede ser negativo";
     }
     setError(Object.values(newErrors).join(". "));
     return Object.keys(newErrors).length === 0;

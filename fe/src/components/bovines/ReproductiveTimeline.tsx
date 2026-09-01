@@ -87,6 +87,10 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
       setFormError("La fecha del evento es obligatoria.");
       return;
     }
+    if (form.due_date && form.due_date < form.event_date) {
+      setFormError("La fecha de parto estimada no puede ser anterior al evento.");
+      return;
+    }
     setSaving(true);
     try {
       await createReproductiveEvent(farmId, {

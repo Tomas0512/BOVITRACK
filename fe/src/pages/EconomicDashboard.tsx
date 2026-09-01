@@ -65,13 +65,14 @@ export default function EconomicDashboard() {
   const [error, setError] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [filterError, setFilterError] = useState("");
 
-  const load = async () => {
+  const run = async (from: string, to: string) => {
     if (!farmId) return;
     setLoading(true);
     setError("");
     try {
-      const params = dateFrom || dateTo ? { date_from: dateFrom || undefined, date_to: dateTo || undefined } : undefined;
+      const params = from || to ? { date_from: from || undefined, date_to: to || undefined } : undefined;
       const [ind, recs] = await Promise.all([
         getIndicators(farmId, params),
         listRecords(farmId, params),
@@ -83,6 +84,24 @@ export default function EconomicDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const load = () => run(dateFrom, dateTo);
+
+  const handleFilter = () => {
+    if (dateFrom && dateTo && dateTo < dateFrom) {
+      setFilterError("La fecha 'Hasta' no puede ser anterior a 'Desde'.");
+      return;
+    }
+    setFilterError("");
+    load();
+  };
+
+  const handleClear = () => {
+    setDateFrom("");
+    setDateTo("");
+    setFilterError("");
+    run("", "");
   };
 
   useEffect(() => { load(); }, [farmId]);
@@ -116,17 +135,20 @@ export default function EconomicDashboard() {
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
             className="rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
         </div>
-        <button onClick={load}
+        <button onClick={handleFilter}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
           <Calendar size={16} className="mr-1 inline align-text-bottom" />
           Filtrar
         </button>
         {dateFrom || dateTo ? (
-          <button onClick={() => { setDateFrom(""); setDateTo(""); }}
+          <button onClick={handleClear}
             className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
             Limpiar
           </button>
         ) : null}
+        {filterError && (
+          <p className="w-full text-xs text-red-600">{filterError}</p>
+        )}
       </div>
 
       {loading ? (

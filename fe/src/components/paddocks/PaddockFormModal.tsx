@@ -56,6 +56,10 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
       setError("Nombre, área y capacidad máxima son obligatorios");
       return false;
     }
+    if (s === 0 && form.rest_start_date && form.rest_end_date && form.rest_end_date < form.rest_start_date) {
+      setError("La fecha fin de descanso no puede ser anterior al inicio");
+      return false;
+    }
     setError("");
     return true;
   };

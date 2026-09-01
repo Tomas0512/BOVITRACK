@@ -81,6 +81,14 @@ export default function FoodFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+    if (form.current_stock < 0) {
+      setError("El stock no puede ser negativo");
+      return;
+    }
+    if ((form.cost_per_unit ?? 0) < 0) {
+      setError("El costo unitario no puede ser negativo");
+      return;
+    }
     setLoading(true);
     setError("");
 
