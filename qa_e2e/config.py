@@ -56,8 +56,8 @@ INACTIVE_USER_EMAIL = "exempleado@bovitrack.com"
 # recurso.
 # UUIDs reales generados por be/seed_test_data.py en la base de datos de
 # pruebas (finca "Hacienda El Porvenir" y uno de sus bovinos activos).
-TEST_FARM_ID = "7dc4c202-714e-4cc2-bb7c-b86b16dcff19"
-TEST_BOVINE_ID = "4731d260-8a77-4e6f-8937-8109eafca4b0"
+TEST_FARM_ID = "a71fac9a-42d1-43a9-9d91-4818555c90e8"
+TEST_BOVINE_ID = "3ba35534-fead-4ad1-8817-defd607d4eea"
 
 # Carpeta (relativa a este archivo) donde base_test.py guarda los
 # screenshots de evidencia que exige la guia: uno por prueba, con sufijo
