@@ -55,7 +55,9 @@ export default function FoodFormModal({
 
   const isFormComplete =
     form.name.trim() !== "" &&
-    form.current_stock >= 0;
+    form.current_stock >= 0 &&
+    (form.min_stock_alert ?? -1) >= 0 &&
+    Boolean(form.expiration_date);
 
   // 🔄 RE-INICIALIZAR FORMULARIO AL CAMBIAR DE ALIMENTO
   // Esto asegura que si pasas de editar un alimento a crear uno nuevo, los campos se limpien
@@ -183,9 +185,9 @@ export default function FoodFormModal({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Stock mínimo</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Stock mínimo <span className="text-red-600">*</span></label>
                   <input type="number" step="0.01" value={form.min_stock_alert ?? ""} onChange={(e) => set("min_stock_alert", e.target.value ? parseFloat(e.target.value) : null)}
-                    placeholder="Ej: 20" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    placeholder="Ej: 20" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Precio unitario ($)</label>
@@ -200,9 +202,9 @@ export default function FoodFormModal({
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Vencimiento</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Vencimiento <span className="text-red-600">*</span></label>
                   <input type="date" value={form.expiration_date ?? ""} onChange={(e) => set("expiration_date", e.target.value || null)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Proveedor</label>

@@ -2,6 +2,7 @@ import api from "./axios";
 
 export interface MovementRequest {
   bovine_id?: string | null;
+  animal_identifier?: string | null;
   movement_type: string;
   movement_date: string;
   price?: number | null;

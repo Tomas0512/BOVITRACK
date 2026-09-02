@@ -28,14 +28,39 @@ import os
 import unittest
 from datetime import datetime
 
+import os
+from glob import glob
+
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 import config
+
+
+def _find_chrome() -> str | None:
+    """Detecta el ejecutable de Chrome en rutas comunes de Windows."""
+    candidates = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+
+def _find_chromedriver() -> str | None:
+    """Usa un ChromeDriver ya descargado por Selenium Manager (cache local)
+    para evitar la llamada de red de Selenium Manager que puede colgarse."""
+    cache = os.path.expandvars(r"%USERPROFILE%\.cache\selenium")
+    hits = glob(os.path.join(cache, "chromedriver", "win64", "*", "chromedriver.exe"))
+    return sorted(hits)[-1] if hits else None
 
 
 class BaseTest(unittest.TestCase):
@@ -57,7 +82,18 @@ class BaseTest(unittest.TestCase):
         # botones de accion) se muestren igual que en un monitor de
         # escritorio, evitando falsos negativos por vista movil/colapsada.
         options.add_argument("--start-maximized")
-        self.driver = webdriver.Chrome(options=options)
+        chrome_path = _find_chrome()
+        if chrome_path:
+            options.binary_location = chrome_path
+        elif os.environ.get("CHROME_BIN"):
+            options.binary_location = os.environ["CHROME_BIN"]
+
+        driver_path = _find_chromedriver()
+        if driver_path:
+            # Usa el driver cacheadó: evita que Selenium Manager consulte la red.
+            self.driver = webdriver.Chrome(options=options, service=Service(executable_path=driver_path))
+        else:
+            self.driver = webdriver.Chrome(options=options)
 
         # WebDriverWait = espera EXPLICITA: en vez de un time.sleep() fijo
         # (que desperdicia tiempo o puede ser insuficiente), Selenium

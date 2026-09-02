@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, AlertTriangle, ArrowUpDown } from "lucide-react";
 import { listMovements, type MovementResponse } from "../../api/movements";
+import { listBovines, type BovineResponse } from "../../api/bovines";
 import { getApiErrorMessage } from "../../api/errors";
 import Pagination from "../Pagination";
 import MovementFormModal from "./MovementFormModal";
@@ -27,6 +28,7 @@ interface Props {
 
 export default function MovementList({ farmId }: Props) {
   const [movements, setMovements] = useState<MovementResponse[]>([]);
+  const [bovines, setBovines] = useState<BovineResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -75,14 +77,24 @@ export default function MovementList({ farmId }: Props) {
 
   const fetchData = async () => {
     try {
-      const data = await listMovements(farmId, filterType ? { movement_type: filterType } : undefined);
+      const [data, bov] = await Promise.all([
+        listMovements(farmId, filterType ? { movement_type: filterType } : undefined),
+        listBovines(farmId),
+      ]);
       setMovements(data);
+      setBovines(bov);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "Error al cargar movimientos"));
     } finally {
       setLoading(false);
     }
   };
+
+  const bovineLabel = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of bovines) map.set(b.id, b.identification_number + (b.name ? ` · ${b.name}` : ""));
+    return (id: string | null | undefined) => (id ? map.get(id) ?? "—" : "—");
+  }, [bovines]);
 
   useEffect(() => { setPage(1); }, [farmId, filterType]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,7 +174,7 @@ export default function MovementList({ farmId }: Props) {
                     </span>
                   </td>
                   <td className="py-3 pr-4 text-text-secondary">{new Date(m.movement_date).toLocaleDateString("es-CO")}</td>
-                  <td className="py-3 pr-4 text-text-secondary">{m.bovine_id ? m.bovine_id.slice(0, 8) + "..." : "—"}</td>
+                  <td className="py-3 pr-4 text-text-secondary">{m.bovine_id ? bovineLabel(m.bovine_id) : (m.animal_identifier ?? "—")}</td>
                   <td className="py-3 pr-4 text-text-secondary">{m.price != null ? `$${Number(m.price).toLocaleString("es-CO")}` : "—"}</td>
                   <td className="py-3 pr-4 text-text-secondary">{m.counterparty_name || "—"}</td>
                   <td className="max-w-[200px] truncate py-3 pr-4 text-text-muted">{m.reason || "—"}</td>

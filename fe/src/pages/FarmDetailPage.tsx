@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 import {
   AlertTriangle,
   Tractor,
@@ -55,9 +56,11 @@ export default function FarmDetailPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "resumen";
+  const { user } = useAuth();
   const [farm, setFarm] = useState<FarmResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const isOwner = farm ? farm.owner_id === user?.id : false;
   const [actionError, setActionError] = useState("");
   const [editing, setEditing] = useState(false);
   const [editStep, setEditStep] = useState(0);
@@ -230,14 +233,18 @@ export default function FarmDetailPage() {
               <Bell size={16} />
               Alertas
             </Link>
-            <button onClick={handleEdit}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
-              Editar
-            </button>
-            <button onClick={() => setShowDelete(true)}
-              className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
-              Eliminar
-            </button>
+            {isOwner && (
+              <>
+                <button onClick={handleEdit}
+                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
+                  Editar
+                </button>
+                <button onClick={() => setShowDelete(true)}
+                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
+                  Eliminar
+                </button>
+              </>
+            )}
           </div>
         </div>
 

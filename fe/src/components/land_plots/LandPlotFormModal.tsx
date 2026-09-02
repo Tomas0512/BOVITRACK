@@ -154,19 +154,19 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
           {step === 0 && (
             <>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del lote</label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre del lote <span className="text-red-600">*</span></label>
                 <input type="text" maxLength={100} value={form.name} onChange={(e) => set("name", e.target.value)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 <span className="mt-0.5 block text-right text-xs text-text-muted">{form.name.length}/100</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Área</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Área <span className="text-red-600">*</span></label>
                   <input type="number" min={0.01} step={0.01} value={form.area} onChange={(e) => set("area", parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-text-secondary">Unidad</label>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Unidad <span className="text-red-600">*</span></label>
                   <select value={form.area_unit} onChange={(e) => set("area_unit", e.target.value)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                     {AREA_UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
