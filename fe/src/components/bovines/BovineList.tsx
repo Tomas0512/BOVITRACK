@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   FileUp, Check, X, Search, SlidersHorizontal, Settings2, ChevronDown,
-  Eye, Pencil, Trash2, Pin, MoveLeft, MoveRight, Save, BookOpen, Download, Plus,
+  Pencil, Trash2, Pin, MoveLeft, MoveRight, Save, BookOpen, Download, Plus,
 } from "lucide-react";
 import { listBovines, deleteBovine, importBovinesCsv, type BovineResponse, type ImportResult } from "../../api/bovines";
 import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
@@ -351,7 +351,7 @@ export default function BovineList({ farmId }: Props) {
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchData(); }, [farmId]);
+  useEffect(() => { setSelected(new Set()); fetchData(); }, [farmId]);
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -372,6 +372,10 @@ export default function BovineList({ farmId }: Props) {
   };
 
   const [toDelete, setToDelete] = useState<BovineResponse | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
   const handleDelete = async () => {
     if (!toDelete) return;
@@ -384,6 +388,62 @@ export default function BovineList({ farmId }: Props) {
       setError(getApiErrorMessage(err, "No se pudo eliminar el bovino"));
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const pageIds = paginated.map((b) => b.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const somePageSelected = pageIds.some((id) => selected.has(id)) && !allPageSelected;
+
+  useEffect(() => {
+    if (selectAllRef.current) selectAllRef.current.indeterminate = somePageSelected;
+  }, [somePageSelected]);
+
+  const handleSelectAllPage = () => {
+    const allSel = pageIds.every((id) => selected.has(id));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allSel) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
+  const handleExportSelected = () => {
+    exportCsv(enriched.filter((b) => selected.has(b.id)), order, visible);
+  };
+
+  const handleEditSelected = () => {
+    if (selected.size !== 1) return;
+    const id = [...selected][0];
+    const b = bovines.find((x) => x.id === id);
+    if (b) {
+      setEditing(b);
+      setShowModal(true);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selected];
+    setBulkDeleting(true);
+    try {
+      await Promise.all(ids.map((id) => deleteBovine(farmId, id)));
+      setBulkDeleteOpen(false);
+      setSelected(new Set());
+      await fetchData();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudieron eliminar los bovinos"));
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -710,10 +770,54 @@ export default function BovineList({ farmId }: Props) {
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <>
+          {selected.size > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5">
+              <span className="text-sm font-semibold text-primary">
+                {selected.size} seleccionado{selected.size !== 1 ? "s" : ""}
+              </span>
+              <button
+                onClick={handleExportSelected}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-alt"
+              >
+                <Download size={14} /> Exportar seleccionados
+              </button>
+              <button
+                onClick={handleEditSelected}
+                disabled={selected.size !== 1}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-secondary hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Pencil size={14} /> Editar
+              </button>
+              <button
+                onClick={() => setBulkDeleteOpen(true)}
+                disabled={bulkDeleting}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-surface px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+              >
+                <Trash2 size={14} /> Eliminar
+              </button>
+              <button
+                onClick={() => setSelected(new Set())}
+                className="ml-auto text-xs font-semibold text-text-muted underline hover:text-text-secondary"
+              >
+                Limpiar selección
+              </button>
+            </div>
+          )}
+          <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-semibold uppercase tracking-wide text-text-muted">
+                <th className="pb-2 pr-4">
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    checked={allPageSelected}
+                    onChange={handleSelectAllPage}
+                    className="h-4 w-4 cursor-pointer accent-primary"
+                    aria-label="Seleccionar todos de la página"
+                  />
+                </th>
                 {/* Columna sticky de ID */}
                 {visibleColumns.length === 0 && (
                   <th className="pb-2 pr-4">ID</th>
@@ -826,6 +930,15 @@ export default function BovineList({ farmId }: Props) {
             <tbody className="divide-y divide-border">
               {paginated.map((b) => (
                 <tr key={b.id} className="hover:bg-surface-alt">
+                  <td className="py-3 pr-4">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(b.id)}
+                      onChange={() => toggleSelected(b.id)}
+                      className="h-4 w-4 cursor-pointer accent-primary"
+                      aria-label={`Seleccionar ${b.identification_number}`}
+                    />
+                  </td>
                   {visibleColumns.length === 0 && (
                     <td className="py-3 pr-4 font-mono text-xs text-text-secondary">{b.identification_number}</td>
                   )}
@@ -841,7 +954,12 @@ export default function BovineList({ farmId }: Props) {
                         style={{ ...(isPinned ? { position: "sticky", left, zIndex: 4, background: "var(--color-surface, #fff)" } : {}) }}
                       >
                         {def.key === "identification_number" ? (
-                          <span className="font-mono text-xs">{b.identification_number}</span>
+                          <Link
+                            to={`/farms/${farmId}/bovines/${b.id}`}
+                            className="font-mono text-xs text-primary no-underline hover:underline"
+                          >
+                            {b.identification_number}
+                          </Link>
                         ) : def.key === "name" ? (
                           <span className="font-medium text-text-primary">{b.name ?? "—"}</span>
                         ) : def.key === "sex" ? (
@@ -862,19 +980,6 @@ export default function BovineList({ farmId }: Props) {
                       </td>
                     );
                   })}
-                  <td className="py-3">
-                    <div className="flex gap-2">
-                      <Link to={`/farms/${farmId}/bovines/${b.id}`} className="rounded px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10 no-underline">
-                        <Eye size={14} className="mr-0.5 inline align-text-bottom" /> Ver
-                      </Link>
-                      <button onClick={() => { setEditing(b); setShowModal(true); }} className="rounded px-2 py-1 text-xs font-medium text-text-secondary hover:bg-surface-alt">
-                        <Pencil size={14} className="mr-0.5 inline align-text-bottom" /> Editar
-                      </button>
-                      <button onClick={() => setToDelete(b)} disabled={actionLoading === b.id} className="rounded px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50">
-                        <Trash2 size={14} className="mr-0.5 inline align-text-bottom" /> Eliminar
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               ))}
             </tbody>
@@ -888,7 +993,8 @@ export default function BovineList({ farmId }: Props) {
           )}
 
           <Pagination page={safePage} pageCount={pageCount} start={start} end={end} total={total} onChange={(p) => setPage(p)} />
-        </div>
+          </div>
+        </>
       )}
 
       {showModal && (
@@ -914,6 +1020,16 @@ export default function BovineList({ farmId }: Props) {
         loading={actionLoading !== null}
         onConfirm={handleDelete}
         onCancel={() => setToDelete(null)}
+      />
+
+      <ConfirmDialog
+        open={bulkDeleteOpen}
+        title="Eliminar bovinos"
+        message={`¿Eliminar ${selected.size} bovino${selected.size !== 1 ? "s" : ""}? Se marcarán como retirados y dejarán de aparecer en el hato.`}
+        confirmLabel="Eliminar"
+        loading={bulkDeleting}
+        onConfirm={handleBulkDelete}
+        onCancel={() => setBulkDeleteOpen(false)}
       />
     </div>
   );
