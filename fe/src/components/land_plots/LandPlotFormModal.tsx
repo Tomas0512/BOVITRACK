@@ -63,6 +63,14 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
       setError("Nombre y área son obligatorios");
       return false;
     }
+    if (s === 1 && !form.usage_type) {
+      setError("Seleccione el tipo de uso del lote");
+      return false;
+    }
+    if (s === 1 && form.max_capacity < 1) {
+      setError("La capacidad máxima debe ser al menos 1");
+      return false;
+    }
     if (s === 2 && !potrerosValidos) {
       setError("Cada potrero necesita nombre, área mayor a 0 y capacidad mínima de 1");
       return false;
@@ -77,7 +85,14 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
     form.name.trim() !== "" &&
     form.area > 0 &&
     form.max_capacity >= 1 &&
+    form.usage_type !== "" &&
     (existing ? true : potrerosValidos);
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) return form.name.trim() !== "" && form.area > 0;
+    if (s === 1) return form.usage_type !== "" && form.max_capacity >= 1;
+    return existing ? true : potrerosValidos;
+  };
 
   const set = (key: keyof LandPlotRequest, value: string | number) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -301,8 +316,8 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button key="paso-siguiente" type="button" onClick={nextStep}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
                 Siguiente →
               </button>
             ) : (

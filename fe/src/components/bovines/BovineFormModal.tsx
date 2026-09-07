@@ -85,10 +85,41 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
     form.entry_date !== "" &&
     (form.purpose ?? "").trim() !== "" &&
     (existing || ((form.birth_weight ?? 0) > 0 && (form.current_weight ?? 0) > 0)) &&
-    Boolean(form.land_plot_id || form.paddock_id);
+    Boolean(form.land_plot_id || form.paddock_id) &&
+    !(form.birth_date && form.entry_date && form.entry_date < form.birth_date);
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) {
+      return form.identification_number.trim() !== "" && (form.name ?? "").trim() !== "" && (form.breed ?? "").trim() !== "";
+    }
+    if (s === 1) {
+      const weightsOk = existing || ((form.birth_weight ?? 0) > 0 && (form.current_weight ?? 0) > 0);
+      return form.birth_date !== "" && form.entry_date !== "" && weightsOk &&
+        !(form.birth_date && form.entry_date && form.entry_date < form.birth_date);
+    }
+    return (form.purpose ?? "").trim() !== "" && Boolean(form.land_plot_id || form.paddock_id);
+  };
+
+  const activePaddocks = paddocks.filter((pd) => pd.is_active);
+  const paddocksForLandPlot = form.land_plot_id
+    ? activePaddocks.filter((pd) => pd.land_plot_id === form.land_plot_id)
+    : activePaddocks;
 
   const set = <K extends keyof BovineRequest>(key: K, value: BovineRequest[K]) => {
-    setForm((f) => ({ ...f, [key]: value }));
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      if (key === "land_plot_id") {
+        const pad = paddocks.find((p) => p.id === next.paddock_id);
+        if (pad && pad.land_plot_id !== (value as string | null)) {
+          next.paddock_id = null;
+        }
+      }
+      if (key === "paddock_id" && value) {
+        const pad = paddocks.find((p) => p.id === value);
+        if (pad) next.land_plot_id = pad.land_plot_id;
+      }
+      return next;
+    });
     if (error) setError("");
   };
 
@@ -260,14 +291,19 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado <span className="text-red-600">*</span></label>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado</label>
                 <select value={form.paddock_id ?? ""} onChange={(e) => set("paddock_id", e.target.value || null)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
                   <option value="">Sin potrero</option>
-                  {paddocks.filter((pd) => pd.is_active).map((pd) => (
-                    <option key={pd.id} value={pd.id}>{pd.name} ({pd.status})</option>
+                  {paddocksForLandPlot.map((pd) => (
+                    <option key={pd.id} value={pd.id}>
+                      {form.land_plot_id ? pd.name : `${pd.name} (${pd.land_plot_name ?? "Sin lote"} · ${pd.status})`}
+                    </option>
                   ))}
                 </select>
+                <span className="mt-0.5 block text-xs text-text-muted">
+                  {form.land_plot_id ? "Potreros del lote seleccionado" : "Selecciona un lote para filtrar los potreros"}
+                </span>
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Observaciones</label>
@@ -287,8 +323,8 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button key="paso-siguiente" type="button" onClick={nextStep}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
                 Siguiente →
               </button>
             ) : (

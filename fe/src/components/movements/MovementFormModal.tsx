@@ -77,6 +77,19 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
       setError("Ingrese el identificador del animal nuevo");
       return false;
     }
+    if (s === 0 && (form.price ?? 0) < 0) { setError("El precio no puede ser negativo"); return false; }
+    if (s === 1 && form.movement_type !== "traslado" && (form.counterparty_name ?? "").trim() === "") {
+      setError("Ingrese el nombre de la contraparte");
+      return false;
+    }
+    if (s === 1 && (form.counterparty_document ?? "").trim() !== "" && (form.counterparty_document ?? "").trim().length < 5) {
+      setError("El documento de la contraparte debe tener al menos 5 caracteres");
+      return false;
+    }
+    if (s === 2 && form.movement_type === "traslado" && ((form.origin_farm_name ?? "").trim() === "" || (form.destination_farm_name ?? "").trim() === "")) {
+      setError("Para un traslado, origen y destino son obligatorios");
+      return false;
+    }
     setError("");
     return true;
   };
@@ -85,6 +98,20 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
     if (validateStep(step)) setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) {
+      return form.movement_date !== "" &&
+        (needsExistingBovine ? Boolean(form.bovine_id) : true) &&
+        (needsNewIdentifier ? (form.animal_identifier ?? "").trim() !== "" : true);
+    }
+    if (s === 1) {
+      return form.movement_type === "traslado" ||
+        (form.counterparty_name ?? "").trim() !== "";
+    }
+    return form.movement_type !== "traslado" ||
+      ((form.origin_farm_name ?? "").trim() !== "" && (form.destination_farm_name ?? "").trim() !== "");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,8 +275,8 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button key="paso-siguiente" type="button" onClick={nextStep}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
                 Siguiente →
               </button>
             ) : (

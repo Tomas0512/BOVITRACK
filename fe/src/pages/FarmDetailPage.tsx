@@ -16,6 +16,7 @@ import {
   Map,
   Users,
   ShieldCheck,
+  Droplets,
 } from "lucide-react";
 import { getFarm, updateFarm, deleteFarm, listDepartments, listPurposes, type FarmResponse, type FarmRequest, type DepartmentOption, type PurposeOption } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
@@ -30,6 +31,7 @@ import AlertBanner from "../components/layout/AlertBanner";
 import MovementList from "../components/movements/MovementList";
 import DocumentManager from "../components/documents/DocumentManager";
 import CalfList from "../components/calves/CalfList";
+import MilkProductionDashboard from "../components/milk/MilkProductionDashboard";
 import ConfirmDialog from "../components/ConfirmDialog";
 
 interface TabDef {
@@ -44,6 +46,7 @@ const TABS: TabDef[] = [
   { id: "terneros", label: "Terneros", icon: <Sprout size={18} /> },
   { id: "sanidad", label: "Sanidad", icon: <Pill size={18} /> },
   { id: "alimentacion", label: "Alimentación", icon: <Wheat size={18} /> },
+  { id: "produccion", label: "Producción de leche", icon: <Droplets size={18} /> },
   { id: "movimientos", label: "Movimientos", icon: <ArrowLeftRight size={18} /> },
   { id: "lotes", label: "Lotes y Potreros", icon: <Map size={18} /> },
   { id: "documentos", label: "Documentos", icon: <FileText size={18} /> },
@@ -55,7 +58,7 @@ export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") ?? "resumen";
+  const activeTab = searchParams.get("tab") ?? "bovinos";
   const { user } = useAuth();
   const [farm, setFarm] = useState<FarmResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -177,6 +180,7 @@ export default function FarmDetailPage() {
         </div>
       );
       case "alimentacion": return <FoodList farmId={farm.id} />;
+      case "produccion": return <MilkProductionDashboard farmId={farm.id} />;
       case "movimientos": return <MovementList farmId={farm.id} />;
       case "lotes": return (
         <div className="space-y-6">

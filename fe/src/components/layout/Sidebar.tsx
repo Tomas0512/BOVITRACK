@@ -15,6 +15,7 @@ import {
   Map,
   FileText,
   Users,
+  Droplets,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useAuth } from "../../hooks/useAuth";
@@ -58,6 +59,7 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
     { to: farm("?tab=terneros"), label: "Terneros", icon: <Sprout size={20} />, tab: "terneros" },
     { to: farm("?tab=sanidad"), label: "Sanidad", icon: <Pill size={20} />, tab: "sanidad" },
     { to: farm("?tab=alimentacion"), label: "Alimentación", icon: <Wheat size={20} />, tab: "alimentacion" },
+    { to: farm("?tab=produccion"), label: "Producción de leche", icon: <Droplets size={20} />, tab: "produccion" },
     { to: farm("?tab=movimientos"), label: "Movimientos", icon: <ArrowLeftRight size={20} />, tab: "movimientos" },
     { to: farm("?tab=lotes"), label: "Lotes y Potreros", icon: <Map size={20} />, tab: "lotes" },
     { to: farm("?tab=documentos"), label: "Documentos", icon: <FileText size={20} />, tab: "documentos" },
