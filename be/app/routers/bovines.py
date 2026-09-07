@@ -138,6 +138,20 @@ def list_all(
     return [BovineResponse.model_validate(b) for b in bovines]
 
 
+@router.get("/breeds", response_model=list[str], summary="Listar razas existentes", dependencies=[Depends(require_permission("bovinos", "can_read"))])
+def list_breeds_route(
+    farm_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[str]:
+    """¿Qué? Retorna las razas ya registradas en la finca (sin duplicados).
+    ¿Para qué? Mostrarlas en el desplegable de razas del formulario.
+    ¿Impacto? Un endpoint ligero que evita traer todos los bovinos al frontend.
+    """
+    _ = current_user
+    return bovine_service.list_breeds(db, farm_id)
+
+
 @router.get("/{bovine_id}", response_model=BovineResponse, summary="Obtener bovino por ID", dependencies=[Depends(require_permission("bovinos", "can_read"))])
 def get_one(
     farm_id: uuid.UUID,

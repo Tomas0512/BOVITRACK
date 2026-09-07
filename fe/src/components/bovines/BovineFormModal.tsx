@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { createBovine, updateBovine, type BovineRequest, type BovineResponse } from "../../api/bovines";
+import { createBovine, listBovineBreeds, updateBovine, type BovineRequest, type BovineResponse } from "../../api/bovines";
 import type { LandPlotResponse } from "../../api/land_plots";
 import type { PaddockResponse } from "../../api/paddocks";
 import { getApiErrorMessage } from "../../api/errors";
@@ -17,6 +17,15 @@ interface Props {
 const ENTRY_TYPES = ["nacimiento", "compra", "donacion", "traspaso"];
 const PURPOSES = ["leche", "carne", "doble_proposito", "cria", "trabajo"];
 const STATUSES = ["activo", "vendido", "muerto", "retirado"];
+
+const COMMON_BREEDS = [
+  "Holstein", "Brahman", "Gyr", "Guzerat", "Normando", "Angus", "Hereford",
+  "Nelore", "Cebú", "Simental", "Simbrah", "Criollo", "Jersey", "Ayrshire",
+  "Limousin", "Montbéliard",
+];
+
+const normalize = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
 const STEPS = [
   { label: "Identificación" },
@@ -45,6 +54,34 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [breeds, setBreeds] = useState<string[]>(COMMON_BREEDS);
+
+  useEffect(() => {
+    let active = true;
+    listBovineBreeds(farmId)
+      .then((list) => {
+        if (!active) return;
+        const seen = new Set(COMMON_BREEDS.map(normalize));
+        const merged = [
+          ...COMMON_BREEDS,
+          ...[...new Set(list.map((b) => b.trim()).filter(Boolean))].filter((b) => {
+            const key = normalize(b);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }),
+        ];
+        const current = (existing?.breed ?? "").trim();
+        if (current && !merged.some((b) => normalize(b) === normalize(current))) {
+          merged.push(current);
+        }
+        setBreeds(merged);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [farmId, existing?.breed]);
 
   const validateStep = (s: number): boolean => {
     const newErrors: Record<string, string> = {};
@@ -209,9 +246,14 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Raza <span className="text-red-600">*</span></label>
-                  <input type="text" value={form.breed ?? ""} maxLength={50}
+                  <select
+                    value={form.breed ?? ""}
                     onChange={(e) => set("breed", e.target.value)}
-                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required
+                  >
+                    <option value="" disabled>Selecciona una raza</option>
+                    {breeds.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
                 </div>
               </div>
               <div>
@@ -255,8 +297,10 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha ingreso *</label>
-                <input type="date" value={form.entry_date} onChange={(e) => set("entry_date", e.target.value)}
+                <input type="date" value={form.entry_date} min={form.birth_date || undefined}
+                  onChange={(e) => set("entry_date", e.target.value)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                <span className="mt-0.5 block text-xs text-text-muted">Puedes registrar una fecha de ingreso a futuro.</span>
               </div>
             </>
           )}
