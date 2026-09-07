@@ -7,6 +7,7 @@ interface FarmContextValue {
   activeFarm: FarmResponse | null;
   setActiveFarmId: (id: string) => void;
   loading: boolean;
+  refreshFarms: () => Promise<void>;
 }
 
 const FarmContext = createContext<FarmContextValue | undefined>(undefined);
@@ -38,14 +39,23 @@ export function FarmProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, id);
   }, []);
 
+  const refreshFarms = useCallback(async () => {
+    try {
+      const data = await listFarms();
+      setFarms(data);
+    } catch {
+      setFarms([]);
+    }
+  }, []);
+
   const activeFarm = useMemo(
     () => farms.find((f) => f.id === effectiveActiveFarmId) ?? null,
     [farms, effectiveActiveFarmId]
   );
 
   const value = useMemo(
-    () => ({ farms, activeFarmId: effectiveActiveFarmId, activeFarm, setActiveFarmId, loading }),
-    [farms, effectiveActiveFarmId, activeFarm, setActiveFarmId, loading]
+    () => ({ farms, activeFarmId: effectiveActiveFarmId, activeFarm, setActiveFarmId, loading, refreshFarms }),
+    [farms, effectiveActiveFarmId, activeFarm, setActiveFarmId, loading, refreshFarms]
   );
 
   return <FarmContext.Provider value={value}>{children}</FarmContext.Provider>;

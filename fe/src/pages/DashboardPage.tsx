@@ -4,7 +4,6 @@ import {
   Beef,
   Building2,
   Droplets,
-  Plus,
   LayoutDashboard,
   Sprout,
   Pill,
@@ -22,10 +21,6 @@ import { listBovines } from "../api/bovines";
 import { listLandPlots } from "../api/land_plots";
 import { listMilkProduction } from "../api/milk_production";
 import { useAuth } from "../hooks/useAuth";
-
-// Fotografía de ganado (si falla, el banner muestra el degradado).
-const BANNER_IMG =
-  "https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1200&q=60";
 
 const kpi = (value: string | number, label: string, icon: ReactNode, tint: string) => ({
   value,
@@ -63,7 +58,6 @@ export default function DashboardPage() {
   const [animals, setAnimals] = useState(0);
   const [lots, setLots] = useState(0);
   const [milk, setMilk] = useState(0);
-  const [bannerOk, setBannerOk] = useState(true);
 
   useEffect(() => {
     if (!activeFarmId) return;
@@ -137,37 +131,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Bienvenida + banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-cream to-accent/30 shadow-sm">
-        {bannerOk && (
-          <img
-            src={BANNER_IMG}
-            alt=""
-            onError={() => setBannerOk(false)}
-            className="absolute inset-0 h-full w-full object-cover opacity-25"
-          />
-        )}
-        <div className="relative z-10 flex flex-col gap-2 p-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary">
-              Bienvenido, {user?.first_name}
-            </h1>
-            <p className="text-sm text-text-secondary">
-              {activeFarm.name} · {activeFarm.city_municipality} · {activeFarm.total_area}{" "}
-              {activeFarm.area_unit}
-            </p>
-          </div>
-          {(!user?.role_name || user.role_name === "Administrador") && (
-            <Link
-              to="/farms/new"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white no-underline transition-colors hover:bg-primary-light"
-            >
-              <Plus size={16} /> Crear finca
-            </Link>
-          )}
-        </div>
-      </div>
-
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-3">
         {cards.map((c) => (
