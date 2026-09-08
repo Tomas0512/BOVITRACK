@@ -53,11 +53,10 @@ services:
       #   Real:   EMAIL_BACKEND=smtp (con SMTP_HOST / SMTP_USERNAME / SMTP_PASSWORD)
       #   Alternativa: EMAIL_BACKEND=resend (con RESEND_API_KEY)
       EMAIL_BACKEND: ${EMAIL_BACKEND:-smtp}
-      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
-      SMTP_PORT: ${SMTP_PORT:-587}
-      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
-      SMTP_USERNAME: ${SMTP_USERNAME:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
       MAIL_FROM: ${MAIL_FROM:-noreply@bovitrack.com}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BoviTrack}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
