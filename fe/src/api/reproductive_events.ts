@@ -44,11 +44,12 @@ export interface ReproductiveEventResponse {
 // Impact? Si falla, el usuario no ve el historial reproductivo del animal.
 export async function listReproductiveEvents(
   farmId: string,
-  bovineId: string
+  bovineId?: string
 ): Promise<ReproductiveEventResponse[]> {
+  const params = bovineId ? { bovine_id: bovineId } : {};
   const response = await api.get<ReproductiveEventResponse[]>(
     `/farms/${farmId}/reproductive-events`,
-    { params: { bovine_id: bovineId } }
+    { params }
   );
   return response.data;
 }

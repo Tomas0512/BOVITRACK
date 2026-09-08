@@ -51,6 +51,73 @@ class MilkProductionCreate(BaseModel):
             raise ValueError(f"Tipo de ordeño inválido. Opciones: {', '.join(allowed)}")
         return v.lower()
 
+    @field_validator("milking_session")
+    @classmethod
+    def validate_milking_session(cls, v: str | None) -> str | None:
+        """¿Qué? Normaliza la sesión de ordeño a un valor estándar.
+        ¿Para qué? Unificar 'manana'/mañana, 'tarde', 'noche' desde la UI.
+        ¿Impacto? Evita duplicados por escribir la sesión con distinta grafía.
+        """
+        if v is None:
+            return None
+        maps = {
+            "manana": "mañana", "morning": "mañana", "mañana": "mañana",
+            "tarde": "tarde", "afternoon": "tarde",
+            "noche": "noche", "evening": "noche",
+        }
+        value = maps.get(v.strip().lower(), v.strip().lower())
+        if value not in {"mañana", "tarde", "noche"}:
+            return None
+        return value
+
+
+class MilkProductionUpdate(BaseModel):
+    """¿Qué? Datos parciales para editar un ordeño existente.
+    ¿Para qué? Corregir litros, fecha, tipo, sesión u observaciones.
+    ¿Impacto? Todos los campos opcionales; reusa las validaciones del create.
+    """
+
+    bovine_id: uuid.UUID | None = None
+    land_plot_id: uuid.UUID | None = None
+    milking_date: datetime | None = None
+    quantity_liters: Decimal | None = None
+    milking_type: str | None = None
+    milking_session: str | None = None
+    observations: str | None = None
+
+    @field_validator("quantity_liters")
+    @classmethod
+    def validate_quantity(cls, v: Decimal | None) -> Decimal | None:
+        if v is None or v <= 0:
+            raise ValueError("La cantidad debe ser mayor a 0")
+        return v
+
+    @field_validator("milking_type")
+    @classmethod
+    def validate_milking_type(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        allowed = {"manual", "mecanico"}
+        value = v.lower()
+        if value not in allowed:
+            raise ValueError(f"Tipo de ordeño inválido. Opciones: {', '.join(allowed)}")
+        return value
+
+    @field_validator("milking_session")
+    @classmethod
+    def validate_milking_session(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        maps = {
+            "manana": "mañana", "morning": "mañana", "mañana": "mañana",
+            "tarde": "tarde", "afternoon": "tarde",
+            "noche": "noche", "evening": "noche",
+        }
+        value = maps.get(v.strip().lower(), v.strip().lower())
+        if value not in {"mañana", "tarde", "noche"}:
+            return None
+        return value
+
 
 class MilkProductionResponse(BaseModel):
     """¿Qué? Schema de respuesta para un registro de producción lechera.

@@ -65,6 +65,11 @@ export async function getBovine(farmId: string, bovineId: string): Promise<Bovin
   return response.data;
 }
 
+export async function listBovineBreeds(farmId: string): Promise<string[]> {
+  const response = await api.get<string[]>(`${base(farmId)}/breeds`);
+  return response.data;
+}
+
 export async function createBovine(farmId: string, data: BovineRequest): Promise<BovineResponse> {
   const response = await api.post<BovineResponse>(base(farmId), data);
   return response.data;

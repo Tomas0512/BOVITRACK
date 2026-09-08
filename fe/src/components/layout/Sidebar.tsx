@@ -6,8 +6,6 @@ import {
   Wallet,
   Bell,
   ShieldCheck,
-  LogOut,
-  UserRound,
   Sprout,
   Pill,
   Wheat,
@@ -15,6 +13,7 @@ import {
   Map,
   FileText,
   Users,
+  Droplets,
 } from "lucide-react";
 import type { JSX } from "react";
 import { useAuth } from "../../hooks/useAuth";
@@ -31,11 +30,10 @@ interface NavItem {
 interface Props {
   open: boolean;
   onClose: () => void;
-  onRequestDelete: () => void;
 }
 
-export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
-  const { user, logout } = useAuth();
+export default function Sidebar({ open, onClose }: Props) {
+  const { user } = useAuth();
   const { farms, activeFarmId, activeFarm, setActiveFarmId } = useFarm();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
@@ -58,6 +56,7 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
     { to: farm("?tab=terneros"), label: "Terneros", icon: <Sprout size={20} />, tab: "terneros" },
     { to: farm("?tab=sanidad"), label: "Sanidad", icon: <Pill size={20} />, tab: "sanidad" },
     { to: farm("?tab=alimentacion"), label: "Alimentación", icon: <Wheat size={20} />, tab: "alimentacion" },
+    { to: farm("?tab=produccion"), label: "Producción de leche", icon: <Droplets size={20} />, tab: "produccion" },
     { to: farm("?tab=movimientos"), label: "Movimientos", icon: <ArrowLeftRight size={20} />, tab: "movimientos" },
     { to: farm("?tab=lotes"), label: "Lotes y Potreros", icon: <Map size={20} />, tab: "lotes" },
     { to: farm("?tab=documentos"), label: "Documentos", icon: <FileText size={20} />, tab: "documentos" },
@@ -77,8 +76,6 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
     if (item.to === "/audit") return pathname === "/audit";
     return isActive(item.to);
   };
-
-  const initials = (user?.first_name?.[0] ?? "") + (user?.last_name?.[0] ?? "");
 
   return (
     <>
@@ -152,40 +149,6 @@ export default function Sidebar({ open, onClose, onRequestDelete }: Props) {
               );
             })}
         </nav>
-
-        {/* Usuario */}
-        <div className="border-t border-border p-3">
-          <div className="mb-2 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
-              {initials || <UserRound size={18} />}
-            </div>
-            <div className="leading-tight">
-              <p className="text-sm font-medium text-text-primary">
-                {user?.first_name} {user?.last_name}
-              </p>
-              {user?.role_name && (
-                <p className="text-xs uppercase tracking-wide text-text-muted">{user.role_name}</p>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                logout();
-                navigate("/login");
-              }}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-2 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-alt"
-            >
-              <LogOut size={14} /> Salir
-            </button>
-            <button
-              onClick={onRequestDelete}
-              className="flex-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
-            >
-              Eliminar cuenta
-            </button>
-          </div>
-        </div>
       </aside>
     </>
   );

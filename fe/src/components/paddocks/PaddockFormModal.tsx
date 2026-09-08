@@ -68,7 +68,15 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
   const isFormComplete =
-    form.land_plot_id !== "" && form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
+    form.land_plot_id !== "" && form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1 &&
+    (!form.rest_start_date || !form.rest_end_date || form.rest_end_date >= form.rest_start_date);
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) {
+      return form.land_plot_id !== "" && form.name.trim() !== "" && form.area_hectares > 0 && form.max_capacity >= 1;
+    }
+    return true;
+  };
 
   const set = <K extends keyof PaddockRequest>(key: K, value: PaddockRequest[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -218,8 +226,8 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button key="paso-siguiente" type="button" onClick={nextStep}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
                 Siguiente →
               </button>
             ) : (

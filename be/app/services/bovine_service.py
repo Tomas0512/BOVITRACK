@@ -135,6 +135,24 @@ def list_bovines(
     return db.execute(stmt).scalars().all()
 
 
+def list_breeds(db: Session, farm_id: uuid.UUID) -> list[str]:
+    """¿Qué? Retorna las razas distintas ya registradas en la finca.
+    ¿Para qué? Alimentar el desplegable de razas del formulario de bovinos.
+    ¿Impacto? Evita duplicados y omite razas vacías/nulas.
+    """
+    rows = db.execute(
+        select(Bovine.breed)
+        .where(
+            Bovine.farm_id == farm_id,
+            Bovine.breed.isnot(None),
+            Bovine.breed != "",
+        )
+        .distinct()
+        .order_by(Bovine.breed)
+    ).scalars().all()
+    return list(rows)
+
+
 def get_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID) -> Bovine:
     """¿Qué? Obtiene un bovino por ID dentro de una finca específica.
     ¿Para qué? Consultar el detalle de un animal o validar que existe antes de operar.

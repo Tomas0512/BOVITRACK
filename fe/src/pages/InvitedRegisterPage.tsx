@@ -89,6 +89,23 @@ export function InvitedRegisterPage() {
 
   const prevStep = () => setStep((s) => Math.max(s - 1, 0));
 
+  const isStepComplete = (s: number): boolean => {
+    const t = (v: string) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(v);
+    if (s === 0) {
+      return formData.firstName.trim() !== "" && t(formData.firstName.trim()) &&
+        formData.lastName.trim() !== "" && t(formData.lastName.trim()) &&
+        formData.documentType !== "" && formData.documentNumber.trim() !== "";
+    }
+    if (s === 1) {
+      const pwdOk = formData.password.length >= 8 && /[A-Z]/.test(formData.password) &&
+        /[a-z]/.test(formData.password) && /\d/.test(formData.password) &&
+        /[^A-Za-z0-9]/.test(formData.password);
+      return formData.phone.trim() !== "" && pwdOk &&
+        formData.confirmPassword !== "" && formData.password === formData.confirmPassword;
+    }
+    return formData.acceptTerms && formData.acceptDataPolicy;
+  };
+
   useEffect(() => {
     if (!token) {
       setInvitationError("No se encontró el token de invitación");
@@ -379,7 +396,7 @@ export function InvitedRegisterPage() {
                 <button type="button" onClick={prevStep} className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt transition-colors">← Anterior</button>
               )}
               {step < STEPS.length - 1 ? (
-                <button key="paso-siguiente" type="button" onClick={nextStep} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors">Siguiente →</button>
+                <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)} className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light transition-colors disabled:cursor-not-allowed disabled:opacity-50">Siguiente →</button>
               ) : (
                 <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
                   className={`flex-1 rounded-lg py-2 text-sm font-bold text-white transition-all active:scale-[0.98] ${!isFormComplete || loading ? "cursor-not-allowed bg-gray-400 opacity-70" : "bg-primary hover:bg-primary-light"}`}

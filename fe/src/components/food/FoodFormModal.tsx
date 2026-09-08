@@ -47,6 +47,10 @@ export default function FoodFormModal({
 
   const validateStep = (s: number): boolean => {
     if (s === 0 && !form.name.trim()) { setError("El nombre es obligatorio"); return false; }
+    if (s === 1 && form.current_stock < 0) { setError("El stock no puede ser negativo"); return false; }
+    if (s === 1 && (form.min_stock_alert ?? -1) < 0) { setError("El stock mínimo es obligatorio"); return false; }
+    if (s === 1 && (form.cost_per_unit ?? 0) < 0) { setError("El costo unitario no puede ser negativo"); return false; }
+    if (s === 2 && !form.expiration_date) { setError("La fecha de vencimiento es obligatoria"); return false; }
     setError("");
     return true;
   };
@@ -57,7 +61,14 @@ export default function FoodFormModal({
     form.name.trim() !== "" &&
     form.current_stock >= 0 &&
     (form.min_stock_alert ?? -1) >= 0 &&
-    Boolean(form.expiration_date);
+    Boolean(form.expiration_date) &&
+    (form.cost_per_unit ?? 0) >= 0;
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) return form.name.trim() !== "";
+    if (s === 1) return form.current_stock >= 0 && (form.min_stock_alert ?? -1) >= 0 && (form.cost_per_unit ?? 0) >= 0;
+    return Boolean(form.expiration_date);
+  };
 
   // 🔄 RE-INICIALIZAR FORMULARIO AL CAMBIAR DE ALIMENTO
   // Esto asegura que si pasas de editar un alimento a crear uno nuevo, los campos se limpien
@@ -224,8 +235,8 @@ export default function FoodFormModal({
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <button key="paso-siguiente" type="button" onClick={nextStep}
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light">
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
                 Siguiente →
               </button>
             ) : (
