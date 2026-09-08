@@ -10,7 +10,6 @@ import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
 import FarmTreatments from "../components/bovines/FarmTreatments";
 import FoodList from "../components/food/FoodList";
 import AuditLogList from "../components/audit/AuditLogList";
-import AlertBanner from "../components/layout/AlertBanner";
 import MovementList from "../components/movements/MovementList";
 import DocumentManager from "../components/documents/DocumentManager";
 import CalfList from "../components/calves/CalfList";
@@ -93,31 +92,7 @@ export default function FarmDetailPage() {
 
   return (
     <div>
-      {/* Módulo activo */}
       {renderTab()}
-
-      {/* Resumen de la finca */}
-      <div className="mt-6 space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <InfoCard label="Dirección" value={farm.address} />
-          <InfoCard label="Ciudad o municipio" value={farm.city_municipality} />
-          <InfoCard label="Área total" value={`${farm.total_area} ${farm.area_unit}`} />
-          <InfoCard label="Teléfono" value={farm.phone ?? "No registrado"} />
-          <InfoCard label="Estado" value={farm.is_active ? "Activa" : "Inactiva"} />
-          <InfoCard label="Fecha de creación" value={new Date(farm.created_at).toLocaleDateString("es-CO")} />
-          <InfoCard label="Última actualización" value={new Date(farm.updated_at).toLocaleDateString("es-CO")} />
-        </div>
-        <AlertBanner farmId={farm.id} />
-      </div>
-    </div>
-  );
-}
-
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-surface p-4">
-      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">{label}</p>
-      <p className="text-sm font-medium text-text-primary">{value}</p>
     </div>
   );
 }
