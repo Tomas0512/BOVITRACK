@@ -18,7 +18,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models.farm import UserFarm
@@ -342,6 +342,25 @@ def list_notification_history(
 
     stmt = stmt.order_by(NotificationLog.created_at.desc()).limit(limit).offset(offset)
     return list(db.execute(stmt).scalars().all())
+
+
+def count_unread_notifications(
+    db: Session, user_id: uuid.UUID, farm_id: uuid.UUID
+) -> int:
+    """¿Qué? Cuenta las notificaciones sin leer del usuario en la finca.
+
+    ¿Para qué? Alimentar el badge de la campana del frontend con un consulta
+               ligera que NO ejecuta el motor de notificaciones (a diferencia
+               de consultar /history, que dispara el ciclo y podría enviar
+               correos).
+    ¿Impacto? Solo SELECT + COUNT; no crea logs ni envía nada.
+    """
+    stmt = select(func.count(NotificationLog.id)).where(
+        NotificationLog.user_id == user_id,
+        NotificationLog.farm_id == farm_id,
+        NotificationLog.read_at.is_(None),
+    )
+    return int(db.execute(stmt).scalar() or 0)
 
 
 def mark_as_read(db: Session, user_id: uuid.UUID, farm_id: uuid.UUID, log_id: uuid.UUID) -> bool:

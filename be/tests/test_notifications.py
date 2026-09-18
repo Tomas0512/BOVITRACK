@@ -184,3 +184,41 @@ def test_tipos_etiquetas_tienen_sanitary_y_low_stock(mock_db):
     """¿Qué? El mapa de etiquetas humanas incluye los tipos principales."""
     assert "sanitary" in notification_service.TYPE_LABELS
     assert "low_stock" in notification_service.TYPE_LABELS
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Conteo de no leídas (campana de notificaciones)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def test_conteo_no_leidas_suma_solo_read_at_nulos(mock_db, user_id, farm_id):
+    """¿Qué? count_unread_notifications devuelve el total de logs sin leer.
+
+    ¿Por qué? El badge de la campana necesita el número exacto de no leídas,
+              sin ejecutar el motor de notificaciones (que enviaría correos).
+    """
+    mock_db.execute.return_value.scalar.return_value = 7
+    total = notification_service.count_unread_notifications(mock_db, user_id, farm_id)
+    assert total == 7
+
+
+def test_conteo_no_leidas_sin_filas_devuelve_cero(mock_db, user_id, farm_id):
+    """¿Qué? Si no hay logs sin leer, el conteo es 0 (None → 0).
+
+    ¿Por qué? Un usuario sin notificaciones pendientes debe ver el badge vacío.
+    """
+    mock_db.execute.return_value.scalar.return_value = None
+    total = notification_service.count_unread_notifications(mock_db, user_id, farm_id)
+    assert total == 0
+
+
+def test_unread_count_response_schema(farm_id):
+    """¿Qué? El schema UnreadCountResponse expone farm_id y unread_count.
+
+    ¿Por qué? El frontend lee esos dos campos para el badge de la campana.
+    """
+    from app.schemas.alert import UnreadCountResponse
+
+    payload = UnreadCountResponse(farm_id=farm_id, unread_count=3)
+    assert payload.farm_id == farm_id
+    assert payload.unread_count == 3

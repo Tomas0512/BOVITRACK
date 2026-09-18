@@ -24,6 +24,7 @@ from app.schemas.alert import (
     NotificationLogResponse,
     NotificationPrefResponse,
     NotificationPrefUpdate,
+    UnreadCountResponse,
 )
 from app.services import notification_service
 
@@ -199,6 +200,30 @@ async def get_history(
         limit=limit,
         offset=offset,
     )
+
+
+@router.get(
+    "/history/unread-count",
+    response_model=UnreadCountResponse,
+    summary="Conteo de notificaciones sin leer",
+    dependencies=[Depends(require_permission("fincas", "can_read"))],
+)
+def unread_count(
+    farm_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """¿Qué? Devuelve cuántas notificaciones del usuario están sin leer.
+
+    ¿Para qué? Alimentar el badge de la campana del frontend. A diferencia del
+               historial, NO ejecuta el motor de notificaciones, por lo que no
+               genera envíos ni duplica ningún efecto colateral.
+    ¿Impacto? Consulta de conteo ligera; no altera el historial ni preferencias.
+    """
+    unread = notification_service.count_unread_notifications(
+        db, current_user.id, farm_id
+    )
+    return UnreadCountResponse(farm_id=farm_id, unread_count=unread)
 
 
 @router.put(

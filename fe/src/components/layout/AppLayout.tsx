@@ -15,6 +15,7 @@ import {
 import { useFarm } from "../../context/FarmContext";
 import Sidebar from "./Sidebar";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 import SessionGuard from "../SessionGuard";
 import ConfirmDialog from "../ConfirmDialog";
 
@@ -195,7 +196,11 @@ export default function AppLayout() {
                 )}
               </div>
 
-              <div className="relative ml-auto" ref={userMenuRef}>
+              <div className="ml-auto">
+                <NotificationBell />
+              </div>
+
+              <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((v) => !v)}
                     title={`${user?.first_name} ${user?.last_name}`}
