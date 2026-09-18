@@ -29,14 +29,12 @@ interface Zone {
 }
 
 const ZONES: Zone[] = [
-  { left: 7, top: 2, width: 44, height: 30 }, // 1
-  { left: 46, top: 3, width: 35, height: 31 }, // 2
-  { left: 61, top: 13, width: 31, height: 28 }, // 3
-  { left: 6, top: 27, width: 43, height: 18 }, // 4
-  { left: 61, top: 39, width: 31, height: 23 }, // 5
-  { left: 2, top: 43, width: 41, height: 37 }, // 6
-  { left: 35, top: 52, width: 27, height: 31 }, // 7
-  { left: 62, top: 56, width: 31, height: 30 }, // 8
+  { left: 6, top: 2, width: 46, height: 31 }, // 1
+  { left: 52, top: 3, width: 43, height: 30 }, // 2
+  { left: 5, top: 33, width: 46, height: 27 }, // 3
+  { left: 51, top: 33, width: 43, height: 27 }, // 4
+  { left: 4, top: 61, width: 45, height: 32 }, // 5
+  { left: 50, top: 60, width: 45, height: 34 }, // 6
 ];
 
 const MAX_ZONES = ZONES.length;

@@ -116,14 +116,14 @@ describe("MapaInteractivoFinca", () => {
     expect(zones[2]?.getAttribute("aria-label")).toBe("Ver información de Lote C");
   });
 
-  it("limita a 8 zonas aunque haya más lotes", async () => {
+  it("limita a 6 zonas aunque haya más lotes", async () => {
     const many = Array.from({ length: 12 }, (_, i) => makePlot(`l${i}`, `Lote ${i + 1}`, `2026-01-${String(i + 1).padStart(2, "0")}T00:00:00Z`));
     vi.mocked(listLandPlots).mockResolvedValue(many as never);
     renderMap();
     await waitForMap();
 
-    expect(screen.getAllByRole("button", { name: /ver información de lote/i })).toHaveLength(8);
-    expect(screen.getByText(/mostrando los primeros 8 lotes sobre el mapa/i)).toBeDefined();
+    expect(screen.getAllByRole("button", { name: /ver información de lote/i })).toHaveLength(6);
+    expect(screen.getByText(/mostrando los primeros 6 lotes sobre el mapa/i)).toBeDefined();
   });
 
   it("al hacer clic en una zona abre el detalle del lote (panel inline)", async () => {
