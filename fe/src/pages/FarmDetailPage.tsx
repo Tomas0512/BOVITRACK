@@ -5,6 +5,7 @@ import { getFarm, type FarmResponse } from "../api/farms";
 import EmployeeList from "../components/employees/EmployeeList";
 import LandPlotList from "../components/land_plots/LandPlotList";
 import PaddockList from "../components/paddocks/PaddockList";
+import MapaInteractivoFinca from "../components/paddocks/MapaInteractivoFinca";
 import BovineList from "../components/bovines/BovineList";
 import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
 import FarmTreatments from "../components/bovines/FarmTreatments";
@@ -79,6 +80,7 @@ export default function FarmDetailPage() {
       case "movimientos": return <MovementList farmId={farm.id} />;
       case "lotes": return (
         <div className="space-y-6">
+          <MapaInteractivoFinca farmId={farm.id} />
           <LandPlotList farmId={farm.id} />
           <PaddockList farmId={farm.id} />
         </div>

@@ -103,3 +103,15 @@ class NotificationHistoryResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class UnreadCountResponse(BaseModel):
+    """¿Qué? Conteo de notificaciones sin leer del usuario en la finca.
+
+    ¿Para qué? Alimentar el badge de la campana de notificaciones del frontend
+               sin ejecutar el motor de notificaciones (evita emails/listados).
+    ¿Impacto? Se calcula con read_at IS NULL; es un conteo ligero y directo.
+    """
+
+    farm_id: uuid.UUID
+    unread_count: int

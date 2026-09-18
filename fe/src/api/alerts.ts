@@ -93,6 +93,11 @@ export interface NotificationHistory {
   offset: number;
 }
 
+export interface UnreadCount {
+  farm_id: string;
+  unread_count: number;
+}
+
 export async function listNotificationHistory(
   farmId: string,
   params?: {
@@ -105,6 +110,15 @@ export async function listNotificationHistory(
   const res = await api.get<NotificationHistory>(
     `/farms/${farmId}/alerts/history`,
     { params },
+  );
+  return res.data;
+}
+
+export async function getUnreadNotificationCount(
+  farmId: string,
+): Promise<UnreadCount> {
+  const res = await api.get<UnreadCount>(
+    `/farms/${farmId}/alerts/history/unread-count`,
   );
   return res.data;
 }

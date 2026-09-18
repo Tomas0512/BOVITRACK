@@ -9,13 +9,13 @@ import { render, screen } from "@testing-library/react";
 import App from "./App";
 
 describe("App", () => {
-  it("renderiza el texto de construcción", () => {
+  it("renderiza el hero de la plataforma", () => {
     render(<App />);
-    expect(screen.getByText(/Bovitrack — En construcción/i)).toBeDefined();
+    expect(screen.getByText(/Tu ganado bajo control con/i)).toBeInTheDocument();
   });
 
-  it("renderiza el título de la plataforma", () => {
+  it("muestra el acceso a registro desde el home", () => {
     render(<App />);
-    expect(screen.getByText(/BoviTrack/i)).toBeDefined();
+    expect(screen.getByRole("link", { name: "Registrarse" })).toBeInTheDocument();
   });
 });

@@ -17,5 +17,5 @@ coverage/
 
 # Tests
 src/__tests__/
-*.test.tsx
-*.test.ts
+**/*.test.tsx
+**/*.test.ts
