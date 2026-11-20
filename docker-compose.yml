@@ -94,7 +94,8 @@ services:
     ports:
       - "127.0.0.1:5173:80"
     depends_on:
-      - be
+      be:
+        condition: service_healthy
     networks:
       - frontend_net
 
