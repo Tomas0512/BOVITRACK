@@ -17,6 +17,7 @@ Impact?
 """
 
 import uuid
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, Query, Request, UploadFile, status
 from fastapi.responses import Response
@@ -27,11 +28,11 @@ from app.models.user import User
 from app.permissions import require_permission
 from app.schemas.document import (
     DocumentAssociationEnum,
-    DocumentListRequest,
     DocumentListResponse,
     DocumentResponse,
     DocumentTypeEnum,
     DocumentUploadRequest,
+    MAX_DOCUMENT_SIZE,
 )
 from app.services import document_service
 from app.utils.limiter import limiter
@@ -44,6 +45,24 @@ router = APIRouter(
     prefix="/api/v1/farms/{farm_id}/documents",
     tags=["Documentos (HU012)"],
 )
+
+
+async def _read_upload_limited(file: UploadFile) -> bytes:
+    """Read in bounded chunks so a large upload is never materialized in memory."""
+    chunks: list[bytes] = []
+    total_size = 0
+    while True:
+        chunk = await file.read(min(1024 * 1024, MAX_DOCUMENT_SIZE + 1 - total_size))
+        if not chunk:
+            break
+        total_size += len(chunk)
+        if total_size > MAX_DOCUMENT_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="El archivo supera el máximo de 50MB",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -83,21 +102,44 @@ async def upload_document(
       - Audit log records who uploaded it
     """
 
-    # 1. Read file content
-    file_content = await file.read()
-
-    # 2. Validate size
-    if len(file_content) > 52428800:  # 50MB
+    # 1. Read with an upper bound before materializing the file in memory.
+    file_content = await _read_upload_limited(file)
+    if not file_content:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="El archivo supera el máximo de 50MB",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El archivo está vacío",
         )
+
+    # Validate content signatures; never trust the MIME header supplied by a client.
+    detected_mime = document_service.detect_mime_type(
+        file_content, file.content_type or ""
+    )
+    expected_types = {
+        DocumentTypeEnum.PDF: {"application/pdf"},
+        DocumentTypeEnum.IMAGE: {"image/jpeg", "image/png", "image/gif"},
+        DocumentTypeEnum.WORD: {
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        },
+        DocumentTypeEnum.EXCEL: {
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        },
+        DocumentTypeEnum.TEXT: {"text/plain", "text/csv"},
+    }
+    if detected_mime not in expected_types[document_type]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El contenido del archivo no coincide con el tipo permitido",
+        )
+    original_filename = document_service.sanitize_original_filename(file.filename)
+    document_service.validate_file_extension(original_filename, detected_mime)
 
     # 3. Create request data
     request_data = DocumentUploadRequest(
         document_type=document_type,
         file_size=len(file_content),
-        mime_type=file.content_type or "application/octet-stream",
+        mime_type=detected_mime,
         association_type=association_type,
         associated_entity_id=associated_entity_id,
         description=description,
@@ -108,7 +150,7 @@ async def upload_document(
         db,
         farm_id=farm_id,
         file_content=file_content,
-        original_filename=file.filename or "document",
+        original_filename=original_filename,
         request_data=request_data,
         user_id=current_user.id,
     )
@@ -201,10 +243,22 @@ def download_document(
         document_service.get_document_for_download(db, farm_id, document_id)
     )
 
+    safe_ascii_name = "".join(
+        character
+        for character in original_filename
+        if 32 <= ord(character) < 127 and character not in {'"', "\\"}
+    ) or "document"
+    content_disposition = (
+        f'attachment; filename="{safe_ascii_name}"; '
+        f"filename*=UTF-8''{quote(original_filename, safe='')}"
+    )
     return Response(
         content=file_content,
         media_type=mime_type,
-        headers={"Content-Disposition": f'attachment; filename="{original_filename}"'},
+        headers={
+            "Content-Disposition": content_disposition,
+            "X-Content-Type-Options": "nosniff",
+        },
     )
 
 

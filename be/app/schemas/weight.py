@@ -11,7 +11,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class WeightCreate(BaseModel):
@@ -21,10 +21,10 @@ class WeightCreate(BaseModel):
     ¿Impacto? Rechaza peticiones inválidas con mensajes claros antes de
               tocar la base de datos.
     """
-    weight_kg: Decimal
+    weight_kg: Decimal = Field(..., gt=0, le=2500)
     measured_at: date
     body_condition: int | None = None   # escala 1-5
-    observations: str | None = None
+    observations: str | None = Field(None, max_length=2000)
 
     @field_validator("weight_kg")
     @classmethod

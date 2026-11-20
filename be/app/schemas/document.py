@@ -21,6 +21,9 @@ from enum import Enum
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
+MAX_DOCUMENT_SIZE = 50 * 1024 * 1024
+
+
 # ── Enums ───────────────────────────────────────────────
 
 class DocumentTypeEnum(str, Enum):
@@ -67,13 +70,14 @@ class DocumentUploadRequest(BaseModel):
     file_size: int = Field(
         ...,
         gt=0,
-        le=52428800,  # 50MB max
+        le=MAX_DOCUMENT_SIZE,
         description="File size in bytes (max 50MB)"
     )
 
     # MIME type
     mime_type: str = Field(
         ...,
+        max_length=100,
         description="application/pdf, image/jpeg, etc"
     )
 

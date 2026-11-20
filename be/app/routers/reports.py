@@ -9,7 +9,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import Response
-from sqlalchemy import select, text
+from sqlalchemy import bindparam, select, text
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_db
@@ -20,12 +20,19 @@ from app.schemas.report import (
     ExportFormat,
     ReportCategory,
     ReportFilterParams,
-    ReportResponse,
 )
 from app.services import report_service
 from app.utils.limiter import limiter
 
 router = APIRouter(prefix="/api/v1", tags=["Reportes"])
+
+ALLOWED_REPORT_VIEWS = frozenset(
+    {
+        "v_farm_summary",
+        "v_low_stock_alerts",
+        "v_pending_tasks",
+    }
+)
 
 
 def _accessible_farm_ids(db: Session, user_id: uuid.UUID) -> list[str]:
@@ -51,14 +58,19 @@ def _accessible_farm_ids(db: Session, user_id: uuid.UUID) -> list[str]:
 
 def _query_view_filtered(db: Session, user_id: uuid.UUID, view: str) -> list[dict]:
     """¿Qué? Consulta una vista de reporte acotada a las fincas del usuario."""
+    if view not in ALLOWED_REPORT_VIEWS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vista de reporte no permitida",
+        )
     farm_ids = _accessible_farm_ids(db, user_id)
     if not farm_ids:
         return []
-    placeholders = ",".join(f":f{i}" for i in range(len(farm_ids)))
-    params = {f"f{i}": fid for i, fid in enumerate(farm_ids)}
     result = db.execute(
-        text(f"SELECT * FROM {view} WHERE farm_id IN ({placeholders})"),
-        params,
+        text(f"SELECT * FROM {view} WHERE farm_id IN :farm_ids").bindparams(
+            bindparam("farm_ids", expanding=True)
+        ),
+        {"farm_ids": farm_ids},
     )
     return [dict(row._mapping) for row in result]
 
