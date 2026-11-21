@@ -11,7 +11,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class BovineCreate(BaseModel):
@@ -22,24 +22,24 @@ class BovineCreate(BaseModel):
     ¿Impacto? Rechaza peticiones malformadas con mensajes claros en español.
     """
 
-    name: str | None = None
-    identification_number: str
+    name: str | None = Field(None, max_length=100)
+    identification_number: str = Field(..., min_length=1, max_length=50)
     sex: str
-    breed: str | None = None
-    color: str | None = None
-    markings: str | None = None
+    breed: str | None = Field(None, max_length=100)
+    color: str | None = Field(None, max_length=100)
+    markings: str | None = Field(None, max_length=255)
     birth_date: date
-    birth_weight: Decimal | None = None
-    current_weight: Decimal | None = None
+    birth_weight: Decimal | None = Field(None, gt=0, le=2500)
+    current_weight: Decimal | None = Field(None, gt=0, le=2500)
     father_id: uuid.UUID | None = None
     mother_id: uuid.UUID | None = None
-    purpose: str | None = None
+    purpose: str | None = Field(None, max_length=30)
     status: str = "activo"
     entry_type: str
     entry_date: date
     land_plot_id: uuid.UUID | None = None
     paddock_id: uuid.UUID | None = None
-    observations: str | None = None
+    observations: str | None = Field(None, max_length=2000)
 
     @field_validator("identification_number")
     @classmethod
@@ -99,24 +99,24 @@ class BovineUpdate(BaseModel):
     ¿Impacto? Usa exclude_unset=True en el service para no sobreescribir con None.
     """
 
-    name: str | None = None
-    identification_number: str | None = None
+    name: str | None = Field(None, max_length=100)
+    identification_number: str | None = Field(None, min_length=1, max_length=50)
     sex: str | None = None
-    breed: str | None = None
-    color: str | None = None
-    markings: str | None = None
+    breed: str | None = Field(None, max_length=100)
+    color: str | None = Field(None, max_length=100)
+    markings: str | None = Field(None, max_length=255)
     birth_date: date | None = None
-    birth_weight: Decimal | None = None
-    current_weight: Decimal | None = None
+    birth_weight: Decimal | None = Field(None, gt=0, le=2500)
+    current_weight: Decimal | None = Field(None, gt=0, le=2500)
     father_id: uuid.UUID | None = None
     mother_id: uuid.UUID | None = None
-    purpose: str | None = None
+    purpose: str | None = Field(None, max_length=30)
     status: str | None = None
     land_plot_id: uuid.UUID | None = None
     paddock_id: uuid.UUID | None = None
     exit_date: date | None = None
-    exit_reason: str | None = None
-    observations: str | None = None
+    exit_reason: str | None = Field(None, max_length=50)
+    observations: str | None = Field(None, max_length=2000)
 
     @field_validator("birth_weight", "current_weight")
     @classmethod

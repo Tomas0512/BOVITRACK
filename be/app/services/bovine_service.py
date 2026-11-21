@@ -104,11 +104,23 @@ def create_bovine(db: Session, farm_id: uuid.UUID, data: BovineCreate, user_id: 
         registered_by=user_id,
         **data_dict,
     )
-    db.add(bovine)
-    db.commit()
-    db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id), farm_id=str(farm_id), action="create", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
-    db.commit()
+    try:
+        db.add(bovine)
+        db.flush()
+        add_audit_log(
+            db,
+            user_id=str(user_id),
+            farm_id=str(farm_id),
+            action="create",
+            entity="bovine",
+            entity_id=str(bovine.id),
+            details={"tag": bovine.identification_number},
+        )
+        db.commit()
+        db.refresh(bovine)
+    except Exception:
+        db.rollback()
+        raise
     return bovine
 
 
@@ -214,10 +226,22 @@ def update_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, data: B
 
     for field, value in cambios.items():
         setattr(bovine, field, value)
-    db.commit()
-    db.refresh(bovine)
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="update", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
-    db.commit()
+    try:
+        db.flush()
+        add_audit_log(
+            db,
+            user_id=str(user_id) if user_id else None,
+            farm_id=str(farm_id),
+            action="update",
+            entity="bovine",
+            entity_id=str(bovine.id),
+            details={"tag": bovine.identification_number},
+        )
+        db.commit()
+        db.refresh(bovine)
+    except Exception:
+        db.rollback()
+        raise
     return bovine
 
 
@@ -232,8 +256,20 @@ def delete_bovine(db: Session, farm_id: uuid.UUID, bovine_id: uuid.UUID, user_id
     bovine.status = "retirado"
     bovine.exit_date = date.today()
     bovine.exit_reason = "retirado"
-    add_audit_log(db, user_id=str(user_id) if user_id else None, farm_id=str(farm_id), action="delete", entity="bovine", entity_id=str(bovine.id), details={"tag": bovine.identification_number})
-    db.commit()
+    try:
+        add_audit_log(
+            db,
+            user_id=str(user_id) if user_id else None,
+            farm_id=str(farm_id),
+            action="delete",
+            entity="bovine",
+            entity_id=str(bovine.id),
+            details={"tag": bovine.identification_number},
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
 
 def import_bovines(db: Session, farm_id: uuid.UUID, rows: list[BovineCreate], user_id: uuid.UUID) -> dict:

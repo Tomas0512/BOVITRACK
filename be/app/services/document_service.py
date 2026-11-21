@@ -19,7 +19,9 @@ Impact?
   Metadata stored in DB for traceability
 """
 
+import io
 import uuid
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
@@ -30,7 +32,7 @@ from sqlalchemy.orm import Session
 
 from app.models.document import Document
 from app.models.bovine import Bovine
-from app.schemas.document import DocumentUploadRequest
+from app.schemas.document import DocumentUploadRequest, MAX_DOCUMENT_SIZE
 from app.services.audit_service import add_audit_log
 
 
@@ -41,6 +43,115 @@ STORAGE_DIR = Path("storage/documents")
 
 # Create directory if it doesn't exist
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def sanitize_original_filename(filename: str | None) -> str:
+    """Strip path components and control characters from client-provided names."""
+    candidate = (filename or "document").replace("\\", "/").split("/")[-1]
+    candidate = "".join(char for char in candidate if char.isprintable()).strip(" .")
+    return (candidate or "document")[:255]
+
+
+def detect_mime_type(file_content: bytes, declared_mime: str = "") -> str:
+    """Identify supported formats from their content, not from the HTTP header."""
+    if len(file_content) > MAX_DOCUMENT_SIZE or not file_content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tamaño de archivo no permitido",
+        )
+
+    if file_content.startswith(b"%PDF-"):
+        return "application/pdf"
+    if file_content.startswith(b"\xff\xd8\xff"):
+        return "image/jpeg"
+    if file_content.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "image/png"
+    if file_content.startswith((b"GIF87a", b"GIF89a")):
+        return "image/gif"
+
+    if file_content.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+        legacy_mime = declared_mime.split(";", 1)[0].strip().lower()
+        if legacy_mime in {"application/msword", "application/vnd.ms-excel"}:
+            return legacy_mime
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se pudo determinar si el archivo Office es Word o Excel",
+        )
+
+    if zipfile.is_zipfile(io.BytesIO(file_content)):
+        try:
+            with zipfile.ZipFile(io.BytesIO(file_content)) as archive:
+                entries = archive.infolist()
+                names = {entry.filename for entry in entries}
+                uncompressed_size = sum(entry.file_size for entry in entries)
+                if len(entries) > 1000 or uncompressed_size > 100 * 1024 * 1024:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="El paquete Office tiene una estructura no permitida",
+                    )
+                if "word/document.xml" in names and "[Content_Types].xml" in names:
+                    if any(name.endswith("vbaProject.bin") for name in names):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="No se permiten documentos Office con macros",
+                        )
+                    return (
+                        "application/vnd.openxmlformats-officedocument."
+                        "wordprocessingml.document"
+                    )
+                if "xl/workbook.xml" in names and "[Content_Types].xml" in names:
+                    if any(name.endswith("vbaProject.bin") for name in names):
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="No se permiten documentos Office con macros",
+                        )
+                    return (
+                        "application/vnd.openxmlformats-officedocument."
+                        "spreadsheetml.sheet"
+                    )
+        except zipfile.BadZipFile:
+            pass
+
+    try:
+        decoded = file_content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        decoded = ""
+    if decoded and all(
+        character.isprintable() or character in "\t\n\r\f" for character in decoded
+    ):
+        if declared_mime.split(";", 1)[0].strip().lower() == "text/csv":
+            return "text/csv"
+        return "text/plain"
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Formato de archivo no permitido o contenido no reconocido",
+    )
+
+
+def validate_file_extension(filename: str, mime_type: str) -> None:
+    """Reject misleading names whose suffix contradicts the detected content."""
+    allowed_extensions = {
+        "application/pdf": {".pdf"},
+        "image/jpeg": {".jpg", ".jpeg"},
+        "image/png": {".png"},
+        "image/gif": {".gif"},
+        "application/msword": {".doc"},
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+            ".docx"
+        },
+        "application/vnd.ms-excel": {".xls"},
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+            ".xlsx"
+        },
+        "text/plain": {".txt"},
+        "text/csv": {".csv"},
+    }
+    if Path(filename).suffix.lower() not in allowed_extensions.get(mime_type, set()):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La extensión del archivo no coincide con su contenido",
+        )
 
 
 def get_file_extension(mime_type: str) -> str:
@@ -216,7 +327,15 @@ def create_document(
             )
 
     # 1. Save file to filesystem
-    stored_filename = save_document_file(file_content, request_data.mime_type)
+    detected_mime = detect_mime_type(file_content, request_data.mime_type)
+    if detected_mime != request_data.mime_type:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El MIME registrado no coincide con el contenido del archivo",
+        )
+    original_filename = sanitize_original_filename(original_filename)
+    validate_file_extension(original_filename, detected_mime)
+    stored_filename = save_document_file(file_content, detected_mime)
 
     # 2. Create document in DB
     document = Document(
@@ -224,7 +343,7 @@ def create_document(
         original_filename=original_filename,
         stored_filename=stored_filename,
         file_size=request_data.file_size,
-        mime_type=request_data.mime_type,
+        mime_type=detected_mime,
         document_type=request_data.document_type.value,
         association_type=request_data.association_type.value,
         associated_entity_id=request_data.associated_entity_id,
@@ -232,27 +351,31 @@ def create_document(
         uploaded_by=user_id,
     )
 
-    db.add(document)
-    db.flush()  # Obtener el ID
+    try:
+        db.add(document)
+        db.flush()  # Obtener el ID sin confirmar la transacción.
 
-    # 3. Register in audit log
-    add_audit_log(
-        db,
-        user_id=str(user_id),
-        farm_id=str(farm_id),
-        action="create",
-        entity="document",
-        entity_id=str(document.id),
-        details={
-            "filename": original_filename,
-            "size": request_data.file_size,
-            "type": request_data.document_type.value,
-            "associated_to": f"{request_data.association_type.value}:{request_data.associated_entity_id}",
-        },
-    )
+        add_audit_log(
+            db,
+            user_id=str(user_id),
+            farm_id=str(farm_id),
+            action="create",
+            entity="document",
+            entity_id=str(document.id),
+            details={
+                "filename": original_filename,
+                "size": request_data.file_size,
+                "type": request_data.document_type.value,
+                "associated_to": f"{request_data.association_type.value}:{request_data.associated_entity_id}",
+            },
+        )
 
-    db.commit()
-    db.refresh(document)
+        db.commit()
+        db.refresh(document)
+    except Exception:
+        db.rollback()
+        delete_document_file(stored_filename)
+        raise
 
     return document
 
