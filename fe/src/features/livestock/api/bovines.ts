@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 export interface BovineRequest {
   identification_number: string;

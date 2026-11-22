@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 export interface EconomicRecordCreate {
   record_type: "ingreso" | "egreso";

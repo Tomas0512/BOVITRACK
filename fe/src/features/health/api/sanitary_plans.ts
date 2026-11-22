@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 export interface SanitaryPlanCreate {
   bovine_id?: string | null;

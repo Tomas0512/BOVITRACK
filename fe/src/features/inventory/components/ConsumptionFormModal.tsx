@@ -4,14 +4,12 @@ import {
   createConsumption,
   type ConsumptionCreate,
   type FoodResponse,
-} from "../../api/food";
-import type { LandPlotResponse } from "../../api/land_plots";
-import type { PaddockResponse } from "../../api/paddocks";
-import type { BovineResponse } from "../../api/bovines";
-import { listLandPlots } from "../../api/land_plots";
-import { listPaddocks } from "../../api/paddocks";
-import { listBovines } from "../../api/bovines";
-import { getApiErrorMessage } from "../../api/errors";
+} from "../api";
+import type { LandPlotResponse, PaddockResponse } from "@/features/farms";
+import type { BovineResponse } from "@/features/livestock";
+import { listLandPlots, listPaddocks } from "@/features/farms";
+import { listBovines } from "@/features/livestock";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

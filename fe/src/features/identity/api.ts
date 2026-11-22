@@ -1,16 +1,19 @@
 /**
- * Archivo: api/auth.ts
- * Descripción: Cliente HTTP para los endpoints de autenticación del backend.
+ * Archivo: features/identity/api.ts
+ * Descripción: Cliente HTTP de identidad: registro, login, recuperación de
+ *              contraseña, verificación de correo, perfil y baja de la cuenta.
+ * Nota: la renovación del access token NO está aquí: la hace el interceptor
+ *       de @/core/http, una sola vez aunque fallen varias peticiones a la vez.
  */
 
-import api from "./axios";
+import { http as api } from "@/core/http";
 import type {
   UserResponse,
   TokenResponse,
   MessageResponse,
   RegisterRequest,
   LoginRequest,
-} from "../types/auth";
+} from "./types";
 
 const AUTH = "/auth";
 const USERS = "/users";
@@ -24,12 +27,6 @@ export async function registerUser(data: RegisterRequest): Promise<UserResponse>
 /** Iniciar sesión */
 export async function loginUser(data: LoginRequest): Promise<TokenResponse> {
   const response = await api.post<TokenResponse>(`${AUTH}/login`, data);
-  return response.data;
-}
-
-/** Renovar tokens */
-export async function refreshToken(refresh_token: string): Promise<TokenResponse> {
-  const response = await api.post<TokenResponse>(`${AUTH}/refresh`, { refresh_token });
   return response.data;
 }
 
@@ -68,80 +65,5 @@ export async function deleteAccount(): Promise<MessageResponse> {
   const response = await api.delete<MessageResponse>(`${USERS}/me`, {
     data: { confirmation_text: "ELIMINAR" },
   });
-  return response.data;
-}
-
-/* ── Invitaciones ── */
-
-export interface InvitationInfo {
-  email: string;
-  farm_name: string;
-  role_name: string;
-  inviter_name: string | null;
-}
-
-export interface InvitedRegisterRequest {
-  token: string;
-  first_name: string;
-  last_name: string;
-  document_type: string;
-  document_number: string;
-  phone: string;
-  password: string;
-  confirm_password: string;
-  accept_terms: boolean;
-  accept_data_policy: boolean;
-}
-
-/** Obtener info de una invitación por token */
-export async function getInvitationInfo(token: string): Promise<InvitationInfo> {
-  const response = await api.get<InvitationInfo>(`${AUTH}/invitation/${token}`);
-  return response.data;
-}
-
-/** Registrar usuario invitado */
-export async function registerInvited(data: InvitedRegisterRequest): Promise<UserResponse> {
-  const response = await api.post<UserResponse>(`${AUTH}/register-invited`, data);
-  return response.data;
-}
-
-/* ── Reactivación ── */
-
-export interface ReactivationRequestData {
-  email: string;
-  reason?: string;
-}
-
-export interface ReactivationRequestResponse {
-  id: string;
-  user_id: string;
-  reason: string | null;
-  status: string;
-  created_at: string;
-  reviewed_at: string | null;
-}
-
-export interface ReactivationRequestDetail extends ReactivationRequestResponse {
-  user_email: string;
-  user_name: string;
-}
-
-export async function requestReactivation(data: ReactivationRequestData): Promise<ReactivationRequestResponse> {
-  const response = await api.post<ReactivationRequestResponse>(`${AUTH}/request-reactivation`, data);
-  return response.data;
-}
-
-export async function listReactivationRequests(): Promise<ReactivationRequestDetail[]> {
-  const response = await api.get<ReactivationRequestDetail[]>("/admin/reactivation-requests");
-  return response.data;
-}
-
-export async function approveReactivation(requestId: string): Promise<ReactivationRequestResponse> {
-  const response = await api.post<ReactivationRequestResponse>(`/admin/reactivation-requests/${requestId}/approve`);
-  return response.data;
-}
-
-export async function rejectReactivation(requestId: string): Promise<ReactivationRequestResponse> {
-  const response = await api.post<ReactivationRequestResponse>(`/admin/reactivation-requests/${requestId}/reject`);
   return response.data;
 }

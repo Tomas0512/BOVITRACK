@@ -6,8 +6,8 @@ import {
   getMe,
   forgotPassword as apiForgotPassword,
   resetPassword as apiResetPassword,
-} from "../api/auth";
-import type { UserResponse, RegisterRequest } from "../types/auth";
+} from "../api";
+import type { UserResponse, RegisterRequest } from "../types";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserResponse | null>(null);

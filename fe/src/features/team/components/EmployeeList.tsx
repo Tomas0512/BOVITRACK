@@ -7,12 +7,11 @@ import {
   setAccountStatus,
   type EmployeeResponse,
   type RoleOption,
-} from "../../api/employees";
-import { getApiErrorMessage } from "../../api/errors";
-import { useAuth } from "../../hooks/useAuth";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
+} from "../api";
+import { getApiErrorMessage } from "@/core/http";
+import { useAuth } from "@/features/identity";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import AssignEmployeeModal from "./AssignEmployeeModal";
 
 interface Props {

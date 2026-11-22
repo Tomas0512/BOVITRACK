@@ -14,10 +14,11 @@ import {
   FileText,
   Users,
   Droplets,
+  UserCheck,
 } from "lucide-react";
 import type { JSX } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { useFarm } from "../../context/FarmContext";
+import { useAuth } from "@/features/identity";
+import { useFarm } from "@/features/farms";
 
 interface NavItem {
   to: string;
@@ -66,6 +67,7 @@ export default function Sidebar({ open, onClose }: Props) {
     { to: farm("/economics"), label: "Economía", icon: <Wallet size={20} /> },
     { to: farm("/alerts"), label: "Alertas", icon: <Bell size={20} /> },
     { to: "/audit", label: "Auditoría Global", icon: <ShieldCheck size={20} />, adminOnly: true },
+    { to: "/admin/reactivations", label: "Reactivaciones", icon: <UserCheck size={20} />, adminOnly: true },
   ];
 
   const visible = user?.role_name === "Administrador";

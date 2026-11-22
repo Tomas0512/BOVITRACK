@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
-import { listAuditLogs, type AuditLogEntry } from "../../api/audit_logs";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+import { listAuditLogs, type AuditLogEntry } from "../api";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

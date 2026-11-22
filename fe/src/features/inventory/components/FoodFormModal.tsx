@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { getApiErrorMessage } from "../../api/errors";
+import { getApiErrorMessage } from "@/core/http";
 import {
   createFood,
   updateFood,
   type FoodCreate,
   type FoodResponse,
-} from "../../api/food";
+} from "../api";
 
 interface Props {
   farmId: string;

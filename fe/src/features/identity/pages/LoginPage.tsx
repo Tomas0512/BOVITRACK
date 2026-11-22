@@ -9,8 +9,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { useAuth } from "../hooks/useAuth";
+import { AuthLayout } from "@/shared/layout";
+import { useAuth } from "../session/useAuth";
 
 export function LoginPage() {
   const [formData, setFormData] = useState({

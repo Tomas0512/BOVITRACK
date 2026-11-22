@@ -9,8 +9,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { useAuth } from "../hooks/useAuth";
+import { AuthLayout } from "@/shared/layout";
+import { useAuth } from "../session/useAuth";
 
 /** Tipos de documento disponibles */
 const DOCUMENT_TYPES = [

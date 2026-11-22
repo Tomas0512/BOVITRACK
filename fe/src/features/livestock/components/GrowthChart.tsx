@@ -35,7 +35,7 @@ import {
   type TooltipItem,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { getCalfWeightHistory, IWeightRecord } from "../../api/calves";
+import { getCalfWeightHistory, IWeightRecord } from "../api/calves";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔧 REGISTRAR COMPONENTES DE CHART.JS

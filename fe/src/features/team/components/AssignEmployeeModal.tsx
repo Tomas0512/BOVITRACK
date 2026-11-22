@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { inviteEmployee, listRoles, type RoleOption } from "../../api/employees";
-import { getApiErrorMessage } from "../../api/errors";
+import { inviteEmployee, listRoles, type RoleOption } from "../api";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

@@ -7,13 +7,12 @@ import {
   type MilkProductionResponse,
   type MilkSummary,
   type MilkListParams,
-} from "../../api/milk_production";
-import { listBovines, type BovineResponse } from "../../api/bovines";
-import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
+} from "../api";
+import { listBovines, type BovineResponse } from "@/features/livestock";
+import { listLandPlots, type LandPlotResponse } from "@/features/farms";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import MilkProductionFormModal from "./MilkProductionFormModal";
 import {
   BarChart,

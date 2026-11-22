@@ -20,12 +20,11 @@ import {
   listFoods,
   deleteFood,
   type FoodResponse,
-} from "../../api/food";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+} from "../api";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import FoodFormModal from "./FoodFormModal";
-import ConfirmDialog from "../ConfirmDialog";
 import PurchaseFormModal from "./PurchaseFormModal";
 import InventoryDashboard from "./InventoryDashboard";
 import ConsumptionFormModal from "./ConsumptionFormModal";

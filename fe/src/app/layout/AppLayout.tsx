@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
 import { LogOut, Menu, Pencil, Plus, Tractor, Trash2 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { deleteAccount } from "../../api/auth";
+import { useAuth, deleteAccount, SessionGuard } from "@/features/identity";
 import {
   updateFarm,
   deleteFarm,
@@ -11,13 +10,12 @@ import {
   type FarmRequest,
   type DepartmentOption,
   type PurposeOption,
-} from "../../api/farms";
-import { useFarm } from "../../context/FarmContext";
+} from "@/features/farms";
+import { useFarm } from "@/features/farms";
 import Sidebar from "./Sidebar";
-import ThemeToggle from "./ThemeToggle";
-import NotificationBell from "./NotificationBell";
-import SessionGuard from "../SessionGuard";
-import ConfirmDialog from "../ConfirmDialog";
+import { ThemeToggle } from "@/shared/theme";
+import { NotificationBell } from "@/features/notifications";
+import { ConfirmDialog } from "@/shared/ui";
 
 // Fotografía de ganado para el fondo del encabezado (si falla, queda el degradado).
 const BANNER_IMG =

@@ -8,11 +8,11 @@
  */
 
 import { useState } from "react";
-import { getApiErrorMessage } from "../api/errors";
+import { getApiErrorMessage } from "@/core/http";
 import { Link, useSearchParams } from "react-router-dom";
 import { AlertTriangle, Lock, Eye, EyeOff, CheckCircle2 } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { resetPassword as resetPasswordApi } from "../api/auth";
+import { AuthLayout } from "@/shared/layout";
+import { resetPassword as resetPasswordApi } from "../api";
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();

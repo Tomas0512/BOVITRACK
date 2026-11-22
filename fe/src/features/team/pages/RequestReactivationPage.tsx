@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { requestReactivation } from "../api/auth";
-import { getApiErrorMessage } from "../api/errors";
+import { AuthLayout } from "@/shared/layout";
+import { requestReactivation } from "../api";
+import { getApiErrorMessage } from "@/core/http";
 
 export default function RequestReactivationPage() {
   const [email, setEmail] = useState("");

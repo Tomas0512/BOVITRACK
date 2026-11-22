@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { recordPurchase, type FoodResponse, type PurchaseCreate } from "../../api/food";
-import { getApiErrorMessage } from "../../api/errors";
+import { recordPurchase, type FoodResponse, type PurchaseCreate } from "../api";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

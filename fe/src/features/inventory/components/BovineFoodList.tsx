@@ -5,9 +5,9 @@ import {
   listFoods,
   type ConsumptionResponse,
   type FoodResponse,
-} from "../../api/food";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+} from "../api";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

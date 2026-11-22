@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 export interface PaddockRequest {
   land_plot_id: string;

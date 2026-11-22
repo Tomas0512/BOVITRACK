@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Syringe, Plus } from "lucide-react";
-import { listTreatments, createTreatment, type TreatmentResponse } from "../../api/treatments";
-import { listBovines, type BovineResponse } from "../../api/bovines";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+import { listTreatments, createTreatment, type TreatmentResponse } from "../api/treatments";
+import { listBovines, type BovineResponse } from "@/features/livestock";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

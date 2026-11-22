@@ -4,16 +4,16 @@
  *       con 8 zonas transparentes encima, una por lote. Hover → resaltado
  *       sutil + tooltip con datos vivos. Click → panel de detalle inline.
  * Why?  Vista general tipo "croquis aéreo real" de los lotes de la finca.
- * Impacto? Se muestra al inicio de la pestaña "Lotes y potreros", antes del
- *       mapa SVG (LandMap). No modifica la imagen ni las listas existentes;
+ * Impacto? Se muestra al inicio de la pestaña "Lotes y potreros", antes de las
+ *       listas de lotes y potreros. No modifica la imagen ni las listas;
  *       usa el mismo endpoint de lotes/potreros ya disponible.
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { listPaddocks, type PaddockResponse } from "../../api/paddocks";
-import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
+import { listPaddocks, type PaddockResponse } from "../api/paddocks";
+import { listLandPlots, type LandPlotResponse } from "../api/land_plots";
+import { getApiErrorMessage } from "@/core/http";
 import { USAGE_LABEL } from "./parcelGeometry";
 
 interface Props {

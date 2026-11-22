@@ -6,11 +6,10 @@ import {
   Droplets,
   LayoutDashboard,
 } from "lucide-react";
-import { useFarm } from "../context/FarmContext";
-import { listBovines } from "../api/bovines";
-import { listLandPlots } from "../api/land_plots";
-import { listMilkProduction } from "../api/milk_production";
-import { useAuth } from "../hooks/useAuth";
+import { useFarm, listLandPlots } from "@/features/farms";
+import { listBovines } from "@/features/livestock";
+import { listMilkProduction } from "@/features/milk_production";
+import { useAuth } from "@/features/identity";
 
 const kpi = (value: string | number, label: string, icon: ReactNode, tint: string) => ({
   value,

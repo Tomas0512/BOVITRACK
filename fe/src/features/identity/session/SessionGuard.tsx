@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useSessionTimeout } from "../hooks/useSessionTimeout";
+import { useSessionTimeout } from "./useSessionTimeout";
 
 const IDLE_MS = 15 * 60 * 1000;
 const WARN_MS = 2 * 60 * 1000;

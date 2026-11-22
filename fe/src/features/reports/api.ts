@@ -1,4 +1,4 @@
-import apiClient from "./axios";
+import { http as apiClient } from "@/core/http";
 
 export type ReportCategory = "productivo" | "sanitario" | "economico";
 export type ExportFormat = "json" | "pdf" | "excel";

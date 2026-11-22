@@ -19,7 +19,7 @@ import {
   textOnColor,
   usageToHex,
   type Point,
-} from "../../components/paddocks/parcelGeometry";
+} from "./parcelGeometry";
 
 function samePoints(a: Point[], b: Point[]): boolean {
   if (a.length !== b.length) return false;

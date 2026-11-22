@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { createBovine, listBovineBreeds, updateBovine, type BovineRequest, type BovineResponse } from "../../api/bovines";
-import type { LandPlotResponse } from "../../api/land_plots";
-import type { PaddockResponse } from "../../api/paddocks";
-import { getApiErrorMessage } from "../../api/errors";
+import { createBovine, listBovineBreeds, updateBovine, type BovineRequest, type BovineResponse } from "../api/bovines";
+import type { LandPlotResponse, PaddockResponse } from "@/features/farms";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

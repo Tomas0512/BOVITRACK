@@ -10,8 +10,8 @@ import {
   markNotificationRead,
   type NotificationPref,
   type NotificationLog,
-} from "../api/alerts";
-import AlertBanner from "../components/layout/AlertBanner";
+} from "../api";
+import AlertBanner from "../components/AlertBanner";
 
 const TYPE_LABELS: Record<string, string> = {
   sanitary: "Sanitario",

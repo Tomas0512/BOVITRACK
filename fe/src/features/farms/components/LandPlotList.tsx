@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { MapPin, Ruler, Users } from "lucide-react";
-import { listLandPlots, deleteLandPlot, type LandPlotResponse } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
+import { listLandPlots, deleteLandPlot, type LandPlotResponse } from "../api/land_plots";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import LandPlotFormModal from "./LandPlotFormModal";
 
 interface Props {

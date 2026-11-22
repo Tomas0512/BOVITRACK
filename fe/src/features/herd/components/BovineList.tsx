@@ -4,18 +4,14 @@ import {
   FileUp, Check, X, Search, SlidersHorizontal, Settings2, ChevronDown,
   Pencil, Trash2, Pin, MoveLeft, MoveRight, Save, BookOpen, Download, Plus,
 } from "lucide-react";
-import { listBovines, deleteBovine, importBovinesCsv, type BovineResponse, type ImportResult } from "../../api/bovines";
-import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
-import { listPaddocks, type PaddockResponse } from "../../api/paddocks";
-import { listMilkProduction, type MilkProductionResponse } from "../../api/milk_production";
-import { listConsumptions, type ConsumptionResponse } from "../../api/food";
-import { listTreatments, type TreatmentResponse } from "../../api/treatments";
-import { listMovements, type MovementResponse } from "../../api/movements";
-import { listReproductiveEvents, type ReproductiveEventResponse } from "../../api/reproductive_events";
-import { getApiErrorMessage } from "../../api/errors";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
-import BovineFormModal from "./BovineFormModal";
+import { listBovines, deleteBovine, importBovinesCsv, type BovineResponse, type ImportResult, listMovements, type MovementResponse, BovineFormModal } from "@/features/livestock";
+import { listLandPlots, type LandPlotResponse, listPaddocks, type PaddockResponse } from "@/features/farms";
+import { listMilkProduction, type MilkProductionResponse } from "@/features/milk_production";
+import { listConsumptions, type ConsumptionResponse } from "@/features/inventory";
+import { listTreatments, type TreatmentResponse } from "@/features/health";
+import { listReproductiveEvents, type ReproductiveEventResponse } from "@/features/reproduction";
+import { getApiErrorMessage } from "@/core/http";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import ColumnCustomizePanel from "./ColumnCustomizePanel";
 import AdvancedFiltersPanel from "./AdvancedFiltersPanel";
 import {

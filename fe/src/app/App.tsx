@@ -4,31 +4,31 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
-import { FarmProvider } from "./context/FarmContext";
-import ProtectedRoute from "./components/ProtectedRoute";
-import RequireRole from "./components/RequireRole";
-import AppLayout from "./components/layout/AppLayout";
+import {
+  AuthProvider,
+  ForgotPasswordPage,
+  LoginPage,
+  ProtectedRoute,
+  RegisterPage,
+  RequireRole,
+  ResetPasswordPage,
+  VerifyEmailPage,
+} from "@/features/identity";
+import { ThemeProvider } from "@/shared/theme";
+import { FarmProvider, CreateFarmPage } from "@/features/farms";
+import AppLayout from "./layout/AppLayout";
 
 import HomePage from "./pages/HomePage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { LoginPage } from "./pages/LoginPage";
-import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
-import CreateFarmPage from "./pages/CreateFarmPage";
 import FarmDetailPage from "./pages/FarmDetailPage";
 import BovineDetailPage from "./pages/BovineDetailPage";
-import EconomicDashboard from "./pages/EconomicDashboard";
-import ReportsPage from "./pages/ReportsPage";
-import AuditPage from "./pages/AuditPage";  // HU015: Auditoria del sistema
-import AlertasPage from "./pages/AlertasPage";  // HU014: Alertas y notificaciones
+import { EconomicDashboard } from "@/features/economics";
+import { ReportsPage } from "@/features/reports";
+import { AuditPage } from "@/features/audit";  // HU015: Auditoria del sistema
+import { AlertasPage } from "@/features/notifications";  // HU014: Alertas y notificaciones
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
-import { InvitedRegisterPage } from "./pages/InvitedRegisterPage";
-import RequestReactivationPage from "./pages/RequestReactivationPage";
-import VerifyEmailPage from "./pages/VerifyEmailPage";
+import { InvitedRegisterPage, ReactivationRequestsPage, RequestReactivationPage } from "@/features/team";
 
 function App() {
   return (
@@ -75,6 +75,15 @@ function App() {
                       mis fincas y llegar directo con un enlace.
             */}
             <Route path="/audit" element={<RequireRole role="Administrador"><AuditPage /></RequireRole>} />
+            {/*
+              Moderación de reactivaciones de cuenta
+
+              COMO: Administrador de una finca
+              QUIERO: aprobar o rechazar las solicitudes de reactivación
+              PARA:   que alguien de mi equipo recupere el acceso sin tocar la BD.
+              (El backend limita la lista a personas de mis fincas.)
+            */}
+            <Route path="/admin/reactivations" element={<RequireRole role="Administrador"><ReactivationRequestsPage /></RequireRole>} />
           </Route>
 
           {/* Catch-all */}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Circle } from "lucide-react";
-import { listAlerts, type AlertsResponse } from "../../api/alerts";
+import { listAlerts, type AlertsResponse } from "../api";
 
 interface Props {
   farmId: string;

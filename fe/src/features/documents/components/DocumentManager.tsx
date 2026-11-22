@@ -8,7 +8,7 @@ import {
   type IDocument,
   type DocumentType,
   type AssociationType,
-} from "../../api/documents";
+} from "../api";
 
 const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   pdf: "PDF",

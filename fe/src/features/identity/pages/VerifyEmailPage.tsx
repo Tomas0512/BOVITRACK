@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { verifyEmail } from "../api/auth";
+import { AuthLayout } from "@/shared/layout";
+import { verifyEmail } from "../api";
 
 type State = "loading" | "success" | "error";
 

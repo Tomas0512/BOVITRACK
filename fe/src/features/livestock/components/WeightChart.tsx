@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { listWeights, type WeightResponse } from "../../api/weights";
+import { listWeights, type WeightResponse } from "../api/weights";
 
 interface Props {
   farmId: string;
@@ -68,17 +68,24 @@ function CustomTooltip({
 }
 
 export default function WeightChart({ farmId, bovineId }: Props) {
-  const [data, setData] = useState<ChartPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // El resultado recuerda de QUÉ bovino es: así "cargando" se deriva (no hace falta
+  // un setState al inicio del efecto) y una respuesta tardía de otro bovino se ignora.
+  const key = `${farmId}/${bovineId}`;
+  const [result, setResult] = useState<{ key: string; data: ChartPoint[]; error: string } | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let current = true;
     listWeights(farmId, bovineId)
-      .then((weights) => setData(toChartPoints(weights)))
-      .catch(() => setError("No se pudo cargar el gráfico de pesos."))
-      .finally(() => setLoading(false));
-  }, [farmId, bovineId]);
+      .then((weights) => current && setResult({ key, data: toChartPoints(weights), error: "" }))
+      .catch(() => current && setResult({ key, data: [], error: "No se pudo cargar el gráfico de pesos." }));
+    return () => {
+      current = false;
+    };
+  }, [farmId, bovineId, key]);
+
+  const loading = result?.key !== key;
+  const data = loading ? [] : result.data;
+  const error = loading ? "" : result.error;
 
   if (loading) {
     return (

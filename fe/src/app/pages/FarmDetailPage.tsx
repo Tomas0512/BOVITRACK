@@ -1,20 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
-import { getFarm, type FarmResponse } from "../api/farms";
-import EmployeeList from "../components/employees/EmployeeList";
-import LandPlotList from "../components/land_plots/LandPlotList";
-import PaddockList from "../components/paddocks/PaddockList";
-import MapaInteractivoFinca from "../components/paddocks/MapaInteractivoFinca";
-import BovineList from "../components/bovines/BovineList";
-import SanitaryPlanList from "../components/bovines/SanitaryPlanList";
-import FarmTreatments from "../components/bovines/FarmTreatments";
-import FoodList from "../components/food/FoodList";
-import AuditLogList from "../components/audit/AuditLogList";
-import MovementList from "../components/movements/MovementList";
-import DocumentManager from "../components/documents/DocumentManager";
-import CalfList from "../components/calves/CalfList";
-import MilkProductionDashboard from "../components/milk/MilkProductionDashboard";
+import { getFarm, type FarmResponse, LandPlotList, PaddockList, MapaInteractivoFinca } from "@/features/farms";
+import { EmployeeList } from "@/features/team";
+import { BovineList } from "@/features/herd";
+import { SanitaryPlanList, FarmTreatments } from "@/features/health";
+import { FoodList } from "@/features/inventory";
+import { AuditLogList } from "@/features/audit";
+import { MovementList, CalfList } from "@/features/livestock";
+import { DocumentManager } from "@/features/documents";
+import { MilkProductionDashboard } from "@/features/milk_production";
 
 export default function FarmDetailPage() {
   const { farmId } = useParams<{ farmId: string }>();

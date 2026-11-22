@@ -1,6 +1,5 @@
-import type { BovineResponse } from "../../api/bovines";
-import type { LandPlotResponse } from "../../api/land_plots";
-import type { PaddockResponse } from "../../api/paddocks";
+import type { BovineResponse } from "@/features/livestock";
+import type { LandPlotResponse, PaddockResponse } from "@/features/farms";
 
 /* ═══════════════════════════════════════════════════════════════
    Catálogo de columnas y filtros del módulo Ganado → Bovinos.

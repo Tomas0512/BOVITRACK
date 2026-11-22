@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FileText, BarChart3, Dna, Syringe, AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Tag, Mars, Venus, TrendingUp } from "lucide-react";
-import { getBovine, type BovineResponse } from "../api/bovines";
-import WeightChart from "../components/bovines/WeightChart";
-import WeightHistory from "../components/bovines/WeightHistory";
-import MilkProductionList from "../components/bovines/MilkProductionList";
-import FoodList from "../components/bovines/FoodList";
-import TreatmentList from "../components/bovines/TreatmentList";
-import ReproductiveTimeline from "../components/bovines/ReproductiveTimeline";
+import { getBovine, type BovineResponse, WeightChart, WeightHistory, GrowthChart } from "@/features/livestock";
+import { MilkProductionList } from "@/features/milk_production";
+import { BovineFoodList as FoodList } from "@/features/inventory";
+import { TreatmentList } from "@/features/health";
+import { ReproductiveTimeline } from "@/features/reproduction";
 
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -19,7 +17,6 @@ function fmtDate(iso: string | null | undefined): string {
 function fmtSex(sex: string): string {
   return sex === "hembra" ? "Hembra" : sex === "macho" ? "Macho" : sex;
 }
-import GrowthChart from "../components/calves/GrowthChart";
 
 type Tab = "general" | "productivo" | "crecimiento" | "reproductivo" | "sanitario";
 

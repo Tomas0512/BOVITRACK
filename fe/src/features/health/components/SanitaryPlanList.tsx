@@ -5,10 +5,10 @@ import {
   deleteSanitaryPlan,
   markSanitaryPlanAsApplied,
   type SanitaryPlanResponse,
-} from "../../api/sanitary_plans";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+} from "../api/sanitary_plans";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

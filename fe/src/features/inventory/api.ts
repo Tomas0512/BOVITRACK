@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 export interface FoodCreate {
   name: string;
@@ -11,7 +11,7 @@ export interface FoodCreate {
   supplier?: string | null;
 }
 
-export interface FoodUpdate extends Partial<FoodCreate> {}
+export type FoodUpdate = Partial<FoodCreate>;
 
 export interface FoodResponse extends FoodCreate {
   id: string;

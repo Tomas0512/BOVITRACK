@@ -9,15 +9,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import MapaInteractivoFinca from "../../components/paddocks/MapaInteractivoFinca";
-import { listPaddocks } from "../../api/paddocks";
-import { listLandPlots } from "../../api/land_plots";
+import MapaInteractivoFinca from "./MapaInteractivoFinca";
+import { listPaddocks } from "../api/paddocks";
+import { listLandPlots } from "../api/land_plots";
 
-vi.mock("../../api/paddocks", () => ({
+vi.mock("../api/paddocks", () => ({
   listPaddocks: vi.fn(),
 }));
 
-vi.mock("../../api/land_plots", () => ({
+vi.mock("../api/land_plots", () => ({
   listLandPlots: vi.fn(),
 }));
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { createMovement, updateMovement, type MovementRequest, type MovementResponse } from "../../api/movements";
-import { listBovines, type BovineResponse } from "../../api/bovines";
+import { createMovement, updateMovement, type MovementRequest, type MovementResponse } from "../api/movements";
+import { listBovines, type BovineResponse } from "../api/bovines";
 
 const MOVEMENT_TYPES = [
   { value: "compra", label: "Compra" },

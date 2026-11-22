@@ -6,8 +6,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AlertTriangle, CheckCircle2, Eye, EyeOff } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { getInvitationInfo, registerInvited, type InvitationInfo } from "../api/auth";
+import { AuthLayout } from "@/shared/layout";
+import { getInvitationInfo, registerInvited, type InvitationInfo } from "../api";
 
 const DOCUMENT_TYPES = [
   { value: "", label: "Seleccione..." },

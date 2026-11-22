@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bell, Check, ChevronRight } from "lucide-react";
-import { useFarm } from "../../context/FarmContext";
+import { useFarm } from "@/features/farms";
 import {
   getUnreadNotificationCount,
   listNotificationHistory,
   markNotificationRead,
   type NotificationLog,
-} from "../../api/alerts";
+} from "../api";
 
 const POLL_INTERVAL_MS = 60_000;
 const PANEL_LIMIT = 5;

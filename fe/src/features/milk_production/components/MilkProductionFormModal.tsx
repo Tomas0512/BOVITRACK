@@ -5,10 +5,10 @@ import {
   updateMilkProduction,
   type MilkProductionRequest,
   type MilkProductionResponse,
-} from "../../api/milk_production";
-import type { BovineResponse } from "../../api/bovines";
-import type { LandPlotResponse } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
+} from "../api";
+import type { BovineResponse } from "@/features/livestock";
+import type { LandPlotResponse } from "@/features/farms";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

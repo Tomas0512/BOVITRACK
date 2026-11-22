@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
-import { listPaddocks, deletePaddock, type PaddockResponse } from "../../api/paddocks";
-import { listLandPlots } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
+import { listPaddocks, deletePaddock, type PaddockResponse } from "../api/paddocks";
+import { listLandPlots } from "../api/land_plots";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
 import PaddockFormModal from "./PaddockFormModal";
 
 interface Props {

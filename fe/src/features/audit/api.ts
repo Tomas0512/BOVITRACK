@@ -12,7 +12,7 @@
  *           se conserva sin cambios para no romper esa pantalla.
  */
 
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 

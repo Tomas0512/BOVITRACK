@@ -6,7 +6,7 @@ import {
   deleteReproductiveEvent,
   type ReproductiveEventResponse,
   type ReproductiveEventCreate,
-} from "../../api/reproductive_events";
+} from "../api";
 
 interface Props {
   farmId: string;
@@ -54,9 +54,14 @@ const EMPTY_FORM: ReproductiveEventCreate = {
 };
 
 export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
-  const [events, setEvents] = useState<ReproductiveEventResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // Cada recarga sube `reloads`; el resultado recuerda para qué bovino y qué recarga
+  // es, así "cargando" se deriva y una respuesta vieja nunca pisa a una nueva.
+  const [reloads, setReloads] = useState(0);
+  const key = `${farmId}/${bovineId}/${reloads}`;
+  const [result, setResult] = useState<{ key: string; events: ReproductiveEventResponse[]; error: string } | null>(null);
+  const loading = result?.key !== key;
+  const events = result?.events ?? [];
+  const error = loading ? "" : result.error;
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<ReproductiveEventCreate>({
     ...EMPTY_FORM,
@@ -67,16 +72,18 @@ export default function ReproductiveTimeline({ farmId, bovineId }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function load() {
-    setLoading(true);
-    listReproductiveEvents(farmId, bovineId)
-      .then(setEvents)
-      .catch(() => setError("No se pudieron cargar los eventos reproductivos."))
-      .finally(() => setLoading(false));
+    setReloads((n) => n + 1);
   }
 
   useEffect(() => {
-    load();
-  }, [farmId, bovineId]);
+    let current = true;
+    listReproductiveEvents(farmId, bovineId)
+      .then((data) => current && setResult({ key, events: data, error: "" }))
+      .catch(() => current && setResult({ key, events: [], error: "No se pudieron cargar los eventos reproductivos." }));
+    return () => {
+      current = false;
+    };
+  }, [farmId, bovineId, key]);
 
   const isFormComplete = form.event_type !== "" && form.event_date !== "";
 

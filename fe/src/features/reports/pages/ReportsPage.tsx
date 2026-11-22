@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, FileText, FileSpreadsheet, Loader2 } from "lucide-react";
-import { generateReport, downloadReport, type ReportResponse, type ReportCategory } from "../api/reports";
+import { generateReport, downloadReport, type ReportResponse, type ReportCategory } from "../api";
 
 const CATEGORY_LABELS: Record<string, string> = {
   productivo: "Productivo",

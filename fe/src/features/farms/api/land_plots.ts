@@ -1,4 +1,4 @@
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 /** Potrero que se crea junto con su lote. Hereda el land_plot_id del lote. */
 export interface PaddockNested {

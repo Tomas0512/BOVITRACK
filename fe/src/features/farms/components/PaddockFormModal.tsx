@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
-import { createPaddock, updatePaddock, type PaddockRequest, type PaddockResponse } from "../../api/paddocks";
-import { listLandPlots, type LandPlotResponse } from "../../api/land_plots";
-import { getApiErrorMessage } from "../../api/errors";
+import { createPaddock, updatePaddock, type PaddockRequest, type PaddockResponse } from "../api/paddocks";
+import { listLandPlots, type LandPlotResponse } from "../api/land_plots";
+import { getApiErrorMessage } from "@/core/http";
 
 interface Props {
   farmId: string;

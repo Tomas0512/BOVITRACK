@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, TrendingUp, TrendingDown, Package, DollarSign } from "lucide-react";
-import { listFoods, listStockMovements, type FoodResponse, type StockMovementResponse } from "../../api/food";
+import { listFoods, listStockMovements, type FoodResponse, type StockMovementResponse } from "../api";
 
 interface Props {
   farmId: string;

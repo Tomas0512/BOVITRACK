@@ -8,8 +8,7 @@
  *           colombiana sobre protección de datos personales.
  */
 
-import { Header } from "../components/layout/Header";
-import { Footer } from "../components/layout/Footer";
+import { Header, Footer } from "@/shared/layout";
 
 export default function PrivacyPage() {
   return (

@@ -1,4 +1,4 @@
-import apiClient from "./axios";
+import { http as apiClient } from "@/core/http";
 
 export type DocumentType = "pdf" | "image" | "word" | "excel" | "text";
 export type AssociationType = "farm" | "bovine" | "reproductive_event" | "treatment" | "sanitary_plan";

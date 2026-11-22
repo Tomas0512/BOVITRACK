@@ -22,8 +22,8 @@ import {
   type AuditLogFilters,
   type AuditLogPage,
   type AuditCatalog,
-} from "../api/audit_logs";
-import { listFarms, type FarmResponse } from "../api/farms";
+} from "../api";
+import { listFarms, type FarmResponse } from "@/features/farms";
 
 /** Registros por página mostrados en la tabla. */
 const PAGE_SIZE = 50;

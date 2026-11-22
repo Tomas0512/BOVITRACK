@@ -1,14 +1,18 @@
-import api from "./axios";
+/**
+ * Archivo: features/team/api.ts
+ * Descripción: Cliente HTTP del equipo de una finca: roles, empleados,
+ *              invitaciones (y el registro por invitación) y reactivación de cuentas.
+ */
+
+import { http as api } from "@/core/http";
+import type { UserResponse } from "@/features/identity";
+
+const AUTH = "/auth";
 
 export interface RoleOption {
   id: string;
   name: string;
   description: string | null;
-}
-
-export interface EmployeeAssign {
-  user_email: string;
-  role_id: string;
 }
 
 export interface InviteEmployee {
@@ -58,13 +62,6 @@ export async function listEmployees(
   return response.data;
 }
 
-export async function assignEmployee(
-  farmId: string,
-  data: EmployeeAssign
-): Promise<EmployeeResponse> {
-  const response = await api.post<EmployeeResponse>(`${base(farmId)}/employees`, data);
-  return response.data;
-}
 
 export interface InvitationResponse {
   id: string;
@@ -111,5 +108,81 @@ export async function setAccountStatus(
     `${base(farmId)}/employees/${userId}/account`,
     data
   );
+  return response.data;
+}
+
+/* ── Invitaciones ── */
+
+export interface InvitationInfo {
+  email: string;
+  farm_name: string;
+  role_name: string;
+  inviter_name: string | null;
+}
+
+export interface InvitedRegisterRequest {
+  token: string;
+  first_name: string;
+  last_name: string;
+  document_type: string;
+  document_number: string;
+  phone: string;
+  password: string;
+  confirm_password: string;
+  accept_terms: boolean;
+  accept_data_policy: boolean;
+}
+
+/** Obtener info de una invitación por token */
+export async function getInvitationInfo(token: string): Promise<InvitationInfo> {
+  const response = await api.get<InvitationInfo>(`${AUTH}/invitation/${token}`);
+  return response.data;
+}
+
+/** Registrar usuario invitado */
+export async function registerInvited(data: InvitedRegisterRequest): Promise<UserResponse> {
+  const response = await api.post<UserResponse>(`${AUTH}/register-invited`, data);
+  return response.data;
+}
+
+/* ── Reactivación ── */
+
+export interface ReactivationRequestData {
+  email: string;
+  reason?: string;
+}
+
+export interface ReactivationRequestResponse {
+  id: string;
+  user_id: string;
+  reason: string | null;
+  status: string;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export interface ReactivationRequestDetail extends ReactivationRequestResponse {
+  user_email: string;
+  user_name: string;
+}
+
+export async function requestReactivation(data: ReactivationRequestData): Promise<ReactivationRequestResponse> {
+  const response = await api.post<ReactivationRequestResponse>(`${AUTH}/request-reactivation`, data);
+  return response.data;
+}
+
+// Moderación (solo Administrador): las usa pages/ReactivationRequestsPage.
+export async function listReactivationRequests(): Promise<ReactivationRequestDetail[]> {
+  const response = await api.get<ReactivationRequestDetail[]>("/admin/reactivation-requests");
+  return response.data;
+}
+
+export async function approveReactivation(requestId: string): Promise<ReactivationRequestResponse> {
+  const response = await api.post<ReactivationRequestResponse>(`/admin/reactivation-requests/${requestId}/approve`);
+  return response.data;
+}
+
+export async function rejectReactivation(requestId: string): Promise<ReactivationRequestResponse> {
+  const response = await api.post<ReactivationRequestResponse>(`/admin/reactivation-requests/${requestId}/reject`);
   return response.data;
 }

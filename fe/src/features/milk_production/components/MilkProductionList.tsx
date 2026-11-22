@@ -4,13 +4,12 @@ import {
   listMilkProduction,
   deleteMilkProduction,
   type MilkProductionResponse,
-} from "../../api/milk_production";
-import { listBovines, type BovineResponse } from "../../api/bovines";
-import { getApiErrorMessage } from "../../api/errors";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
-import ConfirmDialog from "../ConfirmDialog";
-import MilkProductionFormModal from "../milk/MilkProductionFormModal";
+} from "../api";
+import { listBovines, type BovineResponse } from "@/features/livestock";
+import { getApiErrorMessage } from "@/core/http";
+import { useTable } from "@/shared/hooks";
+import { Pagination, ConfirmDialog } from "@/shared/ui";
+import MilkProductionFormModal from "./MilkProductionFormModal";
 
 interface Props {
   farmId: string;

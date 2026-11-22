@@ -1,3 +1,4 @@
+// Configuración global de Vitest: matchers de Testing Library y mocks del navegador (jsdom).
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 

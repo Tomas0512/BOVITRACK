@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Syringe } from "lucide-react";
-import { listTreatments, type TreatmentResponse } from "../../api/treatments";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+import { listTreatments, type TreatmentResponse } from "../api/treatments";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

@@ -10,8 +10,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Key, Mail } from "lucide-react";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { forgotPassword } from "../api/auth";
+import { AuthLayout } from "@/shared/layout";
+import { forgotPassword } from "../api";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

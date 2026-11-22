@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, AlertTriangle, ArrowUpDown } from "lucide-react";
-import { listMovements, type MovementResponse } from "../../api/movements";
-import { listBovines, type BovineResponse } from "../../api/bovines";
-import { getApiErrorMessage } from "../../api/errors";
-import Pagination from "../Pagination";
+import { listMovements, type MovementResponse } from "../api/movements";
+import { listBovines, type BovineResponse } from "../api/bovines";
+import { getApiErrorMessage } from "@/core/http";
+import { Pagination } from "@/shared/ui";
 import MovementFormModal from "./MovementFormModal";
 
 const TYPE_BADGE: Record<string, string> = {

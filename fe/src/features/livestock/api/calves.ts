@@ -20,7 +20,7 @@
  */
 
 import axios from "axios";
-import apiClient from "./axios";
+import { http as apiClient } from "@/core/http";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 📋 TIPOS DE DATOS (TypeScript Interfaces)
@@ -293,8 +293,8 @@ export const updateCalfFeedingPlan = async (
     end_date?: string;
     notes?: string;
   }
-): Promise<any> => {
-  const response = await apiClient.post(
+): Promise<Record<string, unknown>> => {
+  const response = await apiClient.post<Record<string, unknown>>(
     `/farms/${farmId}/calves/${bovineId}/feeding-plan`,
     feedingData
   );
@@ -310,8 +310,8 @@ export const updateCalfFeedingPlan = async (
  * Función auxiliar para manejar errores de forma consistente.
  * Why? Mostrar mensajes de error amigables al usuario.
  */
-export const handleCalfError = (error: any): string => {
-  if (axios.isAxiosError(error)) {
+export const handleCalfError = (error: unknown): string => {
+  if (axios.isAxiosError<{ detail?: string }>(error)) {
     // Error del servidor
     if (error.response?.data?.detail) {
       return error.response.data.detail;

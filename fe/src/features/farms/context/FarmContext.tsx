@@ -1,16 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { listFarms, type FarmResponse } from "../api/farms";
-
-interface FarmContextValue {
-  farms: FarmResponse[];
-  activeFarmId: string | null;
-  activeFarm: FarmResponse | null;
-  setActiveFarmId: (id: string) => void;
-  loading: boolean;
-  refreshFarms: () => Promise<void>;
-}
-
-const FarmContext = createContext<FarmContextValue | undefined>(undefined);
+import { FarmContext } from "./farmContextDef";
 
 const STORAGE_KEY = "active_farm_id";
 
@@ -59,10 +49,4 @@ export function FarmProvider({ children }: { children: ReactNode }) {
   );
 
   return <FarmContext.Provider value={value}>{children}</FarmContext.Provider>;
-}
-
-export function useFarm() {
-  const ctx = useContext(FarmContext);
-  if (!ctx) throw new Error("useFarm must be used within a FarmProvider");
-  return ctx;
 }

@@ -4,7 +4,7 @@ import { ArrowLeft, TrendingUp, TrendingDown, Wallet, DollarSign, Calendar, type
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend,
 } from "recharts";
-import { getIndicators, listRecords, type EconomicIndicators, type EconomicRecordResponse } from "../api/economics";
+import { getIndicators, listRecords, type EconomicIndicators, type EconomicRecordResponse } from "../api";
 
 interface CategoryItem {
   name: string;

@@ -5,7 +5,7 @@
  */
 
 import { Link } from "react-router-dom";
-import ThemeToggle from "./ThemeToggle";
+import { ThemeToggle } from "@/shared/theme";
 
 interface HeaderProps {
   /** Texto del botón de acción (ej: "Iniciar sesión", "Registrarse") */

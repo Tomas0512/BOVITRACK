@@ -7,7 +7,7 @@
  * Impact? Sin este archivo, el componente ReproductiveTimeline no puede
  *           listar ni registrar eventos reproductivos.
  */
-import api from "./axios";
+import { http as api } from "@/core/http";
 
 // What? Datos necesarios para crear un evento reproductivo.
 // Why? Tipar el body de la petición POST al backend.

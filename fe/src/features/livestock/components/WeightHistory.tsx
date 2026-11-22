@@ -6,9 +6,9 @@ import {
   deleteWeight,
   type WeightResponse,
   type WeightCreate,
-} from "../../api/weights";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+} from "../api/weights";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface Props {
   farmId: string;

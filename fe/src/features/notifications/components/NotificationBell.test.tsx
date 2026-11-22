@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import NotificationBell from "../../components/layout/NotificationBell";
+import NotificationBell from "./NotificationBell";
 import {
   getUnreadNotificationCount,
   listNotificationHistory,
   markNotificationRead,
   type NotificationLog,
-} from "../../api/alerts";
+} from "../api";
 
-vi.mock("../../api/alerts", () => ({
+vi.mock("../api", () => ({
   getUnreadNotificationCount: vi.fn(),
   listNotificationHistory: vi.fn(),
   markNotificationRead: vi.fn(),
 }));
 
-vi.mock("../../context/FarmContext", () => ({
+vi.mock("@/features/farms", () => ({
   useFarm: () => ({ activeFarmId: "farm-123" }),
 }));
 

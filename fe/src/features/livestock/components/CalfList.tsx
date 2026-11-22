@@ -32,9 +32,9 @@ import {
   handleCalfError,
   ICalf,
   ICalfSummary,
-} from "../../api/calves";
-import { useTable } from "../../hooks/useTable";
-import Pagination from "../Pagination";
+} from "../api/calves";
+import { useTable } from "@/shared/hooks";
+import { Pagination } from "@/shared/ui";
 
 interface ICalfListProps {
   farmId: string;

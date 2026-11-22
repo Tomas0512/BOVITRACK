@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { getApiErrorMessage } from "../../api/errors";
+import { getApiErrorMessage } from "@/core/http";
 import {
   createLandPlot,
   updateLandPlot,
   type LandPlotRequest,
   type LandPlotResponse,
   type PaddockNested,
-} from "../../api/land_plots";
+} from "../api/land_plots";
 
 interface Props {
   farmId: string;
