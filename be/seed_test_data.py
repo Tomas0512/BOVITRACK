@@ -20,23 +20,24 @@ from decimal import Decimal
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app.database import Base
-from app.models.user import User
-from app.models.farm import Farm, UserFarm, LandPlot
-from app.models.role import Role
-from app.models.purpose import Purpose
-from app.models.department import Department
-from app.models.paddock import Paddock
-from app.models.bovine import Bovine
-from app.models.weight import Weight
-from app.models.food import Food, StockMovement
-from app.models.reproductive_event import ReproductiveEvent
-from app.models.treatment import Treatment
-from app.models.milk_production import MilkProduction
-from app.models.economics import EconomicRecord
-from app.models.movement import AnimalMovement
-from app.models.sanitary_plan import SanitaryPlan
-from app.services.audit_service import add_audit_log
+from app.core.database import Base
+from app.modules.identity.models import User
+from app.modules.farms.models import Farm, LandPlot
+from app.modules.identity.models import UserFarm
+from app.modules.identity.models import Role
+from app.modules.farms.models import Purpose
+from app.modules.farms.models import Department
+from app.modules.farms.models import Paddock
+from app.modules.livestock.models import Bovine
+from app.modules.livestock.models import Weight
+from app.modules.inventory.models import Food, StockMovement
+from app.modules.reproduction.models import ReproductiveEvent
+from app.modules.health.models import Treatment
+from app.modules.milk_production.models import MilkProduction
+from app.modules.economics.models import EconomicRecord
+from app.modules.livestock.models import AnimalMovement
+from app.modules.health.models import SanitaryPlan
+from app.core.audit_trail import add_audit_log
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DATABASE_URL)

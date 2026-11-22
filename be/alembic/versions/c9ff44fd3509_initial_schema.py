@@ -23,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Importar todos los modelos para que Base.metadata los conozca
-    from app.database import Base  # noqa: F401
+    from app.core.database import Base  # noqa: F401
     import app.models  # noqa: F401 — registra todos los modelos en Base.metadata
 
     bind = op.get_bind()
@@ -31,7 +31,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    from app.database import Base  # noqa: F401
+    from app.core.database import Base  # noqa: F401
     import app.models  # noqa: F401
 
     bind = op.get_bind()
