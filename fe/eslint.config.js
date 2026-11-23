@@ -59,7 +59,7 @@ const NO_DOMAIN = [
 ]
 
 export default tseslint.config(
-  { ignores: ['dist', 'coverage', 'vite.config.js', 'vite.config.d.ts'] },
+  { ignores: ['dist', 'coverage'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

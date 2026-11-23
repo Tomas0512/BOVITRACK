@@ -3,3 +3,9 @@ dist/
 .vite/
 .env
 *.local
+
+# Generados (no se versionan)
+coverage/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
