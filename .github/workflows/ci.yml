@@ -1,0 +1,173 @@
+# ══════════════════════════════════════════════════════════════
+# BoviTrack — Integración continua (Parte 6a del refactor)
+#
+# What?    En cada push y pull request corre las mismas verificaciones que se
+#          usaron durante el refactor:
+#            backend  → ruff, contratos de arquitectura (import-linter),
+#                       migraciones en un Postgres limpio + `alembic check`,
+#                       ida y vuelta de la última migración y pytest con cobertura.
+#            frontend → ESLint (fronteras de features, --max-warnings 0),
+#                       Vitest y build de producción (tsc + Vite).
+#            producción → construye las imágenes y levanta docker-compose.prod.yml
+#                       para comprobar que el stack real arranca y responde.
+# ¿Para?   Que nada roto llegue a main: un import que rompe una frontera, un
+#          modelo que no coincide con la BD o un test que falla bloquean el PR.
+# Impact?  Si un job falla, GitHub lo muestra en el PR con el paso y el error.
+# ══════════════════════════════════════════════════════════════
+name: CI
+
+on:
+  push:
+    branches: [main, "refactor/**", "feature/**", "fix/**", "chore/**"]
+  pull_request:
+    branches: [main]
+
+# Una corrida nueva en la misma rama cancela la anterior (ahorra minutos).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (ruff, contratos, migraciones, tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: be
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: bovitrack_ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci -d bovitrack_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Valores SOLO para CI (no son secretos de ningún entorno real).
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/bovitrack_ci
+      SECRET_KEY: ci-only-secret-key-not-used-anywhere-else-0123456789
+      ENVIRONMENT: test
+      PGPASSWORD: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: be/pyproject.toml
+
+      - name: Instalar dependencias (app + grupo dev)
+        run: |
+          python -m pip install --upgrade pip
+          pip install . --group dev
+
+      - name: Ruff (estilo y errores)
+        run: ruff check app tests
+
+      - name: Contratos de arquitectura (import-linter)
+        run: lint-imports
+
+      - name: Preparar la BD como en Docker (db/init.sql)
+        run: psql -h localhost -U ci -d bovitrack_ci -v ON_ERROR_STOP=1 -f ../db/init.sql
+
+      - name: Migraciones en una BD limpia
+        run: alembic upgrade head
+
+      - name: Modelos == BD (alembic check)
+        run: alembic check
+
+      - name: La última migración se puede deshacer y rehacer
+        run: |
+          alembic downgrade -1
+          alembic upgrade head
+          alembic check
+
+      - name: Tests con cobertura
+        run: python -m pytest -q -p no:cacheprovider --cov=app --cov-report=term
+
+  frontend:
+    name: Frontend (lint, tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fe
+    steps:
+      - uses: actions/checkout@v4
+
+      # Usa la versión de pnpm de "packageManager" en fe/package.json.
+      - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: fe/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: fe/pnpm-lock.yaml
+
+      - name: Instalar dependencias (lockfile exacto)
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint (fronteras de features, sin avisos)
+        run: pnpm lint
+
+      - name: Vitest (incluye la prueba de estructura)
+        run: pnpm test
+
+      - name: Build de producción (tsc + Vite)
+        run: pnpm build
+        env:
+          VITE_API_URL: /api/v1
+
+  production-smoke:
+    name: Stack de producción (imágenes + arranque)
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Variables de prueba para docker-compose.prod.yml
+        run: |
+          {
+            echo "POSTGRES_USER=ci"
+            echo "POSTGRES_PASSWORD=$(openssl rand -hex 16)"
+            echo "POSTGRES_DB=bovitrack"
+            echo "SECRET_KEY=$(openssl rand -hex 32)"
+            echo "FRONTEND_URL=http://localhost:8080"
+            echo "EMAIL_BACKEND=smtp"
+            echo "SMTP_HOST=smtp.invalid"
+          } > ci.env
+
+      - name: Construir y levantar (espera a que todo esté healthy)
+        run: docker compose -f docker-compose.prod.yml --env-file ci.env up -d --build --wait --wait-timeout 300
+
+      - name: Comprobar el stack
+        run: |
+          set -e
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/)" = 200          # web servida por nginx
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/v1/users/me)" = 401  # API detrás de nginx, protegida
+          docker compose -f docker-compose.prod.yml --env-file ci.env exec -T be python -c "
+          import urllib.request, urllib.error
+          for path in ('/docs', '/openapi.json'):
+              try:
+                  urllib.request.urlopen('http://localhost:8000' + path)
+                  raise SystemExit(path + ' NO debería estar publicado en producción')
+              except urllib.error.HTTPError as error:
+                  assert error.code == 404, (path, error.code)
+          print('docs apagadas')"
+          echo "Stack de producción OK"
+
+      - name: Logs si algo falló
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml --env-file ci.env logs --tail=100
+
+      - name: Apagar
+        if: always()
+        run: docker compose -f docker-compose.prod.yml --env-file ci.env down -v
