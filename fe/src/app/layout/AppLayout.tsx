@@ -12,6 +12,7 @@ import {
   type PurposeOption,
 } from "@/features/farms";
 import { useFarm } from "@/features/farms";
+import Breadcrumbs from "./Breadcrumbs";
 import Sidebar from "./Sidebar";
 import { ThemeToggle } from "@/shared/theme";
 import { NotificationBell } from "@/features/notifications";
@@ -448,6 +449,7 @@ export default function AppLayout() {
 
         {/* Contenido */}
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+          <Breadcrumbs />
           <Outlet />
         </main>
 

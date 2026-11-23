@@ -21,12 +21,18 @@ export default function Breadcrumbs() {
   else if (pathname === "/audit") {
     crumbs.push({ label: "Auditoría" });
   }
+  // /admin/reactivations → Inicio / Reactivaciones
+  else if (pathname === "/admin/reactivations") {
+    crumbs.push({ label: "Reactivaciones" });
+  }
   // /farms/:farmId → Inicio / Detalle de Finca
   else if (/^\/farms\/[^/]+$/.test(pathname)) {
     crumbs.push({ label: "Detalle de Finca" });
   }
-  // /farms/:farmId/<sub> → Inicio / Detalle de Finca / <sub>
-  else if (/^\/farms\/[^/]+\/[^/]+$/.test(pathname)) {
+  // /farms/:farmId/<sub>[/:id] → Inicio / Detalle de Finca / <sub>
+  // (la ficha del bovino tiene 4 segmentos: /farms/:farmId/bovines/:bovineId;
+  // antes la expresión solo aceptaba 3 y ahí no aparecían las migas)
+  else if (/^\/farms\/[^/]+\/[^/]+(\/[^/]+)?$/.test(pathname)) {
     const [, farmId, sub] = pathname.split("/").filter(Boolean);
     crumbs.push({ label: "Detalle de Finca", to: `/farms/${farmId}` });
 
