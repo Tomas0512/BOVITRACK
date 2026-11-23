@@ -5,7 +5,7 @@
 #          usaron durante el refactor:
 #            backend  → ruff, contratos de arquitectura (import-linter),
 #                       migraciones en un Postgres limpio + `alembic check`,
-#                       ida y vuelta de la última migración y pytest con cobertura.
+#                       deshacer y rehacer TODA la cadena de migraciones y pytest con cobertura.
 #            frontend → ESLint (fronteras de features, --max-warnings 0),
 #                       Vitest y build de producción (tsc + Vite).
 #            producción → construye las imágenes y levanta docker-compose.prod.yml
@@ -83,9 +83,13 @@ jobs:
       - name: Modelos == BD (alembic check)
         run: alembic check
 
-      - name: La última migración se puede deshacer y rehacer
+      # Deshace TODA la cadena (hasta una BD vacía) y la vuelve a aplicar:
+      # cualquier despliegue se puede revertir a cualquier versión anterior.
+      - name: Todas las migraciones se pueden deshacer y rehacer
         run: |
-          alembic downgrade -1
+          alembic downgrade base
+          left=$(psql -h localhost -U ci -d bovitrack_ci -Atc "select count(*) from pg_tables where schemaname='public' and tablename<>'alembic_version'")
+          test "$left" = 0 || { echo "downgrade base dejó $left tablas"; exit 1; }
           alembic upgrade head
           alembic check
 

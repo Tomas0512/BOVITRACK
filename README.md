@@ -167,15 +167,16 @@ con el paso y el error.
 
 | Job | Qué verifica |
 |-----|--------------|
-| **Backend** | `ruff`, contratos de `import-linter`, migraciones en un PostgreSQL 17 limpio, `alembic check` (modelos == BD), deshacer y rehacer la última migración, y `pytest` con cobertura |
+| **Backend** | `ruff`, contratos de `import-linter`, migraciones en un PostgreSQL 17 limpio, `alembic check` (modelos == BD), deshacer **todas** las migraciones hasta una BD vacía y volver a aplicarlas, y `pytest` con cobertura |
 | **Frontend** | `pnpm install --frozen-lockfile`, ESLint sin avisos, Vitest y `pnpm build` |
 | **Stack de producción** | Construye las imágenes, levanta `docker-compose.prod.yml` hasta que todo esté *healthy* y comprueba: la web responde 200, la API detrás de nginx responde 401 sin sesión, y `/docs` y `/openapi.json` dan 404 |
 
 Para reproducirlo en local antes de subir, corre los comandos de **Comandos útiles** (backend y frontend).
 
-> **Limitación conocida:** las migraciones más antiguas no se pueden deshacer hasta `base` (la migración inicial
-> crea las tablas con `create_all`). Por eso CI solo comprueba `alembic downgrade -1`, que es lo que haría falta
-> para revertir un despliegue.
+> **Regla para migraciones nuevas:** cada migración define sus tablas y columnas de forma explícita
+> (`op.create_table`, `op.add_column`…) y su `downgrade()` deshace **solo** lo que ella creó. Nunca usar
+> `Base.metadata.create_all()`/`drop_all()` ni importar modelos dentro de una migración: el resultado cambiaría
+> cada vez que cambie un modelo y la cadena dejaría de poder deshacerse. CI lo comprueba con `alembic downgrade base`.
 
 ## Estructura del proyecto
 
