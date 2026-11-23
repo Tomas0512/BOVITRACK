@@ -59,7 +59,7 @@ class Consumption(Base):
     farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
     land_plot_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("land_plot.id", ondelete="SET NULL"), nullable=True)
     bovine_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bovine.id", ondelete="SET NULL"), nullable=True)
-    paddock_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("paddock.id", ondelete="SET NULL"), nullable=True)
+    paddock_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("paddock.id", ondelete="SET NULL"), nullable=True, index=True)
     food_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("food.id", ondelete="RESTRICT"), nullable=False)
     quantity: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     feeding_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

@@ -27,9 +27,9 @@ class ReproductiveEvent(Base):
     __tablename__ = "reproductive_event"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
-    bovine_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("bovine.id", ondelete="RESTRICT"), nullable=False)
-    event_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False, index=True)
+    bovine_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("bovine.id", ondelete="RESTRICT"), nullable=False, index=True)
+    event_type: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     event_date: Mapped[date] = mapped_column(Date, nullable=False)
     result: Mapped[str | None] = mapped_column(String(50), nullable=True)
     due_date: Mapped[date | None] = mapped_column(Date, nullable=True)

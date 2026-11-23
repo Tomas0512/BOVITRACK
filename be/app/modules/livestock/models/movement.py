@@ -28,11 +28,11 @@ class AnimalMovement(Base):
     __tablename__ = "animal_movement"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
-    bovine_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bovine.id", ondelete="SET NULL"), nullable=True)
+    farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False, index=True)
+    bovine_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("bovine.id", ondelete="SET NULL"), nullable=True, index=True)
     animal_identifier: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    movement_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    movement_date: Mapped[date] = mapped_column(Date, nullable=False)
+    movement_type: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    movement_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     counterparty_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     counterparty_document: Mapped[str | None] = mapped_column(String(50), nullable=True)

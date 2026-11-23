@@ -584,3 +584,28 @@ def test_deleting_an_older_weight_keeps_current_weight(livestock_db: Any) -> Non
     service.delete_weight(FARM, cow.id, oldest.id, USER)
 
     assert cow.current_weight == Decimal("75")
+
+
+# ── 22. Plan sanitario: una dosis de 51 a 100 caracteres daba 500 ───
+# La API aceptaba cualquier largo, el modelo decía VARCHAR(100) y la BD tenía
+# VARCHAR(50). Migración s2t3u4v5w6x7 + límites en el schema (422).
+
+
+def test_sanitary_plan_dose_up_to_100_chars_is_accepted_and_longer_is_422() -> None:
+    from pydantic import ValidationError
+
+    from app.modules.health.models import SanitaryPlan
+    from app.modules.health.schemas import SanitaryPlanCreate
+
+    base = {"bovine_id": uuid.uuid4(), "vaccine_or_treatment_name": "Aftosa", "treatment_type": "vacuna",
+            "administration_route": "intramuscular", "frequency_days": 180}
+    long_dose = "2 mL por cada 50 kg de peso vivo, repetir a los 21 días"  # 56 caracteres
+    assert SanitaryPlanCreate(**base, dose=long_dose).dose == long_dose
+    with pytest.raises(ValidationError):
+        SanitaryPlanCreate(**base, dose="x" * 101)
+    with pytest.raises(ValidationError):
+        SanitaryPlanCreate(**{**base, "administration_route": "y" * 51})
+
+    # El schema nunca acepta más de lo que cabe en la columna.
+    columns = SanitaryPlan.__table__.c
+    assert (columns.dose.type.length, columns.administration_route.type.length) == (100, 50)

@@ -35,7 +35,7 @@ class Bovine(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     farm_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("farm.id", ondelete="RESTRICT"), nullable=False)
     land_plot_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("land_plot.id", ondelete="SET NULL"), nullable=True)
-    paddock_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("paddock.id", ondelete="SET NULL"), nullable=True)
+    paddock_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("paddock.id", ondelete="SET NULL"), nullable=True, index=True)
     name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     identification_number: Mapped[str] = mapped_column(String(50), nullable=False)
     sex: Mapped[str] = mapped_column(String(10), nullable=False)

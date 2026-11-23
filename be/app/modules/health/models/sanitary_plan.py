@@ -34,10 +34,10 @@ Nota: Este es el PLAN (configuración).
 """
 
 import uuid
-from datetime import date, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -75,8 +75,9 @@ class SanitaryPlan(Base):
 
     farm_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("farm.id", ondelete="CASCADE"),
+        ForeignKey("farm.id", ondelete="RESTRICT"),
         nullable=False,
+        index=True,
     )
     """
     ¿A qué finca pertenece este plan?
@@ -89,8 +90,9 @@ class SanitaryPlan(Base):
 
     bovine_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("bovine.id", ondelete="CASCADE"),
+        ForeignKey("bovine.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     """
     ¿A qué bovino aplica este plan?
@@ -100,8 +102,9 @@ class SanitaryPlan(Base):
 
     land_plot_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("land_plot.id", ondelete="CASCADE"),
+        ForeignKey("land_plot.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     """
     ¿A qué lote/potrero aplica este plan?
@@ -130,7 +133,7 @@ class SanitaryPlan(Base):
     """
 
     administration_route: Mapped[str] = mapped_column(
-        String(30), nullable=False, default="intramuscular"
+        String(50), nullable=False, default="intramuscular"
     )
     """
     ¿Cómo se aplica?
@@ -157,14 +160,15 @@ class SanitaryPlan(Base):
     - 365 = cada año
     """
 
-    last_applied_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    last_applied_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     """
     ¿Cuándo se aplicó por última vez?
     Si es NULL, es porque aún no se ha aplicado
     """
 
-    next_scheduled_date: Mapped[date | None] = mapped_column(
-        Date, nullable=True
+    next_scheduled_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True,
+        index=True,
     )
     """
     ¿Cuándo se debe aplicar la próxima vez?

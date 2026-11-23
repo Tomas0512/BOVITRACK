@@ -9,7 +9,7 @@ Módulo: modules/health/schemas/sanitary_plan.py (contrato de entrada y salida)
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class SanitaryPlanCreate(BaseModel):
@@ -22,8 +22,9 @@ class SanitaryPlanCreate(BaseModel):
     land_plot_id: uuid.UUID | None = None
     vaccine_or_treatment_name: str
     treatment_type: str  # "vacuna", "desparasitación", "suplemento", etc.
-    administration_route: str  # "intramuscular", "oral", "tópica", etc.
-    dose: str | None = None  # "2 mL", "100 mL", etc.
+    # Límites = largo de las columnas: un texto más largo es 422, no un 500 de la BD.
+    administration_route: str = Field(max_length=50)  # "intramuscular", "oral", "tópica", etc.
+    dose: str | None = Field(default=None, max_length=100)  # "2 mL", "100 mL", etc.
     frequency_days: int  # Cada cuántos días: 180, 90, 30, etc.
     next_scheduled_date: datetime | None = None
     observations: str | None = None
@@ -61,8 +62,8 @@ class SanitaryPlanUpdate(BaseModel):
 
     vaccine_or_treatment_name: str | None = None
     treatment_type: str | None = None
-    administration_route: str | None = None
-    dose: str | None = None
+    administration_route: str | None = Field(default=None, max_length=50)
+    dose: str | None = Field(default=None, max_length=100)
     frequency_days: int | None = None
     last_applied_date: datetime | None = None
     next_scheduled_date: datetime | None = None
