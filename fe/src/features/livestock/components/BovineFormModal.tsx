@@ -1,0 +1,384 @@
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { createBovine, listBovineBreeds, updateBovine, type BovineRequest, type BovineResponse } from "../api/bovines";
+import type { LandPlotResponse, PaddockResponse } from "@/features/farms";
+import { getApiErrorMessage } from "@/core/http";
+
+interface Props {
+  farmId: string;
+  landPlots: LandPlotResponse[];
+  paddocks: PaddockResponse[];
+  existing?: BovineResponse;
+  onSuccess: () => void;
+  onClose: () => void;
+}
+
+const ENTRY_TYPES = ["nacimiento", "compra", "donacion", "traspaso"];
+const PURPOSES = ["leche", "carne", "doble_proposito", "cria", "trabajo"];
+const STATUSES = ["activo", "vendido", "muerto", "retirado"];
+
+const COMMON_BREEDS = [
+  "Holstein", "Brahman", "Gyr", "Guzerat", "Normando", "Angus", "Hereford",
+  "Nelore", "Cebú", "Simental", "Simbrah", "Criollo", "Jersey", "Ayrshire",
+  "Limousin", "Montbéliard",
+];
+
+const normalize = (s: string) =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+const STEPS = [
+  { label: "Identificación" },
+  { label: "Fechas y pesos" },
+  { label: "Clasificación" },
+];
+
+export default function BovineFormModal({ farmId, landPlots, paddocks, existing, onSuccess, onClose }: Props) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState<BovineRequest>({
+    identification_number: existing?.identification_number ?? "",
+    name: existing?.name ?? "",
+    sex: existing?.sex ?? "macho",
+    breed: existing?.breed ?? "",
+    color: existing?.color ?? "",
+    birth_date: existing?.birth_date ?? "",
+    birth_weight: existing?.birth_weight ?? null,
+    current_weight: existing?.current_weight ?? null,
+    purpose: existing?.purpose ?? "",
+    status: existing?.status ?? "activo",
+    entry_type: existing?.entry_type ?? "nacimiento",
+    entry_date: existing?.entry_date ?? "",
+    land_plot_id: existing?.land_plot_id ?? null,
+    paddock_id: existing?.paddock_id ?? null,
+    observations: existing?.observations ?? "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [breeds, setBreeds] = useState<string[]>(COMMON_BREEDS);
+
+  useEffect(() => {
+    let active = true;
+    listBovineBreeds(farmId)
+      .then((list) => {
+        if (!active) return;
+        const seen = new Set(COMMON_BREEDS.map(normalize));
+        const merged = [
+          ...COMMON_BREEDS,
+          ...[...new Set(list.map((b) => b.trim()).filter(Boolean))].filter((b) => {
+            const key = normalize(b);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }),
+        ];
+        const current = (existing?.breed ?? "").trim();
+        if (current && !merged.some((b) => normalize(b) === normalize(current))) {
+          merged.push(current);
+        }
+        setBreeds(merged);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [farmId, existing?.breed]);
+
+  const validateStep = (s: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (s === 0) {
+      if (!form.identification_number.trim()) newErrors.id = "Obligatorio";
+      if (!form.name?.trim()) newErrors.name = "Obligatorio";
+      if (!form.breed?.trim()) newErrors.breed = "Obligatorio";
+    }
+    if (s === 1) {
+      if (!form.birth_date) newErrors.birth = "Obligatorio";
+      if (!form.entry_date) newErrors.entry = "Obligatorio";
+      if (form.birth_date && form.entry_date && form.entry_date < form.birth_date) {
+        newErrors.entry = "La fecha de ingreso no puede ser anterior al nacimiento";
+      }
+      if (!existing && (form.birth_weight ?? 0) <= 0) newErrors.weights = "El peso de nacimiento es obligatorio y mayor a 0";
+      if (!existing && (form.current_weight ?? 0) <= 0) newErrors.weights = "El peso actual es obligatorio y mayor a 0";
+      if ((form.birth_weight ?? 0) < 0) newErrors.weights = "El peso de nacimiento no puede ser negativo";
+      if ((form.current_weight ?? 0) < 0) newErrors.weights = "El peso actual no puede ser negativo";
+    }
+    if (s === 2) {
+      if (!form.purpose?.trim()) newErrors.purpose = "Obligatorio";
+      if (!form.land_plot_id && !form.paddock_id) newErrors.location = "Debe asignar un lote o un potrero";
+    }
+    setError(Object.values(newErrors).join(". "));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const nextStep = () => {
+    if (validateStep(step)) setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+  const prevStep = () => setStep((s) => Math.max(s - 1, 0));
+
+  const isFormComplete =
+    form.identification_number.trim() !== "" &&
+    (form.name ?? "").trim() !== "" &&
+    (form.breed ?? "").trim() !== "" &&
+    form.birth_date !== "" &&
+    form.entry_date !== "" &&
+    (form.purpose ?? "").trim() !== "" &&
+    (existing || ((form.birth_weight ?? 0) > 0 && (form.current_weight ?? 0) > 0)) &&
+    Boolean(form.land_plot_id || form.paddock_id) &&
+    !(form.birth_date && form.entry_date && form.entry_date < form.birth_date);
+
+  const isStepComplete = (s: number): boolean => {
+    if (s === 0) {
+      return form.identification_number.trim() !== "" && (form.name ?? "").trim() !== "" && (form.breed ?? "").trim() !== "";
+    }
+    if (s === 1) {
+      const weightsOk = existing || ((form.birth_weight ?? 0) > 0 && (form.current_weight ?? 0) > 0);
+      return form.birth_date !== "" && form.entry_date !== "" && weightsOk &&
+        !(form.birth_date && form.entry_date && form.entry_date < form.birth_date);
+    }
+    return (form.purpose ?? "").trim() !== "" && Boolean(form.land_plot_id || form.paddock_id);
+  };
+
+  const activePaddocks = paddocks.filter((pd) => pd.is_active);
+  const paddocksForLandPlot = form.land_plot_id
+    ? activePaddocks.filter((pd) => pd.land_plot_id === form.land_plot_id)
+    : activePaddocks;
+
+  const set = <K extends keyof BovineRequest>(key: K, value: BovineRequest[K]) => {
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      if (key === "land_plot_id") {
+        const pad = paddocks.find((p) => p.id === next.paddock_id);
+        if (pad && pad.land_plot_id !== (value as string | null)) {
+          next.paddock_id = null;
+        }
+      }
+      if (key === "paddock_id" && value) {
+        const pad = paddocks.find((p) => p.id === value);
+        if (pad) next.land_plot_id = pad.land_plot_id;
+      }
+      return next;
+    });
+    if (error) setError("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    setError("");
+    const payload = {
+      ...form,
+      name: form.name || null,
+      breed: form.breed || null,
+      color: form.color || null,
+      purpose: form.purpose || null,
+      observations: form.observations || null,
+      land_plot_id: form.land_plot_id || null,
+      paddock_id: form.paddock_id || null,
+    };
+    try {
+      if (existing) {
+        await updateBovine(farmId, existing.id, payload);
+      } else {
+        await createBovine(farmId, payload);
+      }
+      onSuccess();
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "No se pudo guardar el bovino"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 overflow-y-auto py-4">
+      <div className="w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl mx-4">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-text-primary">{existing ? "Editar bovino" : "Registrar bovino"}</h2>
+          <button onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-text-muted hover:bg-surface-alt hover:text-text-secondary"><X size={20} /></button>
+        </div>
+
+        {error && <div className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>}
+
+        {/* Step indicator */}
+        <div className="mb-4 flex items-center gap-1.5">
+          {STEPS.map((s, i) => (
+            <button key={i} type="button" onClick={() => { if (i < step) setStep(i); }} disabled={i > step}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition-colors ${i === step ? "bg-primary text-white" : i < step ? "bg-green-100 text-green-700" : "bg-surface-alt text-text-muted cursor-default"}`}
+            >
+              {i < step ? "✓ " : ""}{s.label}
+            </button>
+          ))}
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && step < STEPS.length - 1) {
+              e.preventDefault();
+              nextStep();
+            }
+          }}>
+          {step === 0 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">N° Identificación *</label>
+                  <input type="text" value={form.identification_number} maxLength={50}
+                    onChange={(e) => set("identification_number", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                  <span className="mt-0.5 block text-right text-xs text-text-muted">{form.identification_number.length}/50</span>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Nombre <span className="text-red-600">*</span></label>
+                  <input type="text" value={form.name ?? ""} maxLength={100}
+                    onChange={(e) => set("name", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                  <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.name ?? "").length}/100</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Sexo *</label>
+                  <select value={form.sex} onChange={(e) => set("sex", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    <option value="macho">Macho</option>
+                    <option value="hembra">Hembra</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Raza <span className="text-red-600">*</span></label>
+                  <select
+                    value={form.breed ?? ""}
+                    onChange={(e) => set("breed", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required
+                  >
+                    <option value="" disabled>Selecciona una raza</option>
+                    {breeds.map((b) => <option key={b} value={b}>{b}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Color</label>
+                <input type="text" value={form.color ?? ""} maxLength={50}
+                  onChange={(e) => set("color", e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+              </div>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha nacimiento *</label>
+                  <input type="date" value={form.birth_date} onChange={(e) => set("birth_date", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso nacimiento (kg) <span className="text-red-600">*</span></label>
+                  <input type="number" min={0} step={0.1} value={form.birth_weight ?? ""}
+                    onChange={(e) => set("birth_weight", e.target.value ? parseFloat(e.target.value) : null)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Peso actual (kg) <span className="text-red-600">*</span></label>
+                  <input type="number" min={0} step={0.1} value={form.current_weight ?? ""}
+                    onChange={(e) => set("current_weight", e.target.value ? parseFloat(e.target.value) : null)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Tipo de ingreso *</label>
+                  <select value={form.entry_type} onChange={(e) => set("entry_type", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    {ENTRY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Fecha ingreso *</label>
+                <input type="date" value={form.entry_date} min={form.birth_date || undefined}
+                  onChange={(e) => set("entry_date", e.target.value)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
+                <span className="mt-0.5 block text-xs text-text-muted">Puedes registrar una fecha de ingreso a futuro.</span>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Propósito <span className="text-red-600">*</span></label>
+                  <select value={form.purpose ?? ""} onChange={(e) => set("purpose", e.target.value || null)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required>
+                    <option value="">Sin especificar</option>
+                    {PURPOSES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-text-secondary">Estado <span className="text-red-600">*</span></label>
+                  <select value={form.status} onChange={(e) => set("status", e.target.value)}
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                    {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Lote asignado <span className="text-red-600">*</span></label>
+                <select value={form.land_plot_id ?? ""} onChange={(e) => set("land_plot_id", e.target.value || null)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                  <option value="">Sin lote</option>
+                  {landPlots.filter((lp) => lp.is_active).map((lp) => (
+                    <option key={lp.id} value={lp.id}>{lp.name} ({lp.usage_type})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Potrero asignado</label>
+                <select value={form.paddock_id ?? ""} onChange={(e) => set("paddock_id", e.target.value || null)}
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none">
+                  <option value="">Sin potrero</option>
+                  {paddocksForLandPlot.map((pd) => (
+                    <option key={pd.id} value={pd.id}>
+                      {form.land_plot_id ? pd.name : `${pd.name} (${pd.land_plot_name ?? "Sin lote"} · ${pd.status})`}
+                    </option>
+                  ))}
+                </select>
+                <span className="mt-0.5 block text-xs text-text-muted">
+                  {form.land_plot_id ? "Potreros del lote seleccionado" : "Selecciona un lote para filtrar los potreros"}
+                </span>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-text-secondary">Observaciones</label>
+                <textarea value={form.observations ?? ""} maxLength={500}
+                  onChange={(e) => set("observations", e.target.value)}
+                  rows={2} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
+                <span className="mt-0.5 block text-right text-xs text-text-muted">{(form.observations ?? "").length}/500</span>
+              </div>
+            </>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            {step > 0 && (
+              <button type="button" onClick={prevStep}
+                className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-surface-alt">
+                ← Anterior
+              </button>
+            )}
+            {step < STEPS.length - 1 ? (
+              <button key="paso-siguiente" type="button" onClick={nextStep} disabled={!isStepComplete(step)}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-50">
+                Siguiente →
+              </button>
+            ) : (
+              <button key="paso-enviar" type="submit" disabled={!isFormComplete || loading}
+                className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed">
+                {loading ? "Guardando..." : existing ? "Guardar cambios" : "Registrar"}
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

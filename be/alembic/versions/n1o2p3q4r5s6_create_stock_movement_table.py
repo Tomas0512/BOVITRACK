@@ -18,8 +18,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Guarda idempotente: c9ff44fd3509 (create_all) ya crea `stock_movement`
-    # porque el modelo StockMovement está registrado en app.models.
+    # ¿Por qué la guarda? Las BD creadas cuando c9ff44fd3509 usaba
+    # Base.metadata.create_all() ya tienen `stock_movement` (creada desde el modelo).
+    # En una BD nueva esta migración es la que la crea, con la MISMA forma que
+    # dejó create_all (sin índices extra ni server_default), así cualquier BD
+    # termina idéntica.
     conn = op.get_bind()
     if sa.inspect(conn).has_table("stock_movement"):
         return
@@ -43,19 +46,9 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(op.f("ix_stock_movement_farm_id"), "stock_movement", ["farm_id"])
-    op.create_index(op.f("ix_stock_movement_food_id"), "stock_movement", ["food_id"])
-    op.create_index(op.f("ix_stock_movement_type"), "stock_movement", ["movement_type"])
-    op.create_index(op.f("ix_stock_movement_date"), "stock_movement", ["movement_date"])
 
 
 def downgrade() -> None:
-    conn = op.get_bind()
-    if not sa.inspect(conn).has_table("stock_movement"):
-        return
-
-    op.drop_index(op.f("ix_stock_movement_date"), table_name="stock_movement")
-    op.drop_index(op.f("ix_stock_movement_type"), table_name="stock_movement")
-    op.drop_index(op.f("ix_stock_movement_food_id"), table_name="stock_movement")
-    op.drop_index(op.f("ix_stock_movement_farm_id"), table_name="stock_movement")
-    op.drop_table("stock_movement")
+    # drop_table también borra los índices y FKs de la tabla.
+    if sa.inspect(op.get_bind()).has_table("stock_movement"):
+        op.drop_table("stock_movement")

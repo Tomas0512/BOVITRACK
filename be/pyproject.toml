@@ -28,4 +28,303 @@ dev = [
     "pytest-cov==5.0.0",
     "httpx==0.27.2",
     "ruff==0.6.9",
+    "import-linter==2.1",
 ]
+
+# El backend es una APLICACIÓN, no una librería: `pip install .` solo instala las
+# dependencias. Sin esto, setuptools encontraba app/ y alembic/ y no sabía cuál
+# empaquetar ("Multiple top-level packages"); solo funcionaba en el Dockerfile
+# porque allí se instala antes de copiar el código.
+[tool.setuptools]
+packages = []
+py-modules = []
+
+# ══════════════════════════════════════════════════════════════
+# Fronteras arquitectónicas (import-linter)
+#
+# ¿Qué?    Contratos que dicen qué paquete puede importar a cuál.
+# ¿Para?   Que las fronteras del monolito modular no dependan de la
+#          disciplina de cada desarrollador: se verifican con `lint-imports`.
+# ¿Impacto? Si un cambio rompe una frontera (p. ej. core importando un
+#          modelo de dominio), el chequeo falla y dice qué import la rompe.
+# ══════════════════════════════════════════════════════════════
+[tool.importlinter]
+root_package = "app"
+include_external_packages = true
+# Los imports dentro de `if TYPE_CHECKING:` solo existen para el chequeo de tipos
+# (p. ej. relaciones ORM por nombre); no crean acoplamiento en ejecución.
+exclude_type_checking_imports = true
+
+[[tool.importlinter.contracts]]
+name = "shared es Python puro (no depende de la app, ni de FastAPI ni de SQLAlchemy)"
+type = "forbidden"
+source_modules = ["app.shared"]
+forbidden_modules = [
+    "app.core",
+    "app.modules",
+    "app.models",
+    "app.main",
+    "fastapi",
+    "sqlalchemy",
+]
+
+[[tool.importlinter.contracts]]
+name = "core no depende del dominio"
+type = "forbidden"
+source_modules = ["app.core"]
+forbidden_modules = [
+    "app.modules",
+    "app.models",
+    "app.main",
+]
+
+# ── Contratos de los módulos de dominio (app/modules) ─────────────
+# Al crear un módulo nuevo se agrega a las listas de estos contratos y, en
+# "capas de módulos", en el nivel que le corresponda según de quién depende.
+
+[[tool.importlinter.contracts]]
+name = "capas dentro de cada módulo: router -> dependencies -> service -> schemas -> repository -> models"
+type = "layers"
+containers = [
+    "app.modules.audit",
+    "app.modules.team",
+    "app.modules.identity",
+    "app.modules.farms",
+    "app.modules.notifications",
+    "app.modules.reports",
+    "app.modules.tasks",
+    "app.modules.economics",
+    "app.modules.milk_production",
+    "app.modules.reproduction",
+    "app.modules.documents",
+    "app.modules.health",
+    "app.modules.livestock",
+    "app.modules.inventory",
+]
+# Entre paréntesis: capas opcionales (solo algunos módulos las tienen).
+#   scheduler  -> tarea programada que arma el servicio (notifications)
+#   file_rules -> reglas puras sobre el contenido de archivos (documents)
+#   exporters  -> formato de salida Excel/PDF (reports)
+#   storage    -> adaptador de almacenamiento de archivos (documents)
+#   models     -> reports no tiene tablas propias (es un modelo de lectura)
+layers = [
+    "router",
+    "(scheduler)",
+    "dependencies",
+    "service",
+    "(file_rules)",
+    "(exporters)",
+    "schemas",
+    "(storage)",
+    "repository",
+    "(models)",
+]
+
+[[tool.importlinter.contracts]]
+name = "servicios de los módulos sin FastAPI ni SQLAlchemy"
+type = "forbidden"
+source_modules = [
+    "app.modules.audit.service",
+    "app.modules.notifications.service",
+    "app.modules.reports.service",
+    "app.modules.tasks.service",
+    "app.modules.economics.service",
+    "app.modules.milk_production.service",
+    "app.modules.reproduction.service",
+    "app.modules.documents.service",
+    "app.modules.health.service",
+    "app.modules.livestock.service",
+    "app.modules.inventory.service",
+    "app.modules.identity.service",
+    "app.modules.farms.service",
+    "app.modules.team.service",
+]
+forbidden_modules = [
+    "fastapi",
+    "sqlalchemy",
+]
+# El servicio usa el repositorio, que sí usa SQLAlchemy: eso está permitido.
+# Lo prohibido es que el servicio importe SQLAlchemy por sí mismo.
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "módulos independientes salvo por composición: solo dependencies.py importa otro módulo, y solo su API pública"
+type = "independence"
+modules = [
+    "app.modules.audit",
+    "app.modules.team",
+    "app.modules.identity",
+    "app.modules.farms",
+    "app.modules.notifications",
+    "app.modules.reports",
+    "app.modules.tasks",
+    "app.modules.economics",
+    "app.modules.milk_production",
+    "app.modules.reproduction",
+    "app.modules.documents",
+    "app.modules.health",
+    "app.modules.livestock",
+    "app.modules.inventory",
+]
+# Única excepción permitida: el dependencies.py de un módulo puede importar la
+# RAÍZ de otro módulo (app.modules.<otro>), que es su API pública. El comodín *
+# cubre un solo nivel, así que importar app.modules.<otro>.repository (un
+# interno) sigue rompiendo el contrato.
+ignore_imports = ["app.modules.*.dependencies -> app.modules.*"]
+unmatched_ignore_imports_alerting = "none"
+
+[[tool.importlinter.contracts]]
+name = "capas de módulos (sin ciclos): consumidores -> health -> inventory -> livestock -> farms -> identity"
+type = "layers"
+# Un módulo solo puede usar módulos de niveles INFERIORES. Los del mismo nivel
+# (separados por |) no se usan entre sí. Así nunca puede formarse un ciclo.
+layers = [
+    "app.modules.audit | app.modules.team | app.modules.notifications | app.modules.reports | app.modules.tasks | app.modules.economics | app.modules.milk_production | app.modules.reproduction | app.modules.documents",
+    "app.modules.health",
+    "app.modules.inventory",
+    "app.modules.livestock",
+    # Fincas, lotes, potreros y catálogos. Solo usa a identity.
+    "app.modules.farms",
+    # Base: usuarios, autenticación, roles, permisos y membresías. No usa a nadie.
+    "app.modules.identity",
+]
+
+[[tool.importlinter.contracts]]
+name = "API pública de los módulos: main, core, shared y el registro de modelos solo importan app.modules.<modulo>"
+type = "forbidden"
+source_modules = [
+    "app.main",
+    "app.core",
+    "app.shared",
+    "app.models",
+]
+forbidden_modules = [
+    "app.modules.audit.router",
+    "app.modules.audit.scheduler",
+    "app.modules.audit.dependencies",
+    "app.modules.audit.service",
+    "app.modules.audit.repository",
+    "app.modules.audit.schemas",
+    "app.modules.audit.file_rules",
+    "app.modules.audit.exporters",
+    "app.modules.audit.storage",
+    "app.modules.notifications.router",
+    "app.modules.notifications.scheduler",
+    "app.modules.notifications.dependencies",
+    "app.modules.notifications.service",
+    "app.modules.notifications.repository",
+    "app.modules.notifications.schemas",
+    "app.modules.notifications.file_rules",
+    "app.modules.notifications.exporters",
+    "app.modules.notifications.storage",
+    "app.modules.reports.router",
+    "app.modules.reports.scheduler",
+    "app.modules.reports.dependencies",
+    "app.modules.reports.service",
+    "app.modules.reports.repository",
+    "app.modules.reports.schemas",
+    "app.modules.reports.file_rules",
+    "app.modules.reports.exporters",
+    "app.modules.reports.storage",
+    "app.modules.tasks.router",
+    "app.modules.tasks.scheduler",
+    "app.modules.tasks.dependencies",
+    "app.modules.tasks.service",
+    "app.modules.tasks.repository",
+    "app.modules.tasks.schemas",
+    "app.modules.tasks.file_rules",
+    "app.modules.tasks.exporters",
+    "app.modules.tasks.storage",
+    "app.modules.economics.router",
+    "app.modules.economics.scheduler",
+    "app.modules.economics.dependencies",
+    "app.modules.economics.service",
+    "app.modules.economics.repository",
+    "app.modules.economics.schemas",
+    "app.modules.economics.file_rules",
+    "app.modules.economics.exporters",
+    "app.modules.economics.storage",
+    "app.modules.milk_production.router",
+    "app.modules.milk_production.scheduler",
+    "app.modules.milk_production.dependencies",
+    "app.modules.milk_production.service",
+    "app.modules.milk_production.repository",
+    "app.modules.milk_production.schemas",
+    "app.modules.milk_production.file_rules",
+    "app.modules.milk_production.exporters",
+    "app.modules.milk_production.storage",
+    "app.modules.reproduction.router",
+    "app.modules.reproduction.scheduler",
+    "app.modules.reproduction.dependencies",
+    "app.modules.reproduction.service",
+    "app.modules.reproduction.repository",
+    "app.modules.reproduction.schemas",
+    "app.modules.reproduction.file_rules",
+    "app.modules.reproduction.exporters",
+    "app.modules.reproduction.storage",
+    "app.modules.documents.router",
+    "app.modules.documents.scheduler",
+    "app.modules.documents.dependencies",
+    "app.modules.documents.service",
+    "app.modules.documents.repository",
+    "app.modules.documents.schemas",
+    "app.modules.documents.file_rules",
+    "app.modules.documents.exporters",
+    "app.modules.documents.storage",
+    "app.modules.health.router",
+    "app.modules.health.scheduler",
+    "app.modules.health.dependencies",
+    "app.modules.health.service",
+    "app.modules.health.repository",
+    "app.modules.health.schemas",
+    "app.modules.health.file_rules",
+    "app.modules.health.exporters",
+    "app.modules.health.storage",
+    "app.modules.inventory.router",
+    "app.modules.inventory.scheduler",
+    "app.modules.inventory.dependencies",
+    "app.modules.inventory.service",
+    "app.modules.inventory.repository",
+    "app.modules.inventory.schemas",
+    "app.modules.inventory.file_rules",
+    "app.modules.inventory.exporters",
+    "app.modules.inventory.storage",
+    "app.modules.livestock.router",
+    "app.modules.livestock.scheduler",
+    "app.modules.livestock.dependencies",
+    "app.modules.livestock.service",
+    "app.modules.livestock.repository",
+    "app.modules.livestock.schemas",
+    "app.modules.livestock.file_rules",
+    "app.modules.livestock.exporters",
+    "app.modules.livestock.storage",
+    "app.modules.identity.router",
+    "app.modules.identity.scheduler",
+    "app.modules.identity.dependencies",
+    "app.modules.identity.service",
+    "app.modules.identity.repository",
+    "app.modules.identity.schemas",
+    "app.modules.identity.file_rules",
+    "app.modules.identity.exporters",
+    "app.modules.identity.storage",
+    "app.modules.farms.router",
+    "app.modules.farms.scheduler",
+    "app.modules.farms.dependencies",
+    "app.modules.farms.service",
+    "app.modules.farms.repository",
+    "app.modules.farms.schemas",
+    "app.modules.farms.file_rules",
+    "app.modules.farms.exporters",
+    "app.modules.farms.storage",
+    "app.modules.team.router",
+    "app.modules.team.scheduler",
+    "app.modules.team.dependencies",
+    "app.modules.team.service",
+    "app.modules.team.repository",
+    "app.modules.team.schemas",
+    "app.modules.team.file_rules",
+    "app.modules.team.exporters",
+    "app.modules.team.storage",
+]
+# app.models sí importa app.modules.<modulo>.models: es el registro que usa Alembic.
+allow_indirect_imports = true

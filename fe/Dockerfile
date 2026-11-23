@@ -43,6 +43,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # nginx.conf configura la SPA (fallback a index.html) y el proxy /api/ → be:8000.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Encabezados de seguridad (CSP, X-Frame-Options...): los incluye cada location de nginx.conf.
+COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 
 EXPOSE 80
 

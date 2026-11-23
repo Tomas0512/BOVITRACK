@@ -14,8 +14,8 @@ _CALF_SEX_MAP: dict[str, list[str]] = {
 
 
 def _create_calves_from_birth(db, farm_id, event, user_id):
-    from app.models.bovine import Bovine
-    from app.services.audit_service import add_audit_log
+    from app.modules.livestock.models import Bovine
+    from app.core.audit_trail import add_audit_log
 
     sexes = _CALF_SEX_MAP.get(event.result)
     if not sexes:

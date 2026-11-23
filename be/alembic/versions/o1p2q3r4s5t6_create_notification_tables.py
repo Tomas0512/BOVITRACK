@@ -23,10 +23,11 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Guardas idempotentes: c9ff44fd3509 (create_all con los modelos
-    # registrados en app.models) ya crea ambas tablas porque los modelos
-    # NotificationLog y UserNotificationPref existen hoy. Sin la guarda,
-    # la cadena completa se revierte por fallar en una sola transacción.
+    # ¿Por qué las guardas? Las BD creadas cuando c9ff44fd3509 usaba
+    # Base.metadata.create_all() ya tienen ambas tablas (creadas desde los
+    # modelos). En una BD nueva esta migración las crea con la MISMA forma que
+    # dejó create_all (sin índices extra ni server_default), así cualquier BD
+    # termina idéntica.
     insp = sa.inspect(op.get_bind())
 
     if not insp.has_table("user_notification_pref"):
@@ -36,10 +37,10 @@ def upgrade() -> None:
             sa.Column("user_id", postgresql.UUID(as_uuid=True), nullable=False),
             sa.Column("farm_id", postgresql.UUID(as_uuid=True), nullable=False),
             sa.Column("channel", sa.String(20), nullable=False),
-            sa.Column("notify_sanitary", sa.Boolean(), nullable=False, server_default=sa.true()),
-            sa.Column("notify_low_stock", sa.Boolean(), nullable=False, server_default=sa.true()),
-            sa.Column("notify_reproductive", sa.Boolean(), nullable=False, server_default=sa.true()),
-            sa.Column("notify_birth", sa.Boolean(), nullable=False, server_default=sa.true()),
+            sa.Column("notify_sanitary", sa.Boolean(), nullable=False),
+            sa.Column("notify_low_stock", sa.Boolean(), nullable=False),
+            sa.Column("notify_reproductive", sa.Boolean(), nullable=False),
+            sa.Column("notify_birth", sa.Boolean(), nullable=False),
             sa.Column("frequency", sa.String(20), nullable=False),
             sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
             sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
@@ -47,12 +48,6 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(["farm_id"], ["farm.id"], ondelete="CASCADE"),
             sa.PrimaryKeyConstraint("id"),
             sa.UniqueConstraint("user_id", "farm_id", name="uq_user_notification_pref"),
-        )
-        op.create_index(
-            op.f("ix_user_notification_pref_user_id"), "user_notification_pref", ["user_id"]
-        )
-        op.create_index(
-            op.f("ix_user_notification_pref_farm_id"), "user_notification_pref", ["farm_id"]
         )
 
     if not insp.has_table("notification_log"):
@@ -82,17 +77,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # drop_table también borra los índices y FKs de cada tabla, así que da igual
+    # si la tabla la creó esta migración o el antiguo create_all de c9ff44fd3509.
     insp = sa.inspect(op.get_bind())
-
     if insp.has_table("notification_log"):
-        op.drop_index(op.f("ix_notification_log_created_at"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_reference_id"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_type"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_user_id"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_farm_id"), table_name="notification_log")
         op.drop_table("notification_log")
-
     if insp.has_table("user_notification_pref"):
-        op.drop_index(op.f("ix_user_notification_pref_farm_id"), table_name="user_notification_pref")
-        op.drop_index(op.f("ix_user_notification_pref_user_id"), table_name="user_notification_pref")
         op.drop_table("user_notification_pref")

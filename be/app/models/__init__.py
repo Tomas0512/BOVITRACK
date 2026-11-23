@@ -1,51 +1,32 @@
-# Modelos ORM de BoviTrack
-# Aquí se importan todos los modelos para que Alembic los detecte automáticamente.
-# Cada vez que crees un nuevo modelo, impórtalo aquí.
+"""
+Paquete: models (REGISTRO de modelos, sin modelos propios)
+¿Qué? Importa los modelos ORM de todos los módulos para que queden registrados
+      en Base.metadata.
+¿Para qué? Alembic (alembic/env.py) y la app necesitan conocer TODAS las tablas
+           para resolver relaciones por nombre y detectar cambios de esquema.
+¿Impacto? Cada modelo vive en su módulo (app/modules/<modulo>/models). Al crear
+          un modelo nuevo, impórtalo aquí. Es la única excepción a "solo se
+          importa la API pública de un módulo" (ver pyproject.toml).
+"""
 
-from app.models.user import User
-from app.models.password_reset_token import PasswordResetToken
-from app.models.email_verification_token import EmailVerificationToken
-from app.models.audit_log import AuditLog
-from app.models.role import Role, Permission
-from app.models.department import Department, City
-from app.models.purpose import Purpose
-from app.models.farm import Farm, UserFarm, LandPlot
-from app.models.paddock import Paddock, PaddockHerd
-from app.models.bovine import Bovine, BovineIdentification, BovineAudit
-from app.models.food import Food, Consumption, StockMovement
-from app.models.treatment import Treatment
-from app.models.sanitary_plan import SanitaryPlan
-from app.models.milk_production import MilkProduction
-from app.models.task import Task
-from app.models.farm_invitation import FarmInvitation
-from app.models.reactivation_request import ReactivationRequest
-from app.models.reproductive_event import ReproductiveEvent
-from app.models.weight import Weight
-from app.models.economics import EconomicRecord
-from app.models.movement import AnimalMovement
-from app.models.document import Document
-from app.models.notification import NotificationLog, UserNotificationPref
+from app.core.audit_trail import AuditLog
+from app.modules.documents.models import Document
+from app.modules.economics.models import EconomicRecord
+from app.modules.farms.models import City, Department, Farm, LandPlot, Paddock, PaddockHerd, Purpose
+from app.modules.health.models import SanitaryPlan, Treatment
+from app.modules.identity.models import EmailVerificationToken, LoginAttempt, PasswordResetToken, Permission, Role, User, UserFarm
+from app.modules.inventory.models import Consumption, Food, StockMovement
+from app.modules.livestock.models import AnimalMovement, Bovine, BovineAudit, BovineIdentification, Weight
+from app.modules.milk_production.models import MilkProduction
+from app.modules.notifications.models import NotificationLog, UserNotificationPref
+from app.modules.reproduction.models import ReproductiveEvent
+from app.modules.tasks.models import Task
+from app.modules.team.models import FarmInvitation, ReactivationRequest
 
 __all__ = [
-    "User", "PasswordResetToken", "EmailVerificationToken", "AuditLog",
-    "Role", "Permission",
-    "Department", "City",
-    "Purpose",
-    "Farm", "UserFarm", "LandPlot",
-    "Paddock", "PaddockHerd",
-    "Bovine", "BovineIdentification", "BovineAudit",
-    "Food", "Consumption", "StockMovement",
-    "Treatment",
-    "SanitaryPlan",
-    "MilkProduction",
-    "Task",
-    "FarmInvitation",
-    "ReactivationRequest",
-    "ReproductiveEvent",
-    "Weight",
-    "EconomicRecord",
-    "AnimalMovement",
-    "Document",
-    "UserNotificationPref",
-    "NotificationLog",
+    "AnimalMovement", "AuditLog", "Bovine", "BovineAudit", "BovineIdentification", "City", "Consumption",
+    "Department", "Document", "EconomicRecord", "EmailVerificationToken", "Farm", "FarmInvitation", "Food",
+    "LandPlot", "LoginAttempt", "MilkProduction", "NotificationLog", "Paddock", "PaddockHerd", "PasswordResetToken", "Permission",
+    "Purpose", "ReactivationRequest", "ReproductiveEvent", "Role", "SanitaryPlan", "StockMovement", "Task",
+    "Treatment", "User", "UserFarm", "UserNotificationPref", "Weight",
 ]

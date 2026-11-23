@@ -8,37 +8,29 @@ Descripción: Punto de entrada de la aplicación FastAPI — BoviTrack.
 
 from contextlib import asynccontextmanager
 import logging
-from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from app.config import settings
-from app.routers.auth import router as auth_router
-from app.routers.users import router as users_router, audit_router as audit_logs_router
-from app.routers.farms import router as farms_router
-from app.routers.bovines import router as bovines_router
-from app.routers.treatments import router as treatments_router
-from app.routers.milk_production import router as milk_production_router
-from app.routers.food import router as food_router
-from app.routers.tasks import router as tasks_router
-from app.routers.paddocks import router as paddocks_router
-from app.routers.reports import router as reports_router
-from app.routers.employees import router as employees_router
-from app.routers.land_plots import router as land_plots_router
-from app.routers.reproductive_events import router as reproductive_events_router
-from app.routers.sanitary_plan import router as sanitary_plan_router
-from app.routers.alerts import router as alerts_router
-from app.routers.admin import router as admin_router
-from app.routers.weights import router as weights_router
-from app.routers.calves import router as calves_router
-from app.routers.economics import router as economics_router
-from app.routers.movements import router as movements_router
-from app.routers.documents import router as documents_router
-from app.routers.audit import router as audit_router  # HU015: Auditoria del sistema
-from app.utils.limiter import limiter
+from app.core.config import settings
+from app.core.error_handlers import register_error_handlers
+from app.modules.identity import api_router as identity_router  # auth + cuenta propia (capa base)
+from app.modules.team import api_router as team_router  # empleados, invitaciones y reactivación
+from app.modules.farms import api_router as farms_router  # fincas, catálogos, potreros y lotes
+from app.modules.livestock import api_router as livestock_router  # bovinos, pesajes, terneros, movimientos
+from app.modules.health import api_router as health_router  # tratamientos + planes sanitarios
+from app.modules.milk_production import api_router as milk_production_router
+from app.modules.inventory import api_router as food_router
+from app.modules.tasks import api_router as tasks_router  # Módulo piloto (monolito modular)
+from app.modules.reports import api_router as reports_router
+from app.modules.reproduction import api_router as reproductive_events_router
+from app.modules.notifications import api_router as alerts_router
+from app.modules.economics import api_router as economics_router
+from app.modules.documents import api_router as documents_router
+from app.modules.audit import api_router as audit_router  # HU015: auditoría (sistema y por finca)
+from app.core.limiter import limiter
 
 
 # ── Logging ────────────────────────────────────────
@@ -50,9 +42,18 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 # ── Lifespan (arranque y apagado) ─────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Se ejecuta al arrancar y al apagar la aplicación."""
+    """Se ejecuta al arrancar y al apagar la aplicación.
+
+    Arranca la tarea programada de notificaciones (módulo notifications) y la
+    detiene al apagar. Con NOTIFICATIONS_INTERVAL_MINUTES=0 no se arranca.
+    """
+    from app.modules.notifications import start_notification_scheduler
+
     print("🚀 BoviTrack API iniciando...")
+    scheduler = start_notification_scheduler(settings.NOTIFICATIONS_INTERVAL_MINUTES)
     yield
+    if scheduler is not None:
+        scheduler.cancel()
     print("🛑 BoviTrack API detenida")
 
 
@@ -66,11 +67,18 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=None if _is_production else "/docs",
     redoc_url=None if _is_production else "/redoc",
+    # Sin esto, /openapi.json seguía describiendo toda la API en producción.
+    openapi_url=None if _is_production else "/openapi.json",
 )
 
 # ── Rate limiter ──────────────────────────────────
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ── Errores de dominio ────────────────────────────
+# ¿Para qué? Los servicios lanzan errores de app.shared.exceptions (sin conocer
+# HTTP) y aquí se traducen a códigos de estado. Ver app/core/error_handlers.py.
+register_error_handlers(app)
 
 # ── CORS ──────────────────────────────────────────
 _origins = {settings.FRONTEND_URL.rstrip("/")}
@@ -113,27 +121,18 @@ async def add_security_headers(request: Request, call_next):
 
 
 # ── Routers ───────────────────────────────────────
-app.include_router(auth_router)
-app.include_router(users_router)
+app.include_router(identity_router)
+app.include_router(team_router)
 app.include_router(farms_router)
-app.include_router(bovines_router)
-app.include_router(treatments_router)
+app.include_router(livestock_router)
+app.include_router(health_router)
 app.include_router(milk_production_router)
 app.include_router(food_router)
 app.include_router(tasks_router)
-app.include_router(paddocks_router)
 app.include_router(reports_router)
-app.include_router(employees_router)
-app.include_router(land_plots_router)
 app.include_router(reproductive_events_router)
-app.include_router(sanitary_plan_router)
 app.include_router(alerts_router)
-app.include_router(audit_logs_router)
-app.include_router(admin_router)
-app.include_router(weights_router)
-app.include_router(calves_router)  # HU007: Desarrollo de terneros
 app.include_router(economics_router)  # HU010: Información económica
-app.include_router(movements_router)  # HU009: Movimientos de animales
 app.include_router(documents_router)  # HU012: Gestión de documentos
 app.include_router(audit_router)  # HU015: Auditoría del sistema (filtros y exportación)
 

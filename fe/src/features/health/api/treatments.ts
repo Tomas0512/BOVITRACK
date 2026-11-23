@@ -1,0 +1,41 @@
+import { http as api } from "@/core/http";
+
+export interface TreatmentResponse {
+  id: string;
+  farm_id: string;
+  bovine_id: string | null;
+  land_plot_id: string | null;
+  treatment_type: string;
+  product_name: string;
+  dose: string;
+  administration_route: string;
+  application_date: string;
+  next_application_date: string | null;
+  diagnosis: string | null;
+  symptoms: string | null;
+  observations: string | null;
+  applied_by: string;
+  created_at: string;
+}
+
+export async function listTreatments(farmId: string, bovineId?: string): Promise<TreatmentResponse[]> {
+  const params = bovineId ? { bovine_id: bovineId } : {};
+  const response = await api.get<TreatmentResponse[]>(`/farms/${farmId}/treatments`, { params });
+  return response.data;
+}
+
+export interface TreatmentCreate {
+  bovine_id: string | null;
+  treatment_type: string;
+  product_name: string;
+  dose: string;
+  administration_route: string;
+  application_date: string;
+  next_application_date?: string | null;
+  observations?: string | null;
+}
+
+export async function createTreatment(farmId: string, data: TreatmentCreate): Promise<TreatmentResponse> {
+  const response = await api.post<TreatmentResponse>(`/farms/${farmId}/treatments`, data);
+  return response.data;
+}

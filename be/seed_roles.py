@@ -15,13 +15,14 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DATABASE_URL)
 
 # Módulos del sistema. DEBEN coincidir EXACTAMENTE con las claves que usan
-# require_permission(module, action) en be/app/routers/*.py.
+# require_permission(module, action) en be/app/modules/*/router.
 # Historial de corrección (2026-08): 'alimentacion'→'alimentos',
 # 'planes_sanitarios'→'sanitario', se agregaron 'economica' y 'tareas';
 # se eliminaron 'reproduccion' y 'reportes' (ningún router los exige).
 ALL_MODULES = [
     "fincas",
     "bovinos",
+    "documentos",
     "usuarios",
     "potreros",
     "produccion_leche",
@@ -35,50 +36,47 @@ ALL_MODULES = [
 
 # Roles: (nombre, descripción, permisos por módulo)
 # permisos: (can_create, can_read, can_update, can_delete)
+#
+# Fuente de verdad: las MIGRACIONES de Alembic (que es lo que existe en la BD).
+# Antes este archivo sembraba "Operario" y "Auditor", roles que las migraciones
+# no crean: ejecutarlo dejaba roles fantasma y no corregía Capataz ni Empleado.
+# Corregido en la Parte 3e-4 del refactor para que coincida con la BD.
+_NONE = (False, False, False, False)
+_READ = (False, True, False, False)
+_NO_DELETE = (True, True, True, False)
+
 ROLES = [
     (
         "Administrador",
-        "Acceso total a todos los módulos de la finca",
+        "Acceso total al sistema",
         {m: (True, True, True, True) for m in ALL_MODULES},
     ),
     (
-        "Operario",
-        "Registro y consulta de operaciones diarias",
-        {
-            "fincas":           (False, True,  False, False),
-            "bovinos":          (True,  True,  True,  False),
-            "potreros":         (False, True,  False, False),
-            "produccion_leche": (True,  True,  False, False),
-            "alimentos":        (True,  True,  False, False),
-            "tratamientos":     (True,  True,  False, False),
-            "reproductivo":     (True,  True,  False, False),
-            "sanitario":        (True,  True,  False, False),
-            "tareas":           (True,  True,  False, False),
-            "economica":        (False, True,  False, False),
-            "usuarios":         (False, False, False, False),
-        },
+        "Capataz",
+        "Gestión operativa de la finca",
+        {m: _NO_DELETE for m in ALL_MODULES} | {"fincas": _READ, "usuarios": _READ},
     ),
     (
         "Veterinario",
-        "Gestión sanitaria y reproductiva",
-        {
-            "fincas":           (False, True,  False, False),
-            "bovinos":          (False, True,  True,  False),
-            "potreros":         (False, True,  False, False),
-            "produccion_leche": (False, True,  False, False),
-            "alimentos":        (False, True,  False, False),
-            "tratamientos":     (True,  True,  True,  True),
-            "reproductivo":     (True,  True,  True,  True),
-            "sanitario":        (True,  True,  True,  True),
-            "tareas":           (True,  True,  True,  True),
-            "economica":        (False, True,  False, False),
-            "usuarios":         (False, False, False, False),
+        "Gestión sanitaria y tratamientos",
+        {m: _READ for m in ALL_MODULES} | {
+            "bovinos":      (False, True, True, False),
+            "documentos":   (False, True, True, False),
+            "tareas":       (False, True, True, False),
+            "tratamientos": _NO_DELETE,
+            "reproductivo": _NO_DELETE,
+            "sanitario":    _NO_DELETE,
         },
     ),
     (
-        "Auditor",
-        "Solo lectura de todos los módulos",
-        {m: (False, True, False, False) for m in ALL_MODULES},
+        "Empleado",
+        "Operaciones básicas del día a día",
+        {m: _READ for m in ALL_MODULES} | {
+            "alimentos":        (True, True, False, False),
+            "produccion_leche": (True, True, False, False),
+            "tareas":           (False, True, True, False),
+            "usuarios":         _NONE,
+        },
     ),
 ]
 
@@ -166,12 +164,19 @@ def seed():
             print("✓ Todas las fincas ya tienen su vínculo de acceso correcto.")
             return
 
-        repaired = 0
+        # El dueño puede no tener vínculo, o tenerlo INACTIVO (o con otro rol). Antes se
+        # hacía un INSERT a secas y, en el segundo caso, chocaba con uq_user_farm
+        # (user_id, farm_id) y abortaba todo el seed. Ahora es un UPSERT: crea el
+        # vínculo o reactiva el existente como Administrador.
+        created = reactivated = 0
         for farm_id, owner_id in orphan_farms:
-            session.execute(
+            inserted = session.execute(
                 text("""INSERT INTO user_farm
                     (id, user_id, farm_id, role_id, assigned_by, is_active)
-                    VALUES (:id, :user_id, :farm_id, :role_id, :assigned_by, true)"""),
+                    VALUES (:id, :user_id, :farm_id, :role_id, :assigned_by, true)
+                    ON CONFLICT ON CONSTRAINT uq_user_farm
+                    DO UPDATE SET is_active = true, role_id = EXCLUDED.role_id
+                    RETURNING (xmax = 0) AS inserted"""),
                 {
                     "id": str(uuid.uuid4()),
                     "user_id": str(owner_id),
@@ -179,11 +184,15 @@ def seed():
                     "role_id": str(admin_role_id),
                     "assigned_by": str(owner_id),
                 },
-            )
-            repaired += 1
+            ).scalar_one()
+            if inserted:
+                created += 1
+            else:
+                reactivated += 1
 
         session.commit()
-        print(f"✓ {repaired} finca(s) reparada(s): vínculo Administrador creado para el propietario.")
+        print(f"✓ {created + reactivated} finca(s) reparada(s): vínculo Administrador del propietario "
+              f"creado en {created} y reactivado en {reactivated}.")
 
 
 if __name__ == "__main__":

@@ -24,8 +24,14 @@ import pytest
 from openpyxl import load_workbook
 from pydantic import ValidationError
 
-from app.schemas.audit import AuditExportFormat, AuditLogFilters, AuditLogRecord
-from app.services import audit_service
+from app.modules.audit import exporters
+from app.modules.audit import repository as audit_repository
+from app.modules.audit import service as audit_service
+from app.modules.audit.schemas import AuditExportFormat, AuditLogFilters, AuditLogRecord
+
+# Refactor (Parte 3e): el viejo audit_service se dividió por capas. Los nombres
+# se conservan: condiciones SQL -> repository, formatos -> exporters, casos de
+# uso y constantes -> service.
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -136,8 +142,8 @@ def test_usuario_sin_fincas_no_recibe_registros():
     db = MagicMock()
     db.execute.return_value.scalars.return_value.all.return_value = []
 
-    page = audit_service.list_audit_logs(
-        db,
+    service = audit_service.AuditService(audit_repository.AuditRepository(db))
+    page = service.list_audit_logs(
         current_user_id=uuid.uuid4(),
         filters=AuditLogFilters(),
         limit=50,
@@ -146,7 +152,7 @@ def test_usuario_sin_fincas_no_recibe_registros():
 
     assert page.total == 0
     assert page.items == []
-    # Una sola llamada: la de get_accessible_farm_ids. No hubo conteo ni SELECT.
+    # Una sola llamada: la de accessible_farm_ids. No hubo conteo ni SELECT.
     assert db.execute.call_count == 1
 
 
@@ -158,7 +164,7 @@ def test_pedir_finca_ajena_produce_condicion_imposible(farm_id, other_farm_id):
     """
     filters = AuditLogFilters(farm_id=other_farm_id)
 
-    conditions = audit_service._build_filter_conditions(filters, [farm_id])
+    conditions = audit_repository._build_filter_conditions(filters, [farm_id])
 
     # Se agregan dos condiciones mutuamente excluyentes (IS NULL e IS NOT NULL),
     # lo que garantiza cero resultados sin lanzar un 404 delator.
@@ -172,7 +178,7 @@ def test_finca_propia_se_filtra_directamente(farm_id):
     """
     filters = AuditLogFilters(farm_id=farm_id)
 
-    conditions = audit_service._build_filter_conditions(filters, [farm_id, uuid.uuid4()])
+    conditions = audit_repository._build_filter_conditions(filters, [farm_id, uuid.uuid4()])
 
     assert len(conditions) == 1
 
@@ -184,7 +190,7 @@ def test_sin_filtro_de_finca_se_limita_a_las_accesibles(farm_id, other_farm_id):
 
     ¿Impacto? El alcance se aplica igual aunque el usuario no filtre por finca.
     """
-    conditions = audit_service._build_filter_conditions(AuditLogFilters(), [farm_id])
+    conditions = audit_repository._build_filter_conditions(AuditLogFilters(), [farm_id])
 
     assert len(conditions) == 1
 
@@ -200,10 +206,10 @@ def test_excluir_eventos_de_sesion_agrega_condicion(farm_id):
     PARA:   que el ruido de los logins no tape los cambios reales sobre
             bovinos, fincas o tratamientos.
     """
-    con_sesion = audit_service._build_filter_conditions(
+    con_sesion = audit_repository._build_filter_conditions(
         AuditLogFilters(include_auth_events=True), [farm_id]
     )
-    sin_sesion = audit_service._build_filter_conditions(
+    sin_sesion = audit_repository._build_filter_conditions(
         AuditLogFilters(include_auth_events=False), [farm_id]
     )
 
@@ -223,7 +229,7 @@ def test_cada_filtro_suma_una_condicion(farm_id):
         end_date=date(2026, 8, 18),
     )
 
-    conditions = audit_service._build_filter_conditions(filters, [farm_id])
+    conditions = audit_repository._build_filter_conditions(filters, [farm_id])
 
     # 1 de alcance por finca + 1 usuario + 1 acción + 1 entidad + 2 fechas.
     assert len(conditions) == 6
@@ -266,7 +272,7 @@ def test_csv_incluye_encabezados_y_todas_las_filas(sample_records):
     QUIERO: que el archivo tenga encabezados y una fila por registro
     PARA:   poder leerlo sin conocer la estructura de la base de datos.
     """
-    contenido = audit_service.export_to_csv(sample_records).decode("utf-8-sig")
+    contenido = exporters.export_to_csv(sample_records).decode("utf-8-sig")
     lineas = [linea for linea in contenido.splitlines() if linea.strip()]
 
     assert lineas[0].startswith("Fecha y hora;Usuario;Correo")
@@ -280,7 +286,7 @@ def test_csv_lleva_bom_para_excel_en_windows(sample_records):
 
     ¿Impacto? Sin el BOM, Excel en Windows muestra "Cebú" como "CebÃº".
     """
-    contenido = audit_service.export_to_csv(sample_records)
+    contenido = exporters.export_to_csv(sample_records)
 
     assert contenido.startswith(b"\xef\xbb\xbf")
 
@@ -292,7 +298,7 @@ def test_registro_sin_usuario_se_exporta_como_usuario_eliminado(sample_records):
 
     ¿Impacto? La evidencia se conserva aunque la cuenta se haya eliminado.
     """
-    fila = audit_service._record_to_row(sample_records[1])
+    fila = exporters._record_to_row(sample_records[1])
 
     assert fila[1] == "Usuario eliminado"
     assert fila[2] == ""  # correo vacío, nunca "None"
@@ -304,7 +310,7 @@ def test_fecha_exportada_es_legible(sample_records):
     QUIERO: la fecha en formato año-mes-día hora:minuto:segundo
     PARA:   ordenar y comparar los eventos sin ambigüedad de formato.
     """
-    fila = audit_service._record_to_row(sample_records[0])
+    fila = exporters._record_to_row(sample_records[0])
 
     assert fila[0] == "2026-08-18 14:30:05"
 
@@ -314,7 +320,7 @@ def test_excel_se_genera_y_puede_releerse(sample_records):
     QUIERO: un archivo Excel válido con encabezados y datos
     PARA:   mostrarlo o imprimirlo sin darle formato a mano.
     """
-    contenido = audit_service.export_to_excel(sample_records)
+    contenido = exporters.export_to_excel(sample_records)
     hoja = load_workbook(io.BytesIO(contenido)).active
 
     assert hoja.title == "Auditoria"
@@ -328,7 +334,7 @@ def test_excel_congela_la_fila_de_encabezados(sample_records):
     QUIERO: que los encabezados queden fijos al desplazarme
     PARA:   no perder de vista a qué columna corresponde cada dato.
     """
-    hoja = load_workbook(io.BytesIO(audit_service.export_to_excel(sample_records))).active
+    hoja = load_workbook(io.BytesIO(exporters.export_to_excel(sample_records))).active
 
     assert hoja.freeze_panes == "A2"
 
@@ -338,8 +344,8 @@ def test_exportacion_vacia_conserva_los_encabezados():
     QUIERO: recibir igualmente un archivo con encabezados
     PARA:   dejar constancia de que la consulta se hizo y no arrojó nada.
     """
-    csv_vacio = audit_service.export_to_csv([]).decode("utf-8-sig")
-    hoja = load_workbook(io.BytesIO(audit_service.export_to_excel([]))).active
+    csv_vacio = exporters.export_to_csv([]).decode("utf-8-sig")
+    hoja = load_workbook(io.BytesIO(exporters.export_to_excel([]))).active
 
     assert csv_vacio.strip().count("\n") == 0  # solo la fila de encabezados
     assert hoja.max_row == 1

@@ -43,6 +43,9 @@ services:
       # En producción se puede eliminar y acceder solo a través del proxy de nginx.
       - "127.0.0.1:8000:8000"
     environment:
+      # Este compose es el de DESARROLLO (código montado + --reload).
+      # Para producción: docker-compose.prod.yml (ver docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md).
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}

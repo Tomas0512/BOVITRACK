@@ -11,12 +11,82 @@
 
 Antes de compartir el sistema, aplicar estos puntos (ver `README.md` y `docs/STACK_TECNOLOGICO.md`):
 
-- **Puertos vinculados a `127.0.0.1`** (`docker-compose.yml`): el frontend, backend y mailpit
+- **Puertos vinculados a `127.0.0.1`** (`docker-compose.yml`): la BD, el backend y el frontend
   solo se acceden de forma local. Esto reduce la superficie de exposición.
 - **CORS restringido** (`be/app/main.py`): en producción solo se permite el `FRONTEND_URL`
   configurado; en desarrollo, `localhost`/`127.0.0.1`.
-- **Credenciales** en `.env` (raíz) y NO en el repositorio (`.env` está en `.gitignore`).
+- **Credenciales** en `.env` (raíz) y NO en el repositorio (`.env` y `.env.*` están en `.gitignore`).
 - `.env.example` contiene solo valores ilustrativos — **nunca** usarlos en producción.
+
+---
+
+## 1.1 Desarrollo vs. producción (Parte 5 del refactor)
+
+Hay **dos** archivos de Compose:
+
+| | `docker-compose.yml` (desarrollo) | `docker-compose.prod.yml` (producción) |
+|---|---|---|
+| Backend | código montado (`./be:/app`) y `--reload` | imagen construida, sin `--reload`, `WEB_CONCURRENCY` workers |
+| `ENVIRONMENT` | `development` | `production` (fijo) |
+| Documentación de la API | `/docs`, `/redoc`, `/openapi.json` | **apagadas** (404) |
+| Puertos publicados | db, be y fe en `127.0.0.1` | **solo nginx** (`HTTP_BIND:HTTP_PORT`, por defecto `127.0.0.1:8080`) |
+| Documentos subidos | `be/storage/` del equipo | volumen `documents` (sobrevive a recrear contenedores) |
+| Variables | `.env` | `.env.production`; si falta una obligatoria, Compose no arranca |
+
+**Desplegar en un servidor:**
+
+```bash
+cp .env.example .env.production      # completar con valores REALES (secretos nuevos)
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+docker compose -f docker-compose.prod.yml --env-file .env.production ps    # todo "healthy"
+docker compose -f docker-compose.prod.yml --env-file .env.production logs be
+```
+
+En `.env.production` son obligatorias: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `SECRET_KEY`
+(mínimo 32 caracteres), `FRONTEND_URL` (la URL pública con `https://`) y `EMAIL_BACKEND`.
+
+**La API se niega a arrancar en producción** (y el log dice por qué) si:
+- `EMAIL_BACKEND` no es `smtp` ni `resend` (con `log`, los enlaces de recuperación de contraseña quedarían en los logs y nadie recibiría los correos);
+- `EMAIL_BACKEND=smtp` sin `SMTP_HOST`, o `resend` sin `RESEND_API_KEY`;
+- `RATE_LIMIT_ENABLED` está en `false`.
+
+**Lo que hace el contenedor al arrancar** (`be/entrypoint.sh`): aplica las migraciones de Alembic y, solo si salen bien,
+arranca uvicorn. Si una migración falla, el contenedor se detiene en vez de servir con un esquema viejo.
+
+**IP real del cliente:** nginx sobrescribe `X-Forwarded-For` con la IP que ve, y uvicorn (`--proxy-headers`) la usa.
+Así el límite de intentos de login es **por usuario** y no compartido por todos.
+
+Si delante de nginx hay **otro proxy** (Caddy, Cloudflare, el balanceador del proveedor), nginx ve la IP de ese proxy y
+todos los usuarios parecerían uno solo. En ese caso hay que descomentar el bloque `real_ip` al inicio de `fe/nginx.conf`,
+con la IP o el rango de **ese** proxy, y reconstruir la imagen `fe`:
+
+```nginx
+set_real_ip_from 172.16.0.0/12;   # Caddy u otro proxy en la misma red Docker (o su IP exacta)
+real_ip_header X-Forwarded-For;   # con Cloudflare: real_ip_header CF-Connecting-IP; y sus rangos publicados
+real_ip_recursive on;
+```
+
+Nunca usar `set_real_ip_from 0.0.0.0/0`: cualquiera podría falsificar su IP mandando su propio `X-Forwarded-For`.
+Para comprobarlo, inicia sesión desde otro equipo y revisa que la `ip` de las líneas `SECURITY` sea la de ese equipo.
+
+**Encabezados de seguridad de la web:** nginx agrega a la SPA una CSP estricta (`script-src 'self'`, `style-src 'self'`,
+`connect-src 'self'`, `frame-ancestors 'none'`…), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+`Permissions-Policy` y `Cross-Origin-Opener-Policy` (`fe/security-headers.conf`). Si se agrega un recurso externo (una fuente,
+un mapa, un CDN), hay que agregar su origen a la CSP; si no, el navegador lo bloquea y lo avisa en la consola.
+**HSTS** (`Strict-Transport-Security`) lo debe poner el proxy con HTTPS que está delante: nginx solo habla HTTP.
+
+**HTTPS:** nginx escucha en HTTP. Delante debe ir un proxy con TLS (Caddy, Cloudflare Tunnel — sección 2 —, el
+balanceador del proveedor…) apuntando a `HTTP_BIND:HTTP_PORT`.
+
+**Respaldo:** los datos están en los volúmenes `bovitrack-prod_pgdata` (BD) y `bovitrack-prod_documents` (archivos).
+Respaldar la BD con `docker compose -f docker-compose.prod.yml exec db pg_dump -U <usuario> <bd> > respaldo.sql`.
+
+**Eventos de seguridad:** logins (exitosos y fallidos, con el motivo), bloqueos y cambios de contraseña quedan en el log
+de la API como líneas `SECURITY {...}` en JSON, con el correo enmascarado y la IP real:
+`docker compose -f docker-compose.prod.yml --env-file .env.production logs be | grep SECURITY`.
+El bloqueo por intentos de login vive en la BD (tabla `login_attempt`): sirve con varios procesos y sobrevive a reinicios.
+
+**Limitación conocida:** las migraciones corren al arrancar; con varias réplicas de la API habría que correrlas una sola vez, aparte.
 
 ---
 

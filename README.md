@@ -14,6 +14,7 @@ BoviTrack nace de la necesidad del ganadero Luis Barbosa de digitalizar la gesti
 - [Inicio rápido con Docker](#inicio-rápido-con-docker-recomendado)
 - [Desarrollo local](#desarrollo-local-sin-docker)
 - [Comandos útiles](#comandos-útiles)
+- [Integración continua (CI)](#integración-continua-ci)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Convenciones](#convenciones)
 - [Documentación adicional](#documentación-adicional)
@@ -129,79 +130,95 @@ pnpm dev
 
 ## Comandos útiles
 
-### Backend
+### Backend (dentro de `be/`)
 
 ```bash
-pytest -v                          # Correr tests
-pytest --cov=app --cov-report=term-missing  # Tests con cobertura
-ruff check .                       # Linting
-ruff format .                      # Formato
+pip install . --group dev                    # Dependencias de la app + herramientas
+ruff check app tests                         # Linting
+ruff format .                                # Formato
+lint-imports                                 # Contratos de arquitectura (fronteras entre módulos)
+alembic upgrade head && alembic check        # Migraciones y modelos == BD
+pytest -q --cov=app --cov-report=term        # Tests con cobertura
 ```
 
-### Frontend
+### Frontend (dentro de `fe/`)
 
 ```bash
-pnpm test          # Correr tests
+pnpm lint          # ESLint con fronteras de features (--max-warnings 0)
+pnpm test          # Vitest (incluye la prueba de estructura src/test/architecture.test.ts)
 pnpm test:coverage # Tests con cobertura
-pnpm lint          # Linting
+pnpm build         # tsc + Vite (build de producción)
 pnpm format        # Formato con Prettier
 ```
 
+### Producción
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+```
+
+Ver [docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md](docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md) (sección 1.1).
+
+## Integración continua (CI)
+
+Cada push (a `main`, `refactor/**`, `feature/**`, `fix/**`, `chore/**`) y cada pull request a `main`
+corre [.github/workflows/ci.yml](.github/workflows/ci.yml) en GitHub Actions. Si un job falla, el PR lo muestra
+con el paso y el error.
+
+| Job | Qué verifica |
+|-----|--------------|
+| **Backend** | `ruff`, contratos de `import-linter`, migraciones en un PostgreSQL 17 limpio, `alembic check` (modelos == BD), deshacer **todas** las migraciones hasta una BD vacía y volver a aplicarlas, y `pytest` con cobertura |
+| **Frontend** | `pnpm install --frozen-lockfile`, ESLint sin avisos, Vitest y `pnpm build` |
+| **Stack de producción** | Construye las imágenes, levanta `docker-compose.prod.yml` hasta que todo esté *healthy* y comprueba: la web responde 200, la API detrás de nginx responde 401 sin sesión, y `/docs` y `/openapi.json` dan 404 |
+
+Para reproducirlo en local antes de subir, corre los comandos de **Comandos útiles** (backend y frontend).
+
+> **Regla para migraciones nuevas:** cada migración define sus tablas y columnas de forma explícita
+> (`op.create_table`, `op.add_column`…) y su `downgrade()` deshace **solo** lo que ella creó. Nunca usar
+> `Base.metadata.create_all()`/`drop_all()` ni importar modelos dentro de una migración: el resultado cambiaría
+> cada vez que cambie un modelo y la cadena dejaría de poder deshacerse. CI lo comprueba con `alembic downgrade base`.
+
 ## Estructura del proyecto
+
+El backend es un **monolito modular por capas** y el frontend está organizado **por features**. Cada módulo
+y cada feature tiene su propio `README.md` con su responsabilidad, su contrato público y sus fronteras.
 
 ```
 bovitrack/
+├── .github/workflows/ci.yml              # Integración continua (backend, frontend, stack de producción)
 ├── .env.example                          # Plantilla de variables de entorno
-├── docker-compose.yml                    # Orquesta los tres servicios (db, be, fe)
-├── README.md                             # Este archivo
-├── docs/                                 # Documentación del proyecto
-│   ├── HUs/                              # Historias de Usuario
-│   ├── RF/                               # Requisitos Funcionales
-│   ├── RNF/                              # Requisitos No Funcionales
-│   ├── SPRINTS/                          # Planificación de Sprints
-│   ├── interview/                        # Entrevistas con el cliente
-│   ├── BoviTrack.postman_collection.json # Colección de endpoints para Postman
-│   └── RESUMEN_TECNICO_PROYECTO_ACTUAL.md
-├── db/                                   # Base de datos
-│   ├── Dockerfile                        # Imagen PostgreSQL 17 con uuid-ossp
-│   └── init.sql                          # Script de inicialización
+├── docker-compose.yml                    # Desarrollo (db, be con --reload, fe)
+├── docker-compose.prod.yml               # Producción (solo nginx expuesto, volúmenes persistentes)
+├── docs/                                 # Documentación (HUs, RF, RNF, sprints, despliegue, Postman)
+├── db/                                   # Imagen PostgreSQL 17 + init.sql (uuid-ossp)
 ├── be/                                   # Backend — FastAPI + Python
 │   ├── app/
-│   │   ├── main.py                       # Punto de entrada FastAPI
-│   │   ├── config.py                     # Configuración (Pydantic Settings)
-│   │   ├── database.py                   # Conexión a PostgreSQL
-│   │   ├── models/                       # Modelos ORM (SQLAlchemy)
-│   │   ├── schemas/                      # Schemas Pydantic
-│   │   ├── routers/                      # Endpoints de la API
-│   │   ├── services/                     # Lógica de negocio
-│   │   ├── utils/                        # Utilidades
-│   │   └── tests/                        # Tests con pytest
+│   │   ├── main.py                       # Composición: crea la app y monta los routers de los módulos
+│   │   ├── core/                         # Infraestructura: config, BD, seguridad, correo, límites, errores
+│   │   ├── shared/                       # Lo común a todos: excepciones de dominio, puertos, tipos
+│   │   └── modules/                      # 14 módulos de negocio (identity, farms, livestock, health, ...)
+│   │       └── <modulo>/                 # router → dependencies → service → schemas → repository → models
+│   │                                     # API pública en __init__.py; README.md por módulo
 │   ├── alembic/                          # Migraciones de base de datos
-│   └── requirements.txt
+│   ├── tests/                            # Tests con pytest
+│   ├── entrypoint.sh                     # Migra y arranca uvicorn (modo dev o producción)
+│   └── pyproject.toml                    # Dependencias, ruff y contratos de import-linter
 ├── fe/                                   # Frontend — React + Vite + TypeScript
 │   ├── src/
-│   │   ├── api/                          # Clientes HTTP
-│   │   ├── components/                   # Componentes reutilizables
-│   │   ├── pages/                        # Vistas/páginas
-│   │   ├── hooks/                        # Custom hooks
-│   │   ├── context/                      # Context providers
-│   │   └── types/                        # Tipos TypeScript
+│   │   ├── app/                          # Composición: App, rutas, layout y páginas hub
+│   │   ├── core/http/                    # Cliente HTTP y manejo de sesión
+│   │   ├── shared/                       # UI, hooks, tema y layout reutilizables
+│   │   ├── features/<feature>/           # Una carpeta por feature (api, componentes, páginas, tipos)
+│   │   └── test/                         # Setup de Vitest y prueba de estructura
+│   ├── nginx.conf                        # Sirve la SPA y proxia /api al backend
 │   └── package.json
-├── qa_e2e/                                 # Pruebas E2E — Selenium WebDriver + Python
-│   ├── base_test.py                        # Clase base: driver, login y screenshots
-│   ├── config.py                           # URL, credenciales e IDs de prueba
-│   ├── test_01..15_*.py                    # 15 vistas x 2 casos de uso
-│   ├── run_all_tests.py                    # Ejecuta toda la suite
-│   └── screenshots/                        # Evidencia gráfica generada
+├── qa_e2e/                               # Pruebas E2E — Selenium WebDriver + Python
 └── mobile/                               # App móvil — React Native + Expo
-    └── src/
-        ├── navigation/                   # Navegación (React Navigation)
-        ├── screens/                      # Pantallas
-        ├── services/                     # Servicios y llamadas a la API
-        ├── store/                        # Estado global
-        ├── theme/                        # Estilos y tema
-        └── types/                        # Tipos TypeScript
 ```
+
+Las fronteras se hacen cumplir con herramientas, no solo con convenciones: `lint-imports` en el backend y
+ESLint (`no-restricted-imports`) + `architecture.test.ts` en el frontend. Ver
+[be/app/modules/README.md](be/app/modules/README.md) y [fe/src/README.md](fe/src/README.md).
 
 ---
 
@@ -225,7 +242,9 @@ bovitrack/
 | Documento | Descripción |
 |-----------|-------------|
 | [docs/RESUMEN_TECNICO_PROYECTO_ACTUAL.md](docs/RESUMEN_TECNICO_PROYECTO_ACTUAL.md) | Resumen técnico del estado actual del proyecto |
-| [docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md](docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md) | Guía de despliegue en línea (Cloudflare Tunnel) y alternativa Supabase |
+| [docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md](docs/DESPLIEGUE_Y_INFRAESTRUCTURA.md) | Desarrollo vs. producción (`docker-compose.prod.yml`), Cloudflare Tunnel y alternativa Supabase |
+| [be/app/modules/README.md](be/app/modules/README.md) | Arquitectura del backend: módulos, capas y contratos |
+| [fe/src/README.md](fe/src/README.md) | Arquitectura del frontend: features y fronteras |
 | [docs/PRUEBAS_BD/](docs/PRUEBAS_BD/) | Evidencia de pruebas de base de datos (Guía 6): matriz BD vs. aplicación y script SQL CP01–CP27 |
 | [docs/HUs/](docs/HUs/) | Historias de Usuario (HU001 – HU016) |
 | [docs/RF/](docs/RF/) | Requisitos Funcionales (RF001 – RF035) |

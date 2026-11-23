@@ -14,16 +14,34 @@ PARA:   tener la certeza de que las preferencias se crean con valores por
 ¿Impacto? Se usa MagicMock para la sesión de BD, siguiendo el estilo de
           test_reproductive_event.py y test_audit.py, de modo que la suite
           corre sin PostgreSQL.
+
+Refactor (Parte 3b): el módulo pasó a app/modules/notifications. Las reglas
+puras y constantes siguen en el servicio con el mismo nombre; las consultas que
+se probaban con MagicMock ahora viven en NotificationRepository (mismo mock); y
+un canal/frecuencia inválidos lanzan InvalidRequestError (la API responde 422,
+igual que antes).
 """
 
 import uuid
-from unittest.mock import MagicMock, patch
+from datetime import datetime
+from unittest.mock import MagicMock
 
 import pytest
 
-from app.models.notification import UserNotificationPref
-from app.schemas.alert import NotificationPrefUpdate
-from app.services import notification_service
+from app.modules.notifications import service as notification_service
+from app.modules.notifications.models import UserNotificationPref
+from app.modules.notifications.repository import NotificationRepository
+from app.modules.notifications.schemas import NotificationPrefUpdate
+from app.modules.notifications.service import NotificationService
+from app.shared.exceptions import InvalidRequestError
+
+
+def _service_with_pref(pref: UserNotificationPref) -> NotificationService:
+    """Servicio cuyo repositorio ya tiene la preferencia (no se crea una nueva)."""
+    repo = MagicMock(spec=NotificationRepository)
+    repo.get_prefs.return_value = pref
+    noop = MagicMock()
+    return NotificationService(repo, noop, noop, noop, noop, noop)
 
 
 @pytest.fixture
@@ -92,28 +110,20 @@ def test_pref_allows_respeta_la_bandera(mock_db):
 
 
 def test_canal_invalido_es_rechazado(mock_db, user_id, farm_id):
-    """¿Qué? Actualizar con un canal no soportado lanza ValueError.
+    """¿Qué? Actualizar con un canal no soportado lanza InvalidRequestError (422).
 
     ¿Por qué? Guardar un canal inválido corrompería la experiencia del usuario.
     """
-    with patch(
-        "app.services.notification_service.get_or_create_prefs",
-        return_value=UserNotificationPref(user_id=user_id, farm_id=farm_id),
-    ):
-        with pytest.raises(ValueError):
-            notification_service.update_prefs(
-                mock_db, user_id, farm_id, channel="mensaje_de_texto"
-            )
+    service = _service_with_pref(UserNotificationPref(user_id=user_id, farm_id=farm_id))
+    with pytest.raises(InvalidRequestError):
+        service.update_prefs(user_id, farm_id, channel="mensaje_de_texto")
 
 
 def test_frecuencia_invalida_es_rechazada(mock_db, user_id, farm_id):
-    """¿Qué? Actualizar con una frecuencia no soportada lanza ValueError."""
-    with patch(
-        "app.services.notification_service.get_or_create_prefs",
-        return_value=UserNotificationPref(user_id=user_id, farm_id=farm_id),
-    ):
-        with pytest.raises(ValueError):
-            notification_service.update_prefs(mock_db, user_id, farm_id, frequency="mensual")
+    """¿Qué? Actualizar con una frecuencia no soportada lanza InvalidRequestError (422)."""
+    service = _service_with_pref(UserNotificationPref(user_id=user_id, farm_id=farm_id))
+    with pytest.raises(InvalidRequestError):
+        service.update_prefs(user_id, farm_id, frequency="mensual")
 
 
 def test_notification_pref_update_permite_false(mock_db):
@@ -156,14 +166,14 @@ def test_notify_channel_ambos_envia_y_registra(mock_db):
 
 
 def test_ya_enviado_detecta_duplicados(mock_db):
-    """¿Qué? _already_sent revisa la ventana para evitar duplicados.
+    """¿Qué? el repositorio revisa la ventana para evitar duplicados.
 
     ¿Por qué? La idempotencia es clave: un ciclo repetido no debe reenviar.
     """
     mock_db.execute.return_value.scalars.return_value.first.return_value = "algo"
     assert (
-        notification_service._already_sent(
-            mock_db, uuid.uuid4(), "sanitary", "ref-123", hours=24
+        NotificationRepository(mock_db).exists_since(
+            uuid.uuid4(), "sanitary", "ref-123", since=datetime.now()
         )
         is True
     )
@@ -173,8 +183,8 @@ def test_ya_enviado_sin_resultado_es_falso(mock_db):
     """¿Qué? Si no existe un log reciente idéntico, no se considera enviado."""
     mock_db.execute.return_value.scalars.return_value.first.return_value = None
     assert (
-        notification_service._already_sent(
-            mock_db, uuid.uuid4(), "low_stock", "ref-456", hours=24
+        NotificationRepository(mock_db).exists_since(
+            uuid.uuid4(), "low_stock", "ref-456", since=datetime.now()
         )
         is False
     )
@@ -192,13 +202,13 @@ def test_tipos_etiquetas_tienen_sanitary_y_low_stock(mock_db):
 
 
 def test_conteo_no_leidas_suma_solo_read_at_nulos(mock_db, user_id, farm_id):
-    """¿Qué? count_unread_notifications devuelve el total de logs sin leer.
+    """¿Qué? count_unread devuelve el total de logs sin leer.
 
     ¿Por qué? El badge de la campana necesita el número exacto de no leídas,
               sin ejecutar el motor de notificaciones (que enviaría correos).
     """
     mock_db.execute.return_value.scalar.return_value = 7
-    total = notification_service.count_unread_notifications(mock_db, user_id, farm_id)
+    total = NotificationRepository(mock_db).count_unread(user_id, farm_id)
     assert total == 7
 
 
@@ -208,7 +218,7 @@ def test_conteo_no_leidas_sin_filas_devuelve_cero(mock_db, user_id, farm_id):
     ¿Por qué? Un usuario sin notificaciones pendientes debe ver el badge vacío.
     """
     mock_db.execute.return_value.scalar.return_value = None
-    total = notification_service.count_unread_notifications(mock_db, user_id, farm_id)
+    total = NotificationRepository(mock_db).count_unread(user_id, farm_id)
     assert total == 0
 
 
@@ -217,7 +227,7 @@ def test_unread_count_response_schema(farm_id):
 
     ¿Por qué? El frontend lee esos dos campos para el badge de la campana.
     """
-    from app.schemas.alert import UnreadCountResponse
+    from app.modules.notifications.schemas import UnreadCountResponse
 
     payload = UnreadCountResponse(farm_id=farm_id, unread_count=3)
     assert payload.farm_id == farm_id

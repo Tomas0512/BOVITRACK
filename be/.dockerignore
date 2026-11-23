@@ -25,3 +25,18 @@ alembic/versions/__pycache__/
 # Git
 .git/
 .gitignore
+
+# Archivos subidos por los usuarios: NUNCA dentro de la imagen (en producción
+# viven en un volumen; en desarrollo, en be/storage del equipo).
+storage/
+
+# Pruebas y cachés de herramientas: no se usan en la imagen
+tests/
+.ruff_cache/
+.import_linter_cache/
+
+# Scripts de datos de prueba y de depuración: útiles en desarrollo (que monta
+# ./be), pero no deben poder ejecutarse dentro de la imagen de producción.
+seed_test_data.py
+ver_bd.py
+check_tables.py

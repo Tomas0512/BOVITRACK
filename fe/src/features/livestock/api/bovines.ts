@@ -1,0 +1,101 @@
+import { http as api } from "@/core/http";
+
+export interface BovineRequest {
+  identification_number: string;
+  name?: string | null;
+  sex: string;
+  breed?: string | null;
+  color?: string | null;
+  markings?: string | null;
+  birth_date: string;
+  birth_weight?: number | null;
+  current_weight?: number | null;
+  father_id?: string | null;
+  mother_id?: string | null;
+  purpose?: string | null;
+  status?: string;
+  entry_type: string;
+  entry_date: string;
+  land_plot_id?: string | null;
+  paddock_id?: string | null;
+  observations?: string | null;
+}
+
+export interface BovineResponse {
+  id: string;
+  farm_id: string;
+  land_plot_id: string | null;
+  paddock_id: string | null;
+  name: string | null;
+  identification_number: string;
+  sex: string;
+  breed: string | null;
+  color: string | null;
+  markings: string | null;
+  birth_date: string;
+  birth_weight: number | null;
+  current_weight: number | null;
+  father_id: string | null;
+  mother_id: string | null;
+  purpose: string | null;
+  status: string;
+  entry_type: string;
+  entry_date: string;
+  exit_date: string | null;
+  exit_reason: string | null;
+  observations: string | null;
+  is_active: boolean;
+  registered_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const base = (farmId: string) => `/farms/${farmId}/bovines`;
+
+export async function listBovines(
+  farmId: string,
+  filters?: { sex?: string; status?: string; purpose?: string }
+): Promise<BovineResponse[]> {
+  const response = await api.get<BovineResponse[]>(base(farmId), { params: filters });
+  return response.data;
+}
+
+export async function getBovine(farmId: string, bovineId: string): Promise<BovineResponse> {
+  const response = await api.get<BovineResponse>(`${base(farmId)}/${bovineId}`);
+  return response.data;
+}
+
+export async function listBovineBreeds(farmId: string): Promise<string[]> {
+  const response = await api.get<string[]>(`${base(farmId)}/breeds`);
+  return response.data;
+}
+
+export async function createBovine(farmId: string, data: BovineRequest): Promise<BovineResponse> {
+  const response = await api.post<BovineResponse>(base(farmId), data);
+  return response.data;
+}
+
+export async function updateBovine(farmId: string, bovineId: string, data: Partial<BovineRequest>): Promise<BovineResponse> {
+  const response = await api.put<BovineResponse>(`${base(farmId)}/${bovineId}`, data);
+  return response.data;
+}
+
+export async function deleteBovine(farmId: string, bovineId: string): Promise<void> {
+  await api.delete(`${base(farmId)}/${bovineId}`);
+}
+
+export interface ImportResult {
+  total: number;
+  imported: number;
+  failed: number;
+  errors: { row: number; error: string }[];
+}
+
+export async function importBovinesCsv(farmId: string, file: File): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  const response = await api.post<ImportResult>(`${base(farmId)}/import`, form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+}

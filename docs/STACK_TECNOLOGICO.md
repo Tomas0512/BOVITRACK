@@ -251,7 +251,7 @@ Cada router del backend se corresponde con un módulo de negocio. Los verbos usa
 | Método | Ruta | Propósito |
 |---|---|---|
 | GET | `/departments` · `/departments/{id}/cities` · `/purposes` | Catálogos |
-| POST | `` · `/bulk` | Crear finca (individual o masiva) |
+| POST | `` · `/bulk` | Crear finca (individual o masiva; la masiva responde un reporte por fila: creadas y errores) |
 | GET | `` | Listar fincas del usuario (owner o empleado) |
 | GET · PUT · DELETE | `/{farm_id}` | Consultar, actualizar y eliminar una finca |
 
