@@ -1,6 +1,7 @@
 """
 Módulo: modules/identity/repository.py (acceso a datos de identity)
-¿Qué? Las consultas de usuarios, tokens de un solo uso, roles, permisos y membresías.
+¿Qué? Las consultas de usuarios, tokens de un solo uso, intentos de login, roles,
+      permisos y membresías.
 ¿Para qué? Que los servicios no escriban SQL: piden "el usuario con este correo" o
            "el permiso del rol en este módulo" y no saben cómo se consulta.
 ¿Impacto? Las consultas de require_permission conservan su forma (membresía ->
@@ -8,16 +9,18 @@ Módulo: modules/identity/repository.py (acceso a datos de identity)
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from collections.abc import Iterable
 from typing import Any
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, case, delete, func, select
+from sqlalchemy.dialects import postgresql, sqlite
 from sqlalchemy.orm import Session, joinedload
 
 from app.modules.identity.models import (
     EmailVerificationToken,
+    LoginAttempt,
     PasswordResetToken,
     Permission,
     Role,
@@ -76,6 +79,64 @@ class UserRepository:
 
     def refresh(self, user: User) -> None:
         self._db.refresh(user)
+
+
+
+class LoginAttemptRepository:
+    """AttemptStore del bloqueo de login, en la tabla login_attempt.
+
+    Cada escritura hace commit ella misma: el intento fallido tiene que quedar
+    guardado aunque la petición termine en 401 (y el 401 descarta lo pendiente).
+    El conteo es un solo UPSERT atómico, así dos procesos que fallan a la vez
+    contra el mismo correo no se pisan la cuenta.
+    """
+
+    STALE_AFTER = timedelta(days=1)
+
+    def __init__(self, db: Session) -> None:
+        self._db = db
+
+    def locked_until(self, key: str) -> datetime | None:
+        stmt = select(LoginAttempt.locked_until).where(LoginAttempt.email_hash == key)
+        return _aware(self._db.execute(stmt).scalar_one_or_none())
+
+    def add_failure(self, key: str, now: datetime, window_start: datetime) -> int:
+        dialect = postgresql if self._db.get_bind().dialect.name == "postgresql" else sqlite
+        insert = dialect.insert(LoginAttempt).values(email_hash=key, failed_count=1, last_failed_at=now, locked_until=None)
+        current = LoginAttempt.__table__.c
+        stmt = insert.on_conflict_do_update(
+            index_elements=[current.email_hash],
+            set_={
+                # Fallos más viejos que la ventana ya no cuentan: se empieza de nuevo.
+                "failed_count": case((current.last_failed_at < window_start, 1), else_=current.failed_count + 1),
+                "last_failed_at": now,
+            },
+        ).returning(current.failed_count)
+        failed = self._db.execute(stmt).scalar_one()
+        # Limpieza: filas sin fallos recientes ni bloqueo vigente (índice en last_failed_at).
+        self._db.execute(delete(LoginAttempt).where(
+            LoginAttempt.last_failed_at < now - self.STALE_AFTER,
+            (LoginAttempt.locked_until.is_(None)) | (LoginAttempt.locked_until < now),
+        ).execution_options(synchronize_session="fetch"))
+        self._db.commit()
+        return int(failed)
+
+    def lock(self, key: str, until: datetime) -> None:
+        row = self._db.get(LoginAttempt, key)
+        if row:
+            row.locked_until = until
+            row.failed_count = 0
+            self._db.commit()
+
+    def clear(self, key: str) -> None:
+        stmt = delete(LoginAttempt).where(LoginAttempt.email_hash == key)
+        self._db.execute(stmt.execution_options(synchronize_session="fetch"))
+        self._db.commit()
+
+
+def _aware(value: datetime | None) -> datetime | None:
+    """SQLite devuelve fechas sin zona horaria; en la BD siempre se guardan en UTC."""
+    return value.replace(tzinfo=timezone.utc) if value and value.tzinfo is None else value
 
 
 class MembershipRepository:

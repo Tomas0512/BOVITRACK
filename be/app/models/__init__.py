@@ -14,7 +14,7 @@ from app.modules.documents.models import Document
 from app.modules.economics.models import EconomicRecord
 from app.modules.farms.models import City, Department, Farm, LandPlot, Paddock, PaddockHerd, Purpose
 from app.modules.health.models import SanitaryPlan, Treatment
-from app.modules.identity.models import EmailVerificationToken, PasswordResetToken, Permission, Role, User, UserFarm
+from app.modules.identity.models import EmailVerificationToken, LoginAttempt, PasswordResetToken, Permission, Role, User, UserFarm
 from app.modules.inventory.models import Consumption, Food, StockMovement
 from app.modules.livestock.models import AnimalMovement, Bovine, BovineAudit, BovineIdentification, Weight
 from app.modules.milk_production.models import MilkProduction
@@ -26,7 +26,7 @@ from app.modules.team.models import FarmInvitation, ReactivationRequest
 __all__ = [
     "AnimalMovement", "AuditLog", "Bovine", "BovineAudit", "BovineIdentification", "City", "Consumption",
     "Department", "Document", "EconomicRecord", "EmailVerificationToken", "Farm", "FarmInvitation", "Food",
-    "LandPlot", "MilkProduction", "NotificationLog", "Paddock", "PaddockHerd", "PasswordResetToken", "Permission",
+    "LandPlot", "LoginAttempt", "MilkProduction", "NotificationLog", "Paddock", "PaddockHerd", "PasswordResetToken", "Permission",
     "Purpose", "ReactivationRequest", "ReproductiveEvent", "Role", "SanitaryPlan", "StockMovement", "Task",
     "Treatment", "User", "UserFarm", "UserNotificationPref", "Weight",
 ]

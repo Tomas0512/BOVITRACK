@@ -14,10 +14,11 @@ from app.modules.team.dependencies import UserResponse, get_invitation_service, 
 from app.modules.team.schemas import (
     InvitationInfo,
     InvitedRegister,
+    ReactivationRequestAccepted,
     ReactivationRequestCreate,
-    ReactivationRequestResponse,
 )
 from app.modules.team.service import InvitationService, ReactivationService
+from app.modules.team.service.reactivation import REQUEST_RECEIVED
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Autenticación"])
 
@@ -53,8 +54,8 @@ def register_invited(
 
 @router.post(
     "/request-reactivation",
-    response_model=ReactivationRequestResponse,
-    status_code=status.HTTP_201_CREATED,
+    response_model=ReactivationRequestAccepted,
+    status_code=status.HTTP_202_ACCEPTED,
     summary="Solicitar reactivación de cuenta",
 )
 @limiter.limit("3/minute")
@@ -62,6 +63,11 @@ def request_reactivation(
     request: Request,
     data: ReactivationRequestCreate,
     service: ReactivationService = Depends(get_reactivation_service),
-) -> ReactivationRequestResponse:
-    """Endpoint público para que un usuario con cuenta desactivada solicite reactivación."""
-    return ReactivationRequestResponse.model_validate(service.request(data.email, data.reason))
+) -> ReactivationRequestAccepted:
+    """Endpoint público para que un usuario con cuenta desactivada solicite reactivación.
+
+    Siempre 202 con el mismo mensaje: no revela si el correo está registrado ni si
+    la cuenta está activa (igual que /forgot-password).
+    """
+    service.request(data.email, data.reason)
+    return ReactivationRequestAccepted(message=REQUEST_RECEIVED)

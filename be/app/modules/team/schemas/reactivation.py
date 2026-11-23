@@ -14,6 +14,12 @@ class ReactivationRequestCreate(BaseModel):
     reason: str | None = Field(default=None, max_length=500)
 
 
+class ReactivationRequestAccepted(BaseModel):
+    """Respuesta de la ruta pública: el mismo mensaje pase lo que pase con el correo."""
+
+    message: str
+
+
 class ReactivationRequestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

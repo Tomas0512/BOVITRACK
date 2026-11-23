@@ -19,30 +19,39 @@ from fastapi import Depends, Path
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
+from app.core import security_events
 from app.core.audit_trail import add_audit_log
 from app.core.database import get_db
 from app.core.email import send_email_verification, send_password_reset_email
 from app.core.security import hash_password
 from app.modules.identity.models import User
-from app.modules.identity.repository import MembershipDirectory, MembershipRepository, UserRepository
+from app.modules.identity.repository import (
+    LoginAttemptRepository,
+    MembershipDirectory,
+    MembershipRepository,
+    UserRepository,
+)
 from app.modules.identity.service import AccessService, AccountService, AuthService, LoginThrottle
 from app.shared.ports import FarmMemberLookup, FarmMembershipCheck, UserEmailLookup
 
 # Extrae el token del header "Authorization: Bearer <token>".
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-# Un solo contador de intentos para todo el proceso (no uno por request).
-login_throttle = LoginThrottle(max_attempts=5, lockout_minutes=15)
+# Bloqueo de login: 5 fallos en 15 minutos bloquean ese correo 15 minutos. La cuenta
+# vive en la tabla login_attempt, compartida por todos los procesos de la API.
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_LOCKOUT_MINUTES = 15
 
 
 # ── Servicios
 def build_auth_service(db: Session) -> AuthService:
     return AuthService(
         UserRepository(db),
-        throttle=login_throttle,
+        throttle=LoginThrottle(LOGIN_MAX_ATTEMPTS, LOGIN_LOCKOUT_MINUTES, store=LoginAttemptRepository(db)),
         record_audit=partial(add_audit_log, db),
         send_password_reset=send_password_reset_email,
         send_email_verification=send_email_verification,
+        security_log=security_events,
     )
 
 

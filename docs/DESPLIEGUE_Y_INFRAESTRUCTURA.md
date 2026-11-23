@@ -63,9 +63,12 @@ balanceador del proveedor…) apuntando a `HTTP_BIND:HTTP_PORT`.
 **Respaldo:** los datos están en los volúmenes `bovitrack-prod_pgdata` (BD) y `bovitrack-prod_documents` (archivos).
 Respaldar la BD con `docker compose -f docker-compose.prod.yml exec db pg_dump -U <usuario> <bd> > respaldo.sql`.
 
-**Limitaciones conocidas** (para la Parte 6):
-- El bloqueo por intentos de login vive en memoria: con `WEB_CONCURRENCY` > 1 cada proceso lleva su propia cuenta.
-- Las migraciones corren al arrancar: con varias réplicas de la API habría que correrlas una sola vez, aparte.
+**Eventos de seguridad:** logins (exitosos y fallidos, con el motivo), bloqueos y cambios de contraseña quedan en el log
+de la API como líneas `SECURITY {...}` en JSON, con el correo enmascarado y la IP real:
+`docker compose -f docker-compose.prod.yml --env-file .env.production logs be | grep SECURITY`.
+El bloqueo por intentos de login vive en la BD (tabla `login_attempt`): sirve con varios procesos y sobrevive a reinicios.
+
+**Limitación conocida:** las migraciones corren al arrancar; con varias réplicas de la API habría que correrlas una sola vez, aparte.
 
 ---
 

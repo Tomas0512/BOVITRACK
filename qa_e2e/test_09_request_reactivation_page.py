@@ -75,10 +75,10 @@ class TestRequestReactivationPage(BaseTest):
         Impacto: confirma al usuario que su peticion llegara a un
         administrador, evitando reintentos duplicados innecesarios.
 
-        Nota: se usa INACTIVE_USER_EMAIL y no TEST_EMAIL porque el backend
-        rechaza con 400 ("La cuenta ya está activa") las solicitudes de
-        reactivacion para cuentas activas — comportamiento correcto que
-        este caso de uso no ejercita.
+        Nota: se usa INACTIVE_USER_EMAIL para que la solicitud se cree de
+        verdad. El backend responde lo mismo (202) con cualquier correo, para
+        no revelar qué cuentas existen; solo crea la solicitud si la cuenta
+        existe y está desactivada.
         """
         self._reject_pending_requests()
         self.driver.get(f"{config.BASE_URL}/request-reactivation")

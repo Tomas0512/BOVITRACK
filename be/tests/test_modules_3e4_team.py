@@ -241,20 +241,23 @@ def test_existing_user_is_only_linked_and_expired_invitations_fail(team: SimpleN
 # ═══════════════════════════════════════════════════════════════
 
 
-def test_request_reactivation_rules(team: SimpleNamespace) -> None:
-    for email, error, message in (
-        ("nadie@x.com", NotFoundError, reactivation_rules.EMAIL_NOT_REGISTERED),
-        ("ana@x.com", BusinessRuleError, reactivation_rules.ALREADY_ACTIVE),
-    ):
-        with pytest.raises(error) as exc:
-            team.reactivation.request(email, None)
-        assert exc.value.message == message
+def _pending_requests(team: SimpleNamespace) -> list[Any]:
+    from app.modules.team.models import ReactivationRequest
 
-    request = team.reactivation.request(" ROSA@x.com ", "volví a la finca")
-    assert (request.user_id, request.status) == (team.rosa.id, "pending")
-    with pytest.raises(BusinessRuleError) as exc:
-        team.reactivation.request("rosa@x.com", None)
-    assert exc.value.message == reactivation_rules.ALREADY_PENDING
+    return list(team.db.query(ReactivationRequest).filter_by(status="pending"))
+
+
+def test_request_reactivation_rules(team: SimpleNamespace) -> None:
+    # Correo inexistente o cuenta activa: no pasa nada y no hay error (no se revela nada).
+    assert team.reactivation.request("nadie@x.com", None) is None
+    assert team.reactivation.request("ana@x.com", None) is None
+    assert _pending_requests(team) == []
+
+    # Cuenta desactivada: se crea la solicitud (correo normalizado); una pendiente a la vez.
+    team.reactivation.request(" ROSA@x.com ", "volví a la finca")
+    team.reactivation.request("rosa@x.com", None)
+    [request] = _pending_requests(team)
+    assert (request.user_id, request.reason) == (team.rosa.id, "volví a la finca")
 
     with pytest.raises(PermissionDeniedError):
         team.reactivation.ensure_reviewer(team.luis.id)  # no es admin de ninguna finca
@@ -287,6 +290,27 @@ def test_team_routes_are_served_by_the_module(team: SimpleNamespace) -> None:
         assert (public.status_code, public.json()) == (404, {"detail": invitation_rules.INVITATION_NOT_FOUND})
     finally:
         app.dependency_overrides.clear()
+
+
+def test_request_reactivation_answers_the_same_for_any_email(team: SimpleNamespace) -> None:
+    """Parte 6b: la ruta pública no revela si un correo existe ni si la cuenta está activa."""
+    from app.core.database import get_db
+    from app.core.limiter import limiter
+    from app.main import app
+
+    app.dependency_overrides[get_db] = lambda: team.db
+    was_enabled, limiter.enabled = limiter.enabled, False  # 3/minuto: aquí se hacen 3 seguidas
+    try:
+        http = TestClient(app)
+        answers = [http.post("/api/v1/auth/request-reactivation", json={"email": email})
+                   for email in ("nadie@x.com", "ana@x.com", "rosa@x.com")]  # no existe, activa, desactivada
+        assert {(r.status_code, r.text) for r in answers} == {
+            (202, '{"message":"' + reactivation_rules.REQUEST_RECEIVED + '"}'),
+        }
+        assert [r.user_id for r in _pending_requests(team)] == [team.rosa.id]  # solo la que aplica
+    finally:
+        app.dependency_overrides.clear()
+        limiter.enabled = was_enabled
 
 
 def test_team_only_loads_identity_and_farms_and_boots_like_uvicorn() -> None:

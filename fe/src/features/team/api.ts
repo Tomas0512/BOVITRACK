@@ -166,8 +166,13 @@ export interface ReactivationRequestDetail extends ReactivationRequestResponse {
   user_name: string;
 }
 
-export async function requestReactivation(data: ReactivationRequestData): Promise<ReactivationRequestResponse> {
-  const response = await api.post<ReactivationRequestResponse>(`${AUTH}/request-reactivation`, data);
+// Respuesta pública: siempre el mismo mensaje, exista o no el correo (no revela cuentas).
+export interface ReactivationRequestAccepted {
+  message: string;
+}
+
+export async function requestReactivation(data: ReactivationRequestData): Promise<ReactivationRequestAccepted> {
+  const response = await api.post<ReactivationRequestAccepted>(`${AUTH}/request-reactivation`, data);
   return response.data;
 }
 

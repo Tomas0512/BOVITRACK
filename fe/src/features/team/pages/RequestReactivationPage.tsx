@@ -9,7 +9,8 @@ export default function RequestReactivationPage() {
   const [email, setEmail] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  // Mensaje del backend: es el mismo exista o no la cuenta (no revela qué correos existen).
+  const [successMessage, setSuccessMessage] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,8 +19,8 @@ export default function RequestReactivationPage() {
     setLoading(true);
     setError("");
     try {
-      await requestReactivation({ email, reason: reason || undefined });
-      setSuccess(true);
+      const { message } = await requestReactivation({ email, reason: reason || undefined });
+      setSuccessMessage(message);
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, "No se pudo enviar la solicitud"));
     } finally {
@@ -27,16 +28,14 @@ export default function RequestReactivationPage() {
     }
   };
 
-  if (success) {
+  if (successMessage) {
     return (
       <AuthLayout headerActionLabel="Iniciar sesión" headerActionTo="/login">
         <div className="flex w-full items-center justify-center">
           <div className="w-full max-w-md rounded-2xl bg-surface p-8 text-center shadow-lg">
             <CheckCircle2 size={48} className="text-green-500 mx-auto mb-3" />
             <h2 className="mb-2 text-xl font-bold text-text-primary">Solicitud enviada</h2>
-            <p className="mb-6 text-sm text-text-secondary">
-              Tu solicitud de reactivación ha sido registrada. Un administrador la revisará pronto.
-            </p>
+            <p className="mb-6 text-sm text-text-secondary">{successMessage}</p>
             <Link to="/login" className="inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white no-underline hover:bg-primary-light">
               Volver al login
             </Link>

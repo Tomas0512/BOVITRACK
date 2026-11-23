@@ -7,7 +7,7 @@
 | `security.py` | Hash de contraseñas (bcrypt) y creación/validación de JWT. |
 | `email.py` | Envío de correos con backend seleccionable (`smtp`, `resend`, `log`). |
 | `limiter.py` | Instancia única del rate limiter. |
-| `security_events.py` | Log JSON de eventos de seguridad (login, contraseñas), con correo enmascarado. |
+| `security_events.py` | Log JSON de eventos de seguridad (login, bloqueos, contraseñas, cierre de sesiones), con correo enmascarado. Lo usa identity por el puerto `SecurityLog`. |
 | `error_handlers.py` | Traduce errores de dominio (`app.shared.exceptions`) a respuestas HTTP. |
 | `audit_trail.py` | Tabla `audit_log` y `add_audit_log`: deja constancia de cada acción, dentro de la misma transacción. Es transversal, como el logging. La consulta de auditoría es del módulo `audit`. |
 

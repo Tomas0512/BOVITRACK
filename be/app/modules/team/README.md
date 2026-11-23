@@ -39,7 +39,10 @@
 
 **Código muerto eliminado:** `assign_employee` y el schema `EmployeeAssign`. Ningún endpoint los usaba, así que el OpenAPI no cambia. También se quitó la validación de contraseña repetida en el servicio de invitaciones: el schema `InvitedRegister` ya la hace antes (422).
 
+## Cambios de la Parte 6b (seguridad)
+
+- `POST /api/v1/auth/request-reactivation` responde **siempre** `202` con el mismo mensaje, exista o no el correo y esté activa o no la cuenta. Ya no devuelve el `user_id`. Antes daba `404 "Correo no registrado"` o `400 "La cuenta ya está activa"`, y con eso cualquiera podía averiguar qué correos estaban registrados. La solicitud se sigue creando solo si la cuenta existe, está desactivada y no tiene otra pendiente. Esto lo decidió el usuario y funciona igual que `/forgot-password`.
+
 ## Deuda conocida
 
-- `POST /api/v1/auth/request-reactivation` es público y responde distinto si el correo existe (`404 "Correo no registrado"`) o si la cuenta está activa. Eso permite **averiguar qué correos están registrados**. Está pendiente de decidir en la Parte 6 (seguridad).
 - `seed_roles.py`, al reparar fincas sin vínculo de su dueño, intenta insertar la membresía aunque exista una inactiva del mismo usuario, y eso choca con `uq_user_farm`.

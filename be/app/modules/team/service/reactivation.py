@@ -7,6 +7,9 @@ Módulo: modules/team/service/reactivation.py (casos de uso: reactivar cuentas)
           (activos o no) de alguna finca donde él es Administrador activo. Una
           solicitud fuera de su alcance se responde como inexistente (404), para
           no revelar que existe.
+          Pedir la reactivación es público y responde SIEMPRE lo mismo (exista o no
+          el correo, esté activa o no la cuenta): así nadie puede usarlo para
+          averiguar qué correos están registrados (Parte 6b, decisión del usuario).
 """
 
 import uuid
@@ -15,13 +18,14 @@ from typing import Any, Protocol
 
 from app.modules.team.models import ReactivationRequest
 from app.modules.team.schemas import ReactivationRequestDetail
-from app.shared.exceptions import BusinessRuleError, NotFoundError, PermissionDeniedError
+from app.shared.exceptions import NotFoundError, PermissionDeniedError
 from app.shared.ports import AuditRecorder
 
 REQUEST_NOT_FOUND = "Solicitud no encontrada o ya procesada"
-EMAIL_NOT_REGISTERED = "Correo no registrado"
-ALREADY_ACTIVE = "La cuenta ya está activa"
-ALREADY_PENDING = "Ya existe una solicitud de reactivación pendiente"
+REQUEST_RECEIVED = (
+    "Si existe una cuenta desactivada con ese correo, tu solicitud quedó registrada "
+    "y un administrador la revisará."
+)
 USER_NOT_FOUND = "Usuario no encontrado"
 ONLY_ADMIN_REVIEWS = "Solo un administrador puede gestionar solicitudes de reactivación"
 
@@ -57,20 +61,18 @@ class ReactivationService:
         self._tx = transaction
         self._record_audit = record_audit
 
-    def request(self, email: str, reason: str | None) -> ReactivationRequest:
-        """Pública: la persona con la cuenta desactivada deja su solicitud (una pendiente a la vez)."""
+    def request(self, email: str, reason: str | None) -> None:
+        """Pública: la persona con la cuenta desactivada deja su solicitud (una pendiente a la vez).
+
+        No devuelve nada ni lanza errores por el correo: la solicitud se crea solo si
+        la cuenta existe, está desactivada y no tiene otra pendiente; en cualquier
+        otro caso no se hace nada. Quien llama responde siempre REQUEST_RECEIVED.
+        """
         user = self._dir.user_by_email(email.lower().strip())
-        if not user:
-            raise NotFoundError(EMAIL_NOT_REGISTERED)
-        if user.is_active:
-            raise BusinessRuleError(ALREADY_ACTIVE)
-        if self._repo.pending_of_user(user.id):
-            raise BusinessRuleError(ALREADY_PENDING)
-        request = ReactivationRequest(user_id=user.id, reason=reason)
-        self._repo.add(request)
+        if not user or user.is_active or self._repo.pending_of_user(user.id):
+            return
+        self._repo.add(ReactivationRequest(user_id=user.id, reason=reason))
         self._tx.commit()
-        self._tx.refresh(request)
-        return request
 
     def ensure_reviewer(self, reviewer_id: uuid.UUID) -> None:
         """Solo un Administrador (activo, con rol activo) de alguna finca modera solicitudes."""

@@ -6,10 +6,12 @@ Módulo: modules/identity/service/auth.py (casos de uso de autenticación)
 ¿Para qué? Que las reglas de autenticación vivan en un solo lugar, sin HTTP ni SQL:
            lanza errores de dominio (AuthenticationError -> 401, etc.) y la frontera
            HTTP los traduce.
-¿Impacto? El correo y la auditoría llegan inyectados (puertos), así que el servicio
-          se prueba sin servidor SMTP ni base de datos.
+¿Impacto? El correo, la auditoría, el registro de eventos de seguridad y dónde se
+          guardan los intentos de login llegan inyectados (puertos), así que el
+          servicio se prueba sin servidor SMTP ni base de datos.
 """
 
+import hashlib
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -72,43 +74,117 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+class AttemptStore(Protocol):
+    """Dónde se guardan los intentos fallidos (llave = hash del correo).
+
+    Implementación real: identity.repository.LoginAttemptRepository (tabla
+    login_attempt, compartida por todos los procesos). En pruebas: MemoryAttemptStore.
+    """
+
+    def locked_until(self, key: str) -> datetime | None: ...
+    def add_failure(self, key: str, now: datetime, window_start: datetime) -> int: ...
+    def lock(self, key: str, until: datetime) -> None: ...
+    def clear(self, key: str) -> None: ...
+
+
 @dataclass
 class _Attempts:
     failed: int = 0
+    last_failed_at: datetime | None = None
     locked_until: datetime | None = None
+
+
+class MemoryAttemptStore:
+    """AttemptStore en memoria (pruebas): misma semántica que la tabla."""
+
+    def __init__(self) -> None:
+        self._rows: dict[str, _Attempts] = {}
+
+    def locked_until(self, key: str) -> datetime | None:
+        row = self._rows.get(key)
+        return row.locked_until if row else None
+
+    def add_failure(self, key: str, now: datetime, window_start: datetime) -> int:
+        row = self._rows.setdefault(key, _Attempts())
+        row.failed = 1 if row.last_failed_at is None or row.last_failed_at < window_start else row.failed + 1
+        row.last_failed_at = now
+        return row.failed
+
+    def lock(self, key: str, until: datetime) -> None:
+        row = self._rows.get(key)
+        if row:
+            row.locked_until, row.failed = until, 0
+
+    def clear(self, key: str) -> None:
+        self._rows.pop(key, None)
+
+
+class SecurityLog(Protocol):
+    """Registro de eventos de seguridad (logs del servidor). Implementación: app.core.security_events."""
+
+    def log_login_success(self, email: str, ip: str) -> None: ...
+    def log_login_failed(self, email: str, reason: str, ip: str) -> None: ...
+    def log_login_locked(self, email: str, ip: str) -> None: ...
+    def log_password_changed(self, user_id: str, ip: str) -> None: ...
+    def log_password_reset_requested(self, ip: str) -> None: ...
+    def log_sessions_revoked(self, user_id: str) -> None: ...
+
+
+class _NoSecurityLog:
+    """SecurityLog que no registra nada (pruebas que no lo necesitan)."""
+
+    def __getattr__(self, _name: str) -> Callable[..., None]:
+        return lambda *args, **kwargs: None
+
+
+UNKNOWN_IP = "desconocida"
 
 
 class LoginThrottle:
     """Bloqueo temporal por intentos fallidos de login, por correo.
 
-    Vive en memoria: se pierde al reiniciar y no se comparte entre procesos.
-    Basta con un solo proceso; con varias réplicas debería ir a Redis o a la BD.
+    max_attempts fallos dentro de la ventana (lockout_minutes) bloquean ese correo
+    lockout_minutes; un login correcto limpia la cuenta. Los intentos se guardan en
+    el AttemptStore inyectado: con la tabla login_attempt el bloqueo sobrevive a
+    reinicios y es el mismo para todos los procesos de la API.
     """
 
-    def __init__(self, max_attempts: int = 5, lockout_minutes: int = 15, clock: Callable[[], datetime] = _now) -> None:
+    def __init__(
+        self,
+        max_attempts: int = 5,
+        lockout_minutes: int = 15,
+        clock: Callable[[], datetime] = _now,
+        store: AttemptStore | None = None,
+    ) -> None:
         self.max_attempts = max_attempts
         self.lockout = timedelta(minutes=lockout_minutes)
         self._clock = clock
-        self._by_email: dict[str, _Attempts] = {}
+        self._store: AttemptStore = store if store is not None else MemoryAttemptStore()
+
+    @staticmethod
+    def key(email: str) -> str:
+        """El correo nunca se guarda: solo su SHA-256."""
+        return hashlib.sha256(email.lower().strip().encode()).hexdigest()
 
     def ensure_not_locked(self, email: str) -> None:
         now = self._clock()
-        state = self._by_email.get(email)
-        if state and state.locked_until and state.locked_until > now:
-            remaining = int((state.locked_until - now).total_seconds() // 60) + 1
+        locked_until = self._store.locked_until(self.key(email))
+        if locked_until and locked_until > now:
+            remaining = int((locked_until - now).total_seconds() // 60) + 1
             raise TooManyAttemptsError(f"Demasiados intentos fallidos. Intente de nuevo en {remaining} minuto(s).")
 
-    def register_failure(self, email: str) -> None:
-        state = self._by_email.setdefault(email, _Attempts())
-        state.failed += 1
-        if state.failed >= self.max_attempts:
-            state.locked_until = self._clock() + self.lockout
-            state.failed = 0
-        else:
-            state.locked_until = None
+    def register_failure(self, email: str) -> bool:
+        """Cuenta un fallo. Devuelve True si con este fallo el correo quedó bloqueado."""
+        now = self._clock()
+        key = self.key(email)
+        failed = self._store.add_failure(key, now, window_start=now - self.lockout)
+        if failed >= self.max_attempts:
+            self._store.lock(key, now + self.lockout)
+            return True
+        return False
 
     def reset(self, email: str) -> None:
-        self._by_email.pop(email, None)
+        self._store.clear(self.key(email))
 
 
 class AuthService:
@@ -120,8 +196,10 @@ class AuthService:
         record_audit: AuditRecorder,
         send_password_reset: SendTokenEmail,
         send_email_verification: SendTokenEmail,
+        security_log: SecurityLog | None = None,
     ) -> None:
         self._users = users
+        self._security: SecurityLog = security_log if security_log is not None else _NoSecurityLog()
         self._throttle = throttle
         self._record_audit = record_audit
         self._send_password_reset = send_password_reset
@@ -183,19 +261,27 @@ class AuthService:
         self._users.commit()
 
     # ── Sesión
-    def login(self, credentials: UserLogin) -> TokenResponse:
-        """Valida email y contraseña. 5 fallos seguidos bloquean ese correo 15 minutos."""
+    def login(self, credentials: UserLogin, ip: str = UNKNOWN_IP) -> TokenResponse:
+        """Valida email y contraseña. 5 fallos en 15 minutos bloquean ese correo 15 minutos."""
         email = credentials.email.lower().strip()
-        self._throttle.ensure_not_locked(email)
+        try:
+            self._throttle.ensure_not_locked(email)
+        except TooManyAttemptsError:
+            self._security.log_login_failed(email, "locked", ip)
+            raise
 
         user = self._users.get_by_email(email)
         if not user or not verify_password(credentials.password, user.hashed_password):
-            self._throttle.register_failure(email)
+            self._security.log_login_failed(email, "invalid_credentials", ip)
+            if self._throttle.register_failure(email):
+                self._security.log_login_locked(email, ip)
             raise AuthenticationError(INVALID_CREDENTIALS)
 
         self._throttle.reset(email)
         if not user.is_active:
+            self._security.log_login_failed(email, "account_disabled", ip)
             raise PermissionDeniedError(ACCOUNT_DISABLED_LOGIN)
+        self._security.log_login_success(email, ip)
         return self._issue_tokens(user)
 
     def refresh(self, refresh_token: str) -> TokenResponse:
@@ -235,10 +321,12 @@ class AuthService:
         user.token_version += 1
         self._record_audit(user_id=str(user.id), action="logout_all_sessions", entity="user", entity_id=str(user.id))
         self._users.commit()
+        self._security.log_sessions_revoked(str(user.id))
 
     # ── Recuperación de contraseña
-    async def request_password_reset(self, email: str) -> None:
+    async def request_password_reset(self, email: str, ip: str = UNKNOWN_IP) -> None:
         """Siempre "funciona", exista o no el correo: así no se revela quién está registrado."""
+        self._security.log_password_reset_requested(ip)
         user = self._users.get_by_email(email.lower().strip())
         if not user:
             return
@@ -247,7 +335,7 @@ class AuthService:
         self._users.commit()
         await self._send_password_reset(user.email, token)
 
-    def reset_password(self, data: ResetPasswordRequest) -> None:
+    def reset_password(self, data: ResetPasswordRequest, ip: str = UNKNOWN_IP) -> None:
         record = self._users.get_password_reset_token(data.token)
         if not record:
             raise BusinessRuleError(RESET_TOKEN_INVALID)
@@ -262,6 +350,7 @@ class AuthService:
         record.used = True
         self._record_audit(user_id=str(user.id), action="password_reset", entity="user", entity_id=str(user.id))
         self._users.commit()
+        self._security.log_password_changed(str(user.id), ip)
 
     # ── Internos
     def _user_from_subject(self, subject: str) -> User | None:

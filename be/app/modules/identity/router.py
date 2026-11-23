@@ -32,6 +32,12 @@ auth_router = APIRouter(prefix="/api/v1/auth", tags=["Autenticación"])
 users_router = APIRouter(prefix="/api/v1/users", tags=["Usuarios"])
 
 
+def client_ip(request: Request) -> str:
+    """IP del cliente para los eventos de seguridad. Detrás de nginx es la IP real
+    (uvicorn --proxy-headers toma el X-Forwarded-For que nginx sobrescribe)."""
+    return request.client.host if request.client else "desconocida"
+
+
 # ═══════════════════════════════════════════════════════════════
 # Autenticación
 # ═══════════════════════════════════════════════════════════════
@@ -67,7 +73,7 @@ def login(
     service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     """Autentica al usuario y retorna access + refresh tokens."""
-    return service.login(credentials)
+    return service.login(credentials, ip=client_ip(request))
 
 
 @auth_router.post(
@@ -97,7 +103,7 @@ async def forgot_password(
     service: AuthService = Depends(get_auth_service),
 ) -> MessageResponse:
     """Envía un correo con el enlace de recuperación de contraseña."""
-    await service.request_password_reset(data.email)
+    await service.request_password_reset(data.email, ip=client_ip(request))
     return MessageResponse(
         message="Si el correo está registrado, recibirás un enlace para restablecer tu contraseña"
     )
@@ -115,7 +121,7 @@ def reset_password_endpoint(
     service: AuthService = Depends(get_auth_service),
 ) -> MessageResponse:
     """Restablece la contraseña usando el token de recuperación."""
-    service.reset_password(data)
+    service.reset_password(data, ip=client_ip(request))
     return MessageResponse(message="Contraseña restablecida exitosamente")
 
 
