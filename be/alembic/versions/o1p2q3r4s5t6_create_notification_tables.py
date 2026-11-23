@@ -82,17 +82,27 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Solo se borran los índices que EXISTEN: en una BD nueva, c9ff44fd3509 crea
+    # estas tablas desde los modelos (create_all) y upgrade() no las vuelve a crear,
+    # así que estos índices pueden no estar. Antes el downgrade fallaba ahí.
     insp = sa.inspect(op.get_bind())
 
+    def drop_indexes(table: str, names: list[str]) -> None:
+        existing = {index["name"] for index in insp.get_indexes(table)}
+        for name in names:
+            if name in existing:
+                op.drop_index(name, table_name=table)
+
     if insp.has_table("notification_log"):
-        op.drop_index(op.f("ix_notification_log_created_at"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_reference_id"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_type"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_user_id"), table_name="notification_log")
-        op.drop_index(op.f("ix_notification_log_farm_id"), table_name="notification_log")
+        drop_indexes("notification_log", [
+            "ix_notification_log_created_at",
+            "ix_notification_log_reference_id",
+            "ix_notification_log_type",
+            "ix_notification_log_user_id",
+            "ix_notification_log_farm_id",
+        ])
         op.drop_table("notification_log")
 
     if insp.has_table("user_notification_pref"):
-        op.drop_index(op.f("ix_user_notification_pref_farm_id"), table_name="user_notification_pref")
-        op.drop_index(op.f("ix_user_notification_pref_user_id"), table_name="user_notification_pref")
+        drop_indexes("user_notification_pref", ["ix_user_notification_pref_farm_id", "ix_user_notification_pref_user_id"])
         op.drop_table("user_notification_pref")

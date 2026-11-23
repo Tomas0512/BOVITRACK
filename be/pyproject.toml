@@ -31,6 +31,14 @@ dev = [
     "import-linter==2.1",
 ]
 
+# El backend es una APLICACIÓN, no una librería: `pip install .` solo instala las
+# dependencias. Sin esto, setuptools encontraba app/ y alembic/ y no sabía cuál
+# empaquetar ("Multiple top-level packages"); solo funcionaba en el Dockerfile
+# porque allí se instala antes de copiar el código.
+[tool.setuptools]
+packages = []
+py-modules = []
+
 # ══════════════════════════════════════════════════════════════
 # Fronteras arquitectónicas (import-linter)
 #
