@@ -177,6 +177,11 @@ async def _dispatch_email(email: str, subject: str, html: str, label: str, link:
 
 
 def _log_fallback(label: str, email: str, link: str) -> None:
+    # En producción el enlace lleva un token válido (recuperar contraseña, verificar
+    # correo): escribirlo en los logs lo expondría a quien los lea. Solo se avisa.
+    if settings.ENVIRONMENT == "production":
+        logger.error("📧 Email de %s para %s NO enviado (el enlace no se escribe en producción)", label, email)
+        return
     logger.info(
         "\n%s\n"
         "📧 EMAIL DE %s (sin SMTP — copiar enlace del log)\n"

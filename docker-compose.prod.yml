@@ -1,0 +1,100 @@
+# ══════════════════════════════════════════════════════════════
+# BoviTrack — Despliegue de PRODUCCIÓN
+#
+# What?    Stack completo (BD + API + web) con las imágenes construidas, sin
+#          código montado ni --reload, y con solo nginx expuesto.
+# ¿Para?   Desplegar en un servidor. El docker-compose.yml de siempre sigue
+#          siendo el de DESARROLLO (código montado y recarga en caliente).
+# Uso:
+#   cp .env.example .env.production   # y completar los valores de producción
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+# Impact?  - Proyecto propio ("bovitrack-prod"): sus contenedores y volúmenes NO
+#            chocan con los de desarrollo en la misma máquina.
+#          - BD y API no publican puertos: solo se llega a ellas por la red interna.
+#          - Si falta una variable obligatoria, compose se niega a arrancar.
+#          - Los documentos subidos viven en un volumen: sobreviven a reconstruir
+#            o reemplazar los contenedores.
+# ══════════════════════════════════════════════════════════════
+name: bovitrack-prod
+
+services:
+  db:
+    build: ./db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Falta POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?Falta POSTGRES_DB}
+    # Sin "ports": la BD solo es accesible desde la red interna backend_net.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend_net
+
+  be:
+    build: ./be
+    restart: always
+    environment:
+      ENVIRONMENT: production          # apaga /docs y /redoc, CORS solo FRONTEND_URL, sin --reload
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      SECRET_KEY: ${SECRET_KEY:?Falta SECRET_KEY (min. 32 caracteres)}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
+      REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+      FRONTEND_URL: ${FRONTEND_URL:?Falta FRONTEND_URL (URL pública de la web)}
+      EMAIL_BACKEND: ${EMAIL_BACKEND:?Falta EMAIL_BACKEND (smtp o resend)}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-noreply@bovitrack.com}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BoviTrack}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@bovitrack.com}
+      RESEND_FROM_NAME: ${RESEND_FROM_NAME:-BoviTrack}
+      RATE_LIMIT_ENABLED: "true"       # fijo: en producción nunca se apaga
+      NOTIFICATIONS_INTERVAL_MINUTES: ${NOTIFICATIONS_INTERVAL_MINUTES:-15}
+    # Sin "ports" y sin código montado: corre la imagen construida. Solo nginx (fe)
+    # la llama, por eso uvicorn confía en el X-Forwarded-For que nginx sobrescribe.
+    volumes:
+      - documents:/app/storage/documents
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend_net
+      - frontend_net
+
+  fe:
+    build:
+      context: ./fe
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api/v1}
+    restart: always
+    # Única entrada pública. Por defecto solo en esta máquina (127.0.0.1): delante
+    # debe ir el proxy con HTTPS (Caddy, Cloudflare Tunnel...). Para exponerlo
+    # directamente, HTTP_BIND=0.0.0.0.
+    ports:
+      - "${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+    depends_on:
+      be:
+        condition: service_healthy
+    networks:
+      - frontend_net
+
+networks:
+  backend_net:
+    driver: bridge
+  frontend_net:
+    driver: bridge
+
+volumes:
+  pgdata:       # datos de PostgreSQL
+  documents:    # documentos subidos (HU012)

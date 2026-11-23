@@ -8,7 +8,9 @@ Descripción: Configuración centralizada del backend usando Pydantic Settings.
           lo que podría causar errores silenciosos en tiempo de ejecución.
 """
 
-from pydantic import Field
+from typing import Literal
+
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -48,8 +50,9 @@ class Settings(BaseSettings):
     # 🌐 URL del frontend (para CORS y enlaces en emails)
     FRONTEND_URL: str = "http://localhost:5173"
 
-    # 🌍 Entorno (development / production)
-    ENVIRONMENT: str = "development"
+    # 🌍 Entorno. En "production": sin /docs, CORS solo FRONTEND_URL, sin --reload
+    # y la configuración se valida (ver _production_must_be_safe).
+    ENVIRONMENT: Literal["development", "test", "staging", "production"] = "development"
 
     # 🚦 Rate limiting (slowapi)
     # True (default) aplica los límites de auth (5/min login, 3/min recuperación).
@@ -69,6 +72,30 @@ class Settings(BaseSettings):
     # envían las notificaciones pendientes. 0 = desactivado (útil en pruebas).
     # El motor es idempotente: no repite una alerta al mismo usuario en 24 h.
     NOTIFICATIONS_INTERVAL_MINUTES: int = 15
+
+    @model_validator(mode="after")
+    def _production_must_be_safe(self) -> "Settings":
+        """¿Qué? En producción, la app NO arranca con una configuración insegura.
+        ¿Para qué? Que un error de configuración se vea al desplegar, no después:
+           - sin rate limiting, el login queda abierto a fuerza bruta;
+           - con EMAIL_BACKEND=log, los enlaces de recuperación de contraseña
+             quedarían escritos en los logs, y nadie recibiría los correos.
+        """
+        if self.ENVIRONMENT != "production":
+            return self
+        problems: list[str] = []
+        if not self.RATE_LIMIT_ENABLED:
+            problems.append("RATE_LIMIT_ENABLED debe ser true")
+        backend = self.EMAIL_BACKEND.lower()
+        if backend not in ("smtp", "resend"):
+            problems.append(f"EMAIL_BACKEND={self.EMAIL_BACKEND!r} no entrega correos reales (usa smtp o resend)")
+        elif backend == "smtp" and not self.SMTP_HOST:
+            problems.append("EMAIL_BACKEND=smtp necesita SMTP_HOST")
+        elif backend == "resend" and not self.RESEND_API_KEY:
+            problems.append("EMAIL_BACKEND=resend necesita RESEND_API_KEY")
+        if problems:
+            raise ValueError("Configuración insegura para producción: " + "; ".join(problems))
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

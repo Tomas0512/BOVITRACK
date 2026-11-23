@@ -14,6 +14,9 @@ htmlcov/
 
 # ─── Variables de entorno ─────────────────────────
 .env
+# Cualquier archivo de entorno con secretos (.env.production, .env.staging...).
+.env.*
+!.env.example
 *.env.local
 
 # ─── Node / Frontend ──────────────────────────────

@@ -67,6 +67,8 @@ app = FastAPI(
     lifespan=lifespan,
     docs_url=None if _is_production else "/docs",
     redoc_url=None if _is_production else "/redoc",
+    # Sin esto, /openapi.json seguía describiendo toda la API en producción.
+    openapi_url=None if _is_production else "/openapi.json",
 )
 
 # ── Rate limiter ──────────────────────────────────
