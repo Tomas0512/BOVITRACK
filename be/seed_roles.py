@@ -164,12 +164,19 @@ def seed():
             print("✓ Todas las fincas ya tienen su vínculo de acceso correcto.")
             return
 
-        repaired = 0
+        # El dueño puede no tener vínculo, o tenerlo INACTIVO (o con otro rol). Antes se
+        # hacía un INSERT a secas y, en el segundo caso, chocaba con uq_user_farm
+        # (user_id, farm_id) y abortaba todo el seed. Ahora es un UPSERT: crea el
+        # vínculo o reactiva el existente como Administrador.
+        created = reactivated = 0
         for farm_id, owner_id in orphan_farms:
-            session.execute(
+            inserted = session.execute(
                 text("""INSERT INTO user_farm
                     (id, user_id, farm_id, role_id, assigned_by, is_active)
-                    VALUES (:id, :user_id, :farm_id, :role_id, :assigned_by, true)"""),
+                    VALUES (:id, :user_id, :farm_id, :role_id, :assigned_by, true)
+                    ON CONFLICT ON CONSTRAINT uq_user_farm
+                    DO UPDATE SET is_active = true, role_id = EXCLUDED.role_id
+                    RETURNING (xmax = 0) AS inserted"""),
                 {
                     "id": str(uuid.uuid4()),
                     "user_id": str(owner_id),
@@ -177,11 +184,15 @@ def seed():
                     "role_id": str(admin_role_id),
                     "assigned_by": str(owner_id),
                 },
-            )
-            repaired += 1
+            ).scalar_one()
+            if inserted:
+                created += 1
+            else:
+                reactivated += 1
 
         session.commit()
-        print(f"✓ {repaired} finca(s) reparada(s): vínculo Administrador creado para el propietario.")
+        print(f"✓ {created + reactivated} finca(s) reparada(s): vínculo Administrador del propietario "
+              f"creado en {created} y reactivado en {reactivated}.")
 
 
 if __name__ == "__main__":

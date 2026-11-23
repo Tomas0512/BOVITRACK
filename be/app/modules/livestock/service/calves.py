@@ -234,13 +234,16 @@ class CalfService:
 
         El modelo guarda la ganancia en `daily_gain`; la respuesta la expone como
         `daily_gain_kg`. (Antes se leía weight.daily_gain_kg y respondía 500.)
+        Cada punto lleva el `id` del pesaje, que WeightRecordResponse exige (bug #23:
+        sin él, la ruta seguía en 500 con cualquier animal que tuviera pesajes).
         """
         start_date = self._today() - timedelta(days=days_back)
         return [
             {
+                "id": weight.id,
                 "date": weight.measured_at.isoformat(),
                 "weight_kg": float(weight.weight_kg),
-                "daily_gain_kg": float(weight.daily_gain) if weight.daily_gain else None,
+                "daily_gain_kg": float(weight.daily_gain) if weight.daily_gain is not None else None,
             }
             for weight in self._weights.list_for_bovine(farm_id, bovine_id, since=start_date)
         ]

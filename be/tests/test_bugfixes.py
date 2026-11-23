@@ -503,9 +503,10 @@ def test_calf_weight_history_reads_daily_gain(livestock_db: Any) -> None:
     history = service.get_calf_weight_history(FARM, cow.id)
 
     # Antes: AttributeError ('Weight' no tiene daily_gain_kg) -> 500.
+    ids = [w.id for w in sorted(cow.weights, key=lambda w: w.measured_at)]
     assert history == [
-        {"date": "2026-11-01", "weight_kg": 60.0, "daily_gain_kg": None},
-        {"date": "2026-11-11", "weight_kg": 75.0, "daily_gain_kg": 1.5},
+        {"id": ids[0], "date": "2026-11-01", "weight_kg": 60.0, "daily_gain_kg": None},
+        {"id": ids[1], "date": "2026-11-11", "weight_kg": 75.0, "daily_gain_kg": 1.5},
     ]
 
 
@@ -609,3 +610,24 @@ def test_sanitary_plan_dose_up_to_100_chars_is_accepted_and_longer_is_422() -> N
     # El schema nunca acepta más de lo que cabe en la columna.
     columns = SanitaryPlan.__table__.c
     assert (columns.dose.type.length, columns.administration_route.type.length) == (100, 50)
+
+
+# ── 23. Curva de peso de terneros: seguía en 500 (faltaba el id) ──
+
+
+def test_calf_weight_history_route_answers_with_every_point(livestock_db: Any) -> None:
+    """La ruta arma WeightRecordResponse con cada punto; sin "id" fallaba con cualquier pesaje."""
+    from app.modules.livestock.repository import BovineRepository, WeightRepository
+    from app.modules.livestock.schemas import WeightRecordResponse
+    from app.modules.livestock.service import CalfService
+
+    cow = _cow_with_weights(livestock_db, (1, "60"), (11, "60"))
+    max(cow.weights, key=lambda w: w.measured_at).daily_gain = Decimal("0")  # ganancia cero: es 0, no "sin dato"
+    livestock_db.commit()
+    service = CalfService(BovineRepository(livestock_db), WeightRepository(livestock_db), MagicMock(),
+                          today=lambda: date(2026, 11, 20))
+
+    points = [WeightRecordResponse(**record) for record in service.get_calf_weight_history(FARM, cow.id)]
+
+    assert [(p.weight_kg, p.daily_gain_kg) for p in points] == [(60.0, None), (60.0, 0.0)]
+    assert {p.id for p in points} == {w.id for w in cow.weights}

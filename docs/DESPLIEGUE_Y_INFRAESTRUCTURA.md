@@ -54,8 +54,26 @@ En `.env.production` son obligatorias: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `PO
 arranca uvicorn. Si una migración falla, el contenedor se detiene en vez de servir con un esquema viejo.
 
 **IP real del cliente:** nginx sobrescribe `X-Forwarded-For` con la IP que ve, y uvicorn (`--proxy-headers`) la usa.
-Así el límite de intentos de login es **por usuario** y no compartido por todos. Si delante de nginx hay otro proxy
-(Cloudflare, Caddy), nginx verá la IP de ese proxy: hay que configurar `real_ip` en nginx para ese caso.
+Así el límite de intentos de login es **por usuario** y no compartido por todos.
+
+Si delante de nginx hay **otro proxy** (Caddy, Cloudflare, el balanceador del proveedor), nginx ve la IP de ese proxy y
+todos los usuarios parecerían uno solo. En ese caso hay que descomentar el bloque `real_ip` al inicio de `fe/nginx.conf`,
+con la IP o el rango de **ese** proxy, y reconstruir la imagen `fe`:
+
+```nginx
+set_real_ip_from 172.16.0.0/12;   # Caddy u otro proxy en la misma red Docker (o su IP exacta)
+real_ip_header X-Forwarded-For;   # con Cloudflare: real_ip_header CF-Connecting-IP; y sus rangos publicados
+real_ip_recursive on;
+```
+
+Nunca usar `set_real_ip_from 0.0.0.0/0`: cualquiera podría falsificar su IP mandando su propio `X-Forwarded-For`.
+Para comprobarlo, inicia sesión desde otro equipo y revisa que la `ip` de las líneas `SECURITY` sea la de ese equipo.
+
+**Encabezados de seguridad de la web:** nginx agrega a la SPA una CSP estricta (`script-src 'self'`, `style-src 'self'`,
+`connect-src 'self'`, `frame-ancestors 'none'`…), `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`,
+`Permissions-Policy` y `Cross-Origin-Opener-Policy` (`fe/security-headers.conf`). Si se agrega un recurso externo (una fuente,
+un mapa, un CDN), hay que agregar su origen a la CSP; si no, el navegador lo bloquea y lo avisa en la consola.
+**HSTS** (`Strict-Transport-Security`) lo debe poner el proxy con HTTPS que está delante: nginx solo habla HTTP.
 
 **HTTPS:** nginx escucha en HTTP. Delante debe ir un proxy con TLS (Caddy, Cloudflare Tunnel — sección 2 —, el
 balanceador del proveedor…) apuntando a `HTTP_BIND:HTTP_PORT`.

@@ -45,4 +45,4 @@
 
 ## Deuda conocida
 
-- `seed_roles.py`, al reparar fincas sin vínculo de su dueño, intenta insertar la membresía aunque exista una inactiva del mismo usuario, y eso choca con `uq_user_farm`.
+Ninguna pendiente. La reparación de `seed_roles.py` que chocaba con `uq_user_farm` se corrigió en la Parte 6b-2: ahora reactiva el vínculo existente del dueño.
