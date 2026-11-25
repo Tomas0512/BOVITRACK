@@ -183,14 +183,21 @@ correcto solo para silenciar una regla introduce riesgo sin aportar valor.
 
 ## 5. Hallazgos por integrante
 
-> Reparto propuesto de las 3 vulnerabilidades por persona que exige la actividad.
-> **Pendiente de confirmación con el grupo.**
+Cada integrante corrigió **3 vulnerabilidades**, agrupadas por área para que
+cada bloque tuviera una estrategia de corrección coherente.
 
-| Integrante | Hallazgos asignados | Justificación |
-|---|---|---|
-| *(por definir)* | V1, V2, V8 | Infraestructura y secretos: credenciales en código, Dockerfile y pipeline. |
-| *(por definir)* | V3, V4, V5 | Seguridad del frontend: entrada no saneada en rutas de API y almacenamiento del navegador. |
-| *(por definir)* | V6, V7, C1 | Credenciales de prueba, aleatoriedad no criptográfica y ReDoS en la validación de correo. |
+| Integrante | Hallazgos | Issues | Área | Evidencia individual |
+|---|---|---:|---|---|
+| **Camilo** | V1, V2, V8 | 3 | Secretos, imagen de contenedor y pipeline. Además la integración de SonarCloud y los hallazgos B1 y C3. | [INFORME_ANALISIS_ESTATICO_CAMILO.md](INFORME_ANALISIS_ESTATICO_CAMILO.md) |
+| **Tomás** | V3, V4, V5 | 5 | Seguridad del frontend: entrada no saneada en rutas de API y en el almacenamiento del navegador. | [INFORME_ANALISIS_ESTATICO_TOMAS.md](INFORME_ANALISIS_ESTATICO_TOMAS.md) |
+| **Edwin** | V6, V7, V9 | 13 | Credenciales en código versionado, aleatoriedad no criptográfica y permisos dentro de la imagen. | [INFORME_ANALISIS_ESTATICO_EDWIN.md](INFORME_ANALISIS_ESTATICO_EDWIN.md) |
+
+**Total: 9 vulnerabilidades, 21 issues cerrados.**
+
+`V9` (`docker:S6504`) no figuraba en la línea base: lo introdujo la corrección
+de `V2` y lo detectó el análisis del commit siguiente. Sustituye a la
+asignación inicialmente prevista para Edwin y queda documentado como ejemplo
+de que una corrección también se audita.
 
 ---
 
@@ -433,7 +440,69 @@ vulnerabilidades, 3 bugs y 24 code smells.
 
 ---
 
-## 8. Estado
+## 8. Refactorización: tercera iteración (Tomás y Edwin)
+
+Commits `8aca716` y `b20ed93`. El detalle de cada corrección, con su criterio y
+su verificación, está en las evidencias individuales enlazadas en la sección 5.
+
+| Métrica | Antes (`0149226`) | Después (`b20ed93`) | Variación |
+|---|---:|---:|---|
+| Vulnerabilidades | 27 | **9** | **−18** |
+| Esfuerzo de remediación de seguridad | 660 min | **360 min** | −300 min |
+| Bugs | 35 | 35 | = |
+| Code Smells | 146 | 146 | = |
+| Security Rating (global) | C | C | = |
+| **Security Rating sobre código nuevo** | **C** | **A** | **▲** |
+
+El *Security Rating* global sigue en **C** porque la calificación la determina
+la peor vulnerabilidad abierta y quedan 7 hallazgos Major sin tratar. El de
+**código nuevo**, que es la condición del Quality Gate, sí alcanzó **A**.
+
+### Resultado acumulado frente a la línea base
+
+| Métrica | Línea base (`8305de9`) | Actual (`b20ed93`) | Variación |
+|---|---:|---:|---|
+| Vulnerabilidades | 29 | **9** | **−69 %** |
+| Bugs | 38 | **35** | −8 % |
+| Code Smells | 170 | **146** | −14 % |
+| Security Rating | **E** | **C** | ▲ 2 niveles |
+| Esfuerzo de remediación de seguridad | 720 min | **360 min** | **−50 %** |
+| Deuda técnica (`sqale_index`) | 898 min | 850 min | −5 % |
+
+### Estado del Quality Gate
+
+| Condición | Estado | Valor |
+|---|---|---|
+| Security Rating en código nuevo | ✅ OK | **A** |
+| Reliability Rating en código nuevo | ✅ OK | A |
+| Maintainability Rating en código nuevo | ✅ OK | A |
+| Duplicación en código nuevo | ✅ OK | 0.0 % |
+| Security Hotspots revisados | ✅ OK | 100 % |
+| **Cobertura en código nuevo** | ❌ **ERROR** | **0.0 %** (requerido ≥ 80 %) |
+
+De las seis condiciones del *Quality Gate* por defecto (`Sonar way`), **cinco
+se cumplen**. La única que falla es la cobertura de pruebas, y no depende del
+análisis estático: el proyecto tiene pruebas (43 en el frontend y la suite de
+`be/tests`), pero el pipeline **no envía los reportes de cobertura** a
+SonarCloud, por lo que la métrica se calcula como 0 %.
+
+Alcanzar el 80 % exigido sobre 32 000 líneas es un trabajo de pruebas, no de
+análisis estático, y excede el alcance de esta guía. Queda documentado como la
+acción pendiente para que el Quality Gate pase a verde.
+
+### Vulnerabilidades restantes (9)
+
+| Severidad | Regla | Archivo | Observación |
+|---|---|---|---|
+| MAJOR ×2 | `typescript:S2068` | `RegisterPage.tsx:70`, `InvitedRegisterPage.tsx:69` | **Falsos positivos** (ver sección 4). Deben marcarse como *False Positive* en SonarCloud, no corregirse. |
+| MAJOR ×2 | `docker:S8541` | `be/Dockerfile:27, 28` | `pip install` sin `--only-binary :all:`. |
+| MAJOR ×2 | `docker:S8544` | `be/Dockerfile:27, 28` | Dependencias sin versiones resueltas fijadas. |
+| MAJOR | `docker:S6505` | `fe/Dockerfile:23` | `pnpm install` sin `--ignore-scripts`. |
+| MINOR ×2 | `docker:S6471` | `fe/Dockerfile:39`, `db/Dockerfile:6` | Las imágenes `nginx` y `postgres` usan `root` por defecto. Son reglas de revisión sobre imágenes base de terceros. |
+
+---
+
+## 9. Estado
 
 - [x] Integración de SonarCloud con GitHub Actions
 - [x] Escaneo inicial y captura de la línea base
@@ -441,10 +510,19 @@ vulnerabilidades, 3 bugs y 24 code smells.
 - [x] Refactorización — iteración 1: V1, V2, V8 (3 vulnerabilidades)
 - [x] Refactorización — iteración 2: B1 (3 bugs) y C3 (24 code smells)
 - [x] **Mínimo exigido por la guía cumplido** (≥ 2 Code Smells, ≥ 2 Bugs, ≥ 1 Vulnerabilidad)
-- [ ] Refactorización — iteración 3: V3, V4, V5 (seguridad del frontend)
-- [ ] Refactorización — iteración 4: V6, V7, C1
-- [ ] Corrección del bug B2 (35 promesas sin gestionar)
-- [ ] Marcado de falsos positivos (`typescript:S2068`)
-- [ ] Datos de identificación y reparto por integrante (sección 5)
+- [x] Refactorización — iteración 3: V3, V4, V5 (Tomás) y V6, V7, V9 (Edwin)
+- [x] **3 vulnerabilidades corregidas por integrante** (9 en total, 21 issues)
+- [x] Reparto por integrante y evidencias individuales (sección 5)
+- [x] Security Rating sobre código nuevo en **A**
+- [ ] Marcado de los 2 falsos positivos (`typescript:S2068`) en la interfaz de SonarCloud
+- [ ] Envío de reportes de cobertura al análisis
 - [ ] Captura del dashboard final y exportación a PDF
-- [ ] Re-escaneo hasta Quality Gate *Passed*
+- [ ] Quality Gate *Passed* (bloqueado por la condición de cobertura)
+
+### Pendientes que requieren acción manual
+
+| Acción | Quién | Dónde |
+|---|---|---|
+| Marcar como *False Positive* los 2 issues `typescript:S2068` | Administrador del proyecto | SonarCloud → Issues → cada issue → *Open* → *False Positive*, con la justificación de la sección 4 |
+| Rotar la contraseña del usuario demo de pruebas | Equipo | Base de datos de pruebas. El valor sigue en el historial de Git |
+| Capturar el dashboard final | Equipo | SonarCloud → Summary |
