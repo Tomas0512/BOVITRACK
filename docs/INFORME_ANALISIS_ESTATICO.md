@@ -469,7 +469,80 @@ la peor vulnerabilidad abierta y quedan 7 hallazgos Major sin tratar. El de
 | Esfuerzo de remediación de seguridad | 720 min | **360 min** | **−50 %** |
 | Deuda técnica (`sqale_index`) | 898 min | 850 min | −5 % |
 
-### Estado del Quality Gate
+---
+
+## 9. Medición de la cobertura de pruebas
+
+Hasta aquí SonarCloud reportaba **0 % de cobertura**, y no porque el proyecto
+careciera de pruebas: tiene 95 (52 en el backend y 43 en el frontend). La
+cobertura **no se deduce leyendo el código**, hay que ejecutarlo, y el workflow
+solo lanzaba el escáner.
+
+### Cambios realizados (commits `7aad03f` a `1ee2a64`)
+
+| Archivo | Cambio |
+|---|---|
+| `.github/workflows/sonarcloud.yml` | Ejecuta `pytest --cov` y `vitest --coverage` antes del escaneo |
+| `sonar-project.properties` | Rutas de los reportes: `be/coverage.xml` y `fe/coverage/lcov.info` |
+| `fe/vite.config.ts` | Reporter `lcov`, midiendo `src/` y excluyendo las propias pruebas |
+| `be/pyproject.toml` | `[tool.setuptools] py-modules = []` |
+| `be/requirements.lock.txt` | Nuevo: dependencias con hash, generado con `pip-compile --generate-hashes` |
+| `.gitignore` | Deja de versionarse `fe/coverage/` (hallazgo **C5**) |
+
+Las pruebas del backend usan dobles (`MagicMock`) para la sesión de base de
+datos, así que el pipeline **no necesita levantar un PostgreSQL**: basta con
+definir las variables de entorno para que la configuración se pueda instanciar
+al importar la aplicación.
+
+### Resultado
+
+| Métrica | Antes | Después |
+|---|---:|---:|
+| Cobertura global | **0.0 %** (no medida) | **18.7 %** (medida) |
+| Cobertura del backend | — | 31 % (52 pruebas) |
+| Cobertura del frontend | — | 14.8 % (43 pruebas) |
+| Líneas por cubrir | — | 21 627 |
+
+### Tres tropiezos que dejaron enseñanza
+
+**1. El escáner audita su propio workflow.** Al añadir los pasos de cobertura,
+el análisis siguiente mostró **4 vulnerabilidades nuevas** sobre
+`sonarcloud.yml`: `githubactions:S8541` y `S8544` en las dos líneas de
+`pip install`. Las mismas reglas que ya estaban abiertas en `be/Dockerfile`.
+
+La corrección se hizo en dos pasos, porque el primero fue insuficiente:
+
+- `--only-binary :all:` cerró **S8541** (impide que pip ejecute scripts de
+  instalación al construir un paquete desde su código fuente).
+- **S8544 siguió abierta**: fijar versiones con `==` no basta, la regla exige
+  que la instalación sea *verificable*. Se resolvió con
+  `be/requirements.lock.txt` —toda la cadena de dependencias, transitivas
+  incluidas, con el hash de cada distribución— instalado con
+  `--require-hashes`. Si un paquete publicado en PyPI cambiara de contenido,
+  pip aborta en lugar de instalarlo.
+
+**2. Un error de sintaxis YAML tumbó el pipeline.** La línea
+`run: pip install --only-binary :all: -r requirements.txt` contiene la
+secuencia *dos puntos + espacio*, que YAML interpreta como separador de clave y
+valor. GitHub rechazó el archivo completo. Desde entonces el YAML se valida
+con PyYAML antes de cada push.
+
+**3. Los bugs subieron de 35 a 44, y no fue un retroceso.** Los 9 issues nuevos
+son todos de reglas TypeScript **que requieren información de tipos**
+(`typescript:S9383`, `typescript:S6959`), repartidos en 25 archivos de
+`fe/src`, y sus fechas de creación por `git blame` son antiguas: ninguno se
+introdujo en estos commits.
+
+La explicación es que el paso de cobertura ejecuta `pnpm install`, de modo que
+`fe/node_modules` existe cuando corre el escáner. SonarJS necesita las
+dependencias instaladas para resolver los tipos; sin ellas desactiva las reglas
+que dependen del análisis de tipos. **Esos 9 bugs siempre estuvieron ahí**: lo
+que cambió es que ahora el análisis puede verlos. Medir cobertura hizo, de
+paso, que la inspección fuera más profunda.
+
+---
+
+## 10. Estado del Quality Gate
 
 | Condición | Estado | Valor |
 |---|---|---|
@@ -478,17 +551,16 @@ la peor vulnerabilidad abierta y quedan 7 hallazgos Major sin tratar. El de
 | Maintainability Rating en código nuevo | ✅ OK | A |
 | Duplicación en código nuevo | ✅ OK | 0.0 % |
 | Security Hotspots revisados | ✅ OK | 100 % |
-| **Cobertura en código nuevo** | ❌ **ERROR** | **0.0 %** (requerido ≥ 80 %) |
+| **Cobertura en código nuevo** | ❌ **ERROR** | **5.4 %** (requerido ≥ 80 %) |
 
-De las seis condiciones del *Quality Gate* por defecto (`Sonar way`), **cinco
-se cumplen**. La única que falla es la cobertura de pruebas, y no depende del
-análisis estático: el proyecto tiene pruebas (43 en el frontend y la suite de
-`be/tests`), pero el pipeline **no envía los reportes de cobertura** a
-SonarCloud, por lo que la métrica se calcula como 0 %.
+**Cinco de las seis condiciones** del Quality Gate por defecto (`Sonar way`) se
+cumplen. La única que falla es la cobertura.
 
-Alcanzar el 80 % exigido sobre 32 000 líneas es un trabajo de pruebas, no de
-análisis estático, y excede el alcance de esta guía. Queda documentado como la
-acción pendiente para que el Quality Gate pase a verde.
+Conviene ser explícito sobre esto: **llevar la cobertura al 80 % sobre 32 000
+líneas es un trabajo de escritura de pruebas, no de análisis estático**, y
+excede el alcance de esta guía. Lo que sí se consiguió es que la métrica
+exista, sea real y se actualice en cada commit: antes el dashboard mostraba
+0 % y no se podía distinguir "sin pruebas" de "sin medir".
 
 ### Vulnerabilidades restantes (9)
 
@@ -502,7 +574,7 @@ acción pendiente para que el Quality Gate pase a verde.
 
 ---
 
-## 9. Estado
+## 11. Estado
 
 - [x] Integración de SonarCloud con GitHub Actions
 - [x] Escaneo inicial y captura de la línea base
@@ -515,9 +587,9 @@ acción pendiente para que el Quality Gate pase a verde.
 - [x] Reparto por integrante y evidencias individuales (sección 5)
 - [x] Security Rating sobre código nuevo en **A**
 - [ ] Marcado de los 2 falsos positivos (`typescript:S2068`) en la interfaz de SonarCloud
-- [ ] Envío de reportes de cobertura al análisis
+- [x] Envío de reportes de cobertura al análisis (18.7 % medido)
 - [ ] Captura del dashboard final y exportación a PDF
-- [ ] Quality Gate *Passed* (bloqueado por la condición de cobertura)
+- [ ] Quality Gate *Passed*: 5 de 6 condiciones cumplidas; falta cobertura ≥ 80 % en código nuevo
 
 ### Pendientes que requieren acción manual
 
