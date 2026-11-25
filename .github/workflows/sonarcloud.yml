@@ -1,0 +1,47 @@
+# ══════════════════════════════════════════════════════════════
+# BoviTrack — Análisis estático de código (SonarQube Cloud)
+#
+# What?    En cada push a main y en cada pull request, envía el código fuente
+#          al servicio de SonarCloud para su inspección sin ejecutarlo.
+# ¿Para?   Cumplir la Guía N.º 08 (SQA): medir bugs, vulnerabilidades, security
+#          hotspots, duplicación y deuda técnica, y bloquear el Quality Gate.
+# Impact?  Corre en paralelo a ci.yml; no lo reemplaza. ci.yml verifica que el
+#          código funcione, este verifica cómo está escrito.
+#
+# Requiere: el secret SONAR_TOKEN en Settings > Secrets and variables > Actions,
+#           y "CI-based analysis" activo en SonarCloud (Administration >
+#           Analysis method). Si el "Automatic Analysis" queda encendido,
+#           este job falla a propósito para no publicar dos veces.
+# ══════════════════════════════════════════════════════════════
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Una corrida nueva en la misma rama cancela la anterior (ahorra minutos).
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Historial completo: Sonar lo necesita para fechar cada issue
+          # (git blame) y para calcular qué es "código nuevo".
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
