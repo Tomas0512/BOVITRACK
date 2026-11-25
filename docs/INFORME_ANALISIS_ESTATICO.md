@@ -319,14 +319,132 @@ requiere cerrar las vulnerabilidades Major restantes.
 
 ---
 
-## 7. Estado
+## 7. Refactorización: segunda iteración (B1, C3)
+
+Commit `0149226` — análisis #5 sobre `main`.
+Ambas reglas quedaron en **0 issues abiertos**.
+
+### B1 — Condición que devuelve siempre lo mismo (`typescript:S3923`, MAJOR ×3)
+
+**Antes** — `fe/src/components/bovines/BovineList.tsx:530, 542, 555`
+
+```ts
+next = next.concat([{
+  id: Math.random().toString(36).slice(2),
+  connector: next.length > 0 ? "AND" : "AND",
+  field,
+  op: defaultOpForType(f?.type ?? "text"),
+  value,
+}]);
+```
+
+**Después**
+
+```ts
+next = next.concat([{
+  id: Math.random().toString(36).slice(2),
+  connector: "AND",
+  field,
+  op: defaultOpForType(f?.type ?? "text"),
+  value,
+}]);
+```
+
+*Criterio aplicado:* antes de tocar el código se verificó qué hacía realmente
+el campo `connector`. En `bovineColumns.ts`, la función `matchesConditions()`
+**ignora el conector de la primera condición** (`if (!started) result = r`), y
+en `AdvancedFiltersPanel.tsx` el selector de la primera fila aparece
+deshabilitado y fijo en `"AND"` (`disabled={idx === 0}`). Es decir, `"AND"` es
+el valor por defecto correcto para toda condición nueva, y el usuario puede
+cambiar el de las siguientes a `"OR"` desde la interfaz.
+
+El defecto, por tanto, **no era una pérdida de funcionalidad**: era una
+condición muerta que se evaluaba en cada llamada sin que su resultado pudiera
+cambiar nunca. La corrección elimina la evaluación inútil y deja explícita la
+intención. El comportamiento observable del filtro es idéntico.
+
+### C3 — Funciones numéricas globales (`typescript:S7773`, MINOR ×24)
+
+**Antes** — 13 archivos de `fe/src`
+
+```ts
+onChange={(e) => set("area", parseFloat(e.target.value) || 0)}
+onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
+if (isNaN(weightKg) || weightKg <= 0) { ... }
+```
+
+**Después**
+
+```ts
+onChange={(e) => set("area", Number.parseFloat(e.target.value) || 0)}
+onChange={(e) => set("max_capacity", Number.parseInt(e.target.value) || 1)}
+if (Number.isNaN(weightKg) || weightKg <= 0) { ... }
+```
+
+*Criterio aplicado:* `Number.parseFloat` y `Number.parseInt` son exactamente las
+mismas funciones que las globales, pero no dependen del objeto global, lo que
+evita que un identificador local las sombree por accidente y deja explícita la
+intención numérica. `Number.isNaN` sí difiere de la global `isNaN`: esta última
+convierte su argumento antes de comparar, de modo que `isNaN("texto")` es
+`true` mientras que `Number.isNaN("texto")` es `false`. En el único punto
+afectado (`CalfList.tsx:185`) el argumento ya era el resultado de
+`Number.parseFloat`, es decir un `number`, por lo que ambas se comportan igual
+y el cambio es seguro.
+
+### Verificación ejecutada
+
+Sobre la etapa *builder* de `fe/Dockerfile`, que instala las dependencias con
+el lockfile exacto:
+
+| Comprobación | Resultado |
+|---|---|
+| `pnpm build` (tsc + Vite) | correcto |
+| `pnpm lint` (ESLint) | 7 problemas (4 errores, 3 avisos) |
+| `pnpm test` (Vitest) | **43 pruebas, 43 pasan** |
+
+Los 7 problemas de ESLint son **preexistentes**: se ejecutó el mismo linter
+sobre `main` sin estos cambios y el resultado fue idéntico. Ninguno afecta a
+los archivos modificados. Se dejan constar sin corregir porque pertenecen a
+otras reglas (`react-hooks/set-state-in-effect`, `react-refresh/only-export-components`)
+y no forman parte de los hallazgos de esta iteración.
+
+### Impacto medido
+
+| Métrica | Antes (`ab2b907`) | Después (`0149226`) | Variación |
+|---|---:|---:|---|
+| Bugs | 38 | **35** | **−3** |
+| Code Smells | 170 | **146** | **−24** |
+| Deuda técnica (`sqale_index`) | 898 min | **850 min** | −48 min |
+| Vulnerabilidades | 27 | 27 | = |
+| Security Rating | C | C | = |
+| Reliability Rating | C | C | = |
+| Quality Gate | Failed | Failed | sin cambio |
+
+`typescript:S3923` y `typescript:S7773` quedan ambas en **0 issues abiertos**,
+verificado vía API.
+
+El *Reliability Rating* permanece en **C** porque la calificación la determina
+el peor bug abierto y los 35 restantes siguen siendo de severidad Major, en su
+mayoría promesas sin gestionar (`typescript:S9383`, hallazgo B2).
+
+Con esta iteración se cumple el mínimo exigido por la guía: **2 Code Smells, 2
+Bugs y 1 Vulnerabilidad** corregidos. El total acumulado es de 3
+vulnerabilidades, 3 bugs y 24 code smells.
+
+---
+
+## 8. Estado
 
 - [x] Integración de SonarCloud con GitHub Actions
 - [x] Escaneo inicial y captura de la línea base
 - [x] Matriz de hallazgos
 - [x] Refactorización — iteración 1: V1, V2, V8 (3 vulnerabilidades)
-- [ ] Refactorización — iteración 2: V3, V4, V5
-- [ ] Refactorización — iteración 3: V6, V7, C1
-- [ ] Corrección de los bugs B1 y B2
+- [x] Refactorización — iteración 2: B1 (3 bugs) y C3 (24 code smells)
+- [x] **Mínimo exigido por la guía cumplido** (≥ 2 Code Smells, ≥ 2 Bugs, ≥ 1 Vulnerabilidad)
+- [ ] Refactorización — iteración 3: V3, V4, V5 (seguridad del frontend)
+- [ ] Refactorización — iteración 4: V6, V7, C1
+- [ ] Corrección del bug B2 (35 promesas sin gestionar)
 - [ ] Marcado de falsos positivos (`typescript:S2068`)
+- [ ] Datos de identificación y reparto por integrante (sección 5)
+- [ ] Captura del dashboard final y exportación a PDF
 - [ ] Re-escaneo hasta Quality Gate *Passed*
