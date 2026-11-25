@@ -58,7 +58,7 @@ jobs:
       # las incumplía y añadía cuatro vulnerabilidades al propio análisis.
       - name: Instalar dependencias del backend
         working-directory: be
-        run: pip install --only-binary :all: -r requirements.txt
+        run: "pip install --only-binary :all: -r requirements.txt"
 
       # Las pruebas del backend usan dobles (MagicMock) para la sesión de base
       # de datos, así que no hace falta levantar PostgreSQL. Las variables de
