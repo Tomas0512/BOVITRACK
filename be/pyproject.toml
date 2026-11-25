@@ -29,3 +29,18 @@ dev = [
     "httpx==0.27.2",
     "ruff==0.6.9",
 ]
+
+# ══════════════════════════════════════════════════════════════
+# What?    Declara que este proyecto no publica paquetes Python propios.
+# ¿Para?   `pip install .` se usa aqui solo para resolver e instalar las
+#           dependencias, no para empaquetar la aplicacion. Sin esta linea,
+#           setuptools intenta descubrir paquetes automaticamente y falla
+#           con "Multiple top-level packages discovered in a flat-layout"
+#           al encontrar `app`, `alembic` y `storage` juntos.
+# Impact?  La aplicacion se importa desde el directorio de trabajo (asi la
+#           usan uvicorn, alembic y pytest), no desde site-packages. El
+#           Dockerfile tambien depende de esto: en la etapa builder solo
+#           copia pyproject.toml, sin codigo.
+# ══════════════════════════════════════════════════════════════
+[tool.setuptools]
+py-modules = []

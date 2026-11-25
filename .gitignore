@@ -42,3 +42,8 @@ nul
 
 # Imágenes originales de módulos (solo se suben las versiones web en fe/public/imagenes)
 docs/imagenes/
+
+# Reportes de cobertura (artefactos de build, no se versionan)
+coverage/
+coverage.xml
+*.lcov

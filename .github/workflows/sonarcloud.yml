@@ -1,10 +1,13 @@
 # ══════════════════════════════════════════════════════════════
 # BoviTrack — Análisis estático de código (SonarQube Cloud)
 #
-# What?    En cada push a main y en cada pull request, envía el código fuente
-#          al servicio de SonarCloud para su inspección sin ejecutarlo.
+# What?    En cada push a main y en cada pull request ejecuta las pruebas de
+#          backend y frontend para medir cobertura, y después envía el código
+#          y esos reportes a SonarCloud para su inspección.
 # ¿Para?   Cumplir la Guía N.º 08 (SQA): medir bugs, vulnerabilidades, security
-#          hotspots, duplicación y deuda técnica, y bloquear el Quality Gate.
+#          hotspots, duplicación, cobertura y deuda técnica.
+# Nota:    La cobertura no se deduce leyendo el código; hay que ejecutarlo. Sin
+#          los pasos de pruebas, SonarCloud reporta 0 % aunque haya pruebas.
 # Impact?  Corre en paralelo a ci.yml; no lo reemplaza. ci.yml verifica que el
 #          código funcione, este verifica cómo está escrito.
 #
@@ -41,6 +44,51 @@ jobs:
           # (git blame) y para calcular qué es "código nuevo".
           fetch-depth: 0
 
+      # ── Cobertura del backend ────────────────────────────────
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: be/pyproject.toml
+
+      - name: Instalar dependencias del backend
+        working-directory: be
+        run: |
+          python -m pip install --upgrade pip
+          pip install . --group dev
+
+      # Las pruebas del backend usan dobles (MagicMock) para la sesión de base
+      # de datos, así que no hace falta levantar PostgreSQL. Las variables de
+      # entorno solo existen para que la configuración de la app se pueda
+      # instanciar al importarla; no apuntan a ningún entorno real.
+      - name: Pruebas del backend con cobertura
+        working-directory: be
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/bovitrack_ci
+          SECRET_KEY: ci-only-secret-key-not-used-anywhere-else-0123456789
+          ENVIRONMENT: test
+        run: python -m pytest -q -p no:cacheprovider --cov=app --cov-report=xml:coverage.xml --cov-report=term
+
+      # ── Cobertura del frontend ───────────────────────────────
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+        with:
+          package_json_file: fe/package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: fe/pnpm-lock.yaml
+
+      - name: Instalar dependencias del frontend
+        working-directory: fe
+        run: pnpm install --frozen-lockfile
+
+      - name: Pruebas del frontend con cobertura
+        working-directory: fe
+        run: pnpm test:coverage
+
+      # ── Análisis ─────────────────────────────────────────────
       # La acción se fija por SHA completo y no por etiqueta: una etiqueta como
       # @v5 es móvil y quien controle ese repositorio puede reapuntarla a otro
       # commit. Como la acción recibe SONAR_TOKEN y lee todo el código, un
