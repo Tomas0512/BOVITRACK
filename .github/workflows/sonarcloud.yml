@@ -41,7 +41,12 @@ jobs:
           # (git blame) y para calcular qué es "código nuevo".
           fetch-depth: 0
 
+      # La acción se fija por SHA completo y no por etiqueta: una etiqueta como
+      # @v5 es móvil y quien controle ese repositorio puede reapuntarla a otro
+      # commit. Como la acción recibe SONAR_TOKEN y lee todo el código, un
+      # cambio así se ejecutaría aquí con acceso al secret.
+      # El comentario deja legible qué versión es el SHA.
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

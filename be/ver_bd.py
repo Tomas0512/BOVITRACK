@@ -1,7 +1,24 @@
-"""Script temporal para ver las tablas y datos de la BD."""
+"""Script de diagnóstico para ver las tablas y datos de la BD.
+
+La cadena de conexión se lee de la variable de entorno DATABASE_URL, igual que
+en check_tables.py y que en la propia aplicación (app/config.py). Nunca se
+escriben credenciales en el código: cualquiera que clone el repositorio
+obtendría usuario y contraseña válidos de la base de datos.
+"""
+
+import os
+import sys
+
 import psycopg2
 
-conn = psycopg2.connect("postgresql://bovitrack_user:bovitrack_pass@localhost:5432/bovitrack_db")
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    sys.exit(
+        "Falta la variable de entorno DATABASE_URL.\n"
+        "Ejemplo:  DATABASE_URL=postgresql://usuario:clave@localhost:5432/bovitrack_db python ver_bd.py"
+    )
+
+conn = psycopg2.connect(database_url)
 cur = conn.cursor()
 
 # Listar tablas

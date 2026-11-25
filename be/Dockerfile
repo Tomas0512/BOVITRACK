@@ -47,8 +47,19 @@ COPY --from=builder /install /usr/local
 RUN addgroup --system appgroup && \
     adduser --system --ingroup appgroup appuser
 
+# What?    Se copia explícitamente lo que la app necesita en ejecución, en vez
+#           de `COPY . .` (contexto completo).
+# ¿Para?   Un COPY recursivo mete en la imagen publicada todo lo que haya en el
+#           contexto de build: .env, claves, el historial .git, los scripts de
+#           semilla y diagnóstico (seed_*.py, ver_bd.py, check_tables.py) y la
+#           suite de tests. Nada de eso hace falta para servir la API.
+# Impact?  Cualquiera con acceso a la imagen puede extraer esas capas con
+#           `docker save`. Depender solo de .dockerignore es frágil: basta con
+#           que alguien añada un archivo nuevo y no actualice la lista.
 # --chown: asigna ownership en la misma instrucción COPY (evita capa extra).
-COPY --chown=appuser:appgroup . .
+COPY --chown=appuser:appgroup app ./app
+COPY --chown=appuser:appgroup alembic ./alembic
+COPY --chown=appuser:appgroup alembic.ini entrypoint.sh ./
 
 # Directorio para documentos subidos (creado con permisos para appuser)
 RUN mkdir -p /app/storage/documents && chown -R appuser:appgroup /app/storage
