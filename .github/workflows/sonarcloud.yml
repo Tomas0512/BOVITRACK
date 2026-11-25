@@ -49,13 +49,16 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: be/pyproject.toml
+          cache-dependency-path: be/requirements.txt
 
+      # --only-binary :all: evita que pip ejecute scripts de instalación al
+      # construir paquetes desde el código fuente, y requirements.txt tiene
+      # todas las versiones fijadas. Las dos cosas son lo que piden las reglas
+      # githubactions:S8541 y S8544; instalar con `pip install . --group dev`
+      # las incumplía y añadía cuatro vulnerabilidades al propio análisis.
       - name: Instalar dependencias del backend
         working-directory: be
-        run: |
-          python -m pip install --upgrade pip
-          pip install . --group dev
+        run: pip install --only-binary :all: -r requirements.txt
 
       # Las pruebas del backend usan dobles (MagicMock) para la sesión de base
       # de datos, así que no hace falta levantar PostgreSQL. Las variables de
