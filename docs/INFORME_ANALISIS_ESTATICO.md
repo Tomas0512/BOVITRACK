@@ -155,10 +155,126 @@ correcto solo para silenciar una regla introduce riesgo sin aportar valor.
 
 ---
 
-## 6. Estado
+## 6. Refactorización: primera iteración (V1, V2, V8)
+
+Commit `17f08c8` — análisis #2 sobre `main`.
+Las tres vulnerabilidades quedaron en estado `CLOSED / FIXED` en SonarCloud.
+
+### V1 — Credenciales de PostgreSQL en código (`secrets:S6698`, BLOCKER)
+
+**Antes** — `be/ver_bd.py:4`
+
+```python
+"""Script temporal para ver las tablas y datos de la BD."""
+import psycopg2
+
+conn = psycopg2.connect("postgresql://bovitrack_user:bovitrack_pass@localhost:5432/bovitrack_db")
+```
+
+**Después**
+
+```python
+import os
+import sys
+
+import psycopg2
+
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    sys.exit(
+        "Falta la variable de entorno DATABASE_URL.\n"
+        "Ejemplo:  DATABASE_URL=postgresql://usuario:clave@localhost:5432/bovitrack_db python ver_bd.py"
+    )
+
+conn = psycopg2.connect(database_url)
+```
+
+*Criterio aplicado:* no se inventó un mecanismo nuevo de configuración. El
+repositorio ya leía `DATABASE_URL` del entorno en `be/check_tables.py` y en
+`be/app/config.py`; la corrección alinea este script con ese patrón existente.
+
+### V2 — Copia recursiva del contexto de build (`docker:S6470`, CRITICAL)
+
+**Antes** — `be/Dockerfile:51`
+
+```dockerfile
+COPY --chown=appuser:appgroup . .
+```
+
+**Después**
+
+```dockerfile
+COPY --chown=appuser:appgroup app ./app
+COPY --chown=appuser:appgroup alembic ./alembic
+COPY --chown=appuser:appgroup alembic.ini entrypoint.sh ./
+```
+
+*Criterio aplicado:* el proyecto ya tenía `be/.dockerignore`, pero una lista de
+exclusión es frágil —basta con que alguien agregue un archivo y no la
+actualice—. Declarar explícitamente lo que entra invierte la lógica: lo que no
+se nombra, no viaja. Los scripts `seed_*.py`, `ver_bd.py`, `check_tables.py` y
+la carpeta `tests/` dejaron de empaquetarse en la imagen de producción.
+
+**Verificación ejecutada:**
+
+```
+$ docker build -t bovitrack-be .          → build correcto
+$ docker run ... ls -A /app               → alembic  alembic.ini  app  entrypoint.sh  storage
+$ docker run ... python -c "import app.main"  → app.main OK
+```
+
+### V8 — Acción de GitHub sin fijar (`githubactions:S7637`, MAJOR)
+
+**Antes** — `.github/workflows/sonarcloud.yml:45`
+
+```yaml
+uses: SonarSource/sonarqube-scan-action@v5
+```
+
+**Después**
+
+```yaml
+uses: SonarSource/sonarqube-scan-action@2f77a1ec69fb1d595b06f35ab27e97605bdef703 # v5
+```
+
+*Criterio aplicado:* una etiqueta de Git es móvil y quien controle ese
+repositorio puede reapuntarla a otro commit. Como esta acción recibe
+`SONAR_TOKEN` y lee todo el código fuente, un cambio así se ejecutaría aquí con
+acceso al secret. El comentario `# v5` conserva la legibilidad.
+
+### Impacto medido
+
+| Métrica | Antes (`8305de9`) | Después (`17f08c8`) | Variación |
+|---|---:|---:|---|
+| **Security Rating** | **E** | **C** | ▲ 2 niveles |
+| Vulnerabilidades | 29 | 27 | −2 |
+| Bugs | 46 | 38 | −8 |
+| Code Smells | 170 | 170 | = |
+| **Deuda técnica** | **1 888 min** | **898 min** | **−52 %** |
+| Quality Gate | Failed | Failed | sin cambio |
+
+El salto de **E a C** en seguridad se explica porque la calificación la
+determina la vulnerabilidad más grave abierta: al cerrarse el único Blocker y el
+único Critical del proyecto, el peor caso restante pasa a ser Major.
+
+La reducción de bugs y de deuda técnica es mayor que las tres correcciones por
+sí solas: al dejar de indexarse los archivos generados de `fe/coverage/`, que el
+análisis automático previo había incluido, sus hallazgos se cerraron también.
+
+El Quality Gate sigue en *Failed* porque su condición es *Security Rating on New
+Code > 1*, es decir, exige calificación **A** sobre el código nuevo. Alcanzarla
+requiere resolver las vulnerabilidades restantes.
+
+---
+
+## 7. Estado
 
 - [x] Integración de SonarCloud con GitHub Actions
 - [x] Escaneo inicial y captura de la línea base
 - [x] Matriz de hallazgos
-- [ ] Refactorización y corrección
+- [x] Refactorización — iteración 1: V1, V2, V8 (3 vulnerabilidades)
+- [ ] Refactorización — iteración 2: V3, V4, V5
+- [ ] Refactorización — iteración 3: V6, V7, C1
+- [ ] Corrección de bugs B1 y B2
+- [ ] Marcado de falsos positivos (`typescript:S2068`)
 - [ ] Re-escaneo hasta Quality Gate *Passed*
