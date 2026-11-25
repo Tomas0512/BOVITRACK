@@ -14,10 +14,28 @@ const FarmContext = createContext<FarmContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "active_farm_id";
 
+// What?    Comprueba que el identificador tenga forma de UUID antes de
+//           guardarlo o de leerlo de localStorage.
+// ¿Para?   localStorage es escribible por cualquier script que corra en el
+//           origen y persiste entre sesiones. Sin esta validación, un valor
+//           manipulado se propaga como `farmId` a las rutas de la API.
+// Impact?  El patrón es de longitud fija y sin alternativas, por lo que no
+//           tiene retroceso (backtracking) y no es vulnerable a ReDoS.
+const UUID_PATTERN =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+function readStoredFarmId(): string | null {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored && UUID_PATTERN.test(stored)) return stored;
+  // Valor ausente o manipulado: se descarta y se limpia.
+  if (stored) localStorage.removeItem(STORAGE_KEY);
+  return null;
+}
+
 export function FarmProvider({ children }: { children: ReactNode }) {
   const [farms, setFarms] = useState<FarmResponse[]>([]);
   const [activeFarmId, setActiveFarmIdState] = useState<string | null>(
-    () => localStorage.getItem(STORAGE_KEY)
+    readStoredFarmId
   );
   const [loading, setLoading] = useState(true);
 
@@ -35,6 +53,9 @@ export function FarmProvider({ children }: { children: ReactNode }) {
   }, [activeFarmId, farms]);
 
   const setActiveFarmId = useCallback((id: string) => {
+    // Solo se persisten identificadores con forma de UUID: lo que se guarda
+    // aquí se reutiliza después como `farmId` en las rutas de la API.
+    if (!UUID_PATTERN.test(id)) return;
     setActiveFarmIdState(id);
     localStorage.setItem(STORAGE_KEY, id);
   }, []);

@@ -123,3 +123,20 @@ test_login_invalid_credentials_shows_error_and_blocks_access_FAIL_20260820_19310
   frontend cambia esos textos, se recomienda agregar atributos
   `data-testid` a los componentes para hacer las pruebas más robustas a
   futuro.
+
+## Variables de entorno requeridas
+
+Las credenciales de prueba ya no estan escritas en `config.py`: se leen del
+entorno para que no queden en el historial de Git (el repositorio es publico).
+
+| Variable | Obligatoria | Descripcion |
+|---|---|---|
+| `E2E_TEST_PASSWORD` | si | Clave del usuario demo `admin@bovitrack.com` que crea `be/seed_test_data.py`. Sin ella la suite se detiene al arrancar. |
+| `E2E_TEST_EMAIL` | no | Correo del usuario demo. Por defecto `admin@bovitrack.com`. |
+| `E2E_INVALID_PASSWORD` | no | Clave incorrecta para los casos negativos de login. |
+
+Ejemplo de ejecucion:
+
+```bash
+E2E_TEST_PASSWORD='<clave del usuario demo>' python run_all_tests.py
+```

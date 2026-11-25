@@ -13,6 +13,7 @@ Creates:
 """
 
 import os
+import random
 import uuid
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -37,6 +38,18 @@ from app.models.economics import EconomicRecord
 from app.models.movement import AnimalMovement
 from app.models.sanitary_plan import SanitaryPlan
 from app.services.audit_service import add_audit_log
+
+# What?    Generador aleatorio respaldado por la fuente de entropia del
+#           sistema operativo (os.urandom), en lugar del Mersenne Twister
+#           global del modulo random.
+# ¿Para?   El Mersenne Twister es predecible: observando suficientes salidas
+#           se puede reconstruir su estado interno y anticipar las
+#           siguientes. SystemRandom no es reproducible de esa forma.
+# Impact?  Los datos de este script son de demostracion, pero mantener un
+#           unico generador seguro evita que el patron se copie a un
+#           contexto donde si importe (tokens, contrasenas temporales,
+#           identificadores). El costo es nulo.
+_rng = random.SystemRandom()
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 engine = create_engine(DATABASE_URL)
@@ -367,8 +380,7 @@ def main():
                     is_active = False
 
                 # Assign to a random plot
-                import random
-                plot_id = random.choice(plot_ids) if plot_ids and status == "activo" else None
+                plot_id = _rng.choice(plot_ids) if plot_ids and status == "activo" else None
 
                 bovine = Bovine(
                     id=uuid.uuid4(), farm_id=farm_id,
@@ -428,12 +440,12 @@ def main():
                     growth_factor = 1 - math.exp(-growth_rate * measure_age)
                     weight = round(birth_w * (1 - growth_factor) + current_w * growth_factor, 1)
                     # Add some noise
-                    weight += round(random.uniform(-5, 5), 1)
+                    weight += round(_rng.uniform(-5, 5), 1)
                     w = Weight(
                         id=uuid.uuid4(), farm_id=farm_id,
                         bovine_id=b.id, weight_kg=Decimal(str(max(weight, 1))),
                         measured_at=measure_date,
-                        body_condition=random.choice([3, 3, 3, 4, 4, 5]),
+                        body_condition=_rng.choice([3, 3, 3, 4, 4, 5]),
                         observations="Registro histórico de peso",
                         registered_by=user.id,
                     )
@@ -544,10 +556,9 @@ def main():
                 ("desparasitacion", "Fenbendazol", "10 mL", "oral", "Desparasitación interna"),
             ]
 
-            import random
             for i, b in enumerate(active_bovines[:20]):  # 20 treated bovines
-                t_type, product, dose, route, obs = random.choice(treatment_templates)
-                app_date = ref_date - timedelta(days=random.randint(15, 180))
+                t_type, product, dose, route, obs = _rng.choice(treatment_templates)
+                app_date = ref_date - timedelta(days=_rng.randint(15, 180))
                 t = Treatment(
                     id=uuid.uuid4(), farm_id=farm_id, bovine_id=b.id,
                     treatment_type=t_type, product_name=product,
@@ -564,7 +575,6 @@ def main():
 
         # ── 10. Milk production ────────────────────────────────────────
         if needs_seed(MilkProduction):
-            import random
             milk_records = []
             dairy_bovines = [b for b in bovines_list if b.identification_number in DAIRY_FEMALES and b.is_active]
 
@@ -572,7 +582,7 @@ def main():
                 for day_offset in range(1, 31):  # Last 30 days
                     m_date = ref_date - timedelta(days=day_offset)
                     # Morning milking: 8-12 liters
-                    am_liters = round(random.uniform(8.0, 12.0), 1)
+                    am_liters = round(_rng.uniform(8.0, 12.0), 1)
                     m1 = MilkProduction(
                         id=uuid.uuid4(), farm_id=farm_id, bovine_id=b.id,
                         milking_date=datetime.combine(m_date, datetime.min.time()),
@@ -585,7 +595,7 @@ def main():
                     milk_records.append(m1)
 
                     # Afternoon milking: 6-9 liters
-                    pm_liters = round(random.uniform(6.0, 9.0), 1)
+                    pm_liters = round(_rng.uniform(6.0, 9.0), 1)
                     m2 = MilkProduction(
                         id=uuid.uuid4(), farm_id=farm_id, bovine_id=b.id,
                         milking_date=datetime.combine(m_date, datetime.min.time()),
@@ -639,7 +649,6 @@ def main():
 
         # ── 12. Stock movements ────────────────────────────────────────
         if needs_seed(StockMovement):
-            import random
             movements = []
             for f in foods:
                 # Initial purchase
@@ -652,7 +661,7 @@ def main():
                     total_cost=Decimal(str(round(qty * float(f.cost_per_unit if f.cost_per_unit else 0), 2))),
                     stock_before=Decimal("0"),
                     stock_after=f.current_stock,
-                    movement_date=ref_date - timedelta(days=random.randint(30, 90)),
+                    movement_date=ref_date - timedelta(days=_rng.randint(30, 90)),
                     registered_by=user.id,
                     notes=f"Compra inicial de {f.name}",
                 )
@@ -661,7 +670,7 @@ def main():
 
                 # Some consumption/usage
                 if float(f.current_stock) > 20:
-                    used = round(float(f.current_stock) * random.uniform(0.1, 0.3), 2)
+                    used = round(float(f.current_stock) * _rng.uniform(0.1, 0.3), 2)
                     before = f.current_stock
                     after = Decimal(str(round(float(before) - used, 2)))
                     m2 = StockMovement(
@@ -670,7 +679,7 @@ def main():
                         quantity=Decimal(str(-used)),
                         stock_before=before,
                         stock_after=after,
-                        movement_date=ref_date - timedelta(days=random.randint(1, 15)),
+                        movement_date=ref_date - timedelta(days=_rng.randint(1, 15)),
                         registered_by=user.id,
                         notes=f"Consumo de {f.name}",
                     )
@@ -682,7 +691,6 @@ def main():
 
         # ── 13. Economic records ───────────────────────────────────────
         if needs_seed(EconomicRecord):
-            import random
             economic_records = []
 
             # Income from milk sales
@@ -692,7 +700,7 @@ def main():
                     id=uuid.uuid4(), farm_id=farm_id,
                     record_type="ingreso",
                     category="venta_leche",
-                    amount=Decimal(str(round(random.uniform(800000, 1200000), 0))),
+                    amount=Decimal(str(round(_rng.uniform(800000, 1200000), 0))),
                     record_date=inc_date,
                     description="Venta de leche semanal — 120 litros/día",
                     registered_by=user.id,
@@ -707,7 +715,7 @@ def main():
                     id=uuid.uuid4(), farm_id=farm_id,
                     record_type="ingreso",
                     category="venta_animal",
-                    amount=Decimal(str(round(random.uniform(2500000, 4000000), 0))),
+                    amount=Decimal(str(round(_rng.uniform(2500000, 4000000), 0))),
                     record_date=inc_date,
                     description="Venta de bovino para engorde",
                     registered_by=user.id,
@@ -717,16 +725,16 @@ def main():
 
             # Expenses
             expense_categories = [
-                ("compra_insumo", "Compra de concentrado y sales minerales", random.uniform(500000, 1500000)),
-                ("servicio_veterinario", "Servicio veterinario — vacunación y revisión", random.uniform(200000, 600000)),
-                ("transporte", "Transporte de insumos", random.uniform(100000, 300000)),
-                ("personal", "Pago de nómina empleados", random.uniform(1800000, 2500000)),
-                ("mantenimiento", "Mantenimiento de cercas y bebederos", random.uniform(300000, 800000)),
-                ("compra_insumo", "Compra de vitaminas y medicamentos", random.uniform(200000, 500000)),
-                ("personal", "Pago de nómina empleados", random.uniform(1800000, 2500000)),
+                ("compra_insumo", "Compra de concentrado y sales minerales", _rng.uniform(500000, 1500000)),
+                ("servicio_veterinario", "Servicio veterinario — vacunación y revisión", _rng.uniform(200000, 600000)),
+                ("transporte", "Transporte de insumos", _rng.uniform(100000, 300000)),
+                ("personal", "Pago de nómina empleados", _rng.uniform(1800000, 2500000)),
+                ("mantenimiento", "Mantenimiento de cercas y bebederos", _rng.uniform(300000, 800000)),
+                ("compra_insumo", "Compra de vitaminas y medicamentos", _rng.uniform(200000, 500000)),
+                ("personal", "Pago de nómina empleados", _rng.uniform(1800000, 2500000)),
             ]
             for cat, desc, amount in expense_categories:
-                exp_date = ref_date - timedelta(days=random.randint(5, 60))
+                exp_date = ref_date - timedelta(days=_rng.randint(5, 60))
                 exp = EconomicRecord(
                     id=uuid.uuid4(), farm_id=farm_id,
                     record_type="gasto",
@@ -744,7 +752,6 @@ def main():
 
         # ── 14. Animal movements ───────────────────────────────────────
         if needs_seed(AnimalMovement):
-            import random
             movements = []
             movement_templates = [
                 ("compra", "BOV-004", Decimal("3500000"), "Ganadería El Bosque", "CC", "123456789", "+57 310 111 2233"),
@@ -758,7 +765,7 @@ def main():
                 m = AnimalMovement(
                     id=uuid.uuid4(), farm_id=farm_id, bovine_id=b_id,
                     movement_type=m_type,
-                    movement_date=ref_date - timedelta(days=random.randint(30, 180)),
+                    movement_date=ref_date - timedelta(days=_rng.randint(30, 180)),
                     price=price,
                     counterparty_name=counterparty,
                     counterparty_document=cp_doc,
@@ -785,8 +792,8 @@ def main():
                     administration_route="intramuscular",
                     dose="2 mL",
                     frequency_days=180,
-                    last_applied_date=ref_date - timedelta(days=random.randint(30, 100)),
-                    next_scheduled_date=ref_date + timedelta(days=random.randint(80, 150)),
+                    last_applied_date=ref_date - timedelta(days=_rng.randint(30, 100)),
+                    next_scheduled_date=ref_date + timedelta(days=_rng.randint(80, 150)),
                     observations="Plan sanitario individual",
                     created_by=user.id,
                 )

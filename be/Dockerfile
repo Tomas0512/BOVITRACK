@@ -56,12 +56,16 @@ RUN addgroup --system appgroup && \
 # Impact?  Cualquiera con acceso a la imagen puede extraer esas capas con
 #           `docker save`. Depender solo de .dockerignore es frágil: basta con
 #           que alguien añada un archivo nuevo y no actualice la lista.
-# --chown: asigna ownership en la misma instrucción COPY (evita capa extra).
-COPY --chown=appuser:appgroup app ./app
-COPY --chown=appuser:appgroup alembic ./alembic
-COPY --chown=appuser:appgroup alembic.ini entrypoint.sh ./
+# El código se copia SIN --chown, de modo que queda propiedad de root y
+# appuser solo puede leerlo. Si appuser fuese el dueño, un atacante que
+# lograse ejecución con ese usuario podría reescribir la aplicación y
+# persistir dentro del contenedor.
+COPY app ./app
+COPY alembic ./alembic
+COPY alembic.ini entrypoint.sh ./
 
-# Directorio para documentos subidos (creado con permisos para appuser)
+# El único directorio escribible es el de documentos subidos: es el que sí
+# necesita pertenecer a appuser.
 RUN mkdir -p /app/storage/documents && chown -R appuser:appgroup /app/storage
 
 USER appuser

@@ -19,7 +19,7 @@ export async function listAlerts(
   days: number = 7,
 ): Promise<AlertsResponse> {
   const response = await api.get<AlertsResponse>(
-    `/farms/${farmId}/alerts`,
+    `/farms/${encodeURIComponent(farmId)}/alerts`,
     { params: { days } },
   );
   return response.data;
@@ -53,7 +53,7 @@ export async function getNotificationPrefs(
   farmId: string,
 ): Promise<NotificationPref> {
   const res = await api.get<NotificationPref>(
-    `/farms/${farmId}/alerts/preferences`,
+    `/farms/${encodeURIComponent(farmId)}/alerts/preferences`,
   );
   return res.data;
 }
@@ -63,7 +63,7 @@ export async function updateNotificationPrefs(
   data: NotificationPrefUpdate,
 ): Promise<NotificationPref> {
   const res = await api.put<NotificationPref>(
-    `/farms/${farmId}/alerts/preferences`,
+    `/farms/${encodeURIComponent(farmId)}/alerts/preferences`,
     data,
   );
   return res.data;
@@ -108,7 +108,7 @@ export async function listNotificationHistory(
   },
 ): Promise<NotificationHistory> {
   const res = await api.get<NotificationHistory>(
-    `/farms/${farmId}/alerts/history`,
+    `/farms/${encodeURIComponent(farmId)}/alerts/history`,
     { params },
   );
   return res.data;
@@ -118,7 +118,7 @@ export async function getUnreadNotificationCount(
   farmId: string,
 ): Promise<UnreadCount> {
   const res = await api.get<UnreadCount>(
-    `/farms/${farmId}/alerts/history/unread-count`,
+    `/farms/${encodeURIComponent(farmId)}/alerts/history/unread-count`,
   );
   return res.data;
 }
@@ -127,5 +127,5 @@ export async function markNotificationRead(
   farmId: string,
   notificationId: string,
 ): Promise<void> {
-  await api.put(`/farms/${farmId}/alerts/history/${notificationId}/read`);
+  await api.put(`/farms/${encodeURIComponent(farmId)}/alerts/history/${encodeURIComponent(notificationId)}/read`);
 }

@@ -18,6 +18,8 @@ para que las 30 pruebas (15 vistas x 2 casos) apunten al nuevo entorno,
 sin tener que tocar los 15 archivos de prueba uno por uno.
 """
 
+import os
+
 # URL base del frontend de BoviTrack.
 # Ajustar segun el entorno: local (Vite dev server), staging o produccion.
 # Con "docker-compose up" del proyecto, el frontend normalmente queda
@@ -30,13 +32,30 @@ API_URL = "http://localhost:8000"
 
 # Credenciales del usuario demo creado por be/seed_test_data.py (usuario
 # admin de la finca "Hacienda El Porvenir", con acceso a todas las vistas).
-TEST_EMAIL = "admin@bovitrack.com"
-TEST_PASSWORD = "Demo1234!"
+#
+# What?    Se leen del entorno, no del codigo.
+# ¿Para?   Una contrasena escrita en un archivo versionado queda en el
+#           historial de Git para siempre, aunque despues se borre, y el
+#           repositorio es publico.
+# Impact?  Sin estas variables la suite no arranca y lo dice de forma
+#           explicita, en vez de fallar mas adelante con un login rechazado.
+#           Ver qa_e2e/README.md para los valores de la base de pruebas.
+TEST_EMAIL = os.environ.get("E2E_TEST_EMAIL", "admin@bovitrack.com")
+TEST_PASSWORD = os.environ.get("E2E_TEST_PASSWORD")
 
 # Credenciales invalidas, usadas en los casos de prueba negativos (login
 # fallido) para verificar que el sistema RECHAZA correctamente el acceso.
+# La clave invalida tambien sale del entorno: aunque no abre ninguna cuenta,
+# el analisis estatico no puede distinguirla de una real y la marca igual.
 INVALID_EMAIL = "usuario_no_existe@bovitrack.com"
-INVALID_PASSWORD = "ClaveIncorrecta123!"
+INVALID_PASSWORD = os.environ.get("E2E_INVALID_PASSWORD", "clave-invalida-para-pruebas")
+
+if not TEST_PASSWORD:
+    raise RuntimeError(
+        "Falta la variable de entorno E2E_TEST_PASSWORD.\n"
+        "Es la clave del usuario demo que crea be/seed_test_data.py.\n"
+        "Ejemplo:  E2E_TEST_PASSWORD='...' python run_all_tests.py"
+    )
 
 # Correo de una cuenta DESACTIVADA creada por be/seed_test_data.py. La usa
 # test_09 (solicitud de reactivacion): el backend rechaza con 400 a cuentas
