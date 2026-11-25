@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { listFarms, type FarmResponse } from "../api/farms";
+import { UUID_PATTERN } from "../api/pathParams";
 
 interface FarmContextValue {
   farms: FarmResponse[];
@@ -19,11 +20,9 @@ const STORAGE_KEY = "active_farm_id";
 // ¿Para?   localStorage es escribible por cualquier script que corra en el
 //           origen y persiste entre sesiones. Sin esta validación, un valor
 //           manipulado se propaga como `farmId` a las rutas de la API.
-// Impact?  El patrón es de longitud fija y sin alternativas, por lo que no
-//           tiene retroceso (backtracking) y no es vulnerable a ReDoS.
-const UUID_PATTERN =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
+// Impact?  Se reutiliza el mismo patrón que valida los segmentos de ruta en
+//           api/pathParams.ts, para que el criterio de "identificador
+//           válido" sea único en toda la aplicación.
 function readStoredFarmId(): string | null {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored && UUID_PATTERN.test(stored)) return stored;

@@ -1,4 +1,5 @@
 import api from "./axios";
+import { uuidPathSegment } from "./pathParams";
 
 export interface AlertItem {
   id: string;
@@ -19,7 +20,7 @@ export async function listAlerts(
   days: number = 7,
 ): Promise<AlertsResponse> {
   const response = await api.get<AlertsResponse>(
-    `/farms/${encodeURIComponent(farmId)}/alerts`,
+    `/farms/${uuidPathSegment(farmId, "farmId")}/alerts`,
     { params: { days } },
   );
   return response.data;
@@ -53,7 +54,7 @@ export async function getNotificationPrefs(
   farmId: string,
 ): Promise<NotificationPref> {
   const res = await api.get<NotificationPref>(
-    `/farms/${encodeURIComponent(farmId)}/alerts/preferences`,
+    `/farms/${uuidPathSegment(farmId, "farmId")}/alerts/preferences`,
   );
   return res.data;
 }
@@ -63,7 +64,7 @@ export async function updateNotificationPrefs(
   data: NotificationPrefUpdate,
 ): Promise<NotificationPref> {
   const res = await api.put<NotificationPref>(
-    `/farms/${encodeURIComponent(farmId)}/alerts/preferences`,
+    `/farms/${uuidPathSegment(farmId, "farmId")}/alerts/preferences`,
     data,
   );
   return res.data;
@@ -108,7 +109,7 @@ export async function listNotificationHistory(
   },
 ): Promise<NotificationHistory> {
   const res = await api.get<NotificationHistory>(
-    `/farms/${encodeURIComponent(farmId)}/alerts/history`,
+    `/farms/${uuidPathSegment(farmId, "farmId")}/alerts/history`,
     { params },
   );
   return res.data;
@@ -118,7 +119,7 @@ export async function getUnreadNotificationCount(
   farmId: string,
 ): Promise<UnreadCount> {
   const res = await api.get<UnreadCount>(
-    `/farms/${encodeURIComponent(farmId)}/alerts/history/unread-count`,
+    `/farms/${uuidPathSegment(farmId, "farmId")}/alerts/history/unread-count`,
   );
   return res.data;
 }
@@ -127,5 +128,5 @@ export async function markNotificationRead(
   farmId: string,
   notificationId: string,
 ): Promise<void> {
-  await api.put(`/farms/${encodeURIComponent(farmId)}/alerts/history/${encodeURIComponent(notificationId)}/read`);
+  await api.put(`/farms/${uuidPathSegment(farmId, "farmId")}/alerts/history/${uuidPathSegment(notificationId, "notificationId")}/read`);
 }

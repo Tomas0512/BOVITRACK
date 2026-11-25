@@ -19,6 +19,7 @@ sin tener que tocar los 15 archivos de prueba uno por uno.
 """
 
 import os
+import secrets
 
 # URL base del frontend de BoviTrack.
 # Ajustar segun el entorno: local (Vite dev server), staging o produccion.
@@ -45,10 +46,12 @@ TEST_PASSWORD = os.environ.get("E2E_TEST_PASSWORD")
 
 # Credenciales invalidas, usadas en los casos de prueba negativos (login
 # fallido) para verificar que el sistema RECHAZA correctamente el acceso.
-# La clave invalida tambien sale del entorno: aunque no abre ninguna cuenta,
-# el analisis estatico no puede distinguirla de una real y la marca igual.
+# La clave invalida tambien sale del entorno. Si no se define, se genera una
+# cadena aleatoria en cada ejecucion: asi no queda ningun literal de clave en
+# el codigo y, ademas, se garantiza que no coincide con ninguna contrasena
+# real de la base de pruebas.
 INVALID_EMAIL = "usuario_no_existe@bovitrack.com"
-INVALID_PASSWORD = os.environ.get("E2E_INVALID_PASSWORD", "clave-invalida-para-pruebas")
+INVALID_PASSWORD = os.environ.get("E2E_INVALID_PASSWORD") or secrets.token_urlsafe(24)
 
 if not TEST_PASSWORD:
     raise RuntimeError(
