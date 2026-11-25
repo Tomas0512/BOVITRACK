@@ -46,24 +46,43 @@ manual.
 
 > Estado del proyecto **antes** de cualquier refactorización.
 
+Medidas tomadas del análisis del commit `8305de9` (25/11/2026, 02:06 UTC).
+
 | Métrica | Valor | Calificación |
 |---|---|---|
 | **Quality Gate** | **Failed** | — |
-| Seguridad | 29 issues | **E** |
-| Fiabilidad | 216 issues | **C** |
-| Mantenibilidad | 39 issues | **A** |
+| Seguridad | 29 issues abiertos | **E** |
+| Fiabilidad | 208 issues abiertos | **C** |
+| Mantenibilidad | 39 issues abiertos | **A** |
+| Líneas de código (ncloc) | 32 373 | — |
 | Cobertura de pruebas | 0.0 % sobre 9 900 líneas | — |
 | Código duplicado | 2.9 % sobre 42 000 líneas | — |
 | Security Hotspots | 0 | — |
-| **Deuda técnica total** | **1 888 minutos ≈ 31,5 horas** | — |
 
-**Clasificación clásica de los 245 hallazgos:**
+> Los conteos de Seguridad, Fiabilidad y Mantenibilidad corresponden a la
+> taxonomía de *software qualities* de SonarCloud. Un mismo issue puede
+> impactar más de una cualidad, por lo que su suma no equivale al total.
+
+**Clasificación clásica — 237 issues abiertos:**
 
 | Tipo | Cantidad | Severidades |
-|---|---|---|
-| Code Smells | 170 | mayoría Major, 10 Minor |
-| Bugs | 46 | 46 Major |
-| Vulnerabilidades | 29 | 1 Blocker, 1 Critical, 22 Major, 5 Minor |
+|---|---:|---|
+| Code Smells | 170 | 1 Critical, 145 Major, 24 Minor |
+| Bugs | 38 | 38 Major |
+| Vulnerabilidades | 29 | 1 Blocker, 1 Critical, 21 Major, 6 Minor |
+
+**Esfuerzo de remediación estimado por SonarCloud:**
+
+| Concepto | Minutos |
+|---|---:|
+| Deuda técnica (`sqale_index`, solo Code Smells) | 898 |
+| Esfuerzo de remediación de seguridad | 720 |
+| Esfuerzo de remediación de fiabilidad | 220 |
+| **Total** | **1 838 min ≈ 30,6 horas** |
+
+> SonarCloud reserva el término *deuda técnica* para el esfuerzo de los Code
+> Smells únicamente; bugs y vulnerabilidades se contabilizan en métricas
+> aparte. El informe distingue las tres para no inflar la cifra.
 
 **Distribución por área del monorepo:**
 
@@ -71,20 +90,19 @@ manual.
 |---|---:|---:|---:|
 | `fe/src` | 38 | 7 | 165 |
 | `be/seed_test_data.py` | 0 | 10 | 1 |
-| `fe/coverage` *(artefacto generado)* | 6 | 0 | 0 |
-| `be/Dockerfile` | 0 | 5 | 0 |
+| `be/Dockerfile` | 0 | 6 | 0 |
 | `mobile/src` | 0 | 0 | 4 |
 | `qa_e2e/config.py` | 0 | 2 | 0 |
 | `fe/Dockerfile` | 0 | 2 | 0 |
-| `be/app` | 2 | 0 | 0 |
-| `be/ver_bd.py` | 0 | 1 | 0 |
 | `db/Dockerfile` | 0 | 1 | 0 |
+| `be/ver_bd.py` | 0 | 1 | 0 |
+| `.github/workflows` | 0 | 1 | 0 |
 
 ---
 
 ## 3. Matriz de hallazgos seleccionados
 
-Selección de **12 hallazgos** que supera el mínimo exigido por la guía
+Selección de **15 hallazgos** que supera el mínimo exigido por la guía
 (≥ 2 Code Smells, ≥ 2 Bugs, ≥ 1 Vulnerabilidad) y cubre las 3 vulnerabilidades
 por integrante.
 
@@ -106,18 +124,17 @@ por integrante.
 | # | Severidad | Regla | Archivo | Línea | Descripción | Esfuerzo |
 |---|---|---|---|---|---|---|
 | B1 | **MAJOR** | `typescript:S3923` | `fe/src/components/bovines/BovineList.tsx` | 530, 542, 555 | `connector: next.length > 0 ? "AND" : "AND"` — el operador ternario devuelve el mismo valor en ambas ramas. La intención era `"AND"` / `"OR"`; tal como está, el filtro avanzado nunca puede construir una condición `OR`. | 15 min c/u |
-| B2 | **MAJOR** | `pythonbugs:S2583` | `be/app/services/invitation_service.py` | 184, 185 | `datetime.now(...) if data.accept_terms else None` — la condición siempre evalúa a verdadero porque el esquema de entrada ya obliga a que el valor sea `True`. La rama `else` es código muerto. | 15 min c/u |
-| B3 | **MAJOR** | `typescript:S9383` | `fe/src/components/paddocks/LandMap.tsx` y 34 archivos más | 81 y otros | Promesas sin `await`, sin `.catch()` ni marcado con `void`. Un rechazo en cualquiera de estas 35 llamadas produce un *unhandled rejection* silencioso: la operación falla sin que el usuario reciba aviso. | 5 min c/u |
+| B2 | **MAJOR** | `typescript:S9383` | `fe/src/components/paddocks/LandMap.tsx` y otros | 81 y 34 más | Promesas sin `await`, sin `.catch()` ni marcado con `void`. Un rechazo en cualquiera de estas 35 llamadas produce un *unhandled rejection* silencioso: la operación falla sin que el usuario reciba aviso. | 5 min c/u |
 
 ### 3.3 Code Smells
 
 | # | Severidad | Regla | Archivo | Línea | Descripción | Esfuerzo |
 |---|---|---|---|---|---|---|
 | C1 | **MAJOR** | `typescript:S8786` | `fe/src/pages/RegisterPage.tsx`, `LoginPage.tsx`, `ForgotPasswordPage.tsx`, `mobile/src/screens/auth/*` | 68, 104, 178, 37, 62, 25, 29, 45 | Expresión regular de validación de correo `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` con rendimiento superlineal por *backtracking*. Repetida en 8 lugares: además de ser ReDoS, es duplicación de una regla de negocio. | 20 min c/u |
-| C2 | **MAJOR** | `typescript:S6853` | `fe/src/components/layout/AppLayout.tsx` y otros | 304, 309, 314 y 78 más | 81 etiquetas `<label>` sin asociar a su control. Es el hallazgo más numeroso del proyecto y afecta la accesibilidad de todos los formularios. | 5 min c/u |
-| C3 | **MAJOR** | `typescript:S6848` | `fe/src/components/bovines/AdvancedFiltersPanel.tsx`, `BovineList.tsx` | 79, 852, 895 y 3 más | Elementos no interactivos (`<div>`, `<span>`) usados como botones, sin `role` ni soporte de teclado. | 5 min c/u |
-| C4 | **MINOR** | `typescript:S7773` | `fe/src/components/layout/AppLayout.tsx` y otros | 332 y 16 más | Uso de las funciones globales `parseFloat`, `parseInt` e `isNaN` en lugar de `Number.parseFloat`, `Number.parseInt` y `Number.isNaN`. | 2 min c/u |
-| C5 | — | *(hallazgo de configuración)* | `fe/coverage/` | — | La carpeta de reportes de cobertura está versionada en Git (12 archivos generados). Produjo 6 bugs falsos en el análisis automático previo y no debería estar en el repositorio. | — |
+| C2 | **MAJOR** | `typescript:S6853` | `fe/src/components/layout/AppLayout.tsx` y otros | 304, 309, 314 y 119 más | **122 etiquetas `<label>` sin asociar a su control.** Es el hallazgo más numeroso del proyecto —el 52 % de todos los issues abiertos— y afecta la accesibilidad de todos los formularios. | 5 min c/u |
+| C3 | **MINOR** | `typescript:S7773` | `fe/src/components/layout/AppLayout.tsx` y otros | 332 y 23 más | 24 usos de las funciones globales `parseFloat`, `parseInt` e `isNaN` en lugar de `Number.parseFloat`, `Number.parseInt` y `Number.isNaN`. | 2 min c/u |
+| C4 | **MAJOR** | `typescript:S6848` | `fe/src/components/bovines/AdvancedFiltersPanel.tsx`, `BovineList.tsx` | 79, 852, 895 y 7 más | 10 elementos no interactivos (`<div>`, `<span>`) usados como botones, sin `role` ni soporte de teclado. | 5 min c/u |
+| C5 | — | *(hallazgo de configuración, no reportado por Sonar)* | `fe/coverage/` | — | La carpeta de reportes de cobertura está versionada en Git (12 archivos generados). Quedó fuera del alcance del análisis gracias a las exclusiones configuradas, pero no debería estar en el repositorio. | — |
 
 ---
 
@@ -246,24 +263,37 @@ acceso al secret. El comentario `# v5` conserva la legibilidad.
 
 | Métrica | Antes (`8305de9`) | Después (`17f08c8`) | Variación |
 |---|---:|---:|---|
-| **Security Rating** | **E** | **C** | ▲ 2 niveles |
-| Vulnerabilidades | 29 | 27 | −2 |
-| Bugs | 46 | 38 | −8 |
+| **Security Rating** | **E** | **C** | **▲ 2 niveles** |
+| Vulnerabilidades abiertas | 29 | 27 | −2 |
+| Esfuerzo de remediación de seguridad | 720 min | 660 min | −60 min |
+| Bugs | 38 | 38 | = |
 | Code Smells | 170 | 170 | = |
-| **Deuda técnica** | **1 888 min** | **898 min** | **−52 %** |
+| Deuda técnica (`sqale_index`) | 898 min | 898 min | = |
+| Reliability Rating | C | C | = |
 | Quality Gate | Failed | Failed | sin cambio |
 
-El salto de **E a C** en seguridad se explica porque la calificación la
-determina la vulnerabilidad más grave abierta: al cerrarse el único Blocker y el
-único Critical del proyecto, el peor caso restante pasa a ser Major.
+**Lectura honesta de estas cifras.** El resultado relevante de esta iteración no
+es el volumen, sino la **gravedad**: se cerraron el único Blocker y el único
+Critical del proyecto. La calificación de seguridad la determina siempre la
+vulnerabilidad más grave abierta, de modo que al desaparecer esas dos el peor
+caso restante pasa a ser Major y el rating sube de **E a C**. Dos issues menos
+sobre 29 es un 7 % del conteo, pero significa que ya no hay credenciales
+válidas ni riesgo de filtración de secretos en la imagen de producción.
 
-La reducción de bugs y de deuda técnica es mayor que las tres correcciones por
-sí solas: al dejar de indexarse los archivos generados de `fe/coverage/`, que el
-análisis automático previo había incluido, sus hallazgos se cerraron también.
+Las tres vulnerabilidades corregidas son `CLOSED / FIXED` en SonarCloud,
+verificadas una por una vía API.
+
+El conteo de vulnerabilidades baja en 2 y no en 3 porque V8 estaba en el
+workflow que creamos nosotros en el commit anterior: no formaba parte de la
+línea base del proyecto original.
+
+Bugs, Code Smells y deuda técnica no se mueven, y es lo esperado: ninguna de las
+tres correcciones tocó esas categorías. Se corregirán en las iteraciones
+siguientes.
 
 El Quality Gate sigue en *Failed* porque su condición es *Security Rating on New
 Code > 1*, es decir, exige calificación **A** sobre el código nuevo. Alcanzarla
-requiere resolver las vulnerabilidades restantes.
+requiere cerrar las vulnerabilidades Major restantes.
 
 ---
 
@@ -275,6 +305,6 @@ requiere resolver las vulnerabilidades restantes.
 - [x] Refactorización — iteración 1: V1, V2, V8 (3 vulnerabilidades)
 - [ ] Refactorización — iteración 2: V3, V4, V5
 - [ ] Refactorización — iteración 3: V6, V7, C1
-- [ ] Corrección de bugs B1 y B2
+- [ ] Corrección de los bugs B1 y B2
 - [ ] Marcado de falsos positivos (`typescript:S2068`)
 - [ ] Re-escaneo hasta Quality Gate *Passed*
