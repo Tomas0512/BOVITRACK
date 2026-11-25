@@ -121,7 +121,7 @@ export default function ConsumptionFormModal({ farmId, foods, onSuccess, onClose
             <div>
               <label className="mb-1 block text-xs font-medium text-text-secondary">Cantidad *</label>
               <input type="number" min={0.01} step={0.01} value={form.quantity || ""}
-                onChange={(e) => set("quantity", parseFloat(e.target.value) || 0)} className={inputClass} required />
+                onChange={(e) => set("quantity", Number.parseFloat(e.target.value) || 0)} className={inputClass} required />
             </div>
           </div>
 

@@ -527,7 +527,7 @@ export default function BovineList({ farmId }: Props) {
       let next = prev.filter((c) => c.field !== field);
       if (value) {
         const f = fields.find((x) => x.key === field);
-        next = next.concat([{ id: Math.random().toString(36).slice(2), connector: next.length > 0 ? "AND" : "AND", field, op: defaultOpForType(f?.type ?? "text"), value }]);
+        next = next.concat([{ id: Math.random().toString(36).slice(2), connector: "AND", field, op: defaultOpForType(f?.type ?? "text"), value }]);
       }
       return next;
     });
@@ -539,7 +539,7 @@ export default function BovineList({ farmId }: Props) {
     if (!f) return;
     setConditions((prev) => prev.concat([{
       id: Math.random().toString(36).slice(2),
-      connector: prev.length > 0 ? "AND" : "AND",
+      connector: "AND",
       field: f.key,
       op: defaultOpForType(f.type),
       value: "",
@@ -552,7 +552,7 @@ export default function BovineList({ farmId }: Props) {
     if (!f) { setShowFilters(true); setMenuFor(null); return; }
     setConditions((prev) => prev.concat([{
       id: Math.random().toString(36).slice(2),
-      connector: prev.length > 0 ? "AND" : "AND",
+      connector: "AND",
       field: f.key,
       op: defaultOpForType(f.type),
       value: "",

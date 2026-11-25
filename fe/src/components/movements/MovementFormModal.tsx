@@ -210,7 +210,7 @@ export default function MovementFormModal({ farmId, existing, onSuccess, onClose
                 <div>
                   <label className="mb-1 block text-xs font-medium text-text-secondary">Valor ($)</label>
                   <input type="number" min={0} step={0.01} value={form.price ?? ""}
-                    onChange={(e) => setForm({ ...form, price: e.target.value ? parseFloat(e.target.value) : null })}
+                    onChange={(e) => setForm({ ...form, price: e.target.value ? Number.parseFloat(e.target.value) : null })}
                     placeholder="0.00" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                 </div>
                 <div>

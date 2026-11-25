@@ -276,7 +276,7 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Peso nacimiento (kg) <span className="text-red-600">*</span></label>
                   <input type="number" min={0} step={0.1} value={form.birth_weight ?? ""}
-                    onChange={(e) => set("birth_weight", e.target.value ? parseFloat(e.target.value) : null)}
+                    onChange={(e) => set("birth_weight", e.target.value ? Number.parseFloat(e.target.value) : null)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function BovineFormModal({ farmId, landPlots, paddocks, existing,
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Peso actual (kg) <span className="text-red-600">*</span></label>
                   <input type="number" min={0} step={0.1} value={form.current_weight ?? ""}
-                    onChange={(e) => set("current_weight", e.target.value ? parseFloat(e.target.value) : null)}
+                    onChange={(e) => set("current_weight", e.target.value ? Number.parseFloat(e.target.value) : null)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>

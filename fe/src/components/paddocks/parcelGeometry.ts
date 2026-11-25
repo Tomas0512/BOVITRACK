@@ -166,7 +166,7 @@ type RGB = [number, number, number];
 export function hexToRgb(hex: string): RGB {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
-  const n = parseInt(full, 16);
+  const n = Number.parseInt(full, 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 

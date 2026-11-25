@@ -369,7 +369,7 @@ export default function FoodList({ farmId }: Props) {
                     </td>
                     <td className="py-3 pr-4 text-text-secondary">
                       {food.cost_per_unit
-                        ? `$${parseFloat(
+                        ? `$${Number.parseFloat(
                             food.cost_per_unit.toString()
                           ).toLocaleString("es-CO", {
                             minimumFractionDigits: 0,

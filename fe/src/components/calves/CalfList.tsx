@@ -181,8 +181,8 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
       setSavingWeight(true);
 
       // Validación básica en el frontend
-      const weightKg = parseFloat(weightFormData.weight_kg);
-      if (isNaN(weightKg) || weightKg <= 0) {
+      const weightKg = Number.parseFloat(weightFormData.weight_kg);
+      if (Number.isNaN(weightKg) || weightKg <= 0) {
         setError("El peso debe ser un número mayor a 0");
         return;
       }
@@ -191,7 +191,7 @@ export const CalfList: React.FC<ICalfListProps> = ({ farmId }) => {
       await recordCalfWeight(farmId, selectedCalf.id, {
         weight_kg: weightKg,
         measured_date: weightFormData.measured_date,
-        body_condition: parseInt(weightFormData.body_condition),
+        body_condition: Number.parseInt(weightFormData.body_condition),
         observations: weightFormData.observations,
       });
 

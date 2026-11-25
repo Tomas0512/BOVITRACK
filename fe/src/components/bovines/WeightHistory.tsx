@@ -163,7 +163,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                 <input
                   type="number" step="0.01" min="0.01" required
                   value={form.weight_kg || ""}
-                  onChange={(e) => setForm((f) => ({ ...f, weight_kg: parseFloat(e.target.value) }))}
+                  onChange={(e) => setForm((f) => ({ ...f, weight_kg: Number.parseFloat(e.target.value) }))}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 />
               </div>
@@ -190,7 +190,7 @@ export default function WeightHistory({ farmId, bovineId }: Props) {
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      body_condition: e.target.value ? parseInt(e.target.value) : undefined,
+                      body_condition: e.target.value ? Number.parseInt(e.target.value) : undefined,
                     }))
                   }
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"

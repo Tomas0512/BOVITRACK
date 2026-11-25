@@ -103,7 +103,7 @@ export default function PurchaseFormModal({
               <input
                 type="number" step="0.01" min="0.01"
                 value={form.quantity || ""}
-                onChange={(e) => setForm((f) => ({ ...f, quantity: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) => setForm((f) => ({ ...f, quantity: Number.parseFloat(e.target.value) || 0 }))}
                 placeholder="Ej: 100"
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required
@@ -114,7 +114,7 @@ export default function PurchaseFormModal({
               <input
                 type="number" step="1" min="0"
                 value={form.unit_cost || ""}
-                onChange={(e) => setForm((f) => ({ ...f, unit_cost: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) => setForm((f) => ({ ...f, unit_cost: Number.parseFloat(e.target.value) || 0 }))}
                 placeholder="Ej: 5000"
                 className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none"
                 required

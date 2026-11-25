@@ -329,7 +329,7 @@ export default function AppLayout() {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-text-secondary">Área total</label>
                     <input type="number" min={0.01} step={0.01} value={farmEditForm.total_area}
-                      onChange={(e) => setFarmEditForm({ ...farmEditForm, total_area: parseFloat(e.target.value) })}
+                      onChange={(e) => setFarmEditForm({ ...farmEditForm, total_area: Number.parseFloat(e.target.value) })}
                       className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                   </div>
                   <div>

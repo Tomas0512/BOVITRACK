@@ -191,18 +191,18 @@ export default function FoodFormModal({
             <>
               <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Stock actual *</label>
-                <input type="number" step="0.01" value={form.current_stock} onChange={(e) => set("current_stock", parseFloat(e.target.value) || 0)}
+                <input type="number" step="0.01" value={form.current_stock} onChange={(e) => set("current_stock", Number.parseFloat(e.target.value) || 0)}
                   placeholder="0" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Stock mínimo <span className="text-red-600">*</span></label>
-                  <input type="number" step="0.01" value={form.min_stock_alert ?? ""} onChange={(e) => set("min_stock_alert", e.target.value ? parseFloat(e.target.value) : null)}
+                  <input type="number" step="0.01" value={form.min_stock_alert ?? ""} onChange={(e) => set("min_stock_alert", e.target.value ? Number.parseFloat(e.target.value) : null)}
                     placeholder="Ej: 20" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Precio unitario ($)</label>
-                  <input type="number" step="0.01" value={form.cost_per_unit ?? ""} onChange={(e) => set("cost_per_unit", e.target.value ? parseFloat(e.target.value) : null)}
+                  <input type="number" step="0.01" value={form.cost_per_unit ?? ""} onChange={(e) => set("cost_per_unit", e.target.value ? Number.parseFloat(e.target.value) : null)}
                     placeholder="Ej: 5000" className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" />
                 </div>
               </div>

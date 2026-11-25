@@ -177,7 +177,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Área <span className="text-red-600">*</span></label>
-                  <input type="number" min={0.01} step={0.01} value={form.area} onChange={(e) => set("area", parseFloat(e.target.value) || 0)}
+                  <input type="number" min={0.01} step={0.01} value={form.area} onChange={(e) => set("area", Number.parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
@@ -203,7 +203,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-text-secondary">Capacidad máxima (animales)</label>
-                <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
+                <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", Number.parseInt(e.target.value) || 1)}
                   className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
               </div>
               <div>
@@ -253,7 +253,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
                         <label className="mb-1 block text-xs text-text-secondary">Área (ha)</label>
                         <input
                           type="number" min={0.01} step={0.01} value={p.area_hectares}
-                          onChange={(e) => setPotrero(i, "area_hectares", parseFloat(e.target.value) || 0)}
+                          onChange={(e) => setPotrero(i, "area_hectares", Number.parseFloat(e.target.value) || 0)}
                           className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
                         />
                       </div>
@@ -261,7 +261,7 @@ export default function LandPlotFormModal({ farmId, existing, onSuccess, onClose
                         <label className="mb-1 block text-xs text-text-secondary">Cap. animales</label>
                         <input
                           type="number" min={1} value={p.max_capacity}
-                          onChange={(e) => setPotrero(i, "max_capacity", parseInt(e.target.value) || 1)}
+                          onChange={(e) => setPotrero(i, "max_capacity", Number.parseInt(e.target.value) || 1)}
                           className="w-full rounded-lg border border-border bg-surface-alt px-3 py-2 text-sm text-text-primary focus:border-primary focus:outline-none"
                         />
                       </div>

@@ -48,6 +48,28 @@ manual.
 
 Medidas tomadas del análisis del commit `8305de9` (25/11/2026, 02:06 UTC).
 
+### Evidencia: dashboard inicial
+
+![Dashboard inicial de SonarCloud: Quality Gate en estado Failed sobre el commit 8305de96](img/01-dashboard-inicial-quality-gate.png)
+
+*Figura 1 — Quality Gate **Failed** sobre el commit `8305de96`. La condición
+incumplida es Security Rating sobre código nuevo: calificación obtenida **C**,
+requerida **A**. El proyecto declara 32 000 líneas de código.*
+
+![Listado de issues en SonarCloud filtrado por severidad Blocker, High y Medium](img/02-issues-inicial-top-issues.png)
+
+*Figura 2 — Pestaña Issues: **237 issues en total**, 235 priorizados, con un
+esfuerzo estimado de **3 días y 6 horas**. Encabezan la lista los tres
+hallazgos corregidos en la iteración 1, todos en estado `Open`: el Blocker de
+`be/ver_bd.py` (L4), el High de `.github/workflows/sonarcloud.yml` (L45) y el
+High de `be/Dockerfile` (L51).*
+
+![Listado de issues filtrado por cualidad de software Security, mostrando 29 issues](img/03-issues-inicial-seguridad.png)
+
+*Figura 3 — Filtro por cualidad **Security**: **29 issues** con un esfuerzo de
+**1 día y 4 horas**. Se aprecian los mismos tres hallazgos abiertos y, a
+continuación, el *Client-Side Request Forgery* de `fe/src/api/alerts.ts`.*
+
 | Métrica | Valor | Calificación |
 |---|---|---|
 | **Quality Gate** | **Failed** | — |
@@ -123,7 +145,7 @@ por integrante.
 
 | # | Severidad | Regla | Archivo | Línea | Descripción | Esfuerzo |
 |---|---|---|---|---|---|---|
-| B1 | **MAJOR** | `typescript:S3923` | `fe/src/components/bovines/BovineList.tsx` | 530, 542, 555 | `connector: next.length > 0 ? "AND" : "AND"` — el operador ternario devuelve el mismo valor en ambas ramas. La intención era `"AND"` / `"OR"`; tal como está, el filtro avanzado nunca puede construir una condición `OR`. | 15 min c/u |
+| B1 | **MAJOR** | `typescript:S3923` | `fe/src/components/bovines/BovineList.tsx` | 530, 542, 555 | `connector: prev.length > 0 ? "AND" : "AND"` — el operador ternario devuelve el mismo valor en ambas ramas, por lo que la condición es código muerto: se evalúa `prev.length` en cada llamada sin que el resultado pueda cambiar. Repetido en los tres puntos donde se añade una condición al filtro avanzado. | 15 min c/u |
 | B2 | **MAJOR** | `typescript:S9383` | `fe/src/components/paddocks/LandMap.tsx` y otros | 81 y 34 más | Promesas sin `await`, sin `.catch()` ni marcado con `void`. Un rechazo en cualquiera de estas 35 llamadas produce un *unhandled rejection* silencioso: la operación falla sin que el usuario reciba aviso. | 5 min c/u |
 
 ### 3.3 Code Smells

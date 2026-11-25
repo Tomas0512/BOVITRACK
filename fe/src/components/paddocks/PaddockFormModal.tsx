@@ -160,12 +160,12 @@ export default function PaddockFormModal({ farmId, existing, onSuccess, onClose 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Área (ha) <span className="text-red-600">*</span></label>
-                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", parseFloat(e.target.value) || 0)}
+                  <input type="number" min={0.01} step={0.01} value={form.area_hectares} onChange={(e) => set("area_hectares", Number.parseFloat(e.target.value) || 0)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                 </div>
                 <div>
                   <label className="mb-1 block text-sm font-medium text-text-secondary">Cap. máx. animales <span className="text-red-600">*</span></label>
-                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", parseInt(e.target.value) || 1)}
+                  <input type="number" min={1} value={form.max_capacity} onChange={(e) => set("max_capacity", Number.parseInt(e.target.value) || 1)}
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none" required />
                   <p className="mt-1 text-xs text-text-muted">
                     {form.area_hectares > 0 && `Sugerido: ~${Math.max(1, Math.floor(form.area_hectares * 2.5))} animales (≈2,5/ha)`}
